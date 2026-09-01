@@ -18,7 +18,11 @@ const prev = CONCEPTS[i - 1]
 const next = CONCEPTS[i + 1]
 const reference = c.anchor ? `${CONCEPTS_URL}#${c.anchor}` : `${GITHUB_URL}/blob/main/CLAUDE.md`
 ---
-<BaseLayout title={`${c.title} — Rocketflare`} description={c.blurb} ogType="article">
+<BaseLayout
+	title={`${c.title} — Rocketflare, a SaaS starter kit for Cloudflare Workers`}
+	description={`${c.blurb} How ${c.title.toLowerCase()} works in Rocketflare, the open-source multi-tenant B2B SaaS starter kit for Cloudflare Workers.`}
+	ogType="article"
+>
 	<div class={`concept tone-${c.tone}`}>
 		<header class="concept-hero">
 			<div class="wrap concept-hero-inner">

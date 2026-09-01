@@ -1,18 +1,47 @@
 ---
 import Nav from '../components/Nav.astro'
 import Footer from '../components/Footer.astro'
+import { GITHUB_URL } from '../data/site'
 
 interface Props {
 	title: string
 	description: string
 	ogImage?: string
 	ogType?: 'website' | 'article'
+	/** Extra JSON-LD to emit alongside the site-wide graph. */
+	jsonLd?: Record<string, unknown>
 }
 
-const { title, description, ogImage = '/logo.svg', ogType = 'website' } = Astro.props
+const {
+	title,
+	description,
+	ogImage = '/og-image.png',
+	ogType = 'website',
+	jsonLd,
+} = Astro.props
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site)
 const ogImageURL = new URL(ogImage, Astro.site)
+const siteURL = Astro.site?.toString() ?? 'https://rocketflare.dev/'
+
+// One software-application entity for the whole site: this is what a search
+// engine (and an AI answer engine) reads to know what Rocketflare actually is.
+const softwareLd = {
+	'@context': 'https://schema.org',
+	'@type': 'SoftwareApplication',
+	name: 'Rocketflare',
+	alternateName: 'Rocketflare SaaS starter kit',
+	applicationCategory: 'DeveloperApplication',
+	operatingSystem: 'Cloudflare Workers, Node.js 24',
+	url: siteURL,
+	codeRepository: GITHUB_URL,
+	license: 'https://opensource.org/licenses/MIT',
+	description:
+		'An open-source multi-tenant B2B SaaS starter kit for Cloudflare Workers: tenancy, authentication, roles and permissions, background jobs, realtime, file storage, analytics dashboards, an AI agent layer and a CLI, running as one Worker over Postgres.',
+	offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+	keywords:
+		'B2B SaaS Cloudflare, SaaS app Cloudflare Workers, agentic SaaS, multi-tenant SaaS starter kit, Cloudflare Workers boilerplate, Hono, Drizzle, Postgres, AI agents',
+}
 ---
 <html lang="en">
 <head>
@@ -21,6 +50,7 @@ const ogImageURL = new URL(ogImage, Astro.site)
 	<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 	<link rel="canonical" href={canonicalURL} />
 	<link rel="sitemap" href="/sitemap-index.xml" />
+	<link rel="llms-txt" href="/llms.txt" />
 	<meta name="theme-color" content="#3B82C4" />
 	<title>{title}</title>
 	<meta name="description" content={description} />
@@ -31,12 +61,21 @@ const ogImageURL = new URL(ogImage, Astro.site)
 	<meta property="og:description" content={description} />
 	<meta property="og:url" content={canonicalURL} />
 	<meta property="og:image" content={ogImageURL} />
-	<meta property="og:image:alt" content="Rocketflare — a rocket launching from a cloud" />
+	<meta property="og:image:width" content="1200" />
+	<meta property="og:image:height" content="630" />
+	<meta property="og:image:alt" content="Rocketflare — a multi-tenant SaaS starter kit for Cloudflare Workers" />
+	<meta property="og:locale" content="en_GB" />
 
 	<meta name="twitter:card" content="summary_large_image" />
 	<meta name="twitter:title" content={title} />
 	<meta name="twitter:description" content={description} />
 	<meta name="twitter:image" content={ogImageURL} />
+
+	<meta name="author" content="Rocketflare" />
+	<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+
+	<script type="application/ld+json" is:inline set:html={JSON.stringify(softwareLd)} />
+	{jsonLd && <script type="application/ld+json" is:inline set:html={JSON.stringify(jsonLd)} />}
 
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

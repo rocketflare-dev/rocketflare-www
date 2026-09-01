@@ -171,11 +171,16 @@
 		.rocket { right: 3%; transform: scale(0.8); transform-origin: bottom right; }
 	}
 
-	/* Narrow screens: the rocket tucks into the bottom-right corner and drops
-	   behind the copy rather than colliding with the buttons. */
+	/* Narrow screens: the rocket holds the right-hand gutter, small and clear of
+	   the copy, which stacks into a column on the left. */
 	@media (max-width: 860px) {
-		.rocket { right: -2%; bottom: 2%; transform: scale(0.5); transform-origin: bottom right; opacity: 0.85; }
-		.sun { width: 90px; height: 90px; top: 5%; right: 6%; }
+		.rocket { right: 0; bottom: 4%; transform: scale(0.46); transform-origin: bottom right; }
+		.sun { width: 90px; height: 90px; top: 4%; right: 6%; }
+	}
+
+	@media (max-width: 560px) {
+		.rocket { right: -4%; bottom: 5%; transform: scale(0.36); }
+		.sun { width: 70px; height: 70px; }
 	}
 
 	@media (prefers-reduced-motion: reduce) {

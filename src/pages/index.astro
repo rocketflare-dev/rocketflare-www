@@ -2,11 +2,11 @@
 import BaseLayout from '../layouts/BaseLayout.astro'
 import SkyScene from '../components/SkyScene.astro'
 import CloudDivider from '../components/CloudDivider.astro'
-import { GITHUB_URL, DEMO_URL, SETUP_URL, ADAPTING_URL } from '../data/site'
+import { GITHUB_URL, SETUP_URL, ADAPTING_URL } from '../data/site'
 
-const title = 'Rocketflare — a multi-tenant SaaS starter kit for Cloudflare Workers'
+const title = 'Rocketflare — multi-tenant B2B SaaS starter kit for Cloudflare Workers'
 const description =
-	'Tenancy, auth, roles, jobs, realtime, files, analytics, an AI layer and a CLI — already built, already tested, running as one Cloudflare Worker over Postgres. Copy it, rename it, ship your product.'
+	'Open-source starter kit for building a multi-tenant B2B SaaS app on Cloudflare Workers: tenancy, authentication, roles, background jobs, realtime, file storage, analytics dashboards, AI agents and a CLI — already built and tested, running as one Worker over Postgres, and designed to be worked on by coding agents.'
 
 /** The eight things you get, mapped 1:1 to the README's feature groups.
  *  `href` points at the matching section of docs/CONCEPTS.md on GitHub. */
@@ -129,6 +129,45 @@ const features = [
 	},
 ] as const
 
+const faqLd = {
+	'@context': 'https://schema.org',
+	'@type': 'FAQPage',
+	mainEntity: [
+		{
+			'@type': 'Question',
+			name: 'What is Rocketflare?',
+			acceptedAnswer: {
+				'@type': 'Answer',
+				text: 'Rocketflare is an open-source, MIT-licensed starter kit for building a multi-tenant B2B SaaS product or internal tool on Cloudflare Workers. It ships tenancy, authentication, roles and permissions, background jobs, realtime, file storage, analytics dashboards, an AI agent layer and a CLI as one Worker over Postgres.',
+			},
+		},
+		{
+			'@type': 'Question',
+			name: 'Do I need a Cloudflare account to run it locally?',
+			acceptedAnswer: {
+				'@type': 'Answer',
+				text: 'A free one. Local development emulates every binding except Workers AI, which always calls Cloudflare, so the first run asks you to log in. Comment the AI binding out of both wrangler files to stay entirely offline. Deploying needs a Workers Paid account, because Hyperdrive and Workflows do.',
+			},
+		},
+		{
+			'@type': 'Question',
+			name: 'What makes it agentic or agent-first?',
+			acceptedAnswer: {
+				'@type': 'Answer',
+				text: 'Two things. The kit ships an AI layer — streamed chat, agents running on Cloudflare Workflows, hybrid retrieval over pgvector, a usage ledger — and it is itself written to be worked on by a coding agent: a root CLAUDE.md, path-scoped rules that load themselves, a guide in every significant directory, and a test gate that enforces them.',
+			},
+		},
+		{
+			'@type': 'Question',
+			name: 'Is it multi-tenant or single-tenant?',
+			acceptedAnswer: {
+				'@type': 'Answer',
+				text: 'Either, from one schema. TENANCY_MODE switches between many organisations and one, with no migration between them; every domain row carries a tenant id in both modes.',
+			},
+		},
+	],
+}
+
 const stack: { label: string; note: string; href?: string }[] = [
 	{ label: 'Cloudflare Workers', note: 'one Worker: fetch + queue + scheduled, a DO and a Workflow' },
 	{ label: 'Hono 4', note: 'zod contracts, CASL abilities, one error envelope' },
@@ -141,7 +180,7 @@ const stack: { label: string; note: string; href?: string }[] = [
 ]
 ---
 
-<BaseLayout title={title} description={description}>
+<BaseLayout title={title} description={description} jsonLd={faqLd}>
 	<!-- ============================================================ hero -->
 	<header class="hero">
 		<SkyScene />
@@ -149,7 +188,7 @@ const stack: { label: string; note: string; href?: string }[] = [
 			<div class="hero-copy">
 				<div class="badges">
 					<span class="badge badge-yellow">MIT licensed</span>
-					<span class="badge badge-cyan">Zero-credential first run</span>
+					<span class="badge badge-cyan">No API keys to start</span>
 					<span class="badge badge-orange">One Worker, one deploy</span>
 				</div>
 				<h1>Ship the product.<br /><span class="grad">Not the platform.</span></h1>
@@ -164,15 +203,15 @@ const stack: { label: string; note: string; href?: string }[] = [
 						Launch it locally
 						<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
 					</a>
-					<a href={DEMO_URL} class="btn btn-secondary" target="_blank" rel="noopener">See the live demo</a>
-					<a href={GITHUB_URL} class="btn btn-ghost" target="_blank" rel="noopener">
+					<a href={GITHUB_URL} class="btn btn-secondary" target="_blank" rel="noopener">
 						<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
 						Source
 					</a>
 				</div>
 				<p class="hero-note">
-					<code>git clone</code> → <code>pnpm install</code> → <code>pnpm dev</code>. No API keys, no
-					accounts, no cloud login. Sign in through a magic link printed in your terminal.
+					<code>git clone</code> → <code>pnpm install</code> → <code>pnpm dev</code>. Nothing to sign
+					up for and no keys to paste: you sign in through a magic link printed in your own
+					terminal, and the AI features run with no key at all.
 				</p>
 			</div>
 		</div>
@@ -182,9 +221,9 @@ const stack: { label: string; note: string; href?: string }[] = [
 	<!-- ========================================================== counts -->
 	<section class="stats">
 		<div class="wrap stat-grid">
-			<div class="stat reveal"><strong>0</strong><span>credentials for the first run</span></div>
+			<div class="stat reveal"><strong>0</strong><span>API keys to paste on the first run</span></div>
 			<div class="stat reveal"><strong>1</strong><span>Worker to deploy, and to reason about</span></div>
-			<div class="stat reveal"><strong>12</strong><span>subsystems, each written up with its reasoning</span></div>
+			<div class="stat reveal"><strong>13</strong><span>concepts, written up with the reasoning behind them</span></div>
 			<div class="stat reveal"><strong>∞</strong><span>tenants, on one schema</span></div>
 		</div>
 	</section>
@@ -205,15 +244,15 @@ const stack: { label: string; note: string; href?: string }[] = [
 				{features.map((f) => (
 					<a class={`card tone-${f.tone} reveal`} href={f.href}>
 						<span class="chip">
-							{f.icon === 'robot' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="12" rx="3"/><path d="M12 8V4.5"/><circle cx="12" cy="3" r="1.4"/><path d="M8.5 13h.01"/><path d="M15.5 13h.01"/><path d="M9.5 16.5h5"/><path d="M1 12v3"/><path d="M23 12v3"/></svg>}
-							{f.icon === 'building' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/><path d="M9 10h.01"/><path d="M15 10h.01"/></svg>}
-							{f.icon === 'key' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="4.5"/><path d="M10.7 12.3 21 2"/><path d="m17 6 3 3"/><path d="m14 9 3 3"/></svg>}
-							{f.icon === 'bolt' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>}
-							{f.icon === 'inbox' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>}
-							{f.icon === 'sparkles' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18 16l.9 2.4L21 19l-2.1.6L18 22l-.9-2.4L15 19l2.1-.6z"/></svg>}
-							{f.icon === 'chart' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="21" x2="21" y2="21"/><rect x="5" y="11" width="4" height="8"/><rect x="11" y="6" width="4" height="13"/><rect x="17" y="14" width="4" height="5"/></svg>}
-							{f.icon === 'terminal' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>}
-							{f.icon === 'compass' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>}
+							{f.icon === 'robot' && <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="12" rx="3"/><path d="M12 8V4.5"/><circle cx="12" cy="3" r="1.4"/><path d="M8.5 13h.01"/><path d="M15.5 13h.01"/><path d="M9.5 16.5h5"/><path d="M1 12v3"/><path d="M23 12v3"/></svg>}
+							{f.icon === 'building' && <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/><path d="M9 10h.01"/><path d="M15 10h.01"/></svg>}
+							{f.icon === 'key' && <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="4.5"/><path d="M10.7 12.3 21 2"/><path d="m17 6 3 3"/><path d="m14 9 3 3"/></svg>}
+							{f.icon === 'bolt' && <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>}
+							{f.icon === 'inbox' && <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>}
+							{f.icon === 'sparkles' && <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18 16l.9 2.4L21 19l-2.1.6L18 22l-.9-2.4L15 19l2.1-.6z"/></svg>}
+							{f.icon === 'chart' && <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="21" x2="21" y2="21"/><rect x="5" y="11" width="4" height="8"/><rect x="11" y="6" width="4" height="13"/><rect x="17" y="14" width="4" height="5"/></svg>}
+							{f.icon === 'terminal' && <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>}
+							{f.icon === 'compass' && <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>}
 						</span>
 						<h3>{f.title}</h3>
 						<p class="card-lead">{f.lead}</p>
@@ -241,7 +280,7 @@ const stack: { label: string; note: string; href?: string }[] = [
 			<div class="section-head reveal">
 				<span class="eyebrow">Under the hood</span>
 				<h2>Boring choices, made once</h2>
-				<p>One driver, one router, one queue, one contract package. Every choice is written down with the reason behind it, so you can disagree with it deliberately.</p>
+				<p>A complete B2B SaaS application stack on Cloudflare Workers — one driver, one router, one queue, one contract package. Every choice is written down with the reason behind it, so you can disagree with it deliberately.</p>
 			</div>
 			<div class="stack-grid">
 				{stack.map((s) => (
@@ -260,9 +299,74 @@ const stack: { label: string; note: string; href?: string }[] = [
 		<div class="wrap-narrow">
 			<div class="section-head reveal">
 				<span class="eyebrow">Get started</span>
-				<h2>Five commands to a running app</h2>
-				<p>Node 24 via <code>.nvmrc</code>, pnpm 10 via <code>corepack</code>, Docker running. That is the whole prerequisite list.</p>
+				<h2>Ask your agent to launch it</h2>
+				<p>Node 24, pnpm 10 and Docker running. That is the whole prerequisite list — everything else the kit does for itself.</p>
 			</div>
+
+			<div class="agent-panel reveal">
+				<div class="agent-panel-head">
+					<span class="robot">
+						<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="12" rx="3"/><path d="M12 8V4.5"/><circle cx="12" cy="3" r="1.4"/><path d="M8.5 13h.01"/><path d="M15.5 13h.01"/><path d="M9.5 16.5h5"/><path d="M1 12v3"/><path d="M23 12v3"/></svg>
+					</span>
+					<div>
+						<h3>The intended path</h3>
+						<p>Two moves, and the kit sets itself up.</p>
+					</div>
+					<span class="pill">Recommended</span>
+				</div>
+
+				<ol class="agent-steps">
+					<li>
+						<span class="dot">1</span>
+						<div>
+							<strong>Clone it</strong>
+							<pre><code>git clone https://github.com/rocketflare-dev/rocketflare.git myapp
+cd myapp</code></pre>
+						</div>
+					</li>
+					<li>
+						<span class="dot">2</span>
+						<div>
+							<strong>Open it in your coding agent and ask</strong>
+							<p class="bubble">Help me set up this project</p>
+						</div>
+					</li>
+				</ol>
+
+				<p class="agent-outcome">
+					<code>CLAUDE.md</code> makes the agent walk
+					<a href={SETUP_URL} target="_blank" rel="noopener">SETUP.md</a> one step at a time —
+					showing each command's output, confirming the verification line before it moves on,
+					stopping on failure, and installing anything missing instead of handing the problem back
+					to you. It ends with the app running and you signed in. Then ask it to do the rename
+					checklist in <a href={ADAPTING_URL} target="_blank" rel="noopener">ADAPTING.md</a>, and
+					the kit is your app.
+				</p>
+				<a class="agent-more" href="/concepts/agent-first/">
+					Why the kit is built this way
+					<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+				</a>
+			</div>
+
+			<div class="cf-note reveal">
+				<span class="cf-icon">
+					<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 18H7a5 5 0 1 1 .7-9.95A6 6 0 0 1 19.5 9.5 4.25 4.25 0 0 1 18 18z"/></svg>
+				</span>
+				<div>
+					<strong>What about Cloudflare?</strong>
+					<p>
+						Local development emulates every binding except one: Workers AI always calls
+						Cloudflare, so the first <code>pnpm dev</code> on a new machine asks you to log in —
+						a <strong>free account is enough</strong>, and the AI features then work with no key
+						of your own. Prefer to stay entirely offline? Comment the <code>[ai]</code> block out
+						of both wrangler files and everything else still runs; chat and agents wait for a
+						provider. Deploying for real is a <strong>Workers Paid</strong> account, because
+						Hyperdrive and Workflows need one.
+					</p>
+				</div>
+			</div>
+
+			<div class="or-divider reveal"><span>or drive it yourself</span></div>
 
 			<div class="step reveal">
 				<span class="step-num">1</span>
@@ -278,7 +382,6 @@ rm -rf .git && git init && git add -A && git commit -m "Start from Rocketflare"<
 				<span class="step-num">2</span>
 				<div class="step-body">
 					<h3>Install, migrate, seed, run</h3>
-					<p>From the workspace root:</p>
 					<pre><code>corepack enable && pnpm install
 cp apps/web/.dev.vars.example apps/web/.dev.vars   # two random secrets
 pnpm dev:db:up && pnpm db:migrate && pnpm seed     # Postgres :5432 → demo tenant + users
@@ -296,21 +399,6 @@ pnpm cli whoami
 pnpm test:db:up && pnpm test                    # full suite, throwaway Postgres :5433</code></pre>
 				</div>
 			</div>
-
-			<div class="agent-card reveal">
-				<span class="chip tone-chip-purple">
-					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="12" rx="3"/><path d="M12 8V4"/><circle cx="12" cy="3" r="1.4"/><path d="M8.5 13h.01"/><path d="M15.5 13h.01"/><path d="M9 17h6"/></svg>
-				</span>
-				<div>
-					<h3>Or just ask your coding agent</h3>
-					<p>
-						Say <strong>“Help me set up this project”</strong>. <code>CLAUDE.md</code> makes it walk
-						<a href={SETUP_URL} target="_blank" rel="noopener">SETUP.md</a> Part 1 step by step,
-						showing each output and stopping on failure. When you are ready to make it yours, the
-						rename checklist is in <a href={ADAPTING_URL} target="_blank" rel="noopener">ADAPTING.md</a>.
-					</p>
-				</div>
-			</div>
 		</div>
 	</section>
 
@@ -321,7 +409,7 @@ pnpm test:db:up && pnpm test                    # full suite, throwaway Postgres
 			<p>Your first commit can be a feature.</p>
 			<div class="hero-actions" style="justify-content:center">
 				<a href={GITHUB_URL} class="btn btn-primary" target="_blank" rel="noopener">Get Rocketflare on GitHub</a>
-				<a href={DEMO_URL} class="btn btn-ghost" target="_blank" rel="noopener">Try the live demo</a>
+				<a href="/concepts/" class="btn btn-ghost">Read the concepts</a>
 			</div>
 		</div>
 	</section>
@@ -530,20 +618,140 @@ pnpm test:db:up && pnpm test                    # full suite, throwaway Postgres
 	.step-body p { color: var(--text-muted); font-size: 0.95rem; }
 	.muted { color: var(--text-muted); font-size: 0.9rem; margin-top: 0.75rem; }
 
-	.agent-card {
-		display: flex;
-		gap: 1.2rem;
-		align-items: flex-start;
+	.agent-panel {
 		background: var(--card);
 		border: 1px solid var(--border);
-		border-radius: 18px;
-		padding: 1.6rem;
-		box-shadow: var(--shadow-sm);
-		margin-top: 3rem;
+		border-top: 5px solid var(--orange);
+		border-radius: 20px;
+		padding: 1.8rem;
+		box-shadow: var(--shadow);
 	}
-	.agent-card h3 { margin-bottom: 0.35rem; }
-	.agent-card p { margin: 0; color: var(--text-muted); font-size: 0.95rem; }
-	.tone-chip-purple { --tint: var(--tint-purple); --accent: var(--purple); flex: none; margin-bottom: 0; }
+	.agent-panel-head { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.6rem; }
+	.agent-panel-head h3 { margin: 0; }
+	.agent-panel-head p { margin: 0; color: var(--text-muted); font-size: 0.93rem; }
+	.robot {
+		flex: none;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 48px;
+		height: 48px;
+		border-radius: 14px;
+		background: var(--tint-orange);
+		color: var(--orange);
+	}
+	.robot svg { width: 26px; height: 26px; }
+	.pill {
+		margin-left: auto;
+		flex: none;
+		font-size: 0.72rem;
+		font-weight: 700;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		color: var(--orange);
+		background: var(--tint-orange);
+		border-radius: 999px;
+		padding: 0.3rem 0.75rem;
+	}
+
+	.agent-steps { list-style: none; margin: 0; padding: 0; }
+	.agent-steps li { display: flex; gap: 0.9rem; margin-bottom: 1.4rem; }
+	.agent-steps li:last-child { margin-bottom: 0; }
+	.agent-steps li > div { flex: 1; min-width: 0; }
+	.agent-steps strong { display: block; color: var(--text-bright); margin-bottom: 0.5rem; }
+	.agent-steps pre { margin: 0; }
+	.dot {
+		flex: none;
+		width: 28px;
+		height: 28px;
+		border-radius: 50%;
+		display: grid;
+		place-items: center;
+		font-size: 0.85rem;
+		font-weight: 700;
+		color: var(--orange);
+		background: var(--tint-orange);
+	}
+
+	/* The prompt you type, rendered as what it is: a line of chat. */
+	.bubble {
+		position: relative;
+		margin: 0;
+		font-family: var(--mono);
+		font-size: 0.95rem;
+		color: var(--text-bright);
+		background: var(--tint-orange);
+		border: 1.5px solid var(--orange);
+		border-radius: 14px 14px 14px 4px;
+		padding: 0.85rem 1.1rem;
+		display: inline-block;
+	}
+	.bubble::before { content: '“'; opacity: 0.5; margin-right: 0.1rem; }
+	.bubble::after { content: '”'; opacity: 0.5; margin-left: 0.1rem; }
+
+	.agent-outcome {
+		margin: 1.6rem 0 0;
+		padding-top: 1.3rem;
+		border-top: 1px solid var(--border);
+		font-size: 0.95rem;
+		color: var(--text-muted);
+	}
+	.agent-more {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4rem;
+		font-weight: 600;
+		font-size: 0.92rem;
+		color: var(--orange);
+	}
+	.agent-more:hover { text-decoration: none; }
+	.agent-more svg { transition: transform 0.2s ease; }
+	.agent-more:hover svg { transform: translateX(4px); }
+
+	.cf-note {
+		display: flex;
+		gap: 1rem;
+		align-items: flex-start;
+		margin-top: 1.8rem;
+		padding: 1.2rem 1.4rem;
+		border: 1px dashed var(--border-bright);
+		border-radius: 16px;
+		background: var(--card-alt);
+	}
+	.cf-note > div > strong { display: block; color: var(--text-bright); margin-bottom: 0.25rem; }
+	.cf-note p strong { color: var(--text); }
+	.cf-note p { margin: 0; font-size: 0.92rem; color: var(--text-muted); }
+	.cf-icon {
+		flex: none;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 40px;
+		height: 40px;
+		border-radius: 12px;
+		background: var(--tint-cyan);
+		color: var(--cyan);
+	}
+	.cf-icon svg { width: 22px; height: 22px; }
+
+	/* A labelled rule between the two routes. */
+	.or-divider {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+		margin: 3.4rem 0 2.4rem;
+		color: var(--text-muted);
+		font-size: 0.78rem;
+		font-weight: 700;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+	}
+	.or-divider::before, .or-divider::after {
+		content: '';
+		flex: 1;
+		height: 1px;
+		background: var(--border);
+	}
 
 	/* -------------------------------------------------------------- cta -- */
 	.cta {
@@ -557,8 +765,26 @@ pnpm test:db:up && pnpm test                    # full suite, throwaway Postgres
 	.cta h2 { margin-bottom: 0.3rem; }
 	.cta p { color: var(--text-muted); font-size: 1.1rem; margin-bottom: 2rem; }
 
+	/* Narrow screens: everything in the hero becomes one left-aligned column and
+	   leaves the right-hand third to the rocket. */
+	@media (max-width: 860px) {
+		.hero { padding: 2.5rem 0 4rem; min-height: 0; }
+		.hero-copy { max-width: none; }
+		.badges { max-width: 88%; }
+		.lede { max-width: none; padding-right: 26%; }
+		.hero-actions { flex-direction: column; align-items: stretch; width: min(15rem, 62%); }
+		.hero-actions .btn { justify-content: center; }
+		.hero-note { padding-right: 26%; max-width: none; }
+	}
+
+	@media (max-width: 560px) {
+		.lede, .hero-note { padding-right: 20%; }
+		.hero-actions { width: min(14rem, 68%); }
+	}
+
 	@media (max-width: 700px) {
-		.hero { padding: 3rem 0 11rem; min-height: 0; }
-		.agent-card { flex-direction: column; }
+		.agent-panel { padding: 1.4rem; }
+		.agent-panel-head { flex-wrap: wrap; }
+		.pill { margin-left: 0; order: 3; }
 	}
 </style>
