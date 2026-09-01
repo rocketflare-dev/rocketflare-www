@@ -1,0 +1,156 @@
+---
+import ConceptLayout from '../../layouts/ConceptLayout.astro'
+---
+<ConceptLayout
+	slug="deployment"
+	source={[
+		'apps/web/wrangler.toml',
+		'apps/web/wrangler.staging.toml',
+		'apps/web/tests/config/wrangler-parity.test.ts',
+		'.github/workflows/deploy.yml',
+		'apps/web/scripts/migrate.ts',
+	]}
+>
+	<h2>Two environments, two files</h2>
+	<p>
+		Staging and production are two standalone wrangler files — <code>wrangler.staging.toml</code>
+		and <code>wrangler.toml</code> — rather than one file with an environment section layered on
+		top. Cloudflare's <code>[env.*]</code> blocks do not inherit bindings from the top level, so a
+		binding declared once and assumed everywhere is simply absent in the environment that did not
+		repeat it. Two files that each say everything are honest about that; one file with a hidden gap
+		is not.
+	</p>
+	<div class="why">
+		<p>
+			<strong>Why duplication beats inheritance here.</strong> The failure mode of the clever
+			version is silent: the code compiles, the deploy succeeds, and the binding is missing at
+			runtime in exactly one environment. Duplication is only a maintenance problem if nothing
+			checks it — so something does.
+		</p>
+	</div>
+
+	<h2>A test holds the two files together</h2>
+	<p>
+		<code>wrangler-parity.test.ts</code> runs in the ordinary test suite on every commit and reads
+		both files relative to the package rather than the working directory, so it behaves the same
+		from the repository root and from inside <code>apps/web</code>. It asserts what may differ and
+		what may not:
+	</p>
+	<table>
+		<thead><tr><th>Must differ</th><th>Must be identical</th></tr></thead>
+		<tbody>
+			<tr>
+				<td>the worker <code>name</code>, routes and custom domains, the <code>[vars]</code> <em>values</em>, Hyperdrive and KV ids, and every account-scoped resource name</td>
+				<td>the entry point, <code>compatibility_date</code> and flags, every binding name, every Durable Object <code>class_name</code>, the migrations block, <code>[limits]</code>, the cron triggers, the assets block, and the set of <code>[vars]</code> <em>keys</em></td>
+			</tr>
+		</tbody>
+	</table>
+	<p>
+		The identical column is the point: application code never branches on the environment. A route
+		reads a binding by name and the name is the same in both places, so "works on staging" means
+		something.
+	</p>
+	<p>
+		Before a deploy, the same test runs again with <code>REQUIRE_PROVISIONED=1</code>, which
+		additionally refuses any <code>&lt;PLACEHOLDER&gt;</code> value still sitting in a file. That
+		keeps continuous integration green on a fresh, unprovisioned copy of the kit while making it
+		impossible to ship one.
+	</p>
+
+	<h2>The account-scoped name hazard</h2>
+	<p>
+		Workflow names, queue names, R2 bucket names and Analytics Engine dataset names are unique per
+		Cloudflare <em>account</em>, not per Worker. Whichever script last deployed a given name owns
+		it — and every instance created under that name, including instances created by the other
+		environment's binding, then runs with the owning script's bindings, against the owning script's
+		database.
+	</p>
+	<p>
+		This is not hypothetical. In one of the applications this kit was extracted from, staging and
+		production briefly shared a workflow name. The production API created a run and started an
+		instance; the instance executed under the staging worker against the staging database; and
+		production was left holding a pending row and a UI stuck on its last progress event. Nothing
+		errored anywhere, which is precisely what made it expensive to find.
+	</p>
+	<div class="why">
+		<p>
+			<strong>Why the suffix is a rule and not a habit.</strong> Every account-scoped name in the
+			staging file ends in <code>-staging</code>, while the <code>binding</code> and
+			<code>class_name</code> stay identical — so no application code becomes
+			environment-aware — and the parity test refuses a collision. The guard has to be mechanical,
+			because the failure it prevents produces no error to notice.
+		</p>
+	</div>
+
+	<h2>The CPU limit is per step</h2>
+	<p>
+		A workflow's CPU budget is applied per <code>step.do</code>, from the script's
+		<code>cpu_ms</code> setting. CPU is not wall clock: a step that is almost entirely waiting on
+		the network still dies if it <em>processes</em> enough items, because the per-item cost adds up
+		inside the same budget.
+	</p>
+	<p>
+		This is why <code>[limits]</code> is in the identical column. Declared in one file only, the
+		same workflow class dies in one environment and works perfectly in the other — a difference
+		that reads as a flaky bug rather than a configuration one. Splitting a heavy phase into its own
+		step draws a fresh budget, which is usually the better fix.
+	</p>
+
+	<h2>Releases move by tag</h2>
+	<p>
+		The git tag must equal the <code>version</code> in the <em>root</em> <code>package.json</code>;
+		the deploy job fails if it does not. One tag ships the web app and the CLI together, so the
+		per-package versions are informational.
+	</p>
+	<pre><code>1. bump the root version, commit
+2. git tag X.Y.Z && git push origin X.Y.Z   -> staging deploys
+3. check staging
+4. gh release create X.Y.Z                  -> production deploys the same tag</code></pre>
+	<p>
+		Publishing the GitHub release is the promotion gate. Production does not re-run the full gate;
+		it ships the exact commit staging validated, with the release version injected at deploy time
+		and surfaced by the session endpoint, the nav footer and <code>rocketflare status</code>.
+	</p>
+	<p>
+		Rolling back has two speeds. <code>wrangler rollback</code> restores the previous worker version
+		in seconds — code and bindings, but <strong>not</strong> the database. Migrations are
+		forward-only, so undoing a schema change means writing a compensating migration and running the
+		dance again.
+	</p>
+
+	<h2>Where each kind of secret lives</h2>
+	<table>
+		<thead><tr><th>Kind</th><th>Home</th></tr></thead>
+		<tbody>
+			<tr><td>Non-secret configuration</td><td><code>[vars]</code> in each toml, committed</td></tr>
+			<tr><td>Worker secrets</td><td><code>wrangler secret put</code> per environment; <code>.dev.vars</code> locally, git-ignored</td></tr>
+			<tr><td>Continuous-integration secrets</td><td>GitHub environments, one set per environment</td></tr>
+			<tr><td>Resource ids</td><td>the tomls — Hyperdrive and KV ids are not secrets</td></tr>
+		</tbody>
+	</table>
+	<p>
+		Setting a worker secret requires the worker to exist, so the first deploy of a fresh environment
+		runs before its secrets do and returns errors until they are set. That ordering is inherent to
+		the platform rather than a quirk of the kit, and the setup guide says so plainly.
+	</p>
+	<div class="note">
+		<p>
+			Use different key material per environment. Rotating the encryption key invalidates every
+			stored provider credential, since there is no re-encrypt path — administrators re-enter the
+			key and the row keeps everything else.
+		</p>
+	</div>
+
+	<h2>Migrations run against the direct host</h2>
+	<p>
+		Hyperdrive is itself a connection pooler, so it points at the database's direct host rather than
+		its pooled one — stacking a pooler on a pooler adds a hop and a second transaction-mode layer
+		for nothing. The migration script goes further and rewrites a pooled host to the direct host
+		itself, whichever form the connection string arrives in.
+	</p>
+	<p>
+		The reason is specific: a pooled backend can carry a stale read-only transaction setting that
+		blocks schema changes. Migrations then fail in a way that looks like a permissions problem and
+		is not. Rewriting the host in one place means nobody has to remember.
+	</p>
+</ConceptLayout>

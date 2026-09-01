@@ -1,0 +1,172 @@
+---
+import ConceptLayout from '../../layouts/ConceptLayout.astro'
+---
+<ConceptLayout
+	slug="cli"
+	source={[
+		'apps/cli/src/api.ts',
+		'apps/cli/src/auth.ts',
+		'apps/cli/src/config.ts',
+		'apps/cli/src/errors.ts',
+		'apps/web/src/api/routes/auth/cli.ts',
+	]}
+>
+	<h2>A thin client, not a second implementation</h2>
+	<p>
+		Every internal tool and every B2B product eventually wants a command line — for scripts, for
+		continuous integration, for the person who would rather type than click. The risk is that the
+		CLI quietly grows its own idea of what the API returns, and then drifts.
+	</p>
+	<p>
+		So the CLI is deliberately thin. It calls the same <code>/api/*</code> routes the browser calls,
+		authenticated with a tenant API key, and parses every response with the same
+		<code>@rocketflare/shared</code> schema the server validated the response against. There is one
+		<code>fetch</code> call site — <code>apps/cli/src/api.ts</code> — which attaches the bearer
+		token, parses the error envelope and maps a status onto an exit code. Commands themselves are
+		options in, one API call, output out.
+	</p>
+	<div class="why">
+		<p>
+			<strong>Why one contract, three consumers.</strong> A response type hand-written in the CLI
+			is a copy that nothing keeps honest. Importing the server's own schema means a field that
+			changes shape breaks the type check in the CLI at the same moment it breaks in the UI —
+			before anyone runs anything.
+		</p>
+	</div>
+	<p>
+		Adding a command follows the same order every time: schema in the shared package if the surface
+		is new, then the route, then a file under <code>apps/cli/src/commands/</code> that calls the API
+		client. Never the other way round.
+	</p>
+
+	<h2>Logging in is a browser handoff</h2>
+	<p>
+		<code>rocketflare login</code> avoids asking anyone to paste a token. The sequence is small
+		enough to describe completely:
+	</p>
+	<ol>
+		<li>The CLI starts a loopback HTTP listener on the first free port in <code>8765–8770</code>.</li>
+		<li>
+			It opens the browser at <code>/auth/cli</code> on the server, passing the callback URL and
+			the machine's hostname.
+		</li>
+		<li>
+			The server authenticates the person normally — no session sends them to the login page,
+			a session without an organisation sends them to the tenant picker, which is skipped
+			entirely in single-tenant mode.
+		</li>
+		<li>
+			It then mints a tenant API key named <code>cli:&lt;hostname&gt;</code> through the same
+			helper the settings page uses, records the creation in the activity log, and redirects back
+			to the loopback URL with the key, the tenant id and the tenant name.
+		</li>
+		<li>
+			The listener answers with a self-closing page, verifies the key against
+			<code>/api/me</code>, stores it, and shuts down. The whole thing times out after five
+			minutes.
+		</li>
+	</ol>
+	<p>
+		Because the key is created through the ordinary helper, it appears in Settings → API keys like
+		any other and is revoked in the same place. It is a normal tenant key that happens to have a
+		recognisable name.
+	</p>
+
+	<h2>Why a key in a query string is acceptable here</h2>
+	<p>
+		Handing a credential back in a URL is usually a bad idea, and it is only defensible because the
+		destination is pinned. The <code>redirect_uri</code> must be exactly
+		<code>http://127.0.0.1:&lt;port&gt;/callback</code> or
+		<code>http://localhost:&lt;port&gt;/callback</code> — any port, <code>http</code> only, no query
+		string, no fragment, no user info. Anything else is a 400 before the server does any work.
+	</p>
+	<div class="why">
+		<p>
+			<strong>Why an allowlist rather than a check.</strong> An open redirect on this route would
+			mail a working API key to whoever asked. Validating the shape of the target — rather than
+			trying to spot bad ones — means the key can only ever be delivered to a listener on the same
+			machine that started the login.
+		</p>
+	</div>
+	<p>
+		There is no device-code flow and no refresh. A key that needs replacing is revoked server-side
+		and a fresh login mints another; that is a smaller surface than a token lifecycle nobody
+		exercises.
+	</p>
+
+	<h2>Configuration, and running without a browser</h2>
+	<p>
+		The key lands in <code>~/.rocketflare/config.json</code> alongside the server URL, the active
+		tenant and the signed-in user. The directory is created <code>0700</code> and the file
+		<code>0600</code>, re-tightened on every write rather than only at creation.
+	</p>
+	<p>
+		Environment variables win over the file. <code>ROCKETFLARE_API_KEY</code> and
+		<code>ROCKETFLARE_URL</code> make the CLI work in continuous integration with no browser and no
+		config file at all, and <code>ROCKETFLARE_CONFIG_DIR</code> relocates the directory, which is how
+		the tests keep away from a real home directory.
+	</p>
+	<div class="note">
+		<p>
+			<strong>No command ever prints a full key.</strong> <code>whoami</code>,
+			<code>status</code> and <code>keys list</code> show a prefix and four characters;
+			<code>login</code> reports where the key was stored, not what it is; and
+			<code>config</code> prints the effective configuration with the key masked. A secret that is
+			never rendered cannot be scrolled back to in a terminal buffer or captured in a CI log.
+		</p>
+	</div>
+
+	<h2>Output a script can use</h2>
+	<p>
+		Human output is a coloured table on standard output; diagnostics and progress go to standard
+		error, so redirecting one does not swallow the other. Every list and read command accepts
+		<code>--json</code>, which switches the whole output to the parsed response and nothing else —
+		no colour, no headers, no summary line — so it pipes straight into <code>jq</code>.
+	</p>
+	<p>
+		The command set is small and covers the things a script actually wants:
+		<code>login</code>, <code>logout</code>, <code>whoami</code>, <code>status</code>,
+		<code>config</code>, and <code>members list</code>, <code>keys list</code> and
+		<code>activity list</code> with paging. <code>--server</code> and <code>--json</code> are global
+		options.
+	</p>
+	<pre><code>rocketflare login --server https://app.example.com
+rocketflare whoami
+rocketflare members list --json | jq -r '.items[].email'</code></pre>
+
+	<h2>Exit codes tell failures apart</h2>
+	<p>
+		A script needs to distinguish "you are not signed in" from "you are signed in and not allowed",
+		because the first is fixable by logging in again and the second is not. So those are separate
+		codes rather than a single generic failure.
+	</p>
+	<table>
+		<thead><tr><th>Code</th><th>Meaning</th></tr></thead>
+		<tbody>
+			<tr><td><code>0</code></td><td>success</td></tr>
+			<tr><td><code>1</code></td><td>an API failure other than 401 or 403, a network problem, bad options, anything unexpected</td></tr>
+			<tr><td><code>2</code></td><td>not logged in — no key in the config or the environment, or the server answered 401. The hint tells you to run <code>login</code></td></tr>
+			<tr><td><code>3</code></td><td>forbidden — the key's role in that organisation does not allow the action</td></tr>
+		</tbody>
+	</table>
+	<p>
+		Commands throw a typed error and never call <code>process.exit</code> themselves. One handler at
+		the top prints once and sets the exit code, which is also what lets the test suite run commands
+		in-process with an injected <code>fetch</code> and assert on the code without spawning
+		anything.
+	</p>
+
+	<h2>Shipped in the repository, not on a registry</h2>
+	<p>
+		The package is private. It is built by continuous integration as a compile check and run from
+		the repository with <code>pnpm cli &lt;command&gt;</code>, or installed from a built
+		<code>dist/cli.js</code>.
+	</p>
+	<div class="note">
+		<p>
+			Publishing a CLI means owning a public name, a release cadence and a support expectation.
+			That is a decision for the product built on the kit, not one the kit should make on its
+			behalf — so it ships private, and flipping that is a deliberate act.
+		</p>
+	</div>
+</ConceptLayout>

@@ -1,0 +1,132 @@
+---
+import ConceptLayout from '../../layouts/ConceptLayout.astro'
+---
+<ConceptLayout
+	slug="contracts"
+	source={[
+		'packages/shared/package.json',
+		'packages/shared/src/index.ts',
+		'packages/shared/src/errors.ts',
+		'packages/shared/src/pagination.ts',
+		'packages/shared/src/ai/',
+	]}
+>
+	<h2>One package, three consumers, zero build</h2>
+	<p>
+		<code>packages/shared</code> holds the zod schemas that describe the API, and three things
+		consume them: the server validates requests and responses with them, the browser parses
+		responses with them, and the CLI parses the same responses with the same ones. There is exactly
+		one definition of every shape.
+	</p>
+	<p>
+		It is consumed as TypeScript source rather than as a compiled artefact. The package's exports
+		map points <code>@rocketflare/shared</code> at <code>./src/index.ts</code> and
+		<code>@rocketflare/shared/*</code> at <code>./src/*.ts</code>, and every tool in the
+		workspace — Vite, wrangler, tsx, vitest — resolves the <code>.ts</code> file directly through the
+		workspace link.
+	</p>
+	<div class="why">
+		<p>
+			<strong>Why no build step.</strong> A <code>dist</code> directory introduces a state where the
+			source and the thing everyone imports disagree, and a class of confusing failures that all
+			resolve to "rebuild the shared package". Removing the artefact removes the staleness: an edit
+			is visible to the API, the UI and the CLI on the next type check, with nothing to run in
+			between.
+		</p>
+	</div>
+
+	<h2>What lives there</h2>
+	<p>
+		The package is a vocabulary rather than a library. It contains the entity schemas and the
+		request and query schemas for every route, the error envelope, the pagination shape, the
+		permission vocabulary — actions, subjects, the ability type, the packed rules the server ships
+		to the browser — and the AI contracts, which are large enough to sit in their own directory with
+		deep imports.
+	</p>
+	<p>
+		Naming is conventional so that the reader never has to guess: <code>&lt;thing&gt;Schema</code>
+		for a response or an entity, <code>&lt;thing&gt;RequestSchema</code> for a body,
+		<code>&lt;thing&gt;QuerySchema</code> for query parameters, and an inferred type sitting next to
+		each one.
+	</p>
+	<pre><code>export const memberSchema = z.object(&#123; /* ... */ &#125;)
+export type Member = z.infer&lt;typeof memberSchema&gt;
+
+export const inviteMemberRequestSchema = z.object(&#123; /* ... */ &#125;)
+export type InviteMemberRequest = z.infer&lt;typeof inviteMemberRequestSchema&gt;</code></pre>
+	<p>
+		Types are inferred from schemas, never declared alongside them. A hand-written interface next to
+		a schema is a second source of truth that compiles happily while diverging.
+	</p>
+
+	<h2>Contracts first, as a working order</h2>
+	<p>
+		A new or changed API surface starts here rather than arriving here. The sequence is fixed:
+	</p>
+	<ol>
+		<li>Write or change the schema in <code>packages/shared/src/</code> and export it.</li>
+		<li>Validate with it in the route, which throws the shared error envelope on a bad request.</li>
+		<li>Parse with it in the UI, so a response that drifted fails loudly at the boundary.</li>
+		<li>Parse with it in the CLI, and only then add the command.</li>
+	</ol>
+	<p>
+		Errors are the same envelope everywhere — including validation failures, which is why the
+		route wrapper throws a typed validation error rather than letting the validator emit its own
+		shape. Pagination is one shape everywhere too, so a list endpoint added next year renders in
+		the existing pagination control without a conversation.
+	</p>
+	<div class="note">
+		<p>
+			The package has no test suite of its own; its schemas are exercised by the web and CLI tests
+			that import them. A schema tested in isolation tells you it parses the fixture you wrote —
+			testing it at the boundary tells you the server and the client agree, which is the property
+			that matters.
+		</p>
+	</div>
+
+	<h2>The dependency rule, and why it is strict</h2>
+	<p>
+		<code>packages/shared</code> may import <code>zod</code>, its own siblings, and one type-only
+		import for the ability type. That is the entire list. It may never import
+		<code>apps/web</code>, and it may never import <code>apps/cli</code>; the CLI in turn never
+		imports the web application.
+	</p>
+	<div class="why">
+		<p>
+			<strong>Why the direction is enforced.</strong> This package has to bundle for the browser and
+			load inside a Node CLI. One import reaching back into the server drags the whole server type
+			graph — and eventually its runtime dependencies — across both boundaries. The symptom is
+			unmistakable and arrives late: a browser bundle that suddenly contains a Postgres driver.
+		</p>
+	</div>
+	<p>
+		The linter and each package's TypeScript configuration keep the direction honest, so the rule is
+		mechanical rather than a matter of reviewer memory.
+	</p>
+
+	<h2>The one exception, stated out loud</h2>
+	<p>
+		Database columns holding JSON take their type from a schema in this package, so the shape stored
+		and the shape served cannot diverge. There is a single deliberate exception: the dashboard
+		configuration column takes its type from the analytics library instead, imported type-only on
+		the server side.
+	</p>
+	<p>
+		The reason is the dependency rule above — shared may only import zod, so it cannot hold that
+		library's type. Its own schema for the column is therefore loose, and the precise type lives
+		where the import is legal. Naming the exception is the point: an undocumented one becomes the
+		precedent for the next.
+	</p>
+
+	<h2>Private, and staying that way</h2>
+	<p>
+		The package is marked private and has no publish configuration. It is not a library with users;
+		it is the internal agreement between three parts of one repository, and it is meant to be edited
+		freely by whoever forks the kit.
+	</p>
+	<p>
+		Publishing it would turn every field rename into someone else's breaking change, which is
+		exactly the friction the kit exists to avoid. It travels with your copy of the repository and
+		versions with it.
+	</p>
+</ConceptLayout>

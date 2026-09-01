@@ -1,0 +1,115 @@
+---
+import ConceptLayout from '../../layouts/ConceptLayout.astro'
+---
+<ConceptLayout
+	slug="email-and-files"
+	source={[
+		'apps/web/src/api/services/email.ts',
+		'apps/web/src/api/services/storage.ts',
+		'apps/web/src/api/routes/files.ts',
+		'apps/web/src/db/schema/files.ts',
+		'packages/shared/src/files.ts',
+	]}
+>
+	<h2>Email is a fetch call, not an SDK</h2>
+	<p>
+		Sending mail is one function over plain <code>fetch</code> against Resend's HTTP API. There is no
+		vendor SDK in the bundle, because the whole surface being used is a single POST with a JSON body
+		— and an SDK would be a dependency, a bundle-size cost and a Node-compatibility risk in exchange
+		for nothing.
+	</p>
+	<p>
+		Templates share a shell and a call-to-action helper, and cover the magic link, the organisation
+		invitation, the invitation-accepted notice and the access-request decision. The from address and
+		the branding come from configuration, so changing them is not a code change.
+	</p>
+
+	<h2>No API key means logged, not failed</h2>
+	<p>
+		With no mail provider configured, a message is not an error. It is written to the log — loudly,
+		with any link printed on its own line — and reported as delivered-false. Nothing throws, nothing
+		retries, and no code path branches on whether email "works".
+	</p>
+	<div class="why">
+		<p>
+			<strong>Why degrade instead of fail.</strong> This is what makes a fresh clone signable-in
+			with zero external credentials. Sign-in is a magic link; a magic link is an email; an email
+			with no provider would normally be a hard stop before the first screen. Treating the absent
+			provider as a delivery channel of last resort — your terminal — removes the only credential
+			that would otherwise be mandatory on day one.
+		</p>
+	</div>
+
+	<h2>What is queued, and what deliberately is not</h2>
+	<p>
+		Invitation mail — created, bulk, resent — and the access-request decision notice are queued.
+		Those routes answer as soon as the row exists, and a provider outage becomes a retry with
+		backoff rather than a failed request.
+	</p>
+	<p>
+		The magic link is sent inline, on purpose. Somebody is sitting in front of the login form
+		waiting for it, and moving it to a queue trades a latency they can feel for a durability they
+		would never notice. When the work has a human waiting on it, latency wins.
+	</p>
+	<div class="note">
+		<p>
+			The queued payload carries the link explicitly, so the console fallback still prints a usable
+			accept URL when no provider is configured. The development path and the production path go
+			through the same handler.
+		</p>
+	</div>
+
+	<h2>Storage is a seam over R2</h2>
+	<p>
+		File storage sits behind a small service interface — put, get, head, delete, list — whose one
+		implementation wraps the native R2 binding. Keys are built by a helper and always take the shape
+		<code>tenants/&#123;tenantId&#125;/&#123;scope&#125;/&#123;uuid&#125;-&#123;filename&#125;</code>,
+		so a single prefix scopes one tenant, or one scope within it, for listing or bulk deletion. The
+		UUID means every key is unique whatever the client happened to call the file.
+	</p>
+	<p>
+		Bytes stream through the Worker in both directions. The binding cannot mint presigned URLs, so
+		there is no path that hands the browser a direct link to the bucket — which also means every
+		download passes the same authorisation check as every other route, with no separate signing
+		scheme to get wrong.
+	</p>
+
+	<h2>The index table is the only thing the browser can name</h2>
+	<p>
+		A <code>files</code> table records id, tenant, uploader, scope, key, filename, content type,
+		size and creation time. Rows are immutable: there is no <code>updated_at</code>, because a file
+		is not edited, it is replaced by another file. The browser only ever references a file by that
+		row's id — never by a storage key.
+	</p>
+	<p>
+		Uploads write the object first and the row second; if the insert fails, the object is deleted,
+		so there are no orphans in the bucket. Downloads are tenant-scoped lookups — another tenant's
+		file is a 404, not a 403 — and carry an ETag from R2 so a repeat request is a 304.
+	</p>
+
+	<h2>Limits per scope, and one deliberate security default</h2>
+	<p>
+		Upload scopes are declared once in the shared package and mirrored in the database enum. Each
+		carries its own rules: an avatar must be one of a short list of image types, everything is
+		capped by size, and an empty file is rejected outright. The JSON body limit is skipped for
+		upload routes, which mount their own larger transport cap and then enforce the exact per-file
+		limit in the handler.
+	</p>
+	<div class="why">
+		<p>
+			<strong>Why almost everything downloads as an attachment.</strong> Only the avatar image
+			types are served inline. Everything else — SVG very much included — is sent with a
+			<code>Content-Disposition: attachment</code> header, so a stored HTML page or a scripted SVG
+			cannot execute on the application's own origin against a live session. Rendering user-supplied
+			markup inline is a stored-XSS primitive; the attachment header removes it, and the cost is
+			that one class of file downloads instead of previewing.
+		</p>
+	</div>
+	<div class="note">
+		<p>
+			A missing storage binding is a loud 503 rather than a silent no-op. Realtime can degrade
+			quietly because nothing is lost; storage cannot, because an upload that appears to succeed
+			and stores nothing is data loss.
+		</p>
+	</div>
+</ConceptLayout>

@@ -1,0 +1,14 @@
+{
+	"name": "rocketflare-www",
+	"compatibility_date": "2026-03-06",
+	"assets": {
+		"directory": "./dist"
+	},
+	"routes": [
+		{ "pattern": "rocketflare.dev", "custom_domain": true },
+		{ "pattern": "www.rocketflare.dev", "custom_domain": true }
+	],
+	"observability": {
+		"logs": { "enabled": true }
+	}
+}

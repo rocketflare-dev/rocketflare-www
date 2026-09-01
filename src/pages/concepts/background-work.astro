@@ -1,0 +1,162 @@
+---
+import ConceptLayout from '../../layouts/ConceptLayout.astro'
+---
+<ConceptLayout
+	slug="background-work"
+	source={[
+		'apps/web/src/api/services/jobs.ts',
+		'apps/web/src/api/queues/jobs.ts',
+		'apps/web/src/api/workflows/agent-run.ts',
+		'apps/web/src/api/durable-objects/notifications-hub.ts',
+		'apps/web/src/api/services/realtime.ts',
+	]}
+>
+	<h2>A route enqueues. It never runs.</h2>
+	<p>
+		The rule is one sentence long, and everything else in this section follows from it: a request
+		handler writes the row that records what should happen, hands the work to a primitive built to
+		outlive the response, and answers. It does not wait for an email provider, an LLM, or a
+		multi-minute rebuild.
+	</p>
+	<p>
+		There are three primitives, and the choice between them is decided by shape rather than by
+		taste:
+	</p>
+	<table>
+		<thead><tr><th>The need</th><th>The primitive</th><th>What it looks like</th></tr></thead>
+		<tbody>
+			<tr>
+				<td>Fire and forget, finished well inside 30 seconds</td>
+				<td>The jobs queue</td>
+				<td>A producer validates the input and stamps an envelope; a consumer dispatches on the envelope's <code>type</code> to one handler file.</td>
+			</tr>
+			<tr>
+				<td>Multiple steps, retries, minutes or longer</td>
+				<td>A durable workflow</td>
+				<td>A row is written first, then a workflow instance is created with the row's id, and steps claim, execute and finish.</td>
+			</tr>
+			<tr>
+				<td>Periodic</td>
+				<td>Cron triggers</td>
+				<td>A dispatch table keyed on the exact cron expression; each task is caught on its own so one failure does not take the run down.</td>
+			</tr>
+		</tbody>
+	</table>
+
+	<div class="why">
+		<p>
+			<strong>Why the rule is absolute.</strong> A Worker invocation is short-lived and can be
+			evicted the moment its response is returned. Work that is "just a bit of extra" on the
+			response path is work that silently does not happen under load — and the failure has no
+			error, no retry and no trace. Pushing it onto a queue or a workflow makes the durability
+			someone else's problem, which is the whole reason for using a platform that has those
+			primitives.
+		</p>
+	</div>
+
+	<h2>One queue, typed envelopes, a version seam</h2>
+	<p>
+		There is a single jobs queue. Every message is a discriminated union validated by a zod schema
+		in the shared package, wrapped in an envelope carrying an id, the type, the payload and when it
+		was enqueued. The producer validates before anything is sent, so a malformed job is a caller's
+		error rather than a consumer's mystery.
+	</p>
+	<p>
+		The <code>type</code> string is the versioning seam. A payload change that would break in-flight
+		messages ships as a new type with its own handler while the old one drains, rather than as an
+		edit to an existing schema. There is no schema-version field to interpret, because the type
+		already is one.
+	</p>
+	<p>
+		A missing queue binding throws rather than quietly running the work inline. Silence there would
+		mean a deployment that looks healthy while every queued side effect happens on the request path
+		instead.
+	</p>
+
+	<h2>Poison messages are acknowledged, not retried</h2>
+	<p>
+		Per message the consumer parses the envelope first. If it fails the schema, the message is
+		logged and <em>acknowledged</em> — retrying cannot make an invalid message valid, and the only
+		thing a retry would achieve is the same failure four more times before the queue gives up.
+	</p>
+	<p>
+		A handler that throws is a different case: that is retried with a delay that doubles from thirty
+		seconds up to a fifteen-minute ceiling, until the queue's own retry limit ends it. Each message
+		opens and closes its own database client, and every operation inside a consumer is awaited —
+		there is no deferring work past the end of a consumer, because there is nothing left to defer
+		it to.
+	</p>
+
+	<h2>The database row is the claim</h2>
+	<p>
+		Durable multi-step work runs as a workflow whose instance id <em>is</em> the row id it operates
+		on. The steps are claim, execute and finish, and the claim is a single conditional update:
+		mark the row running and increment its attempt count, but only where the status is still queued
+		or running, returning the row. Every terminal write carries the same predicate.
+	</p>
+	<p>
+		That one predicate buys two properties at once. A retried step re-claims the row instead of
+		fighting a lock, and a row that has already settled — succeeded, failed, cancelled — can never
+		be rewritten by a late-arriving attempt.
+	</p>
+	<p>
+		"Only one active run per tenant and agent" is a partial unique index over the active statuses,
+		not application logic. A second request gets the existing run handed back to it rather than an
+		error, because that is almost always what the caller actually wanted.
+	</p>
+
+	<div class="why">
+		<p>
+			<strong>Why never an in-memory Map.</strong> Concurrency control, deduplication and "is this
+			already running" all look trivial to solve with a module-level object. On Workers they are
+			not solved at all: there are many isolates, they are created and destroyed constantly, and no
+			two requests are guaranteed to share one. Anything that must be true across requests has to
+			live in Postgres, in a Durable Object, or in KV. The claim row is the honest version of the
+			Map.
+		</p>
+	</div>
+
+	<h2>Cancellation is cooperative</h2>
+	<p>
+		Cancelling a run that has not started yet settles the row outright. Cancelling one that is
+		already executing sets a timestamp on the row, and the run checks it between turns and stops
+		itself. Progress is written to a durable event table as it happens, so a viewer who arrives
+		late — or reloads — sees the whole timeline rather than whatever happened to be in memory.
+	</p>
+	<p>
+		A run whose workflow instance has vanished is reconciled the next time somebody reads it: the
+		read asks the workflow engine for the instance status and settles the row accordingly. There is
+		no sweeper cron, because the only rows anybody cares about are the ones somebody is looking at.
+	</p>
+
+	<h2>The database is the truth, the WebSocket is a nudge</h2>
+	<p>
+		Realtime is one stateless Durable Object per tenant, on the hibernation API. Sockets are
+		accepted with tags for the tenant and the user, per-socket metadata lives in the attachment
+		rather than in storage, and the client's keepalive is answered automatically without waking the
+		object at all. Publishing is a typed RPC call, never a fetch dispatch.
+	</p>
+	<p>
+		The important part is what travels over the socket: an event type, the tenant, a timestamp, and
+		at most an identifier. The browser reacts by invalidating the matching query keys and asking the
+		API again. It never applies a socket payload as state.
+	</p>
+	<div class="why">
+		<p>
+			<strong>Why a nudge rather than a payload.</strong> A payload-carrying socket is a second
+			source of truth, and the two drift the moment a message is missed, delivered twice, or
+			arrives out of order — which over a long-lived connection is not a hypothetical. Re-querying
+			costs one request and makes reconnection, tab-switching and a dropped message all the same
+			case: the next fetch is correct by construction.
+		</p>
+	</div>
+	<div class="note">
+		<p>
+			The socket is genuinely optional. Every nudge is deferred, never awaited on the response
+			path, and is a no-op when the binding is absent — so an environment without the Durable
+			Object still works, it just refreshes on the next fetch instead of immediately. The client
+			backs off exponentially with jitter and treats a redeploy-shaped close as a reconnect rather
+			than a failure.
+		</p>
+	</div>
+</ConceptLayout>

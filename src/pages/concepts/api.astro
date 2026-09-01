@@ -1,0 +1,135 @@
+---
+import ConceptLayout from '../../layouts/ConceptLayout.astro'
+---
+<ConceptLayout
+	slug="api"
+	source={[
+		'apps/web/src/worker.ts',
+		'apps/web/src/api/index.ts',
+		'apps/web/src/config.ts',
+		'apps/web/src/api/utils/routes/validate.ts',
+		'apps/web/src/api/utils/routes/router.ts',
+	]}
+>
+	<h2>One Worker, one app, one environment</h2>
+	<p>
+		<code>apps/web/src/worker.ts</code> is the entry point and exports three handlers —
+		<code>fetch</code>, <code>queue</code> and <code>scheduled</code> — alongside the Durable Object
+		and Workflow classes. HTTP requests, queue batches and cron ticks are three doors into the same
+		code, the same configuration and the same database client factory.
+	</p>
+	<p>
+		The Hono application itself lives in <code>apps/web/src/api/index.ts</code>, which exports the app
+		and nothing else. That separation is not cosmetic: it means a test can build a request, hand it
+		an environment and an execution context, and drive the real application through every middleware
+		under plain Node — no platform emulator, no mocked router, no second wiring of the app that can
+		drift from the one that ships.
+	</p>
+
+	<div class="why">
+		<p>
+			<strong>Why one Worker instead of several.</strong> Splitting the API, the realtime hub and the
+			background consumers into separate Workers buys independent deploys and costs you a shared
+			type graph, three deploy pipelines and a class of "which one is stale" bug. One Worker with
+			three exported handlers deploys atomically, shares the config schema, and is one thing to
+			roll back.
+		</p>
+	</div>
+
+	<h2>Configuration is validated once, and routes never read the environment</h2>
+	<p>
+		<code>loadConfig(env)</code> parses the Cloudflare environment through a zod schema at the top of
+		all three handlers, memoised per isolate, so a malformed variable fails loudly at the boundary
+		rather than as an <code>undefined</code> three layers down. Under <code>wrangler dev</code> the
+		memoisation keys on the environment object itself, so editing local variables re-validates
+		instead of serving a stale parse.
+	</p>
+	<p>
+		Routes then read <code>c.get('config')</code> and never <code>c.env</code> directly.
+		<code>process.env</code> is forbidden throughout the Worker's source — the compatibility flag
+		would populate it, but that hides which binding a module actually depends on and is simply empty
+		in tests. The environment discriminator is <code>APP_ENV</code>, with the values
+		<code>development</code>, <code>staging</code> and <code>production</code>;
+		<code>NODE_ENV</code> is a Node concept and stays in the test scripts where it belongs.
+	</p>
+
+	<h2>The middleware order is an argument, not an accident</h2>
+	<p>
+		Each layer sits where it does because of what has to be true before it runs, and what must still
+		be catchable after it.
+	</p>
+	<table>
+		<thead><tr><th>Layer</th><th>Why here</th></tr></thead>
+		<tbody>
+			<tr><td>error handler</td><td>outermost, so even a configuration failure comes back as the JSON envelope</td></tr>
+			<tr><td>request logger</td><td>next, so everything below has a request id to log against</td></tr>
+			<tr><td>config</td><td>everything below reads the parsed config rather than raw bindings</td></tr>
+			<tr><td>security headers</td><td>applied after the handler, and returns a 101 upgrade untouched</td></tr>
+			<tr><td>body limit</td><td>before anything reads a body; upload routes mount their own larger cap</td></tr>
+			<tr><td>CORS</td><td>before CSRF, so preflight requests get answered rather than rejected</td></tr>
+			<tr><td>CSRF</td><td>cookie-only and cheap — reject before spending a database connection</td></tr>
+			<tr><td>database</td><td>the first real cost: one client per request, closed in <code>waitUntil</code></td></tr>
+			<tr><td>tracing</td><td>after the database, flushed after the handler, never on the response path</td></tr>
+			<tr><td>route mounts</td><td>authentication is applied per mount, not globally</td></tr>
+		</tbody>
+	</table>
+	<p>
+		Authentication is deliberately not a global middleware. The public surface — health, OAuth
+		callbacks, invite acceptance — is small and can be listed, so mounting auth per group makes the
+		unauthenticated routes an explicit, reviewable set rather than a scattering of exemptions.
+	</p>
+	<div class="note">
+		<p>
+			The security-header layer returns a WebSocket upgrade untouched on purpose. A 101 response has
+			immutable headers, and re-wrapping it drops the socket — a failure that looks like a flaky
+			network rather than a bug in a header.
+		</p>
+	</div>
+
+	<h2>Routes are thin</h2>
+	<p>
+		A route reads its authenticated context through one helper, authorises with one ability check,
+		runs a tenant-filtered query, and returns. Bodies, query strings and parameters are validated
+		against a schema imported from the shared contracts package, so the shape the handler receives is
+		the shape the client was promised.
+	</p>
+	<p>
+		Errors are thrown as typed errors — not found, forbidden, validation, conflict — and turned into
+		responses in one place. No route hand-writes a status code and an error body, which is how the
+		envelope stays identical across a hundred endpoints.
+	</p>
+
+	<h2>One error envelope, one pagination shape</h2>
+	<p>
+		Every failure, including a validation failure, comes back in the same form, and successful bodies
+		are bare — no <code>data</code> wrapper to unwrap:
+	</p>
+	<pre><code>&#123; error, statusCode, code?, details? &#125;</code></pre>
+	<p>
+		Paginated endpoints answer with the items alongside a pagination block of
+		<code>page</code>, <code>pageSize</code>, <code>total</code> and <code>totalPages</code>. Both
+		shapes live in the shared package, so the UI's error toast and the CLI's exit-code mapping read
+		the same fields the server wrote.
+	</p>
+
+	<h2>Long work never happens in a request</h2>
+	<p>
+		A route enqueues a job or creates a workflow instance and answers immediately. Side effects that
+		may outlive the response — sending mail, flushing traces, nudging a socket, closing the database
+		client — go through <code>waitUntil</code>. Streaming endpoints do everything that can fail as
+		JSON before the first frame is written, because after that a failure can only be an error event
+		in the stream.
+	</p>
+
+	<h2>The catch-all that never serves HTML to an API client</h2>
+	<p>
+		The single-page application is served from the static-asset binding by a catch-all route, which
+		is what makes client-side routing work. That catch-all explicitly returns a JSON 404 for anything
+		under the API, auth, analytics or websocket prefixes.
+	</p>
+	<p>
+		Without that guard, a typo in an endpoint path returns <code>index.html</code> with a 200 — and
+		the client fails somewhere far away, parsing HTML as JSON. A missing route should look like a
+		missing route.
+	</p>
+</ConceptLayout>

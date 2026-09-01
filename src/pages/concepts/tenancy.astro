@@ -1,0 +1,120 @@
+---
+import ConceptLayout from '../../layouts/ConceptLayout.astro'
+---
+<ConceptLayout
+	slug="tenancy"
+	source={[
+		'apps/web/src/db/schema/_helpers.ts',
+		'apps/web/src/permissions/',
+		'apps/web/src/api/routes/admin.ts',
+		'apps/web/src/api/middleware/auth.ts',
+	]}
+>
+	<h2>One schema, one or many tenants</h2>
+	<p>
+		Every row of domain data belongs to a tenant, and the schema is identical whether the app runs
+		for a single organisation or a thousand. <code>TENANCY_MODE</code> is configuration, not a fork
+		of the codebase:
+	</p>
+	<ul>
+		<li>
+			<strong>multi</strong> — users belong to many organisations through <code>tenant_users</code>;
+			the session carries the current one, an org switcher moves between them, and global admins
+			manage every tenant from the admin area.
+		</li>
+		<li>
+			<strong>single</strong> — one organisation is created at bootstrap and every admitted user is
+			auto-joined to it. The switcher and the tenant-select screen disappear from the UI and answer
+			404 on the server. Members, roles, invitations and settings all stay.
+		</li>
+	</ul>
+
+	<div class="why">
+		<p>
+			<strong>Why one schema.</strong> The alternative — a "simple" single-tenant build you later
+			retrofit — means a migration and an audit of every query on the day the second customer
+			arrives. Here, flipping to <code>multi</code> later needs no migration at all, because the
+			tenant column was never optional.
+		</p>
+	</div>
+
+	<h2>Sign-up is a mode too</h2>
+	<p>
+		<code>SIGNUP_MODE</code> decides what happens when somebody who was never invited signs in.
+		Invite-only is the default.
+	</p>
+	<table>
+		<thead><tr><th>Mode</th><th>An uninvited login gets…</th></tr></thead>
+		<tbody>
+			<tr><td><code>invite_only</code></td><td>a user row and a "pending" screen. No organisation is created, and there is nothing for an admin to review.</td></tr>
+			<tr><td><code>approval</code></td><td>the same, plus one access request that a global admin approves into a new or existing organisation, or rejects with a note.</td></tr>
+			<tr><td><code>open</code></td><td>a personal organisation of their own.</td></tr>
+		</tbody>
+	</table>
+	<p>
+		The access request is written when the email is <em>verified</em>, not when a magic link is
+		requested — so the queue cannot be filled by typing a stranger's address into the login box. An
+		optional domain allow-list turns away obvious outsiders before any of that.
+	</p>
+	<p>
+		Invited users behave the same in all three modes: the pending-invitation handler runs first on
+		every login path, and every fallback gates on "has no memberships" rather than "is a new user" —
+		which is what stops someone who just lost their last organisation from being stranded.
+	</p>
+
+	<h2>Roles and abilities</h2>
+	<p>
+		A membership carries one of <code>owner</code>, <code>admin</code> or <code>member</code>. A
+		fourth role, <code>support</code>, can only be minted from the admin area, is excluded from
+		member counts, and is deliberately visible to the customer. Separately,
+		<code>users.isGlobalAdmin</code> is a platform flag — not a role inside any organisation.
+	</p>
+	<p>
+		Permissions are CASL abilities computed on the server and shipped to the browser with the
+		session, so a nav item, a page guard and the route behind them all consult the same rules. As a
+		rough shape: owners and admins manage their organisation; members read it and write the things
+		they own; support behaves like an admin; global admins can do anything.
+	</p>
+	<div class="note">
+		<p>
+			Two actions ignore the ability system on purpose and check the role directly: deleting an
+			organisation, and changing who owns it. Those are one-way doors, and an explicit
+			<code>role === 'owner'</code> test is easier to audit than a rule buried in a policy.
+		</p>
+	</div>
+
+	<h2>Isolation is a predicate you cannot forget quietly</h2>
+	<p>
+		Every domain query filters by the tenant id taken from the authenticated context — never from
+		anything the client sent. That predicate is also what keeps the composite indexes selective, so
+		it is load-bearing twice over.
+	</p>
+	<p>
+		Cross-tenant SQL exists in exactly two places: the admin routes, and the pre-tenant part of the
+		auth path (sign-in, invite acceptance). A test pins that list, so widening it is a decision
+		somebody makes on purpose rather than a refactor that slips through.
+	</p>
+	<p>
+		On top of that, every tenant table also carries a Postgres row-level-security policy. The
+		policies ship switched off, with the application role created but unable to log in, and a
+		catalog-driven test that fails the build if a new tenant table arrives without one. Turning
+		enforcement on is a configuration change — the scaffolding is already in place and already
+		tested.
+	</p>
+
+	<h2>The admin area, and "entering" a customer</h2>
+	<p>
+		Everything cross-tenant lives behind one global-admin middleware, so the blast radius of that
+		capability is one file. When an admin enters a customer's organisation to help them, the app
+		inserts a real <code>support</code> membership row rather than special-casing the request. The
+		auth middleware keeps its single invariant — you must be a member — and the customer can see who
+		is in their organisation.
+	</p>
+
+	<h2>The CLI is inside a tenant too</h2>
+	<p>
+		Logging the CLI in ends with a tenant-scoped API key, so every command already runs inside one
+		organisation and travels the same middleware and the same abilities as the UI. There is no
+		second permission model for machines.
+	</p>
+</ConceptLayout>

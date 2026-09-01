@@ -1,0 +1,125 @@
+---
+import ConceptLayout from '../../layouts/ConceptLayout.astro'
+---
+<ConceptLayout
+	slug="ui"
+	source={[
+		'apps/web/src/ui/index.css',
+		'apps/web/src/ui/App.tsx',
+		'apps/web/src/ui/components/RequireGuard.tsx',
+		'apps/web/src/ui/lib/api-client.ts',
+		'apps/web/src/ui/stores/websocketStore.ts',
+	]}
+>
+	<h2>Tokens, not colours</h2>
+	<p>
+		The stylesheet defines two themes, and the brand values for both live in one block at the top of
+		one file. Below them sit semantic tokens — surfaces, borders, text, shape, motion — and a small
+		set of component primitives. Components use the semantic classes or the kit's own tokens; a
+		palette utility like a raw blue-50 is not something you will find in a component, because the
+		point of a rebrand being one block is that nothing else may hard-code a colour.
+	</p>
+	<p>
+		A contrast test runs over the emitted tokens and gates the build against the accessibility
+		floors. Changing a brand colour is therefore a change you find out about immediately rather than
+		one a user finds out about later.
+	</p>
+
+	<div class="why">
+		<p>
+			<strong>Why the scan is scoped by hand.</strong> Tailwind's automatic source detection is
+			switched off and re-enabled with explicit paths pointing only at the UI tree. Left on, it
+			detects sources from the package root and scans the whole repository — documentation, server
+			code, tests — and the component library then emits a component for every stray word in a
+			comment that happens to look like a class name. Scoping the scan is the difference between a
+			stylesheet that reflects the app and one that reflects the prose around it.
+		</p>
+	</div>
+	<div class="note">
+		<p>
+			The same reasoning applies to dependencies. A package is only added to the scan if it ships
+			uncompiled classes, and only after measuring the output — a dependency whose styles are
+			already compiled and prefixed contributes nothing but stray components.
+		</p>
+	</div>
+
+	<h2>Providers, in an order that means something</h2>
+	<p>
+		The tree is an error boundary, then the query client, then auth, then abilities, then the
+		websocket provider, then the router. Each layer depends on the one above it and on nothing
+		below.
+	</p>
+	<table>
+		<thead><tr><th>Layer</th><th>What it adds</th></tr></thead>
+		<tbody>
+			<tr><td>Error boundary</td><td>Outermost, so a failure anywhere below renders a page rather than a blank screen.</td></tr>
+			<tr><td>Query client</td><td>Server state, and one global handler that clears the cache and redirects on a 401.</td></tr>
+			<tr><td>Auth</td><td>The session, fetched once and parsed with the same schema the server validated it with.</td></tr>
+			<tr><td>Abilities</td><td>The CASL rules the server computed and shipped with that session.</td></tr>
+			<tr><td>WebSocket</td><td>Connects once the session has a tenant, reconnects when the tenant changes.</td></tr>
+			<tr><td>Router</td><td>Routes, with the layout mounted once and a second error boundary inside it.</td></tr>
+		</tbody>
+	</table>
+
+	<h2>One guard, composed</h2>
+	<p>
+		There is a single guard primitive. Coarse role guards and fine ability guards are compositions
+		of it, not parallel implementations — and a navigation item uses the same guard as the page it
+		opens.
+	</p>
+	<p>
+		That last detail is the one that matters in practice. When the nav and the route each decide
+		visibility their own way, they disagree eventually, and the symptom is a link that leads to a
+		403. Sharing the guard makes the two agree by construction.
+	</p>
+
+	<h2>The data layer is deliberately boring</h2>
+	<p>
+		All HTTP goes through one client that sends credentials, turns the shared error envelope into a
+		typed error, and optionally parses the response with a zod schema — the same schema the server
+		validated the response against. There is no RPC client generated from the server's types, which
+		would drag the server's type graph into the browser bundle.
+	</p>
+	<p>
+		Above that: one hook file per resource, query keys from a central factory rather than inline
+		arrays, and shared query definitions as reusable option factories. Mutations invalidate through
+		the same key factory. Pagination has one shape everywhere.
+	</p>
+
+	<h2>Server data lives in the cache, and only there</h2>
+	<p>
+		The query cache owns server state. The one client-side store holds exactly one thing: websocket
+		connection status, written only by the socket client. Component-local interface state is local
+		state; the theme and the density are DOM attributes. There is no store shadowing data the server
+		already owns.
+	</p>
+	<p>
+		Streaming chat is the single exception, and it is a narrow one. Assistant text accumulates in
+		local state as deltas arrive, because it is not true yet — then, when the stream signals the end
+		of the message, the finished message is written into the cache, which the server had already
+		persisted before sending that frame. The exception exists for the duration of one reply and
+		then closes.
+	</p>
+	<div class="why">
+		<p>
+			<strong>Why the socket does not write state.</strong> Realtime events name a query-key root
+			and the browser invalidates it — the mapping lives in the shared package, so a new server
+			event type gets client behaviour without any hook subscribing to a socket. Components
+			subscribe to query state, never to the connection. A resource that nudges under a given
+			entity name simply names its query family the same thing and gets live refresh for free.
+		</p>
+	</div>
+
+	<h2>Weight is kept out of the shell</h2>
+	<p>
+		Heavy dependencies ship in lazy chunks and are imported by path from the pages that need them,
+		never from the shared component barrel that the shell loads eagerly. Markdown rendering lives
+		with the chat and agent pages; the charting and dashboard libraries live only in the analytics
+		chunk.
+	</p>
+	<p>
+		The constraint is enforced by watching the build output rather than by convention alone: the
+		main bundle has a size it is expected to stay near, and an import that merges an analytics
+		dependency into it is visible immediately.
+	</p>
+</ConceptLayout>

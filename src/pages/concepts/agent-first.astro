@@ -1,0 +1,164 @@
+---
+import ConceptLayout from '../../layouts/ConceptLayout.astro'
+---
+<ConceptLayout
+	slug="agent-first"
+	source={[
+		'CLAUDE.md',
+		'.claude/rules/api.md',
+		'docs/CONCEPTS.md',
+		'docs/ADAPTING.md',
+		'apps/web/src/api/routes/CLAUDE.md',
+	]}
+>
+	<h2>The premise</h2>
+	<p>
+		Most of your code from here on will be written with a coding agent in the loop. That changes
+		what a good starting point looks like. An agent does not absorb a codebase by working in it for
+		six months; it arrives with an empty head, reads what is in front of it, and acts. Whatever you
+		did not write down, it will invent — plausibly, consistently, and wrong.
+	</p>
+	<p>
+		So the conventions of this kit are not folklore in somebody's head or a style guide nobody
+		opens. They are files placed where the agent will actually read them, written in the imperative,
+		and backed by a check that fails when they are ignored. That is the whole idea: <strong>the
+		documentation is an interface, and the test suite is its enforcement.</strong>
+	</p>
+
+	<div class="why">
+		<p>
+			<strong>Why write it down rather than rely on review.</strong> An agent will produce a route
+			that works, passes its own test, and quietly breaks a rule you care about — a query without a
+			tenant filter, a long job run inline, a response type declared in the route instead of the
+			shared package. Catching that in review, every time, does not scale. Stating the rule where
+			the agent reads it, and failing the build when it is broken, does.
+		</p>
+	</div>
+
+	<h2>One root brief, loaded every session</h2>
+	<p>
+		<code>CLAUDE.md</code> at the repository root is the map: the stack in a table, the commands
+		that matter, the directory layout with a one-line job description each, and a short list of
+		non-negotiables. It is deliberately dense and deliberately short — it is read on every single
+		turn, so every line has to earn its place.
+	</p>
+	<p>
+		<code>AGENTS.md</code> is a symlink to that same file. Different tools look for different
+		names; there is exactly one document behind both, so they can never drift apart.
+	</p>
+
+	<h2>Rules that load themselves, by path</h2>
+	<p>
+		A single enormous instruction file is a bad interface: most of it is irrelevant to whatever you
+		are touching, and the part that matters gets lost. So the detail lives in
+		<code>.claude/rules/</code>, one file per layer, each carrying a frontmatter list of globs:
+	</p>
+	<pre><code>---
+globs:
+  - apps/web/src/api/**
+  - apps/web/src/worker.ts
+  - apps/web/src/config.ts
+---
+
+# API Patterns</code></pre>
+	<p>
+		Open a route and the API rules are in context: the middleware order and the reason for each
+		position, the fact that routes enqueue and never run long work, the one sanctioned way to read
+		the authenticated context. Open a schema file and you get the database rules instead — tenant
+		reference first in every index, <code>timestamptz</code> not <code>timestamp</code>,
+		append-only enums. Seven rule files cover the API, the database, the UI, the CLI, testing,
+		Cloudflare and code quality.
+	</p>
+
+	<div class="why">
+		<p>
+			<strong>Why globs rather than one long file.</strong> Attention is the scarce resource. Rules
+			scoped to a path arrive exactly when they apply and cost nothing when they do not — and the
+			glob list doubles as documentation of which layer a file belongs to.
+		</p>
+	</div>
+
+	<h2>A guide in every significant directory</h2>
+	<p>
+		Fourteen directories carry their own <code>CLAUDE.md</code> — the routes, the middleware, the
+		permission model, the database schema, the AI services, the agent runtime, the workflows, the
+		cubes, the fact tables, the dashboard templates, the UI, the CLI and the shared package. Each
+		one describes the local shape: what a file in this folder looks like, what it must not do, and
+		what to copy when adding another.
+	</p>
+	<p>
+		The effect is that "add a cube" or "add an agent" is a mechanical path rather than an
+		archaeology exercise. The agent opens the folder, finds the guide, follows the shape, and the
+		result reads like the code beside it.
+	</p>
+
+	<h2>Written-down reasoning, not just rules</h2>
+	<p>
+		<code>docs/CONCEPTS.md</code> — the same material these concept pages are drawn from — records
+		one section per subsystem: what it does, the invariant it protects, and the decision behind it.
+		It exists because an agent asked to change something needs to know which parts are load-bearing
+		and which are arbitrary.
+	</p>
+	<p>
+		A rule tells you what to do. The reasoning tells you when the rule stops applying — which is the
+		difference between an agent that adapts a pattern intelligently and one that cargo-cults it into
+		a place it does not belong.
+	</p>
+
+	<h2>The gate is the contract</h2>
+	<p>
+		Instructions that nothing enforces decay within a month. So the conventions that matter most are
+		tests, and one command runs all of them:
+	</p>
+	<pre><code>pnpm lint && pnpm typecheck && pnpm test && pnpm build</code></pre>
+	<p>
+		That gate runs before every commit and again in CI. Several of its checks exist specifically to
+		catch the mistakes an agent makes:
+	</p>
+	<table>
+		<thead><tr><th>Check</th><th>What it refuses to let through</th></tr></thead>
+		<tbody>
+			<tr><td>Row-level-security coverage</td><td>a new tenant table that arrived without a policy, or an untenanted one without a stated reason</td></tr>
+			<tr><td>Cube isolation</td><td>a new cube with no two-tenant isolation case — the test compares the cases to the registry</td></tr>
+			<tr><td>Unscoped-query allow-list</td><td>cross-tenant SQL appearing anywhere it was not already sanctioned</td></tr>
+			<tr><td>Wrangler parity</td><td>a binding, cron or variable added to one environment and not the other</td></tr>
+			<tr><td>Dashboard templates</td><td>a renamed cube member that would silently break every saved dashboard</td></tr>
+			<tr><td>Bundle check</td><td>a Node-only dependency that type-checks but cannot run on the platform</td></tr>
+		</tbody>
+	</table>
+	<p>
+		Each of those is a rule from the documents above, expressed as a failure. The agent does not have
+		to remember them; it finds out immediately when it forgets.
+	</p>
+
+	<div class="note">
+		<p>
+			The kit also states plainly that a behaviour change updates the matching document in the same
+			change — the concepts file, the setup walkthrough, the deploy reference or the layer's rules.
+			It is the least glamorous convention here and the one that keeps every other one true.
+		</p>
+	</div>
+
+	<h2>The loop this produces</h2>
+	<p>
+		Because contracts live in one shared package and the API, the UI and the CLI all consume them,
+		adding a feature is a fixed sequence rather than an open-ended design problem: a schema in the
+		shared package, a route that validates with it, a page that parses with it, optionally a CLI
+		command that does the same. Every step has a rule file, a directory guide and an existing
+		example beside it.
+	</p>
+	<p>
+		That is the pay-off of everything above. The next feature is a short, well-lit path — for you,
+		and for the agent working alongside you.
+	</p>
+
+	<h2>It sets itself up, too</h2>
+	<p>
+		The same approach covers the first hour. Ask a coding agent <strong>"help me set up this
+		project"</strong> and the root brief tells it to walk the setup guide step by step, showing each
+		command's output, confirming the stated verification line, stopping on failure, and fixing
+		missing prerequisites rather than reporting them. When you are ready to make the kit your own,
+		<code>docs/ADAPTING.md</code> is an explicit rename checklist — every token, every file it
+		appears in, and the order to do them in.
+	</p>
+</ConceptLayout>

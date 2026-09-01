@@ -1,0 +1,185 @@
+---
+/**
+ * The hero illustration: a layered sky the rocket launches out of.
+ *
+ * Three cloud bands drift at different speeds (back slowest) for parallax, the
+ * sun/moon sits behind them, the rocket bobs and its flame flickers. Every
+ * fill is a var() token, so the whole scene re-themes with the day/night
+ * toggle, and every animation stops under prefers-reduced-motion.
+ */
+---
+<div class="sky" aria-hidden="true">
+	<div class="stars"></div>
+	<div class="sun"></div>
+
+	<!-- Cloud band: back (slow, small, pale) -->
+	<div class="band band-back">
+		<svg viewBox="0 0 1600 200" preserveAspectRatio="none"><use href="#cloudrow" /></svg>
+		<svg viewBox="0 0 1600 200" preserveAspectRatio="none"><use href="#cloudrow" /></svg>
+	</div>
+	<!-- Cloud band: mid -->
+	<div class="band band-mid">
+		<svg viewBox="0 0 1600 200" preserveAspectRatio="none"><use href="#cloudrow" /></svg>
+		<svg viewBox="0 0 1600 200" preserveAspectRatio="none"><use href="#cloudrow" /></svg>
+	</div>
+	<!-- Cloud band: front (fast, large, opaque) -->
+	<div class="band band-front">
+		<svg viewBox="0 0 1600 200" preserveAspectRatio="none"><use href="#cloudrow" /></svg>
+		<svg viewBox="0 0 1600 200" preserveAspectRatio="none"><use href="#cloudrow" /></svg>
+	</div>
+
+	<!-- One cloud row, defined once and instanced six times above. -->
+	<svg width="0" height="0" style="position:absolute">
+		<defs>
+			<g id="cloudrow" fill="var(--cloud)">
+				<path d="M80 150c0-28 22-50 50-50 6 0 12 1 17 3 9-27 34-47 64-47 32 0 59 22 66 52 8-6 17-9 27-9 26 0 47 20 49 46 19 2 34 18 34 38v17H40v-12c0-19 17-36 40-38z"/>
+				<path d="M520 160c0-22 18-40 40-40 5 0 9 1 14 2 7-22 28-38 52-38 26 0 47 18 53 42 6-5 14-7 21-7 21 0 38 16 40 37 15 2 27 14 27 30v14H488v-10c0-16 14-29 32-30z"/>
+				<path d="M980 152c0-25 20-45 45-45 5 0 11 1 16 3 8-25 31-43 58-43 29 0 54 20 60 47 7-5 16-8 24-8 24 0 43 18 45 42 17 2 31 16 31 34v16H944v-11c0-17 15-33 36-35z"/>
+				<path d="M1380 165c0-19 15-34 34-34 4 0 8 0 12 2 6-19 24-33 45-33 22 0 40 15 45 36 5-4 11-6 18-6 18 0 33 14 34 32 13 1 23 12 23 26v12h-268v-9c0-14 12-25 27-26z"/>
+			</g>
+		</defs>
+	</svg>
+
+	<!-- The rocket, flying up out of the clouds -->
+	<div class="rocket">
+		<svg viewBox="0 0 220 470" width="190" height="406">
+			<!-- fins -->
+			<path fill="var(--red)" d="M62 150C30 168 12 200 6 246l56-22z"/>
+			<path fill="var(--red)" d="M158 150c32 18 50 50 56 96l-56-22z"/>
+			<!-- body -->
+			<path fill="var(--blue-bright)" d="M110 8C67 43 46 98 46 168v108c0 20 14 34 34 34h60c20 0 34-14 34-34V168c0-70-21-125-64-160z"/>
+			<path fill="var(--blue)" d="M110 8c14 35 22 88 22 160v150h8c20 0 34-14 34-34V168c0-70-21-125-64-160z" opacity="0.55"/>
+			<!-- nose cone -->
+			<path fill="var(--yellow-bright)" d="M110 8C86 28 70 53 60 83h100C150 53 134 28 110 8z"/>
+			<!-- window -->
+			<circle cx="110" cy="140" r="30" fill="var(--cloud)"/>
+			<circle cx="110" cy="140" r="20" fill="var(--cyan-soft)"/>
+			<circle cx="102" cy="132" r="7" fill="var(--cloud)" opacity="0.8"/>
+			<!-- engine bell -->
+			<path fill="var(--text-muted)" d="M78 306h64l-10 34H88z"/>
+			<!-- exhaust flame, below the bell so it is always visible -->
+			<g class="flame">
+				<path fill="var(--yellow-bright)" d="M110 336c-22 34-33 62-33 84 0 19 15 30 33 30s33-11 33-30c0-22-11-50-33-84z"/>
+				<path fill="var(--orange)" d="M110 348c-14 26-21 47-21 62 0 13 9 21 21 21s21-8 21-21c0-15-7-36-21-62z"/>
+				<path fill="var(--red)" d="M110 366c-7 17-11 30-11 39 0 8 5 13 11 13s11-5 11-13c0-9-4-22-11-39z"/>
+			</g>
+		</svg>
+	</div>
+
+	<!-- Sparks trailing the launch -->
+	<span class="spark spark-1"></span>
+	<span class="spark spark-2"></span>
+	<span class="spark spark-3"></span>
+	<span class="spark spark-4"></span>
+</div>
+
+<style>
+	.sky {
+		position: absolute;
+		inset: 0;
+		overflow: hidden;
+		background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 48%, var(--sky-bottom) 100%);
+		pointer-events: none;
+	}
+
+	.sun {
+		position: absolute;
+		top: 8%;
+		right: 10%;
+		width: 140px;
+		height: 140px;
+		border-radius: 50%;
+		background: var(--sun);
+		opacity: 0.55;
+		filter: blur(2px);
+		box-shadow: 0 0 90px 40px var(--sun);
+		animation: pulse 7s ease-in-out infinite;
+	}
+
+	/* Stars are one repeating radial-gradient sheet; invisible by day because
+	   --star is transparent in the day theme. */
+	.stars {
+		position: absolute;
+		inset: 0;
+		background-image:
+			radial-gradient(1.6px 1.6px at 12% 18%, var(--star), transparent),
+			radial-gradient(1.4px 1.4px at 32% 8%, var(--star), transparent),
+			radial-gradient(1.8px 1.8px at 58% 22%, var(--star), transparent),
+			radial-gradient(1.3px 1.3px at 74% 12%, var(--star), transparent),
+			radial-gradient(1.6px 1.6px at 88% 30%, var(--star), transparent),
+			radial-gradient(1.2px 1.2px at 22% 40%, var(--star), transparent),
+			radial-gradient(1.5px 1.5px at 46% 34%, var(--star), transparent),
+			radial-gradient(1.3px 1.3px at 66% 44%, var(--star), transparent);
+		animation: twinkle 4.5s ease-in-out infinite alternate;
+	}
+
+	.band {
+		position: absolute;
+		left: 0;
+		display: flex;
+		width: 200%;
+		will-change: transform;
+	}
+	.band svg { width: 50%; height: auto; flex: none; }
+
+	.band-back  { bottom: 34%; opacity: 0.45; transform: scale(1); animation: drift 90s linear infinite; }
+	.band-mid   { bottom: 14%; opacity: 0.7;  animation: drift 60s linear infinite; }
+	.band-front { bottom: -6%; opacity: 1;    animation: drift 38s linear infinite; }
+
+	.rocket {
+		position: absolute;
+		/* Sits to the right of the hero copy on wide screens; re-centres below. */
+		left: auto;
+		right: 9%;
+		bottom: 12%;
+		margin-left: 0;
+		animation: bob 5s ease-in-out infinite;
+		filter: drop-shadow(0 18px 24px rgba(16, 36, 58, 0.25));
+	}
+	.flame {
+		transform-origin: 110px 336px;
+		animation: flicker 0.42s steps(2, jump-none) infinite alternate;
+	}
+
+	.spark {
+		position: absolute;
+		left: 50%;
+		bottom: 0;
+		width: 7px;
+		height: 7px;
+		border-radius: 50%;
+		background: var(--orange);
+		opacity: 0;
+		animation: rise 4s linear infinite;
+	}
+	.spark-2 { background: var(--yellow-bright); margin-left: -46px; animation-delay: 0.9s; animation-duration: 5.2s; }
+	.spark-3 { background: var(--red);           margin-left: 38px;  animation-delay: 1.8s; animation-duration: 4.6s; }
+	.spark-4 { background: var(--cyan);          margin-left: -14px; animation-delay: 2.7s; animation-duration: 6s; }
+
+	@keyframes drift    { from { transform: translateX(0); }        to { transform: translateX(-50%); } }
+	@keyframes bob      { 0%, 100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-22px) rotate(1deg); } }
+	@keyframes flicker  { from { transform: scaleY(0.82) scaleX(1.05); opacity: 0.9; } to { transform: scaleY(1.14) scaleX(0.94); opacity: 1; } }
+	@keyframes pulse    { 0%, 100% { transform: scale(1); opacity: 0.55; } 50% { transform: scale(1.07); opacity: 0.7; } }
+	@keyframes twinkle  { from { opacity: 0.45; } to { opacity: 1; } }
+	@keyframes rise {
+		0%   { opacity: 0; transform: translateY(0) scale(0.6); }
+		12%  { opacity: 0.9; }
+		100% { opacity: 0; transform: translateY(-340px) scale(0.2); }
+	}
+
+	@media (max-width: 1100px) {
+		.rocket { right: 3%; transform: scale(0.8); transform-origin: bottom right; }
+	}
+
+	/* Narrow screens: the rocket tucks into the bottom-right corner and drops
+	   behind the copy rather than colliding with the buttons. */
+	@media (max-width: 860px) {
+		.rocket { right: -2%; bottom: 2%; transform: scale(0.5); transform-origin: bottom right; opacity: 0.85; }
+		.sun { width: 90px; height: 90px; top: 5%; right: 6%; }
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.band, .rocket, .flame, .sun, .stars, .spark { animation: none; }
+		.spark { opacity: 0; }
+	}
+</style>

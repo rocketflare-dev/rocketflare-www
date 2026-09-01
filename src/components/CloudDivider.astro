@@ -1,0 +1,36 @@
+---
+/**
+ * A cloud-shaped section transition. Sits at the bottom of a section (or the
+ * top, with `flip`) and fills with the NEXT section's background so the two
+ * meet along a soft edge rather than a straight line.
+ */
+interface Props {
+	/** Point the clouds upward — use at the top of a section. */
+	flip?: boolean
+	/** Which token the cloud silhouette is filled with. */
+	fill?: string
+}
+const { flip = false, fill = 'var(--card)' } = Astro.props
+---
+<div class:list={['divider', flip && 'flip']}>
+	<svg viewBox="0 0 1440 130" preserveAspectRatio="none" aria-hidden="true">
+		<path
+			fill={fill}
+			d="M0 78c62-4 96-30 154-30 47 0 72 17 110 26 30 7 55-2 84-15 33-15 63-26 100-20 43 7 63 33 106 37 46 4 74-20 118-32 41-11 78-6 116 8 35 13 63 30 101 28 44-2 71-27 113-35 39-8 74 2 110 17 33 14 62 26 99 22 44-5 72-26 115-26 34 0 60 9 84 21 20 10 39 18 30 19v42H0z"
+		/>
+	</svg>
+</div>
+
+<style>
+	.divider {
+		position: absolute;
+		left: 0;
+		right: 0;
+		bottom: -1px;
+		line-height: 0;
+		pointer-events: none;
+		z-index: 1;
+	}
+	.divider.flip { bottom: auto; top: -1px; transform: rotate(180deg); }
+	.divider svg { display: block; width: 100%; height: clamp(60px, 8vw, 120px); }
+</style>

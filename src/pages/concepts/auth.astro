@@ -1,0 +1,130 @@
+---
+import ConceptLayout from '../../layouts/ConceptLayout.astro'
+---
+<ConceptLayout
+	slug="auth"
+	source={[
+		'apps/web/src/api/middleware/auth.ts',
+		'apps/web/src/api/auth/sessions.ts',
+		'apps/web/src/api/auth/providers/',
+		'apps/web/src/api/auth/oauth-encryption.ts',
+		'apps/web/src/api/routes/auth/cli.ts',
+	]}
+>
+	<h2>Sessions are rows, not tokens</h2>
+	<p>
+		A signed-in browser holds one cookie, <code>__Host-session</code>, whose value points at a row in
+		<code>user_sessions</code>. The row has a seven-day sliding lifetime; the cookie is
+		<code>HttpOnly</code>, <code>SameSite=Lax</code>, carries no <code>Domain</code>, and is
+		<code>Secure</code> everywhere except local development. The <code>__Host-</code> prefix is what
+		makes the browser refuse a cookie that tries to widen its own scope.
+	</p>
+	<p>
+		Every request resolves session, user, membership and abilities in one <code>LATERAL</code> query,
+		then does its bookkeeping — touching <code>last_used</code>, sweeping expired rows — inside
+		<code>waitUntil</code>, so the work happens after the response has already gone out. The second
+		strategy is a bearer <code>Authorization</code> header carrying a hashed tenant API key, checked
+		for expiry and soft revocation. Both strategies converge on the same authenticated context, so
+		nothing downstream knows or cares which one was used.
+	</p>
+
+	<div class="why">
+		<p>
+			<strong>Why rows rather than a self-contained token.</strong> A JWT cannot be revoked without
+			building the very lookup table it was meant to avoid. Sessions in Postgres mean "log out
+			everywhere" is a <code>DELETE</code>, a suspended tenant takes effect on the next request, and
+			there is one place to look when somebody asks who was signed in. The cost is a query per
+			request, which is the same query already fetching the membership and abilities.
+		</p>
+	</div>
+
+	<h2>The magic link is the zero-credential path</h2>
+	<p>
+		A magic link is an HMAC-signed token, valid for fifteen minutes, usable once, and stored as a
+		SHA-256 hash rather than in the clear. Nothing about it depends on an email provider being
+		configured: without <code>RESEND_API_KEY</code> the URL is written to the log instead of sent, so
+		a freshly cloned repository can be signed into with no accounts, no keys and no external service
+		at all.
+	</p>
+	<p>
+		This is also why the magic-link email is the one message the kit sends inline rather than
+		queueing. Somebody is sitting in front of a login screen waiting for it; latency beats
+		offloading.
+	</p>
+	<p>
+		A development login route exists alongside it for convenience and returns a 404 in production —
+		it is not gated by a flag that somebody can set wrongly, it simply is not there.
+	</p>
+
+	<h2>OAuth is a registry, not a copy-paste</h2>
+	<p>
+		Rather than a file per provider, there is one generic pair of routes —
+		<code>/auth/:provider</code> and <code>/auth/:provider/callback</code> — over a list of provider
+		definitions. Google and Microsoft ship; adding a third is one definition file with its endpoints,
+		scopes and profile mapping, and no new routing.
+	</p>
+	<p>
+		Redirect URIs are derived from <code>APP_URL</code>, so there is no
+		<code>GOOGLE_REDIRECT_URI</code>-style variable to keep in step across three environments — the
+		one that is wrong in staging and right in production, and only discovered by a user. A single
+		<code>oauth_state</code> cookie carries both the provider and the PKCE state.
+	</p>
+	<p>
+		Account linking is by verified email only, and a provider that reports
+		<code>email_verified: false</code> is refused outright. A pair of provider and provider-user-id is
+		unique, so the same external account cannot be attached to two people.
+	</p>
+
+	<h2>What encrypts what, and why they are separate</h2>
+	<table>
+		<thead><tr><th>Secret</th><th>Job</th></tr></thead>
+		<tbody>
+			<tr><td><code>AUTH_SIGNING_KEY</code></td><td>signs magic-link tokens</td></tr>
+			<tr><td><code>OAUTH_ENCRYPTION_KEY</code></td><td>AES-GCM encryption of OAuth tokens, and of tenant AI credentials, at rest</td></tr>
+		</tbody>
+	</table>
+	<p>
+		They are two values on purpose, so either can be rotated without invalidating what the other
+		protects. Neither is derived from the database URL, which would tie the ability to forge a login
+		token to the ability to read a connection string. Key material comes from
+		<code>crypto.getRandomValues</code>, and there is no plaintext pass-through when the encryption
+		key is missing — the app refuses instead.
+	</p>
+
+	<h2>Hardening at the edges</h2>
+	<p>
+		CSRF is enforced by an origin allow-list built from <code>APP_URL</code> plus the local
+		development ports, and bearer-authenticated requests are exempt because they cannot be made
+		ambiently by a browser. Login routes sit behind a sliding-window rate limit in Workers KV, which
+		also backs a per-tenant single-flight lock for operations that must not run twice concurrently.
+		Security headers, a body limit and a secret scanner in CI round it out.
+	</p>
+	<div class="note">
+		<p>
+			The KV rate limiter is approximate by design: eventually-consistent counters trade exactness
+			for a global limit that costs nothing on the request path and degrades to a no-op when the
+			binding is absent. Where an exact count matters more than availability, Cloudflare's rate
+			limiting binding is the swap, and it goes in the same place.
+		</p>
+	</div>
+
+	<h2>The CLI login handoff</h2>
+	<p>
+		<code>GET /auth/cli</code> is the single bridge between a browser session and a terminal. It takes
+		a <code>redirect_uri</code>, and that URI must be exactly
+		<code>http://127.0.0.1:&lt;port&gt;/callback</code> or the <code>localhost</code> equivalent — any
+		port, <code>http</code> only, no query string, no fragment, no userinfo. Anything else is a 400.
+	</p>
+	<p>
+		That allow-list is the whole reason it is acceptable to hand a key over in a query string: the
+		redirect can only ever reach a listener on the machine the person is sitting at. Without a session
+		the route bounces to the login page and comes back; without a tenant it asks which organisation
+		(skipped entirely in single-tenant mode); then it mints a tenant API key named after the machine,
+		through the same helper the settings screen uses, and redirects home with it.
+	</p>
+	<p>
+		The key is therefore an ordinary tenant key: visible in Settings, revocable there, and logged in
+		the activity feed when it was created. It is shown exactly once. There is no refresh — if you lose
+		it, revoke it and log in again.
+	</p>
+</ConceptLayout>

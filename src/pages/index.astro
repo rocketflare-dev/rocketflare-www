@@ -1,0 +1,564 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import SkyScene from '../components/SkyScene.astro'
+import CloudDivider from '../components/CloudDivider.astro'
+import { GITHUB_URL, DEMO_URL, SETUP_URL, ADAPTING_URL } from '../data/site'
+
+const title = 'Rocketflare — a multi-tenant SaaS starter kit for Cloudflare Workers'
+const description =
+	'Tenancy, auth, roles, jobs, realtime, files, analytics, an AI layer and a CLI — already built, already tested, running as one Cloudflare Worker over Postgres. Copy it, rename it, ship your product.'
+
+/** The eight things you get, mapped 1:1 to the README's feature groups.
+ *  `href` points at the matching section of docs/CONCEPTS.md on GitHub. */
+const features = [
+	{
+		tone: 'orange',
+		title: 'Agent-first by design',
+		lead: 'Built from the start to be worked on by a coding agent.',
+		points: [
+			'A root <code>CLAUDE.md</code> (and <code>AGENTS.md</code>) that is the map, read every session',
+			'Layer rules in <code>.claude/rules/</code> that load themselves by path, so the API rules arrive when you open a route',
+			'A guide in every significant directory, plus a written record of why each subsystem is the way it is',
+			'One gate — lint, typecheck, test, build — whose tests enforce the rules an agent would otherwise forget',
+		],
+		href: '/concepts/agent-first/',
+		icon: 'robot',
+	},
+	{
+		tone: 'blue',
+		title: 'Tenancy and access',
+		lead: 'Multi- or single-tenant from one schema — flip a var, no migration.',
+		points: [
+			'Every domain row carries a <code>tenant_id</code>; every query filters by the session tenant',
+			'<code>owner · admin · member</code> plus platform support and global admins, CASL abilities shared by API and UI',
+			'Invitations, role changes, ownership transfer, an activity log and an admin area',
+			'Row-level security policies ship inert, with a catalog test that fails CI if a table is missed',
+		],
+		href: '/concepts/tenancy/',
+		icon: 'building',
+	},
+	{
+		tone: 'purple',
+		title: 'Authentication',
+		lead: 'Sign in on the first run with no credentials at all.',
+		points: [
+			'Magic link — HMAC-signed, single-use, hashed at rest, logged locally when no mail provider exists',
+			'Google and Microsoft OAuth from one provider registry; adding a third is one file',
+			'Sessions as rows behind a <code>__Host-</code> cookie; hashed, scoped tenant API keys',
+			'CSRF, rate limits, security headers, body limits and gitleaks in CI',
+		],
+		href: '/concepts/auth/',
+		icon: 'key',
+	},
+	{
+		tone: 'orange',
+		title: 'Background work and realtime',
+		lead: 'Routes enqueue. They never run long work.',
+		points: [
+			'One typed jobs queue — poison messages are acked, handler errors retry with capped backoff',
+			'Durable Workflows where the database row is the claim, so a retry re-claims and settled rows stay settled',
+			'A cron dispatcher for nightly pruning and hourly fact rebuilds',
+			'One stateless Durable Object per tenant: the server nudges, the UI re-queries',
+		],
+		href: '/concepts/background-work/',
+		icon: 'bolt',
+	},
+	{
+		tone: 'cyan',
+		title: 'Email and files',
+		lead: 'Both degrade gracefully instead of failing.',
+		points: [
+			'Resend over plain <code>fetch</code> with shared templates; without a key, mail is logged, never lost',
+			'R2 storage behind a service seam with tenant-prefixed keys and per-scope MIME and size limits',
+			'An indexed <code>files</code> table, ETag/304 downloads, avatars wired end to end',
+		],
+		href: '/concepts/email-and-files/',
+		icon: 'inbox',
+	},
+	{
+		tone: 'red',
+		title: 'AI layer',
+		lead: 'Chat, agents and retrieval — with a zero-key floor on Workers AI.',
+		points: [
+			'Per-agent model → tenant provider → platform key → Workers AI → a clean 503, resolved in one place',
+			'Streamed chat over SSE, a prompt registry tenants can override, agents that run on Workflows',
+			'Document ingest and hybrid search: dense pgvector cosine fused with lexical ranking',
+			'A per-call usage ledger with costs, plus optional Langfuse tracing',
+		],
+		href: '/concepts/ai/',
+		icon: 'sparkles',
+	},
+	{
+		tone: 'green',
+		title: 'Analytics and dashboards',
+		lead: 'A semantic layer that is tenant-scoped by construction.',
+		points: [
+			'drizzle-cube at <code>/cubejs-api</code> and <code>/mcp</code> behind the app’s own auth',
+			'A mandatory test queries every cube as two tenants and asserts disjoint rows',
+			'Fact tables rebuilt per tenant on a cron, with a freshness endpoint for ops',
+			'TypeScript dashboard templates copied per tenant, editable with autosave and reset',
+		],
+		href: '/concepts/analytics/',
+		icon: 'chart',
+	},
+	{
+		tone: 'yellow',
+		title: 'A real CLI',
+		lead: 'Because every internal tool ends up wanting one.',
+		points: [
+			'<code>rocketflare login</code> opens the browser and lands a tenant API key on a loopback callback',
+			'<code>whoami · status · members · keys · activity</code>, each with <code>--json</code> that pipes into <code>jq</code>',
+			'Responses parsed with the same zod schema the server validated with',
+			'Exit codes that tell “not logged in” apart from “forbidden”',
+		],
+		href: '/concepts/cli/',
+		icon: 'terminal',
+	},
+	{
+		tone: 'blue',
+		title: 'Contracts, tests and releases',
+		lead: 'The plumbing that keeps three consumers honest.',
+		points: [
+			'One zod package the API validates with and the UI and CLI parse with — no build step, no drift',
+			'Two wrangler files kept identical by a parity test; tag-driven staging then production releases',
+			'Tests that drive the real app against real Postgres — queues, workflows and cron included',
+			'A single gate for the whole workspace: lint, typecheck, test, build',
+		],
+		href: '/concepts/contracts/',
+		icon: 'compass',
+	},
+] as const
+
+const stack: { label: string; note: string; href?: string }[] = [
+	{ label: 'Cloudflare Workers', note: 'one Worker: fetch + queue + scheduled, a DO and a Workflow' },
+	{ label: 'Hono 4', note: 'zod contracts, CASL abilities, one error envelope' },
+	{ label: 'Postgres + pgvector', note: 'Neon through Hyperdrive, Docker locally, Drizzle over postgres.js' },
+	{ label: 'React 18 + Vite', note: 'DaisyUI 5 on Tailwind v4, TanStack Query 5' },
+	{ label: 'Queues · Workflows · DO · R2', note: 'async and realtime without a second service' },
+	{ label: 'drizzle-cube', note: 'the semantic layer, and an MCP endpoint for free', href: 'https://try.drizzle-cube.dev' },
+	{ label: 'commander CLI', note: 'browser login → tenant API key' },
+	{ label: 'Biome · vitest · gitleaks', note: 'one CI gate for the whole workspace' },
+]
+---
+
+<BaseLayout title={title} description={description}>
+	<!-- ============================================================ hero -->
+	<header class="hero">
+		<SkyScene />
+		<div class="hero-inner wrap">
+			<div class="hero-copy">
+				<div class="badges">
+					<span class="badge badge-yellow">MIT licensed</span>
+					<span class="badge badge-cyan">Zero-credential first run</span>
+					<span class="badge badge-orange">One Worker, one deploy</span>
+				</div>
+				<h1>Ship the product.<br /><span class="grad">Not the platform.</span></h1>
+				<p class="lede">
+					Rocketflare is one repository that already solves everything an internal tool or a B2B
+					product needs <em>before</em> its first real feature — tenancy, sign-in, roles, jobs,
+					realtime, files, analytics, an AI layer and a CLI — running as a single Cloudflare
+					Worker over Postgres.
+				</p>
+				<div class="hero-actions">
+					<a href="#start" class="btn btn-primary">
+						Launch it locally
+						<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+					</a>
+					<a href={DEMO_URL} class="btn btn-secondary" target="_blank" rel="noopener">See the live demo</a>
+					<a href={GITHUB_URL} class="btn btn-ghost" target="_blank" rel="noopener">
+						<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+						Source
+					</a>
+				</div>
+				<p class="hero-note">
+					<code>git clone</code> → <code>pnpm install</code> → <code>pnpm dev</code>. No API keys, no
+					accounts, no cloud login. Sign in through a magic link printed in your terminal.
+				</p>
+			</div>
+		</div>
+		<CloudDivider />
+	</header>
+
+	<!-- ========================================================== counts -->
+	<section class="stats">
+		<div class="wrap stat-grid">
+			<div class="stat reveal"><strong>0</strong><span>credentials for the first run</span></div>
+			<div class="stat reveal"><strong>1</strong><span>Worker to deploy, and to reason about</span></div>
+			<div class="stat reveal"><strong>12</strong><span>subsystems, each written up with its reasoning</span></div>
+			<div class="stat reveal"><strong>∞</strong><span>tenants, on one schema</span></div>
+		</div>
+	</section>
+
+	<!-- ====================================================== everything -->
+	<section class="everything" id="everything">
+		<div class="wrap">
+			<div class="section-head reveal">
+				<span class="eyebrow">What you get on day one</span>
+				<h2>Nine things you do not have to build</h2>
+				<p>
+					Not a scaffold that leaves the hard parts as an exercise. Each of these is finished,
+					tested and documented — follow any card through to a page on what it does, and why it
+					works that way.
+				</p>
+			</div>
+			<div class="feature-grid">
+				{features.map((f) => (
+					<a class={`card tone-${f.tone} reveal`} href={f.href}>
+						<span class="chip">
+							{f.icon === 'robot' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="12" rx="3"/><path d="M12 8V4.5"/><circle cx="12" cy="3" r="1.4"/><path d="M8.5 13h.01"/><path d="M15.5 13h.01"/><path d="M9.5 16.5h5"/><path d="M1 12v3"/><path d="M23 12v3"/></svg>}
+							{f.icon === 'building' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/><path d="M9 10h.01"/><path d="M15 10h.01"/></svg>}
+							{f.icon === 'key' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="4.5"/><path d="M10.7 12.3 21 2"/><path d="m17 6 3 3"/><path d="m14 9 3 3"/></svg>}
+							{f.icon === 'bolt' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>}
+							{f.icon === 'inbox' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>}
+							{f.icon === 'sparkles' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18 16l.9 2.4L21 19l-2.1.6L18 22l-.9-2.4L15 19l2.1-.6z"/></svg>}
+							{f.icon === 'chart' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="21" x2="21" y2="21"/><rect x="5" y="11" width="4" height="8"/><rect x="11" y="6" width="4" height="13"/><rect x="17" y="14" width="4" height="5"/></svg>}
+							{f.icon === 'terminal' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>}
+							{f.icon === 'compass' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>}
+						</span>
+						<h3>{f.title}</h3>
+						<p class="card-lead">{f.lead}</p>
+						<ul>
+							{f.points.map((p) => <li set:html={p} />)}
+						</ul>
+						<span class="card-link">
+							Read the concept
+							<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+						</span>
+					</a>
+				))}
+			</div>
+			<p class="all-concepts reveal">
+				<a href="/concepts/">Browse all thirteen concepts
+					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+				</a>
+			</p>
+		</div>
+	</section>
+
+	<!-- =========================================================== stack -->
+	<section class="stack" id="stack">
+		<div class="wrap">
+			<div class="section-head reveal">
+				<span class="eyebrow">Under the hood</span>
+				<h2>Boring choices, made once</h2>
+				<p>One driver, one router, one queue, one contract package. Every choice is written down with the reason behind it, so you can disagree with it deliberately.</p>
+			</div>
+			<div class="stack-grid">
+				{stack.map((s) => (
+					<div class="stack-item reveal">
+						<strong>{s.href ? <a href={s.href} target="_blank" rel="noopener">{s.label}</a> : s.label}</strong>
+						<span>{s.note}</span>
+					</div>
+				))}
+			</div>
+		</div>
+	</section>
+
+	<!-- =========================================================== start -->
+	<section class="start" id="start">
+		<CloudDivider flip />
+		<div class="wrap-narrow">
+			<div class="section-head reveal">
+				<span class="eyebrow">Get started</span>
+				<h2>Five commands to a running app</h2>
+				<p>Node 24 via <code>.nvmrc</code>, pnpm 10 via <code>corepack</code>, Docker running. That is the whole prerequisite list.</p>
+			</div>
+
+			<div class="step reveal">
+				<span class="step-num">1</span>
+				<div class="step-body">
+					<h3>Take a copy and cut it loose</h3>
+					<p>The kit is a starting point, not a dependency. There is nothing to merge back.</p>
+					<pre><code>git clone https://github.com/rocketflare-dev/rocketflare.git myapp && cd myapp
+rm -rf .git && git init && git add -A && git commit -m "Start from Rocketflare"</code></pre>
+				</div>
+			</div>
+
+			<div class="step reveal">
+				<span class="step-num">2</span>
+				<div class="step-body">
+					<h3>Install, migrate, seed, run</h3>
+					<p>From the workspace root:</p>
+					<pre><code>corepack enable && pnpm install
+cp apps/web/.dev.vars.example apps/web/.dev.vars   # two random secrets
+pnpm dev:db:up && pnpm db:migrate && pnpm seed     # Postgres :5432 → demo tenant + users
+pnpm dev                                           # http://localhost:3000</code></pre>
+					<p class="muted">Sign in with the seeded owner's email — the magic-link URL is printed by <code>wrangler dev</code>.</p>
+				</div>
+			</div>
+
+			<div class="step reveal">
+				<span class="step-num">3</span>
+				<div class="step-body">
+					<h3>Log the CLI in, and run the suite</h3>
+					<pre><code>pnpm cli login --server http://localhost:3001   # browser sign-in → tenant API key
+pnpm cli whoami
+pnpm test:db:up && pnpm test                    # full suite, throwaway Postgres :5433</code></pre>
+				</div>
+			</div>
+
+			<div class="agent-card reveal">
+				<span class="chip tone-chip-purple">
+					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="12" rx="3"/><path d="M12 8V4"/><circle cx="12" cy="3" r="1.4"/><path d="M8.5 13h.01"/><path d="M15.5 13h.01"/><path d="M9 17h6"/></svg>
+				</span>
+				<div>
+					<h3>Or just ask your coding agent</h3>
+					<p>
+						Say <strong>“Help me set up this project”</strong>. <code>CLAUDE.md</code> makes it walk
+						<a href={SETUP_URL} target="_blank" rel="noopener">SETUP.md</a> Part 1 step by step,
+						showing each output and stopping on failure. When you are ready to make it yours, the
+						rename checklist is in <a href={ADAPTING_URL} target="_blank" rel="noopener">ADAPTING.md</a>.
+					</p>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- ============================================================= cta -->
+	<section class="cta">
+		<div class="wrap-narrow cta-inner reveal">
+			<h2>Everything above is already written.</h2>
+			<p>Your first commit can be a feature.</p>
+			<div class="hero-actions" style="justify-content:center">
+				<a href={GITHUB_URL} class="btn btn-primary" target="_blank" rel="noopener">Get Rocketflare on GitHub</a>
+				<a href={DEMO_URL} class="btn btn-ghost" target="_blank" rel="noopener">Try the live demo</a>
+			</div>
+		</div>
+	</section>
+</BaseLayout>
+
+<style>
+	/* ------------------------------------------------------------- hero -- */
+	.hero {
+		position: relative;
+		min-height: min(94vh, 900px);
+		display: flex;
+		align-items: center;
+		padding: 5rem 0 14rem;
+		overflow: hidden;
+	}
+	.hero-inner { position: relative; z-index: 2; width: 100%; }
+	.hero-copy { max-width: 660px; }
+
+	.badges { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.4rem; }
+	.badge {
+		font-size: 0.78rem;
+		font-weight: 700;
+		padding: 0.3rem 0.85rem;
+		border-radius: 999px;
+		border: 1.5px solid currentColor;
+		background: var(--card);
+	}
+	.badge-yellow { color: var(--yellow); }
+	.badge-cyan   { color: var(--cyan); }
+	.badge-orange { color: var(--orange); }
+
+	.grad {
+		background: linear-gradient(100deg, var(--orange), var(--red) 40%, var(--blue-bright));
+		-webkit-background-clip: text;
+		background-clip: text;
+		color: transparent;
+	}
+
+	.lede {
+		font-size: clamp(1.05rem, 1.7vw, 1.28rem);
+		color: var(--text);
+		max-width: 60ch;
+		margin-bottom: 1.9rem;
+	}
+	.hero-actions { display: flex; flex-wrap: wrap; gap: 0.8rem; }
+	.hero-note {
+		margin-top: 1.6rem;
+		font-size: 0.92rem;
+		color: var(--text-muted);
+		max-width: 52ch;
+	}
+
+	/* ------------------------------------------------------------ stats -- */
+	.stats { background: var(--card); border-bottom: 1px solid var(--border); }
+	.stat-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+		gap: 1.5rem;
+		padding-top: 3rem;
+		padding-bottom: 3rem;
+		text-align: center;
+	}
+	.stat strong {
+		display: block;
+		font-size: clamp(2.4rem, 5vw, 3.4rem);
+		font-weight: 800;
+		line-height: 1;
+		background: linear-gradient(160deg, var(--blue-bright), var(--cyan));
+		-webkit-background-clip: text;
+		background-clip: text;
+		color: transparent;
+	}
+	.stat:nth-child(2) strong { background: linear-gradient(160deg, var(--orange), var(--yellow)); -webkit-background-clip: text; background-clip: text; }
+	.stat:nth-child(3) strong { background: linear-gradient(160deg, var(--red), var(--orange)); -webkit-background-clip: text; background-clip: text; }
+	.stat:nth-child(4) strong { background: linear-gradient(160deg, var(--purple), var(--blue-bright)); -webkit-background-clip: text; background-clip: text; }
+	.stat span { display: block; margin-top: 0.5rem; color: var(--text-muted); font-size: 0.92rem; }
+
+	/* --------------------------------------------------------- features -- */
+	.everything { padding: 5.5rem 0; background: var(--bg); }
+	.feature-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+		gap: 1.5rem;
+	}
+	.card {
+		display: flex;
+		flex-direction: column;
+		background: var(--card);
+		border: 1px solid var(--border);
+		border-top: 4px solid var(--accent);
+		border-radius: 18px;
+		padding: 1.7rem 1.6rem 1.4rem;
+		color: var(--text);
+		box-shadow: var(--shadow-sm);
+		transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+	}
+	.card:hover {
+		text-decoration: none;
+		transform: translateY(-6px);
+		box-shadow: var(--shadow);
+		border-color: var(--accent);
+	}
+	.card h3 { margin-bottom: 0.35rem; }
+	.card-lead { color: var(--accent); font-weight: 600; font-size: 0.96rem; margin-bottom: 0.9rem; }
+	.card ul { margin: 0 0 1.2rem; padding: 0; list-style: none; }
+	.card li {
+		position: relative;
+		padding-left: 1.45rem;
+		margin-bottom: 0.55rem;
+		font-size: 0.93rem;
+		color: var(--text-muted);
+		line-height: 1.55;
+	}
+	.card li::before {
+		content: '';
+		position: absolute;
+		left: 0;
+		top: 0.55em;
+		width: 8px;
+		height: 8px;
+		border-radius: 2px;
+		background: var(--accent);
+		transform: rotate(45deg);
+	}
+	.card-link {
+		margin-top: auto;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4rem;
+		font-weight: 600;
+		font-size: 0.9rem;
+		color: var(--accent);
+	}
+	.card:hover .card-link svg { transform: translateX(4px); }
+	.card-link svg { transition: transform 0.2s ease; }
+
+	.chip {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 46px;
+		height: 46px;
+		border-radius: 14px;
+		background: var(--tint);
+		color: var(--accent);
+		margin-bottom: 1rem;
+		transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+	}
+	.chip :global(svg) { width: 23px; height: 23px; }
+	.card:hover .chip { transform: rotate(-8deg) scale(1.08); }
+
+	.tone-blue   { --accent: var(--blue-bright); --tint: var(--tint-blue); }
+	.tone-purple { --accent: var(--purple);      --tint: var(--tint-purple); }
+	.tone-orange { --accent: var(--orange);      --tint: var(--tint-orange); }
+	.tone-cyan   { --accent: var(--cyan);        --tint: var(--tint-cyan); }
+	.tone-red    { --accent: var(--red);         --tint: var(--tint-red); }
+	.tone-green  { --accent: var(--green);       --tint: var(--tint-green); }
+	.tone-yellow { --accent: var(--yellow);      --tint: var(--tint-yellow); }
+
+	.all-concepts { text-align: center; margin: 2.6rem 0 0; }
+	.all-concepts a {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.45rem;
+		font-weight: 600;
+		font-size: 1.02rem;
+	}
+	.all-concepts a:hover { text-decoration: none; }
+	.all-concepts svg { transition: transform 0.2s ease; }
+	.all-concepts a:hover svg { transform: translateX(4px); }
+
+	/* ------------------------------------------------------------ stack -- */
+	.stack { padding: 5rem 0; background: var(--card); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+	.stack-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; }
+	.stack-item {
+		background: var(--card-alt);
+		border: 1px solid var(--border);
+		border-left: 4px solid var(--cyan);
+		border-radius: 12px;
+		padding: 1rem 1.1rem;
+	}
+	.stack-item:nth-child(2n) { border-left-color: var(--orange); }
+	.stack-item:nth-child(3n) { border-left-color: var(--blue-bright); }
+	.stack-item:nth-child(5n) { border-left-color: var(--purple); }
+	.stack-item strong { display: block; color: var(--text-bright); font-size: 0.98rem; }
+	.stack-item span { font-size: 0.87rem; color: var(--text-muted); }
+
+	/* ------------------------------------------------------------ start -- */
+	.start { position: relative; padding: 0 0 5.5rem; background: var(--bg); }
+	.start .wrap-narrow { padding-top: 4.5rem; }
+	.step { display: flex; gap: 1.2rem; margin-bottom: 2.2rem; }
+	.step-num {
+		flex: none;
+		width: 42px;
+		height: 42px;
+		border-radius: 50%;
+		display: grid;
+		place-items: center;
+		font-weight: 800;
+		color: #fff;
+		background: linear-gradient(150deg, var(--orange), var(--red));
+		box-shadow: 0 8px 18px -8px var(--red);
+	}
+	.step-body { flex: 1; min-width: 0; }
+	.step-body h3 { margin-bottom: 0.3rem; }
+	.step-body p { color: var(--text-muted); font-size: 0.95rem; }
+	.muted { color: var(--text-muted); font-size: 0.9rem; margin-top: 0.75rem; }
+
+	.agent-card {
+		display: flex;
+		gap: 1.2rem;
+		align-items: flex-start;
+		background: var(--card);
+		border: 1px solid var(--border);
+		border-radius: 18px;
+		padding: 1.6rem;
+		box-shadow: var(--shadow-sm);
+		margin-top: 3rem;
+	}
+	.agent-card h3 { margin-bottom: 0.35rem; }
+	.agent-card p { margin: 0; color: var(--text-muted); font-size: 0.95rem; }
+	.tone-chip-purple { --tint: var(--tint-purple); --accent: var(--purple); flex: none; margin-bottom: 0; }
+
+	/* -------------------------------------------------------------- cta -- */
+	.cta {
+		padding: 5.5rem 0 6rem;
+		text-align: center;
+		background:
+			radial-gradient(900px 380px at 50% 0%, var(--tint-orange), transparent 70%),
+			var(--card);
+		border-top: 1px solid var(--border);
+	}
+	.cta h2 { margin-bottom: 0.3rem; }
+	.cta p { color: var(--text-muted); font-size: 1.1rem; margin-bottom: 2rem; }
+
+	@media (max-width: 700px) {
+		.hero { padding: 3rem 0 11rem; min-height: 0; }
+		.agent-card { flex-direction: column; }
+	}
+</style>

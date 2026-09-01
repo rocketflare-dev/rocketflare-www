@@ -1,0 +1,139 @@
+---
+import ConceptLayout from '../../layouts/ConceptLayout.astro'
+---
+<ConceptLayout
+	slug="database"
+	source={[
+		'apps/web/src/db/client.ts',
+		'apps/web/src/db/schema/_helpers.ts',
+		'apps/web/src/db/schema/rls.ts',
+		'apps/web/src/db/tenant-scope.ts',
+		'apps/web/scripts/migrate.ts',
+	]}
+>
+	<h2>One driver, one client per invocation</h2>
+	<p>
+		The kit talks to Postgres through <code>postgres.js</code> and Drizzle, and nothing else. There is
+		no second driver for edge cases, no serverless HTTP client alongside the TCP one, and no adapter
+		layer papering over the difference — which means there is exactly one place where connection
+		semantics, transactions and error shapes are decided.
+	</p>
+	<p>
+		<code>createDatabase(url)</code> returns a client and a matching <code>close</code>. A client is
+		built by the database middleware for an HTTP request, or at the top of a queue consumer, a
+		workflow step or a cron task, and is closed in <code>waitUntil</code> or a <code>finally</code>.
+		Nothing is shared at module scope, because an isolate may be discarded between any two requests
+		and a connection held across that boundary is a leak you cannot see.
+	</p>
+
+	<div class="why">
+		<p>
+			<strong>Why <code>postgres.js</code>.</strong> Transactions. Invite acceptance and organisation
+			creation both write several tables and must not half-happen, and the row-level-security path
+			needs a session setting scoped to a transaction. The HTTP-based drivers popular in serverless
+			cannot do either. Hyperdrive already provides the pooling that the HTTP drivers were invented
+			to avoid needing, so the trade goes the other way here.
+		</p>
+	</div>
+
+	<h2>One way to resolve the connection string</h2>
+	<p>
+		The URL is resolved by a single expression: a preview override if one is set, otherwise
+		Hyperdrive's connection string, otherwise <code>DATABASE_URL</code>. Production goes through
+		Hyperdrive to Neon; local development uses Hyperdrive's local connection string against Docker;
+		tests point at a throwaway Postgres on another port. Same code path, three environments — the
+		configuration differs, the resolution logic does not.
+	</p>
+	<p>
+		Hyperdrive is the pool, so each client's own maximum is small. It is a transaction-mode pooler,
+		which means <code>LISTEN</code> and <code>NOTIFY</code>, advisory locks and prepared statements are
+		unavailable — none of which appear on the request path. Realtime goes through the Durable Object
+		hub instead of <code>NOTIFY</code>, and single-flight locking goes through KV instead of advisory
+		locks.
+	</p>
+
+	<h2>Schema conventions that survive a second author</h2>
+	<p>
+		One file per table. A shared helper supplies the tenant foreign key — a UUID, cascading on delete,
+		and always the first column of any composite index — and another supplies
+		<code>created_at</code> and <code>updated_at</code> as <code>timestamptz</code>. Both helpers exist
+		because the applications this kit was extracted from had mixed <code>timestamp</code> with
+		<code>timestamptz</code>, and the resulting hour-off bug is tedious to find.
+	</p>
+	<p>
+		Closed sets are Postgres enums, with values appended and never reordered, because a migration
+		cannot use an enum value it adds in the same statement. Flexible metadata is
+		<code>jsonb</code>, typed from a zod schema in the shared package rather than from an interface
+		written twice. Encrypted columns are plain <code>text</code> and are only ever written through the
+		crypto helper.
+	</p>
+
+	<h2>Vectors are ordinary rows</h2>
+	<p>
+		Embeddings live in a <code>vector</code> column with an HNSW index using cosine distance, matching
+		the operator the retrieval queries order by. The extension is created by the migration script
+		before migrations run, not by a migration file, so the same command works against a managed Neon
+		branch and the local <code>pgvector</code> image.
+	</p>
+	<p>
+		The dimension is a constant in the shared package and is part of the column type. Changing it is a
+		new table and a re-embed, never an <code>ALTER</code> — which is why the source text of every
+		document is kept even though the API never returns it. Query vectors are bound parameters and
+		cast, never concatenated into SQL.
+	</p>
+	<div class="note">
+		<p>
+			The lexical half of hybrid search computes its <code>tsvector</code> at query time rather than
+			storing a generated column with a GIN index. That is the cheaper default at the sizes a new
+			product has; the upgrade is a migration and no change to the query's shape.
+		</p>
+	</div>
+
+	<h2>Migrations: role first, tables, then grants</h2>
+	<p>
+		The workflow is: edit the schema, generate the SQL, <em>read</em> the SQL, apply it. Applying it
+		runs three things in order, and the order is the point.
+	</p>
+	<pre><code>db-roles --phase=role   # create the application role
+migrate                 # create the extension, then run the migrations
+db-roles --phase=grants # grant DML, revoke the auth-infrastructure tables</code></pre>
+	<p>
+		The role comes first because a security policy naming that role cannot be created before the role
+		exists. Grants come last because a <code>REVOKE</code> can only name tables that exist. Both halves
+		are idempotent, so re-running the command is safe.
+	</p>
+	<p>
+		The migration script rewrites a pooled Neon host to the direct host before connecting. A pooled
+		backend can carry a stale read-only session setting that blocks DDL, and the resulting failure
+		reads as a permissions problem rather than a routing one. Migrations are forward-only: undoing a
+		schema change means writing the compensating migration.
+	</p>
+
+	<h2>Row-level security, shipped inert, with an honest threat model</h2>
+	<p>
+		Runtime isolation is the tenant predicate on every query, and that never changes. Alongside it,
+		every tenant table carries an RLS policy, an application role exists that cannot log in, and a
+		scoping helper is ready to wrap work in a transaction that sets the tenant as a scoped session
+		setting. All of it is present, tested and switched off by default, behind
+		<code>TENANT_SCOPE_MODE</code>.
+	</p>
+	<p>
+		A catalog-driven test compares the live database against the schema and fails the build if a
+		tenant table has no policy, or an untenanted table has no recorded reason for being exempt. So the
+		scaffolding cannot rot while it waits.
+	</p>
+	<div class="note">
+		<p>
+			<strong>What RLS is actually for here.</strong> It catches a forgotten predicate — a query
+			somebody wrote in a hurry without the tenant filter. It is not a defence against SQL injection,
+			because the application role can set the tenant variable itself. Saying so plainly is more
+			useful than implying a second wall that is not there.
+		</p>
+	</div>
+	<p>
+		It is off by default because the well-known RLS pattern assumes session-mode pooling, and
+		Hyperdrive resets connections between uses. The setting therefore has to be applied inside a
+		transaction on every request, and the effect on latency and on the pooler's query cache is
+		something to measure on real infrastructure before turning on — not to assume.
+	</p>
+</ConceptLayout>

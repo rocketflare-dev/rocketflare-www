@@ -1,0 +1,165 @@
+---
+import ConceptLayout from '../../layouts/ConceptLayout.astro'
+---
+<ConceptLayout
+	slug="analytics"
+	source={[
+		'apps/web/src/api/cubes/',
+		'apps/web/src/api/routes/cube-api.ts',
+		'apps/web/src/api/services/fact-tables/',
+		'apps/web/src/dashboards/',
+		'apps/web/tests/api/cubes/cube-isolation.test.ts',
+	]}
+>
+	<h2>A semantic layer, not a reporting bolt-on</h2>
+	<p>
+		Analytics is <a href="https://try.drizzle-cube.dev" target="_blank" rel="noopener">drizzle-cube</a> mounted inside the same Worker as the rest of the API, behind the same
+		authentication. One router is mounted at two paths — <code>/cubejs-api</code> for the query API
+		and <code>/mcp</code> for the same layer spoken as MCP — and every request through either one
+		runs the app's own auth middleware first, then checks that the caller may read analytics, then
+		builds the security context from the session.
+	</p>
+	<p>
+		A cube is a TypeScript definition over the Drizzle schema: a base query, a set of measures and a
+		set of dimensions. The compiler is rebuilt for each request, because the database client it
+		compiles against is the per-request one and cannot outlive the invocation. With a handful of
+		cubes that is cheap, and it keeps the layer honest about where its connection comes from.
+	</p>
+
+	<div class="why">
+		<p>
+			<strong>Why a semantic layer at all.</strong> The alternative is a growing pile of bespoke
+			report endpoints, each with its own hand-written SQL and its own chance to forget the tenant
+			predicate. A cube is declared once; the dashboards, the query builder and an AI client
+			through MCP all ask the same layer the same way, and there is exactly one place per table
+			where the scoping lives.
+		</p>
+	</div>
+
+	<h2>Every cube scopes itself to the tenant</h2>
+	<p>
+		This is the invariant the whole section rests on: a cube's base query filters by the tenant id
+		taken from the security context, which in turn comes from the authenticated session. For a
+		table that carries <code>tenant_id</code> that is a direct equality. For a global table such as
+		<code>users</code>, the cube narrows through a membership subquery instead — "the users who are
+		members of this tenant" — with the tenant id passed as a bound parameter rather than
+		interpolated into a string.
+	</p>
+	<p>
+		The helper that reads the tenant out of the context throws when there is not one, rather than
+		compiling a comparison against <code>NULL</code>. A query with no tenant is a bug, and a bug
+		that returns zero rows quietly is worse than one that fails loudly.
+	</p>
+
+	<div class="note">
+		<p>
+			Be clear-eyed about what this is: <strong>convention with one line of defence</strong>.
+			drizzle-cube will happily join whatever a query asks for, and there is no second check inside
+			the cube layer that catches an unscoped base query. The defence is a mandatory test that
+			seeds two tenants, runs every cube in the registry through the real HTTP endpoint as each of
+			them, and asserts that each sees only its own rows and that the other tenant's identifiers
+			appear nowhere in the payload. The test's case table is compared against the cube registry,
+			so a new cube without a case fails the suite — you cannot merge one and forget.
+		</p>
+	</div>
+
+	<h2>Member names are frozen</h2>
+	<p>
+		A saved dashboard stores references to cube members as strings — <code>Cube.measure</code>,
+		<code>Cube.dimension</code> — inside a JSONB column, in every tenant that has a copy of it.
+		Nothing in the database knows that those strings point at code. Rename a measure and every
+		stored page that used it breaks, silently, everywhere, at once.
+	</p>
+	<p>
+		So the rule is simple and absolute: <strong>add members, never rename them.</strong> A test walks
+		every shipped dashboard template and checks that each member it references still exists in the
+		cube registry, which catches the mistake at build time for the templates. For dashboards a user
+		built themselves, the repair is the reset and recreate actions described below.
+	</p>
+
+	<div class="why">
+		<p>
+			<strong>Why store member names rather than ids.</strong> Because a dashboard config is meant
+			to be readable, diffable and hand-editable — a portlet's query is a cube query, in the same
+			shape the API takes. The cost of that legibility is a naming commitment, and naming it out
+			loud is cheaper than a layer of indirection nobody would trust anyway.
+		</p>
+	</div>
+
+	<h2>Fact tables are plain tables</h2>
+	<p>
+		Aggregates that would be expensive to compute on every dashboard load are pre-built into fact
+		tables, rebuilt per tenant by an hourly cron. They are ordinary tables with a declared grain, a
+		set of measures and a <code>fact_refreshed_at</code> watermark, carrying the same tenant column
+		and the same row-level-security policy as everything else.
+	</p>
+	<p>
+		A refresh runs one transaction per tenant: delete that tenant's rows, then insert the result of
+		a parameterised select. The insert names its target columns from the Drizzle table definition,
+		so if the query and the schema ever drift apart the refresh fails loudly instead of shifting
+		every value one column to the left. Tenants run in sequence and errors are collected per tenant,
+		so one bad organisation cannot abort the run for everybody else.
+	</p>
+
+	<div class="why">
+		<p>
+			<strong>Why not a materialised view.</strong> Two reasons, both hard.
+			<code>REFRESH MATERIALIZED VIEW</code> cannot run through the connection pooler the Worker
+			talks to, and a materialised view cannot be refreshed for one tenant — it is all rows or
+			none. A plain table can be rebuilt for a single organisation, in a single transaction, from
+			ordinary application code that is tested like any other service.
+		</p>
+	</div>
+
+	<p>
+		One registry entry per fact table is the only list: the refresh service, the freshness check,
+		the cron task and both operator scripts all iterate it. Freshness is measured as lag — the
+		newest source row against the newest watermark — and a table is called stale once that lag
+		passes twice its refresh interval, so one missed cron is tolerated and two are not. An
+		admin-level endpoint and a command-line check read the same calculation, and the rows are
+		derived data throughout: a rebuild is always safe.
+	</p>
+
+	<h2>Dashboards are TypeScript, copied per tenant</h2>
+	<p>
+		A dashboard template is a typed configuration object in the repository — rows whose widths sum
+		to a twelve-column grid, groups for a strip of headline numbers, and portlets whose queries are
+		cube queries. Templates are registered in one place, and each tenant gets its own copy as a row
+		in <code>analytics_pages</code>, which is what the UI actually edits.
+	</p>
+	<p>
+		Copies are created in two places, deliberately. Once when an organisation is created, as a
+		best-effort step after the transaction commits — a template bug must never break sign-up. And
+		again, idempotently, on every read of the pages list.
+	</p>
+
+	<div class="note">
+		<p>
+			That second path is the one that matters. Seeding at creation only ever reaches organisations
+			created after you wrote the template; the lazy repair on read is how a template added today
+			arrives for every customer who signed up last year. It is a conflict-free insert, so running
+			it on every request costs nothing once the rows exist.
+		</p>
+	</div>
+
+	<p>
+		Because <code>config</code> is a copy rather than a reference, editing a template does not
+		change any existing page. The two explicit repairs are reset — restore one page from its
+		template — and recreate, which re-copies the whole set for a tenant. Reads are open to every
+		member; writes require dashboard management, which is admin and above. Deleting a page that came
+		from a template is refused, because the next read would simply create it again.
+	</p>
+
+	<h2>MCP falls out of the same layer</h2>
+	<p>
+		The MCP endpoint is not a second implementation. It is the same router, the same cubes and the
+		same tenant scoping, exposed in the shape an AI client expects — so pointing a model at a
+		tenant's analytics is a tenant API key and nothing else. Whatever the model asks for, it is
+		asking a layer that already filters every query by the tenant that key belongs to.
+	</p>
+	<p>
+		The query API is read-only by nature, and access to it is membership plus one read permission
+		rather than a role check — no cube consults the caller's role. Filtering is by tenant, and only
+		by tenant.
+	</p>
+</ConceptLayout>

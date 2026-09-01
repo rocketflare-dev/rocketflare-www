@@ -1,0 +1,291 @@
+---
+import BaseLayout from './BaseLayout.astro'
+import ConceptIcon from '../components/ConceptIcon.astro'
+import { CONCEPTS, conceptBySlug } from '../data/concepts'
+import { CONCEPTS_URL, GITHUB_URL } from '../data/site'
+
+interface Props {
+	slug: string
+	/** Repo paths the reader should open next. */
+	source?: string[]
+}
+const { slug, source = [] } = Astro.props
+const c = conceptBySlug(slug)
+if (!c) throw new Error(`Unknown concept slug: ${slug}`)
+
+const i = CONCEPTS.findIndex((x) => x.slug === slug)
+const prev = CONCEPTS[i - 1]
+const next = CONCEPTS[i + 1]
+const reference = c.anchor ? `${CONCEPTS_URL}#${c.anchor}` : `${GITHUB_URL}/blob/main/CLAUDE.md`
+---
+<BaseLayout title={`${c.title} — Rocketflare`} description={c.blurb} ogType="article">
+	<div class={`concept tone-${c.tone}`}>
+		<header class="concept-hero">
+			<div class="wrap concept-hero-inner">
+				<a class="crumb" href="/concepts/">
+					<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+					All concepts
+				</a>
+				<div class="concept-title">
+					<span class="chip"><ConceptIcon name={c.icon} /></span>
+					<div>
+						<span class="eyebrow">{c.num} — Concept</span>
+						<h1>{c.title}</h1>
+					</div>
+				</div>
+				<p class="lede">{c.blurb}</p>
+			</div>
+		</header>
+
+		<div class="wrap concept-body">
+			<aside class="side">
+				<p class="side-head">Concepts</p>
+				<nav>
+					{CONCEPTS.map((x) => (
+						<a href={`/concepts/${x.slug}/`} class:list={['side-link', x.slug === slug && 'current']}>
+							<span class="side-num">{x.num}</span> {x.title}
+						</a>
+					))}
+				</nav>
+				<a class="side-ref" href={reference} target="_blank" rel="noopener">
+					{c.anchor ? "Full reference on GitHub" : "Read CLAUDE.md on GitHub"}
+					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+				</a>
+			</aside>
+
+			<article class="prose">
+				<slot />
+
+				{source.length > 0 && (
+					<div class="source-box">
+						<h3>Where this lives</h3>
+						<ul>
+							{source.map((p) => (
+								<li><a href={`${GITHUB_URL}/blob/main/${p}`} target="_blank" rel="noopener"><code>{p}</code></a></li>
+							))}
+						</ul>
+					</div>
+				)}
+
+				<nav class="pager">
+					{prev ? (
+						<a href={`/concepts/${prev.slug}/`} class="pager-link prev">
+							<span>Previous</span>
+							<strong>{prev.title}</strong>
+						</a>
+					) : <span />}
+					{next && (
+						<a href={`/concepts/${next.slug}/`} class="pager-link next">
+							<span>Next</span>
+							<strong>{next.title}</strong>
+						</a>
+					)}
+				</nav>
+			</article>
+		</div>
+	</div>
+</BaseLayout>
+
+<style>
+	.tone-blue   { --accent: var(--blue-bright); --tint: var(--tint-blue); }
+	.tone-purple { --accent: var(--purple);      --tint: var(--tint-purple); }
+	.tone-orange { --accent: var(--orange);      --tint: var(--tint-orange); }
+	.tone-cyan   { --accent: var(--cyan);        --tint: var(--tint-cyan); }
+	.tone-red    { --accent: var(--red);         --tint: var(--tint-red); }
+	.tone-green  { --accent: var(--green);       --tint: var(--tint-green); }
+	.tone-yellow { --accent: var(--yellow);      --tint: var(--tint-yellow); }
+
+	.concept-hero {
+		position: relative;
+		padding: 3rem 0 3.2rem;
+		background:
+			radial-gradient(1100px 420px at 15% -30%, var(--tint), transparent 70%),
+			linear-gradient(180deg, var(--sky-top), var(--bg));
+		border-bottom: 1px solid var(--border);
+	}
+	.concept-hero-inner { max-width: 900px; }
+	.crumb {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4rem;
+		font-size: 0.88rem;
+		font-weight: 600;
+		color: var(--text-muted);
+		margin-bottom: 1.4rem;
+	}
+	.crumb:hover { color: var(--accent); text-decoration: none; }
+	.concept-title { display: flex; gap: 1.1rem; align-items: center; }
+	.concept-title h1 { font-size: clamp(2rem, 4.5vw, 3.1rem); margin: 0; }
+	.chip {
+		flex: none;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 60px;
+		height: 60px;
+		border-radius: 18px;
+		background: var(--card);
+		border: 1px solid var(--border);
+		color: var(--accent);
+		box-shadow: var(--shadow-sm);
+	}
+	.chip :global(svg) { width: 28px; height: 28px; }
+	.eyebrow { color: var(--accent); }
+	.lede { margin-top: 1.2rem; font-size: 1.12rem; color: var(--text-muted); max-width: 62ch; }
+
+	.concept-body {
+		display: grid;
+		grid-template-columns: 250px minmax(0, 1fr);
+		gap: 3rem;
+		padding-top: 3rem;
+		padding-bottom: 5rem;
+		align-items: start;
+	}
+	.side { position: sticky; top: 5.5rem; }
+	.side-head {
+		font-size: 0.72rem;
+		font-weight: 700;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: var(--text-muted);
+		margin-bottom: 0.7rem;
+	}
+	.side nav { display: flex; flex-direction: column; border-left: 2px solid var(--border); }
+	.side-link {
+		display: flex;
+		gap: 0.5rem;
+		padding: 0.4rem 0.9rem;
+		font-size: 0.9rem;
+		line-height: 1.4;
+		color: var(--text-muted);
+		border-left: 2px solid transparent;
+		margin-left: -2px;
+	}
+	.side-link:hover { color: var(--text-bright); text-decoration: none; }
+	.side-num { flex: none; font-family: var(--mono); font-size: 0.76rem; opacity: 0.6; padding-top: 0.15em; }
+	.side-link.current { color: var(--accent); font-weight: 600; border-left-color: var(--accent); }
+	.side-ref {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4rem;
+		margin-top: 1.4rem;
+		font-size: 0.86rem;
+		font-weight: 600;
+		color: var(--accent);
+	}
+
+	/* ------------------------------------------------------------ prose -- */
+	.prose { max-width: 74ch; }
+	.prose :global(h2) {
+		font-size: 1.6rem;
+		margin-top: 2.8rem;
+		margin-bottom: 0.7rem;
+		padding-top: 0.2rem;
+	}
+	.prose :global(h2:first-child) { margin-top: 0; }
+	.prose :global(h3) { margin-top: 2rem; font-size: 1.1rem; }
+	.prose :global(p) { color: var(--text); }
+	.prose :global(ul), .prose :global(ol) { padding-left: 0; margin: 0 0 1.2rem; }
+	.prose :global(ul) { list-style: none; }
+	.prose :global(ul > li) {
+		position: relative;
+		padding-left: 1.4rem;
+		margin-bottom: 0.5rem;
+	}
+	.prose :global(ul > li)::before {
+		content: '';
+		position: absolute;
+		left: 0;
+		top: 0.62em;
+		width: 7px;
+		height: 7px;
+		border-radius: 2px;
+		background: var(--accent);
+		transform: rotate(45deg);
+	}
+	.prose :global(ol) { padding-left: 1.3rem; }
+	.prose :global(ol > li) { margin-bottom: 0.5rem; }
+	.prose :global(pre) { margin: 1.2rem 0; }
+	.prose :global(table) {
+		width: 100%;
+		border-collapse: collapse;
+		margin: 1.4rem 0;
+		font-size: 0.92rem;
+	}
+	.prose :global(th) {
+		text-align: left;
+		font-size: 0.74rem;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		color: var(--text-muted);
+		border-bottom: 2px solid var(--border);
+		padding: 0.5rem 0.7rem;
+	}
+	.prose :global(td) {
+		border-bottom: 1px solid var(--border);
+		padding: 0.6rem 0.7rem;
+		vertical-align: top;
+	}
+	.prose :global(tr:hover td) { background: var(--card-alt); }
+
+	/* A "why" callout: the decision behind the thing just described. */
+	.prose :global(.why) {
+		border-left: 4px solid var(--accent);
+		background: var(--tint);
+		border-radius: 0 14px 14px 0;
+		padding: 1.1rem 1.3rem;
+		margin: 1.6rem 0;
+	}
+	.prose :global(.why p:last-child) { margin-bottom: 0; }
+	.prose :global(.why strong:first-child) { color: var(--accent); }
+
+	.prose :global(.note) {
+		border: 1px dashed var(--border-bright);
+		border-radius: 14px;
+		padding: 1rem 1.2rem;
+		margin: 1.6rem 0;
+		font-size: 0.94rem;
+		color: var(--text-muted);
+	}
+	.prose :global(.note p:last-child) { margin-bottom: 0; }
+
+	.source-box {
+		margin-top: 3rem;
+		background: var(--card);
+		border: 1px solid var(--border);
+		border-radius: 16px;
+		padding: 1.3rem 1.5rem;
+	}
+	.source-box h3 { margin-top: 0; font-size: 0.95rem; }
+	.source-box ul { margin: 0; }
+	.source-box :global(code) { background: none; padding: 0; font-size: 0.86rem; }
+
+	.pager {
+		display: flex;
+		justify-content: space-between;
+		gap: 1rem;
+		margin-top: 3rem;
+		padding-top: 2rem;
+		border-top: 1px solid var(--border);
+	}
+	.pager-link {
+		display: flex;
+		flex-direction: column;
+		gap: 0.15rem;
+		padding: 0.9rem 1.2rem;
+		border: 1px solid var(--border);
+		border-radius: 14px;
+		background: var(--card);
+		max-width: 48%;
+	}
+	.pager-link:hover { text-decoration: none; border-color: var(--accent); }
+	.pager-link span { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); }
+	.pager-link strong { color: var(--text-bright); font-size: 0.98rem; }
+	.pager-link.next { text-align: right; margin-left: auto; }
+
+	@media (max-width: 900px) {
+		.concept-body { grid-template-columns: 1fr; gap: 2rem; }
+		.side { position: static; }
+		.side nav { display: none; }
+	}
+</style>

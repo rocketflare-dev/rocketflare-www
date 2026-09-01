@@ -1,0 +1,250 @@
+---
+import ConceptLayout from '../../layouts/ConceptLayout.astro'
+---
+<ConceptLayout
+	slug="ai"
+	source={[
+		'apps/web/src/api/services/ai/resolve.ts',
+		'apps/web/src/api/services/ai/kit.ts',
+		'apps/web/src/api/services/agents/',
+		'apps/web/src/api/workflows/agent-run.ts',
+		'packages/shared/src/ai/',
+	]}
+>
+	<h2>Three tiers, one resolver</h2>
+	<p>
+		Everything model-shaped in the kit — the chat box, the agents, the embeddings behind search —
+		goes through a single pair of functions that resolve a client. They are the only readers of the
+		provider configuration tables, and the only place in the codebase where a stored credential is
+		decrypted. Feature code never imports a vendor SDK, never queries those tables and never sees a
+		key: it asks for a client and calls it.
+	</p>
+	<p>
+		Chat resolves in this order, stopping at the first tier that can answer:
+	</p>
+	<table>
+		<thead><tr><th>Tier</th><th>What it is</th></tr></thead>
+		<tbody>
+			<tr><td>Agent</td><td>a per-agent model assignment, so one agent can run on a different provider or model from everything else</td></tr>
+			<tr><td>Tenant</td><td>the organisation's own default chat provider, configured in settings with its key encrypted at rest</td></tr>
+			<tr><td>Platform</td><td>an Anthropic key held by the deployment, used by every tenant that has not brought its own</td></tr>
+			<tr><td>Workers AI</td><td>the binding, with no key at all</td></tr>
+			<tr><td>None</td><td>a clean 503 saying AI is not configured</td></tr>
+		</tbody>
+	</table>
+	<p>
+		Embeddings resolve the same way with a shorter chain: the tenant's own embeddings provider, then
+		Workers AI, then a platform OpenAI key, then the same 503. Both platform tiers are one function
+		that the resolver, the readiness endpoint and the model-assignment screen all read, so the thing
+		the settings page tells you is ready is by construction the thing the runtime will pick.
+	</p>
+
+	<div class="why">
+		<p>
+			<strong>Why one seam.</strong> The moment two places can build a model client, they disagree —
+			about which key wins, about whether thinking is enabled, about what a rate-limit error looks
+			like. Funnelling everything through one resolver means a new provider, a new default or a new
+			cross-cutting concern is one edit, and it means tests can replace the whole AI layer by
+			swapping that module for a fake.
+		</p>
+	</div>
+
+	<h2>The floor is a real model, and it costs real money</h2>
+	<p>
+		Because both environment configurations declare the Workers AI binding, chat and agents work on
+		a freshly cloned workspace with nothing configured — no account signup, no key, no credit card
+		in a form before you can see whether the thing is any good.
+	</p>
+	<p>
+		The chat floor is <code>@cf/meta/llama-3.3-70b-instruct-fp8-fast</code>, and embeddings default
+		to <code>@cf/baai/bge-m3</code> at 1024 dimensions. The embedding width is a column type, not a
+		setting: a different width is a new table and a re-embed of every chunk, which is exactly why the
+		original text of every document is kept.
+	</p>
+
+	<div class="why">
+		<p>
+			<strong>Why a 70B model as the floor.</strong> A cheaper, smaller model is perfectly
+			serviceable for a chat box. But the same tier has to run the <em>agents</em> — multi-turn tool
+			loops over real documents — and a 24B model handles that badly: it stalls, or it answers in
+			prose where a tool call was required. The floor is sized for the hardest thing that depends on
+			it, not the easiest. The smaller model is still one click away as an explicit choice, and its
+			24k context window is what the knowledge tools budget their answers against.
+		</p>
+	</div>
+
+	<div class="note">
+		<p>
+			Every call through that binding is billed to the Cloudflare account that owns the Worker.
+			There is a free daily allowance and metering after it. If you want the kit to spend nothing at
+			all, remove the binding from both environment files — chat then answers 503 until a key or a
+			tenant provider exists. If you would rather it used Claude, set the platform key, which ranks
+			above the binding. Both are one line; neither is hidden from you.
+		</p>
+	</div>
+
+	<h2>Providers, and a toolkit written against an interface</h2>
+	<p>
+		The shipped adapters cover Anthropic, an Anthropic-compatible mode for services that speak the
+		same wire format behind a bearer token, OpenAI, an OpenAI-compatible mode that works against any
+		local server, and Workers AI. A tenant's key is encrypted at rest and the API only ever reports
+		whether a credential exists, never the credential. Before saving a provider you can test it: a
+		ten-token completion or a single embedding, through the same client builders the runtime uses,
+		so a passing test means the real path works.
+	</p>
+	<p>
+		On top of the client sits a small toolkit — prompt caching breakpoints, a forced structured tool
+		call that validates its result against a schema and retries once with the validation errors fed
+		back, the tool loop that is the agent engine, and the streaming chat. All of it is written
+		against a client interface rather than a vendor type, which is what lets the test suite drive
+		the whole AI layer with a scripted fake and assert on the exact system prompt, tools and
+		settings a route sent.
+	</p>
+	<p>
+		Per-tenant request defaults are injected where the client is built, never at the call sites.
+		Extended thinking is off by default and sent explicitly rather than left unset, because a
+		reasoning model would otherwise bill for thinking that a chat surface throws away. Every
+		provider failure is normalised into one error type with a small set of codes, its message run
+		through a redactor — a vendor's error body can echo the key it just rejected — and rendered to
+		the user as a sentence, never as the raw response.
+	</p>
+
+	<div class="note">
+		<p>
+			Workers AI has no notion of forcing a tool call, so a forced tool there is an instruction the
+			model is asked to honour, plus a recovery path that treats a JSON object answered in prose as
+			the call it was meant to be. Model schemas also differ between models on that platform, so the
+			adapter never sends null content and, if a request is rejected outright, retries once with the
+			lowest common message shape. These are accommodations to the platform, made once in the
+			adapter, rather than conditionals scattered through the agents.
+		</p>
+	</div>
+
+	<h2>Prompts are code, overrides are rows</h2>
+	<p>
+		Every system prompt lives in a registry in the source — a key, a title, a description, its
+		variables and its default text. Nothing hard-codes a prompt string into a route or an agent. A
+		tenant that wants to change one gets a row keyed by that prompt, and reverting is deleting the
+		row.
+	</p>
+	<p>
+		Placeholders are filled at resolve time, and an unknown placeholder is left visible in the
+		output rather than silently blanked, so a typo shows up in the first response instead of
+		quietly removing half the instruction. Adding a prompt is one registry entry and no migration;
+		the per-agent model assignments key off the same registry.
+	</p>
+
+	<h2>Chat: persisted, streamed, and ordered carefully</h2>
+	<p>
+		Conversations and messages are ordinary rows. Ownership is enforced as a filter on every query,
+		so another member's thread — an administrator's included — is a 404 rather than a permission
+		error. Creating a conversation resolves the client first, so a tenant with no provider gets its
+		503 before any row exists, and the provider and model are frozen onto the conversation.
+	</p>
+	<p>
+		Sending a message does everything that can fail as ordinary JSON <em>before</em> the stream
+		opens: resolve the client, resolve the prompt, load the recent turns, insert the user's message.
+		Only then does it start emitting frames.
+	</p>
+
+	<div class="why">
+		<p>
+			<strong>Why the ordering matters.</strong> Once the first byte of a stream has gone out, the
+			response status is settled. A failure after that point can only be an error frame inside a
+			200, which every client then has to handle as a special case. Doing the fallible work first
+			means the common failures — no provider, bad input, no permission — arrive as the same error
+			envelope as everywhere else in the API.
+		</p>
+	</div>
+
+	<p>
+		Inside the stream there is one more subtlety worth knowing: the request's database client is
+		closed the moment the response object is returned, which is before the stream body runs. So
+		everything written during the stream — the assistant message, the conversation's timestamp, the
+		auto-generated title, the usage row — happens on a second client opened for the stream and
+		closed with it, and all of it is awaited rather than deferred.
+	</p>
+
+	<h2>Agents run on workflows; routes only enqueue</h2>
+	<p>
+		An agent is a registry entry: a key, an input and output schema shared with the client, a prompt
+		key, and a function to run. Starting one is a request that validates the input, inserts a queued
+		row, creates a durable workflow instance whose id <em>is</em> the row id, and answers 202. No
+		route ever calls an agent's run function.
+	</p>
+	<p>
+		The workflow is three steps — claim, execute, finish — each opening and closing its own database
+		client. The claim is the row itself: an update that only matches a queued or running status and
+		returns the row. Every terminal write carries the same condition, so a settled run is never
+		rewritten and a retried step simply re-claims. Exclusivity — at most one active run per tenant
+		per agent — is a partial unique index, so a second request gets the existing run back rather
+		than a race.
+	</p>
+
+	<div class="why">
+		<p>
+			<strong>Why the database row is the claim.</strong> The runtime is many short-lived isolates.
+			An in-memory lock, a counter or a map of active runs is a fiction there — it is per-isolate,
+			and there may be a hundred of them. A conditional update against a row is the only thing that
+			means the same to every isolate, and it survives a retry, a redeploy and a cold start.
+		</p>
+	</div>
+
+	<p>
+		Progress is durable: each step, tool call and chunk of text becomes a numbered event row, and a
+		nudge over the websocket tells any open viewer to re-read. Cancellation is cooperative — a
+		request marks the row and the run checks between turns — and reads reconcile, asking the workflow
+		engine about any run that still claims to be active and settling it if the engine has never
+		heard of it. There is no sweeper cron, because reconcile-on-read covers the same ground at the
+		moment somebody actually cares.
+	</p>
+
+	<h2>Every agent can read the knowledge base</h2>
+	<p>
+		Three tools come attached to every run, all bound to that run's tenant: search the knowledge
+		base, fetch a document as a window of characters, and list what is indexed. Search returns whole
+		passages grouped by document, each located inside it — passage <em>n</em> of so many, and the
+		character offset to hand straight back to the fetch tool.
+	</p>
+	<p>
+		The governing principle is that a tool answer is JSON the model can act on. A dense search
+		always returns its nearest neighbours, so every non-empty answer carries a note telling the model
+		to judge relevance for itself rather than assume it. An organisation with nothing indexed gets a
+		description of what does exist and a hint, not an empty list. An unknown document id gets the
+		documents that do exist. A missing embeddings provider gets a named error and a hint. There is
+		never a bare "nothing found", because a dead end with no next move is where a tool loop starts
+		guessing.
+	</p>
+
+	<h2>Ingest, retrieval and the ledger</h2>
+	<p>
+		Text arrives two ways and takes one path. Pasted text and text-like uploads are chunked
+		paragraph-aware and indexed. Binary uploads — PDF, Office, OpenDocument, HTML — keep the original
+		in object storage and enqueue a conversion job that turns them into Markdown through the same
+		Workers AI binding, then runs the same indexing. Everything that could fail with a 503 is checked
+		before anything is written, so a missing provider never leaves an orphan row.
+	</p>
+	<p>
+		Retrieval is hybrid: a dense cosine search over an approximate-nearest-neighbour index, and a
+		lexical search over a text-search vector, each contributing a pool of candidates that are fused
+		by reciprocal rank fusion. Every hit reports both of its ranks and its position inside the
+		document, so a person or an agent can jump to the passage rather than to the file.
+	</p>
+
+	<div class="note">
+		<p>
+			The vectors are ordinary rows in Postgres, under the same tenant predicate and the same
+			row-level-security policy as everything else — not a separate vector service. That means one
+			database to back up, one place isolation is enforced, and a join between a chunk and its
+			document that is just a join.
+		</p>
+	</div>
+
+	<p>
+		Every model call writes one usage row: the feature, the provider, the model, the token counts,
+		and a cost. The cost is computed at write time from a single price table and frozen onto the
+		row, so correcting a rate later cannot rewrite history. A model the table does not know is
+		recorded as unpriced rather than guessed at, and the summary counts those calls separately so a
+		partial total says that it is one.
+	</p>
+</ConceptLayout>
