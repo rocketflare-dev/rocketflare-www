@@ -326,15 +326,17 @@ const conceptLinks = (slugs: string[]) =>
 const pad = (n: number) => String(n).padStart(2, '0')
 ---
 <BaseLayout title={page.title} description={page.description} noindex={!page.ready}>
-	<header class="tour-hero bg-sky">
-		<div class="wrap tour-hero-inner">
-			<span class="eyebrow">Tour · {total} stops</span>
-			<h1>Take the tour</h1>
-			<p class="lede">
-				Every screenshot below is from a fresh <code>bash scripts/bootstrap.sh</code> with the demo
-				workspace seeded — nothing configured, no keys pasted. Light and dark follow this site's
-				theme toggle; the app has both.
-			</p>
+	<header class="tour-hero page-hero bg-sky">
+		<div class="wrap">
+			<div class="hero-copy">
+				<span class="eyebrow">Tour · {total} stops</span>
+				<h1>Take the tour</h1>
+				<p class="lede">
+					Every screenshot below is from a fresh <code>bash scripts/bootstrap.sh</code> with the demo
+					workspace seeded — nothing configured, no keys pasted. Light and dark follow this site's
+					theme toggle; the app has both.
+				</p>
+			</div>
 		</div>
 	</header>
 
@@ -430,10 +432,8 @@ const pad = (n: number) => String(n).padStart(2, '0')
 </BaseLayout>
 
 <style>
-	.tour-hero { padding: 3.2rem 0 3.4rem; border-bottom: 1px solid var(--border); }
-	.tour-hero-inner { max-width: 900px; }
-	.tour-hero h1 { font-size: clamp(2.2rem, 5vw, 3.4rem); margin-bottom: 0.4em; }
-	.lede { font-size: 1.12rem; color: var(--text-muted); max-width: 62ch; margin: 0; }
+	/* Width, h1 and lede come from the global .page-hero (BaseLayout). */
+	.tour-hero { border-bottom: 1px solid var(--border); }
 
 	/* The sticky index — the same shape as ConceptLayout's `.side`, copied so
 	   this page does not import a layout built for a different kind of page. */

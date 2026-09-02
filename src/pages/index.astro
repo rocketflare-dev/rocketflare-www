@@ -186,7 +186,7 @@ const faqLd = {
 		<SkyScene />
 		<div class="hero-inner wrap">
 			<div class="hero-copy">
-				<h1>Ship the product.<br /><span class="grad">Not the platform.</span></h1>
+				<h1>Ship your product.<br /><span class="grad">Not the platform.</span></h1>
 				<p class="lede">
 					Rocketflare is a ready-made web app you copy and make your own. Out of the box it has
 					sign-in, teams and permissions, an AI assistant that can read your documents, dashboards,
@@ -753,7 +753,8 @@ const faqLd = {
 		text-align: center;
 		border-top: 1px solid var(--border);
 	}
-	.cta-inner { max-width: 860px; }
+	/* Keeps the .wrap edge; the copy inside stays a readable width. */
+	.cta-inner > * { max-width: 860px; margin-inline: auto; }
 	.cta-inner :global(.cta-mark) { display: block; margin: 0 auto 1.2rem; }
 	.cta h2 { margin-bottom: 0.3rem; }
 	.cta p { color: var(--text-muted); font-size: 1.1rem; margin-bottom: 2rem; }

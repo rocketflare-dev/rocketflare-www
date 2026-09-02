@@ -10,8 +10,9 @@ const description =
 	`${numberWord(CONCEPT_COUNT, { capital: true })} concepts, one page each: tenancy, auth, the API shell, Postgres, background work, storage, the UI, analytics, the AI agent layer, deployment, the CLI and shared contracts — what each does in Rocketflare, the invariant it protects, and the decision behind it.`
 ---
 <BaseLayout title={title} description={description}>
-	<header class="index-hero">
+	<header class="index-hero page-hero">
 		<div class="wrap">
+			<div class="hero-copy">
 			<span class="eyebrow">Concepts</span>
 			<h1>What it is, and why it is that way</h1>
 			<p class="lede">
@@ -20,6 +21,7 @@ const description =
 				about to change. The full reference lives in
 				<a href={CONCEPTS_URL} target="_blank" rel="noopener">docs/CONCEPTS.md</a> in the repo.
 			</p>
+			</div>
 		</div>
 		<CloudDivider fill="var(--bg)" />
 	</header>
@@ -49,13 +51,13 @@ const description =
 </BaseLayout>
 
 <style>
+	/* Width, h1 and lede come from the global .page-hero (BaseLayout); the
+	   extra bottom padding leaves room for the cloud divider. */
 	.index-hero {
 		position: relative;
-		padding: 4rem 0 7rem;
+		padding-bottom: 7rem;
 		background: linear-gradient(180deg, var(--sky-top), var(--sky-mid) 60%, var(--bg));
 	}
-	.index-hero h1 { max-width: 16ch; }
-	.lede { max-width: 62ch; font-size: 1.1rem; color: var(--text-muted); }
 
 	.index-grid-wrap { padding: 0 0 5rem; background: var(--bg); }
 	.group + .group { margin-top: 3.6rem; }

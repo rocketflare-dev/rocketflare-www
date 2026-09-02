@@ -130,15 +130,17 @@ const notFor = [
 ]
 ---
 <BaseLayout title={page.title} description={page.description} noindex={!page.ready}>
-	<header class="hero bg-sky">
-		<div class="wrap hero-inner">
-			<span class="eyebrow">Who it's for</span>
-			<h1>Who this is for — and who it isn't</h1>
-			<p class="lede">
-				Rocketflare is for a product where people belong to organisations and the organisation is the
-				boundary: a team's internal tool, a customer portal, a B2B product. Three sketches of what you
-				would build on it, then the honest list of what to pick something else for.
-			</p>
+	<header class="hero page-hero bg-sky">
+		<div class="wrap">
+			<div class="hero-copy">
+				<span class="eyebrow">Who it's for</span>
+				<h1>Who this is for — and who it isn't</h1>
+				<p class="lede">
+					Rocketflare is for a product where people belong to organisations and the organisation is the
+					boundary: a team's internal tool, a customer portal, a B2B product. Three sketches of what you
+					would build on it, then the honest list of what to pick something else for.
+				</p>
+			</div>
 		</div>
 	</header>
 
@@ -217,10 +219,8 @@ const notFor = [
 </BaseLayout>
 
 <style>
-	.hero { padding: 3.2rem 0 3.4rem; border-bottom: 1px solid var(--border); }
-	.hero-inner { max-width: 900px; }
-	.hero h1 { font-size: clamp(2.2rem, 5vw, 3.4rem); margin-bottom: 0.4em; }
-	.lede { font-size: 1.12rem; color: var(--text-muted); max-width: 62ch; margin: 0; }
+	/* Width, h1 and lede come from the global .page-hero (BaseLayout). */
+	.hero { border-bottom: 1px solid var(--border); }
 
 	/* --------------------------------------------------------- sketches -- */
 	.sketches { padding: 3rem 0 4rem; }

@@ -28,7 +28,7 @@ export interface SitePage {
 export const PAGES: SitePage[] = [
 	{
 		path: '/',
-		title: 'Rocketflare — ship the product, not the platform',
+		title: 'Rocketflare — ship your product, not the platform',
 		nav: 'Home',
 		description:
 			'A ready-made multi-tenant web app you copy and make your own — sign-in, teams, an AI assistant over your documents, dashboards and background jobs on one Cloudflare Worker. Running on your laptop in about two minutes.',

@@ -24,20 +24,22 @@ const reference = c.anchor ? `${CONCEPTS_URL}#${c.anchor}` : `${GITHUB_URL}/blob
 	ogType="article"
 >
 	<div class={`concept tone-${c.tone}`}>
-		<header class="concept-hero">
-			<div class="wrap concept-hero-inner">
-				<a class="crumb" href="/concepts/">
-					<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-					All concepts
-				</a>
-				<div class="concept-title">
-					<span class="chip"><ConceptIcon name={c.icon} /></span>
-					<div>
-						<span class="eyebrow">{c.num} — Concept</span>
-						<h1>{c.title}</h1>
+		<header class="concept-hero page-hero">
+			<div class="wrap">
+				<div class="hero-copy">
+					<a class="crumb" href="/concepts/">
+						<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+						All concepts
+					</a>
+					<div class="concept-title">
+						<span class="chip"><ConceptIcon name={c.icon} /></span>
+						<div>
+							<span class="eyebrow">{c.num} — Concept</span>
+							<h1>{c.title}</h1>
+						</div>
 					</div>
+					<p class="lede">{c.blurb}</p>
 				</div>
-				<p class="lede">{c.blurb}</p>
 			</div>
 		</header>
 
@@ -99,13 +101,12 @@ const reference = c.anchor ? `${CONCEPTS_URL}#${c.anchor}` : `${GITHUB_URL}/blob
 	/* --accent / --tint come from the global .tone-* classes in BaseLayout. */
 	.concept-hero {
 		position: relative;
-		padding: 3rem 0 3.2rem;
 		background:
 			radial-gradient(1100px 420px at 15% -30%, var(--tint), transparent 70%),
 			linear-gradient(180deg, var(--sky-top), var(--bg));
 		border-bottom: 1px solid var(--border);
 	}
-	.concept-hero-inner { max-width: 900px; }
+	/* Width, h1 and lede come from the global .page-hero (BaseLayout). */
 	.crumb {
 		display: inline-flex;
 		align-items: center;
@@ -117,7 +118,8 @@ const reference = c.anchor ? `${CONCEPTS_URL}#${c.anchor}` : `${GITHUB_URL}/blob
 	}
 	.crumb:hover { color: var(--accent); text-decoration: none; }
 	.concept-title { display: flex; gap: 1.1rem; align-items: center; }
-	.concept-title h1 { font-size: clamp(2rem, 4.5vw, 3.1rem); margin: 0; }
+	/* Beats the global .page-hero h1 margin: the chip row sets the spacing. */
+	.concept-hero .concept-title h1 { margin: 0; }
 	.chip {
 		flex: none;
 		display: inline-flex;
@@ -133,7 +135,7 @@ const reference = c.anchor ? `${CONCEPTS_URL}#${c.anchor}` : `${GITHUB_URL}/blob
 	}
 	.chip :global(svg) { width: 28px; height: 28px; }
 	.eyebrow { color: var(--accent-ink); }
-	.lede { margin-top: 1.2rem; font-size: 1.12rem; color: var(--text-muted); max-width: 62ch; }
+	.concept-hero .lede { margin-top: 1.2rem; }
 
 	.concept-body {
 		display: grid;
