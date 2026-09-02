@@ -1,0 +1,115 @@
+---
+/**
+ * A terminal transcript: commands with a prompt glyph, their output, and a
+ * copy button that appears only when JavaScript runs (`html.js`).
+ *
+ * Props
+ * - `title?`   the window title (default "Terminal")
+ * - `lines`    { cmd? | out?, ok?, muted? }[] — a `cmd` line gets the prompt;
+ *              an `out` line with `ok` gets a ✔ in --terminal-ok, `muted` dims it
+ * - `copy?`    the text the button copies; defaults to every `cmd` joined by "\n"
+ * - `expect?`  an "expected output" footer, in --terminal-ok
+ */
+interface Line {
+	cmd?: string
+	out?: string
+	ok?: boolean
+	muted?: boolean
+}
+interface Props {
+	title?: string
+	lines: Line[]
+	copy?: string
+	expect?: string
+}
+const { title = 'Terminal', lines, copy, expect } = Astro.props
+const copyText = copy ?? lines.filter((l) => l.cmd !== undefined).map((l) => l.cmd).join('\n')
+---
+<figure class="terminal">
+	<div class="bar">
+		<span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+		<span class="title">{title}</span>
+		<button type="button" class="copy" data-copy={copyText} aria-live="polite">
+			<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+			<span class="copy-label">Copy</span>
+		</button>
+	</div>
+	<pre><code>{lines.map((l) => l.cmd !== undefined ? <span class="line cmd">{l.cmd}</span> : <span class:list={['line', 'out', l.ok && 'ok', l.muted && 'muted']}>{l.out}</span>)}</code></pre>
+	{expect && <figcaption class="expect"><span aria-hidden="true">→ </span>{expect}</figcaption>}
+</figure>
+
+<style>
+	.terminal {
+		margin: 1.4rem 0;
+		border-radius: 14px;
+		background: var(--terminal-bg);
+		color: var(--terminal-text);
+		box-shadow: var(--shadow-sm);
+		overflow: hidden;
+	}
+	.bar {
+		display: flex;
+		align-items: center;
+		gap: 0.7rem;
+		padding: 0.55rem 0.9rem;
+		border-bottom: 1px solid color-mix(in srgb, var(--terminal-text) 12%, transparent);
+	}
+	.dots { display: inline-flex; gap: 5px; }
+	.dots i { width: 10px; height: 10px; border-radius: 50%; background: var(--frame-dots); opacity: 0.6; }
+	.title { font-family: var(--mono); font-size: 0.74rem; opacity: 0.6; }
+	.copy {
+		margin-left: auto;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
+		padding: 0.25rem 0.6rem;
+		font: inherit;
+		font-size: 0.74rem;
+		font-weight: 600;
+		color: var(--terminal-text);
+		background: color-mix(in srgb, var(--terminal-text) 10%, transparent);
+		border: 1px solid color-mix(in srgb, var(--terminal-text) 20%, transparent);
+		border-radius: 999px;
+		cursor: pointer;
+	}
+	.copy:hover { background: color-mix(in srgb, var(--terminal-text) 18%, transparent); }
+	.copy.done { color: var(--terminal-ok); border-color: var(--terminal-ok); }
+	:global(html:not(.js)) .copy { display: none; }
+
+	pre { background: none; color: inherit; border-radius: 0; padding: 1rem 1.2rem; }
+	.line { display: block; white-space: pre; }
+	.cmd::before { content: '$ '; color: var(--terminal-prompt); font-weight: 600; }
+	.out { opacity: 0.85; }
+	.out.muted { opacity: 0.5; }
+	.out.ok { color: var(--terminal-ok); opacity: 1; }
+	.out.ok::before { content: '✔ '; }
+	.expect {
+		padding: 0.6rem 1.2rem 0.75rem;
+		border-top: 1px dashed color-mix(in srgb, var(--terminal-text) 15%, transparent);
+		font-family: var(--mono);
+		font-size: 0.8rem;
+		color: var(--terminal-ok);
+	}
+</style>
+
+<script>
+	// Progressive: the button is hidden until html.js, and a clipboard failure
+	// simply leaves the label alone.
+	for (const btn of document.querySelectorAll<HTMLButtonElement>('.terminal .copy')) {
+		btn.addEventListener('click', async () => {
+			const label = btn.querySelector('.copy-label')
+			try {
+				await navigator.clipboard.writeText(btn.dataset.copy ?? '')
+			} catch {
+				return
+			}
+			if (!label) return
+			label.textContent = 'Copied'
+			btn.classList.add('done')
+			setTimeout(() => {
+				label.textContent = 'Copy'
+				btn.classList.remove('done')
+			}, 1500)
+		})
+	}
+</script>

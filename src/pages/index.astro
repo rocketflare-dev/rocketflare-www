@@ -2,14 +2,17 @@
 import BaseLayout from '../layouts/BaseLayout.astro'
 import SkyScene from '../components/SkyScene.astro'
 import CloudDivider from '../components/CloudDivider.astro'
+import ConceptIcon from '../components/ConceptIcon.astro'
 import { GITHUB_URL, SETUP_URL, ADAPTING_URL } from '../data/site'
+import { CONCEPT_COUNT, numberWord } from '../data/concepts'
 
 const title = 'Rocketflare — multi-tenant B2B SaaS starter kit for Cloudflare Workers'
 const description =
 	'Open-source starter kit for building a multi-tenant B2B SaaS app on Cloudflare Workers: tenancy, authentication, roles, background jobs, realtime, file storage, analytics dashboards, AI agents and a CLI — already built and tested, running as one Worker over Postgres, and designed to be worked on by coding agents.'
 
-/** The eight things you get, mapped 1:1 to the README's feature groups.
- *  `href` points at the matching section of docs/CONCEPTS.md on GitHub. */
+/** The things you get, mapped 1:1 to the README's feature groups — the copy
+ *  below counts them from this array, so add one here and nothing else. `href`
+ *  points at the concept page; `icon` is a ConceptIcon name. */
 const features = [
 	{
 		tone: 'orange',
@@ -129,6 +132,9 @@ const features = [
 	},
 ] as const
 
+/** The headline says how many; derived, never typed. */
+const featureCount = numberWord(features.length, { capital: true })
+
 const faqLd = {
 	'@context': 'https://schema.org',
 	'@type': 'FAQPage',
@@ -223,7 +229,7 @@ const stack: { label: string; note: string; href?: string }[] = [
 		<div class="wrap stat-grid">
 			<div class="stat reveal"><strong>0</strong><span>API keys to paste on the first run</span></div>
 			<div class="stat reveal"><strong>1</strong><span>Worker to deploy, and to reason about</span></div>
-			<div class="stat reveal"><strong>13</strong><span>concepts, written up with the reasoning behind them</span></div>
+			<div class="stat reveal"><strong>{CONCEPT_COUNT}</strong><span>concepts, written up with the reasoning behind them</span></div>
 			<div class="stat reveal"><strong>∞</strong><span>tenants, on one schema</span></div>
 		</div>
 	</section>
@@ -233,7 +239,7 @@ const stack: { label: string; note: string; href?: string }[] = [
 		<div class="wrap">
 			<div class="section-head reveal">
 				<span class="eyebrow">What you get on day one</span>
-				<h2>Nine things you do not have to build</h2>
+				<h2>{featureCount} things you do not have to build</h2>
 				<p>
 					Not a scaffold that leaves the hard parts as an exercise. Each of these is finished,
 					tested and documented — follow any card through to a page on what it does, and why it
@@ -244,15 +250,7 @@ const stack: { label: string; note: string; href?: string }[] = [
 				{features.map((f) => (
 					<a class={`card tone-${f.tone} reveal`} href={f.href}>
 						<span class="chip">
-							{f.icon === 'robot' && <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="12" rx="3"/><path d="M12 8V4.5"/><circle cx="12" cy="3" r="1.4"/><path d="M8.5 13h.01"/><path d="M15.5 13h.01"/><path d="M9.5 16.5h5"/><path d="M1 12v3"/><path d="M23 12v3"/></svg>}
-							{f.icon === 'building' && <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/><path d="M9 10h.01"/><path d="M15 10h.01"/></svg>}
-							{f.icon === 'key' && <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="4.5"/><path d="M10.7 12.3 21 2"/><path d="m17 6 3 3"/><path d="m14 9 3 3"/></svg>}
-							{f.icon === 'bolt' && <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>}
-							{f.icon === 'inbox' && <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>}
-							{f.icon === 'sparkles' && <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18 16l.9 2.4L21 19l-2.1.6L18 22l-.9-2.4L15 19l2.1-.6z"/></svg>}
-							{f.icon === 'chart' && <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="21" x2="21" y2="21"/><rect x="5" y="11" width="4" height="8"/><rect x="11" y="6" width="4" height="13"/><rect x="17" y="14" width="4" height="5"/></svg>}
-							{f.icon === 'terminal' && <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>}
-							{f.icon === 'compass' && <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>}
+							<ConceptIcon name={f.icon} />
 						</span>
 						<h3>{f.title}</h3>
 						<p class="card-lead">{f.lead}</p>
@@ -267,7 +265,7 @@ const stack: { label: string; note: string; href?: string }[] = [
 				))}
 			</div>
 			<p class="all-concepts reveal">
-				<a href="/concepts/">Browse all thirteen concepts
+				<a href="/concepts/">Browse all {numberWord(CONCEPT_COUNT)} concepts
 					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
 				</a>
 			</p>
@@ -306,7 +304,7 @@ const stack: { label: string; note: string; href?: string }[] = [
 			<div class="agent-panel reveal">
 				<div class="agent-panel-head">
 					<span class="robot">
-						<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="12" rx="3"/><path d="M12 8V4.5"/><circle cx="12" cy="3" r="1.4"/><path d="M8.5 13h.01"/><path d="M15.5 13h.01"/><path d="M9.5 16.5h5"/><path d="M1 12v3"/><path d="M23 12v3"/></svg>
+						<ConceptIcon name="robot" />
 					</span>
 					<div>
 						<h3>The intended path</h3>
@@ -350,7 +348,7 @@ cd myapp</code></pre>
 
 			<div class="cf-note reveal">
 				<span class="cf-icon">
-					<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 18H7a5 5 0 1 1 .7-9.95A6 6 0 0 1 19.5 9.5 4.25 4.25 0 0 1 18 18z"/></svg>
+					<ConceptIcon name="cloud" />
 				</span>
 				<div>
 					<strong>What about Cloudflare?</strong>
@@ -403,7 +401,7 @@ pnpm test:db:up && pnpm test                    # full suite, throwaway Postgres
 	</section>
 
 	<!-- ============================================================= cta -->
-	<section class="cta">
+	<section class="cta bg-lift">
 		<div class="wrap-narrow cta-inner reveal">
 			<h2>Everything above is already written.</h2>
 			<p>Your first commit can be a feature.</p>
@@ -561,14 +559,7 @@ pnpm test:db:up && pnpm test                    # full suite, throwaway Postgres
 	.chip :global(svg) { width: 23px; height: 23px; }
 	.card:hover .chip { transform: rotate(-8deg) scale(1.08); }
 
-	.tone-blue   { --accent: var(--blue-bright); --tint: var(--tint-blue); }
-	.tone-purple { --accent: var(--purple);      --tint: var(--tint-purple); }
-	.tone-orange { --accent: var(--orange);      --tint: var(--tint-orange); }
-	.tone-cyan   { --accent: var(--cyan);        --tint: var(--tint-cyan); }
-	.tone-red    { --accent: var(--red);         --tint: var(--tint-red); }
-	.tone-green  { --accent: var(--green);       --tint: var(--tint-green); }
-	.tone-yellow { --accent: var(--yellow);      --tint: var(--tint-yellow); }
-
+	/* --accent / --tint come from the global .tone-* classes in BaseLayout. */
 	.all-concepts { text-align: center; margin: 2.6rem 0 0; }
 	.all-concepts a {
 		display: inline-flex;
@@ -609,7 +600,7 @@ pnpm test:db:up && pnpm test                    # full suite, throwaway Postgres
 		display: grid;
 		place-items: center;
 		font-weight: 800;
-		color: #fff;
+		color: var(--on-accent);
 		background: linear-gradient(150deg, var(--orange), var(--red));
 		box-shadow: 0 8px 18px -8px var(--red);
 	}
@@ -757,9 +748,6 @@ pnpm test:db:up && pnpm test                    # full suite, throwaway Postgres
 	.cta {
 		padding: 5.5rem 0 6rem;
 		text-align: center;
-		background:
-			radial-gradient(900px 380px at 50% 0%, var(--tint-orange), transparent 70%),
-			var(--card);
 		border-top: 1px solid var(--border);
 	}
 	.cta h2 { margin-bottom: 0.3rem; }

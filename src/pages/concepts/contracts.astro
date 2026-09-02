@@ -49,10 +49,10 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		<code>&lt;thing&gt;QuerySchema</code> for query parameters, and an inferred type sitting next to
 		each one.
 	</p>
-	<pre><code>export const memberSchema = z.object(&#123; /* ... */ &#125;)
+	<pre><code>export const memberSchema = z.object(&lbrace; /* ... */ &rbrace;)
 export type Member = z.infer&lt;typeof memberSchema&gt;
 
-export const inviteMemberRequestSchema = z.object(&#123; /* ... */ &#125;)
+export const inviteMemberRequestSchema = z.object(&lbrace; /* ... */ &rbrace;)
 export type InviteMemberRequest = z.infer&lt;typeof inviteMemberRequestSchema&gt;</code></pre>
 	<p>
 		Types are inferred from schemas, never declared alongside them. A hand-written interface next to

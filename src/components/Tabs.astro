@@ -1,0 +1,132 @@
+---
+/**
+ * A tab strip over named-slot panels. Without JavaScript every panel is
+ * visible, stacked, each introduced by an <h3>; with it the strip becomes a
+ * WAI-ARIA tablist (arrow keys, Home/End), the heading is hidden, and the
+ * selected tab is mirrored into the URL hash (`#agent`) so it can be linked.
+ *
+ * Props
+ * - `tabs`     { id, label }[] — `id` is the panel's element id AND its slot name
+ * - `default?` the id selected on load (default: the first); a matching URL hash wins
+ *
+ * Usage
+ *   <Tabs tabs={[{ id: 'agent', label: 'With your agent' }, { id: 'hand', label: 'By hand' }]}>
+ *     <Fragment slot="agent">…</Fragment>
+ *     <Fragment slot="hand">…</Fragment>
+ *   </Tabs>
+ */
+interface Tab {
+	id: string
+	label: string
+}
+interface Props {
+	tabs: Tab[]
+	default?: string
+}
+const { tabs, default: defaultId = tabs[0]?.id } = Astro.props
+const panels = await Promise.all(
+	tabs.map(async (t) => ({ ...t, html: Astro.slots.has(t.id) ? await Astro.slots.render(t.id) : '' })),
+)
+---
+<div class="tabs">
+	<div class="tablist" role="tablist">
+		{tabs.map((t) => (
+			<button
+				type="button"
+				role="tab"
+				id={`tab-${t.id}`}
+				aria-controls={t.id}
+				aria-selected={t.id === defaultId ? 'true' : 'false'}
+				tabindex={t.id === defaultId ? 0 : -1}
+			>{t.label}</button>
+		))}
+	</div>
+	{panels.map((p) => (
+		<section class="panel" id={p.id} aria-labelledby={`tab-${p.id}`}>
+			<h3 class="panel-title">{p.label}</h3>
+			<Fragment set:html={p.html} />
+		</section>
+	))}
+</div>
+
+<style>
+	.tablist {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.4rem;
+		margin-bottom: 1.4rem;
+		padding: 0.3rem;
+		border: 1px solid var(--border);
+		border-radius: 999px;
+		background: var(--card-alt);
+		width: fit-content;
+	}
+	:global(html:not(.js)) .tablist { display: none; }
+	[role='tab'] {
+		font: inherit;
+		font-weight: 600;
+		font-size: 0.92rem;
+		color: var(--text-muted);
+		background: none;
+		border: 0;
+		border-radius: 999px;
+		padding: 0.5rem 1.1rem;
+		cursor: pointer;
+	}
+	[role='tab']:hover { color: var(--text-bright); }
+	[role='tab'][aria-selected='true'] {
+		color: var(--on-accent);
+		background: var(--blue-bright);
+		box-shadow: 0 8px 18px -10px var(--blue-bright);
+	}
+	.panel + .panel { margin-top: 2.4rem; }
+	:global(html.js) .panel + .panel { margin-top: 0; }
+	:global(html.js) .panel-title {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip: rect(0 0 0 0);
+		white-space: nowrap;
+	}
+</style>
+
+<script>
+	// < 40 lines: select, arrow keys, hash sync. Panels start visible so a
+	// no-script reader sees everything.
+	const hash = location.hash.slice(1)
+	for (const root of document.querySelectorAll<HTMLElement>('.tabs')) {
+		const tabs = [...root.querySelectorAll<HTMLButtonElement>('[role=tab]')]
+		const panelOf = (t: HTMLButtonElement) => document.getElementById(t.getAttribute('aria-controls') ?? '')
+		// `sync` writes the hash — only on interaction, never on load.
+		const select = (i: number, opts: { focus?: boolean; sync?: boolean } = {}) => {
+			tabs.forEach((t, j) => {
+				const on = i === j
+				t.setAttribute('aria-selected', String(on))
+				t.tabIndex = on ? 0 : -1
+				const p = panelOf(t)
+				if (p) {
+					p.setAttribute('role', 'tabpanel')
+					p.hidden = !on
+				}
+			})
+			if (opts.focus) tabs[i]?.focus()
+			const id = tabs[i]?.getAttribute('aria-controls')
+			if (opts.sync && id && location.hash !== `#${id}`) history.replaceState(null, '', `#${id}`)
+		}
+		const fromHash = tabs.findIndex((t) => t.getAttribute('aria-controls') === hash)
+		const preset = tabs.findIndex((t) => t.getAttribute('aria-selected') === 'true')
+		select(fromHash >= 0 ? fromHash : Math.max(0, preset))
+		tabs.forEach((t, i) => {
+			t.addEventListener('click', () => select(i, { sync: true }))
+			t.addEventListener('keydown', (e) => {
+				const n = tabs.length
+				const to =
+					e.key === 'ArrowRight' ? (i + 1) % n : e.key === 'ArrowLeft' ? (i - 1 + n) % n : e.key === 'Home' ? 0 : e.key === 'End' ? n - 1 : -1
+				if (to < 0) return
+				e.preventDefault()
+				select(to, { focus: true, sync: true })
+			})
+		})
+	}
+</script>

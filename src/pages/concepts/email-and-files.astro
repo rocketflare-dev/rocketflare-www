@@ -63,7 +63,7 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 	<p>
 		File storage sits behind a small service interface — put, get, head, delete, list — whose one
 		implementation wraps the native R2 binding. Keys are built by a helper and always take the shape
-		<code>tenants/&#123;tenantId&#125;/&#123;scope&#125;/&#123;uuid&#125;-&#123;filename&#125;</code>,
+		<code>tenants/&lbrace;tenantId&rbrace;/&lbrace;scope&rbrace;/&lbrace;uuid&rbrace;-&lbrace;filename&rbrace;</code>,
 		so a single prefix scopes one tenant, or one scope within it, for listing or bulk deletion. The
 		UUID means every key is unique whatever the client happened to call the file.
 	</p>

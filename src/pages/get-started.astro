@@ -1,0 +1,26 @@
+---
+/**
+ * Placeholder — the real page lands later on the overhaul branch. It exists so
+ * the nav and footer (generated from src/data/pages.ts) never link to a 404;
+ * it is `noindex` and left out of the sitemap until `ready` flips to true.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro'
+import { pageByPath } from '../data/pages'
+
+const page = pageByPath('/get-started/')
+if (!page) throw new Error('Page not in the registry: /get-started/')
+---
+<BaseLayout title={page.title} description={page.description} noindex={!page.ready}>
+	<section class="placeholder">
+		<div class="wrap-narrow">
+			<span class="eyebrow">Coming soon</span>
+			<h1>{page.nav}</h1>
+			<p class="measure">{page.description} This page is coming in this branch.</p>
+		</div>
+	</section>
+</BaseLayout>
+
+<style>
+	.placeholder { padding: 5rem 0 6rem; min-height: 50vh; }
+	.placeholder p { color: var(--text-muted); font-size: var(--step-1); }
+</style>

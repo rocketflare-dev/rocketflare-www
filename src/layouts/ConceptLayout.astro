@@ -91,14 +91,7 @@ const reference = c.anchor ? `${CONCEPTS_URL}#${c.anchor}` : `${GITHUB_URL}/blob
 </BaseLayout>
 
 <style>
-	.tone-blue   { --accent: var(--blue-bright); --tint: var(--tint-blue); }
-	.tone-purple { --accent: var(--purple);      --tint: var(--tint-purple); }
-	.tone-orange { --accent: var(--orange);      --tint: var(--tint-orange); }
-	.tone-cyan   { --accent: var(--cyan);        --tint: var(--tint-cyan); }
-	.tone-red    { --accent: var(--red);         --tint: var(--tint-red); }
-	.tone-green  { --accent: var(--green);       --tint: var(--tint-green); }
-	.tone-yellow { --accent: var(--yellow);      --tint: var(--tint-yellow); }
-
+	/* --accent / --tint come from the global .tone-* classes in BaseLayout. */
 	.concept-hero {
 		position: relative;
 		padding: 3rem 0 3.2rem;

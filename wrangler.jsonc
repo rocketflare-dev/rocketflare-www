@@ -6,6 +6,9 @@
 		"directory": "./dist",
 		"binding": "ASSETS"
 	},
+	// Lets `wrangler versions upload --preview-alias pr-<n>` (deploy.yml) publish a
+	// pull request at pr-<n>-rocketflare-www.<subdomain>.workers.dev.
+	"preview_urls": true,
 	"routes": [
 		{ "pattern": "rocketflare.dev", "custom_domain": true },
 		{ "pattern": "www.rocketflare.dev", "custom_domain": true }

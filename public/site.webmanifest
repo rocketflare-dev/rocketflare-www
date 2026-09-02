@@ -1,0 +1,13 @@
+{
+  "name": "Rocketflare",
+  "short_name": "Rocketflare",
+  "description": "An open-source multi-tenant B2B SaaS starter kit for Cloudflare Workers.",
+  "start_url": "/",
+  "display": "browser",
+  "background_color": "#F2FAFE",
+  "theme_color": "#3B82C4",
+  "icons": [
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

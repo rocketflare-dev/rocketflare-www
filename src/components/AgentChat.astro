@@ -1,0 +1,93 @@
+---
+/**
+ * A short chat between a person and their coding agent, as bubbles. Pure
+ * markup and CSS — no script.
+ *
+ * Props
+ * - `agent?`  the agent's label (default "your coding agent")
+ * - `turns`   { who: 'you' | 'agent', text, checks?: string[] }[] — an agent
+ *             turn with `checks` renders them as a ✔ list
+ * - `typeIn?` stagger the bubbles in (CSS only; ends visible, so the global
+ *             reduced-motion rule simply shows them at once)
+ */
+interface Turn {
+	who: 'you' | 'agent'
+	text: string
+	checks?: string[]
+}
+interface Props {
+	agent?: string
+	turns: Turn[]
+	typeIn?: boolean
+}
+const { agent = 'your coding agent', turns, typeIn = false } = Astro.props
+---
+<ol class:list={['chat', typeIn && 'type-in']} aria-label={`A conversation with ${agent}`}>
+	{turns.map((t, i) => (
+		<li class={`turn ${t.who}`} style={`--i: ${i}`}>
+			<span class="who">{t.who === 'you' ? 'You' : agent}</span>
+			<div class="bubble">
+				<p>{t.text}</p>
+				{t.checks && (
+					<ul class="checks">
+						{t.checks.map((c) => <li>{c}</li>)}
+					</ul>
+				)}
+			</div>
+		</li>
+	))}
+</ol>
+
+<style>
+	.chat { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.9rem; }
+	.turn { display: flex; flex-direction: column; gap: 0.25rem; max-width: 86%; }
+	.turn.you { align-self: flex-end; align-items: flex-end; }
+	.turn.agent { align-self: flex-start; align-items: flex-start; }
+	.who {
+		font-size: 0.72rem;
+		font-weight: 700;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		color: var(--text-muted);
+		padding: 0 0.4rem;
+	}
+	.bubble {
+		padding: 0.8rem 1.05rem;
+		border-radius: 16px;
+		font-size: 0.95rem;
+		color: var(--text-bright);
+		border: 1px solid var(--border);
+	}
+	.you .bubble {
+		background: var(--bubble-user);
+		border-color: color-mix(in srgb, var(--orange) 40%, transparent);
+		border-bottom-right-radius: 4px;
+		font-family: var(--mono);
+		font-size: 0.9rem;
+	}
+	.agent .bubble {
+		background: var(--bubble-agent);
+		border-color: color-mix(in srgb, var(--blue-bright) 30%, transparent);
+		border-bottom-left-radius: 4px;
+	}
+	.bubble p { margin: 0; }
+	.checks { list-style: none; margin: 0.6rem 0 0; padding: 0; display: grid; gap: 0.3rem; }
+	.checks li { position: relative; padding-left: 1.4rem; font-size: 0.9rem; color: var(--text); }
+	.checks li::before {
+		content: '✔';
+		position: absolute;
+		left: 0;
+		color: var(--green);
+		font-weight: 700;
+	}
+
+	/* Staggered reveal: `both` means the end state is the visible one. */
+	.type-in .turn {
+		animation: turn-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+		animation-delay: calc(var(--i) * 0.45s);
+	}
+	@keyframes turn-in {
+		from { opacity: 0; transform: translateY(10px); }
+		to { opacity: 1; transform: none; }
+	}
+</style>

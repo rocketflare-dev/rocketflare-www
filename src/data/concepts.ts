@@ -1,5 +1,6 @@
 /**
- * The twelve subsystems, in the order they are presented. Each has its own
+ * The subsystems, in the order they are presented — `CONCEPT_COUNT` of them,
+ * and every page that says how many derives it from here. Each has its own
  * page under /concepts/<slug>; `anchor` points at the matching section of
  * docs/CONCEPTS.md on GitHub for the full reference.
  *
@@ -138,3 +139,21 @@ export const CONCEPTS: Concept[] = [
 ]
 
 export const conceptBySlug = (slug: string) => CONCEPTS.find((c) => c.slug === slug)
+
+/** How many concepts there are — use this, never a literal, in copy. */
+export const CONCEPT_COUNT = CONCEPTS.length
+
+const WORDS = [
+	'zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten',
+	'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen',
+	'nineteen', 'twenty',
+]
+
+/**
+ * A small number as a word ("thirteen"), for prose that counts things. Past
+ * twenty it falls back to digits — by then a word reads worse anyway.
+ */
+export function numberWord(n: number, opts: { capital?: boolean } = {}): string {
+	const word = Number.isInteger(n) && n >= 0 && n < WORDS.length ? WORDS[n] : String(n)
+	return opts.capital ? word.charAt(0).toUpperCase() + word.slice(1) : word
+}

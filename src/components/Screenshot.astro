@@ -1,0 +1,123 @@
+---
+/**
+ * A product screenshot in a browser frame, in both themes: two <Picture>s
+ * (AVIF + WebP + the PNG fallback) and CSS shows the one that matches
+ * html[data-theme]. Sources live in src/assets/screens/ — see MANIFEST.md
+ * there for how a capture is recorded.
+ *
+ * Props
+ * - `light`, `dark`  ImageMetadata imports of the two captures
+ * - `alt`            what the screenshot shows (same for both)
+ * - `caption?`       figcaption
+ * - `frame?`         'browser' (default: three dots and a URL bar) or 'none'
+ * - `url?`           the text in the fake URL bar
+ * - `priority?`      above the fold: the day image loads eagerly with high
+ *                    priority; the night one stays lazy
+ * - `crop?`          'full' (default) or 'top' — shows the top of a tall capture
+ * - `width?`         max width in px (default: the container)
+ * - `tilt?`          a slight perspective tilt that flattens on hover
+ */
+import { Picture } from 'astro:assets'
+import type { ImageMetadata } from 'astro'
+
+interface Props {
+	light: ImageMetadata
+	dark: ImageMetadata
+	alt: string
+	caption?: string
+	frame?: 'browser' | 'none'
+	url?: string
+	priority?: boolean
+	crop?: 'top' | 'full'
+	width?: number
+	tilt?: boolean
+}
+const { light, dark, alt, caption, frame = 'browser', url, priority = false, crop = 'full', width, tilt = false } = Astro.props
+
+const widths = [720, 1440]
+const sizes = width ? `(max-width: ${width}px) 100vw, ${width}px` : '(max-width: 1140px) 100vw, 1140px'
+---
+<figure class:list={['shot', `frame-${frame}`, `crop-${crop}`, tilt && 'tilt']} style={width ? `max-width: ${width}px` : undefined}>
+	<div class="window">
+		{frame === 'browser' && (
+			<div class="chrome" aria-hidden="true">
+				<span class="dots"><i></i><i></i><i></i></span>
+				{url && <span class="url">{url}</span>}
+			</div>
+		)}
+		<div class="body">
+			<Picture
+				src={light}
+				formats={['avif', 'webp']}
+				widths={widths}
+				sizes={sizes}
+				alt={alt}
+				loading={priority ? 'eager' : 'lazy'}
+				fetchpriority={priority ? 'high' : undefined}
+				decoding="async"
+				pictureAttributes={{ class: 'light' }}
+			/>
+			<Picture
+				src={dark}
+				formats={['avif', 'webp']}
+				widths={widths}
+				sizes={sizes}
+				alt={alt}
+				loading="lazy"
+				decoding="async"
+				pictureAttributes={{ class: 'dark' }}
+			/>
+		</div>
+	</div>
+	{caption && <figcaption>{caption}</figcaption>}
+</figure>
+
+<style>
+	.shot { margin: 1.6rem auto; }
+	.window {
+		border: 1px solid var(--border-bright);
+		border-radius: 14px;
+		background: var(--frame);
+		box-shadow: var(--shadow);
+		overflow: hidden;
+		transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+	}
+	.frame-none .window { background: none; border: 0; border-radius: 12px; }
+	.chrome {
+		display: flex;
+		align-items: center;
+		gap: 0.7rem;
+		padding: 0.5rem 0.8rem;
+	}
+	.dots { display: inline-flex; gap: 5px; }
+	.dots i { width: 10px; height: 10px; border-radius: 50%; background: var(--frame-dots); }
+	.url {
+		flex: 1;
+		max-width: 60%;
+		margin: 0 auto;
+		padding: 0.2rem 0.8rem;
+		border-radius: 999px;
+		background: var(--card);
+		color: var(--text-muted);
+		font-family: var(--mono);
+		font-size: 0.72rem;
+		text-align: center;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	.body { background: var(--card); line-height: 0; }
+	.body :global(img) { display: block; width: 100%; height: auto; }
+	.crop-top .body { max-height: 420px; overflow: hidden; }
+	.crop-top .body :global(img) { object-fit: cover; object-position: top; }
+
+	/* One theme, one picture. The hidden one is display:none, so it is
+	   neither fetched (lazy) nor announced. */
+	:global(html[data-theme='night']) .light { display: none; }
+	:global(html:not([data-theme='night'])) .dark { display: none; }
+
+	.tilt .window { transform: perspective(1400px) rotateX(3deg) rotateY(-5deg); }
+	.tilt:hover .window { transform: none; }
+
+	figcaption { margin-top: 0.7rem; text-align: center; font-size: 0.88rem; color: var(--text-muted); }
+</style>

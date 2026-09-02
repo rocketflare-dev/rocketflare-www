@@ -1,0 +1,66 @@
+---
+/**
+ * A vertical stack of layers with a request arrow running down the left and
+ * a response arrow running back up the right — the middleware order, the
+ * runtime layers. Inline SVG, every fill a token, so it re-themes.
+ *
+ * Props
+ * - `layers`      { label, note? }[] top to bottom
+ * - `describedBy` id of the table/list beneath that holds the same data (aria-describedby)
+ * - `title?`      the SVG <title> (default "The request stack")
+ */
+interface Layer {
+	label: string
+	note?: string
+}
+interface Props {
+	layers: Layer[]
+	describedBy: string
+	title?: string
+}
+const { layers, describedBy, title = 'The request stack' } = Astro.props
+const id = `${describedBy}-svg`
+
+const W = 640
+const PAD = 16
+const ARROW = 84
+const ROW = 56
+const GAP = 10
+const n = layers.length
+const H = PAD * 2 + n * ROW + (n - 1) * GAP
+const boxX = PAD + ARROW
+const boxW = W - 2 * (PAD + ARROW)
+const y = (i: number) => PAD + i * (ROW + GAP)
+const leftX = PAD + ARROW / 2 - 10
+const rightX = W - PAD - ARROW / 2 + 10
+---
+<svg class="diagram" viewBox={`0 0 ${W} ${H}`} role="img" aria-labelledby={`${id}-title`} aria-describedby={describedBy}>
+	<title id={`${id}-title`}>{title}</title>
+	<defs>
+		<marker id={`${id}-req`} viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5 0 10z" fill="var(--orange)" /></marker>
+		<marker id={`${id}-res`} viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5 0 10z" fill="var(--blue-bright)" /></marker>
+	</defs>
+
+	<line x1={leftX} y1={PAD} x2={leftX} y2={H - PAD - 6} stroke="var(--orange)" stroke-width="2.5" marker-end={`url(#${id}-req)`} />
+	<text class="arrow-label" fill="var(--orange)" transform={`translate(${leftX - 14} ${H / 2}) rotate(-90)`} text-anchor="middle">request</text>
+
+	<line x1={rightX} y1={H - PAD} x2={rightX} y2={PAD + 6} stroke="var(--blue-bright)" stroke-width="2.5" marker-end={`url(#${id}-res)`} />
+	<text class="arrow-label" fill="var(--blue-bright)" transform={`translate(${rightX + 14} ${H / 2}) rotate(90)`} text-anchor="middle">response</text>
+
+	{layers.map((l, i) => (
+		<g>
+			<rect x={boxX} y={y(i)} width={boxW} height={ROW} rx="12" fill="var(--card)" stroke="var(--border-bright)" stroke-width="1.5" />
+			<rect x={boxX} y={y(i)} width="5" height={ROW} rx="2.5" fill="var(--cyan)" />
+			<text class="label" x={boxX + 20} y={y(i) + (l.note ? 25 : 34)}>{l.label}</text>
+			{l.note && <text class="note" x={boxX + 20} y={y(i) + 44}>{l.note}</text>}
+			{i < n - 1 && <line x1={W / 2} y1={y(i) + ROW} x2={W / 2} y2={y(i) + ROW + GAP} stroke="var(--border-bright)" stroke-width="2" stroke-dasharray="2 3" />}
+		</g>
+	))}
+</svg>
+
+<style>
+	.diagram { display: block; width: 100%; height: auto; font-family: var(--sans); }
+	.label { fill: var(--text-bright); font-size: 15px; font-weight: 600; }
+	.note { fill: var(--text-muted); font-size: 12.5px; }
+	.arrow-label { font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+</style>

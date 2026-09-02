@@ -2,12 +2,12 @@
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import ConceptIcon from '../../components/ConceptIcon.astro'
 import CloudDivider from '../../components/CloudDivider.astro'
-import { CONCEPTS } from '../../data/concepts'
+import { CONCEPTS, CONCEPT_COUNT, numberWord } from '../../data/concepts'
 import { CONCEPTS_URL } from '../../data/site'
 
 const title = 'Concepts — how a multi-tenant SaaS on Cloudflare Workers fits together'
 const description =
-	'Thirteen concepts, one page each: tenancy, auth, the API shell, Postgres, background work, storage, the UI, analytics, the AI agent layer, deployment, the CLI and shared contracts — what each does in Rocketflare, the invariant it protects, and the decision behind it.'
+	`${numberWord(CONCEPT_COUNT, { capital: true })} concepts, one page each: tenancy, auth, the API shell, Postgres, background work, storage, the UI, analytics, the AI agent layer, deployment, the CLI and shared contracts — what each does in Rocketflare, the invariant it protects, and the decision behind it.`
 ---
 <BaseLayout title={title} description={description}>
 	<header class="index-hero">
@@ -98,12 +98,4 @@ const description =
 	}
 	.chip :global(svg) { width: 22px; height: 22px; }
 	.ccard:hover .chip { transform: rotate(-8deg) scale(1.08); }
-
-	.tone-blue   { --accent: var(--blue-bright); --tint: var(--tint-blue); }
-	.tone-purple { --accent: var(--purple);      --tint: var(--tint-purple); }
-	.tone-orange { --accent: var(--orange);      --tint: var(--tint-orange); }
-	.tone-cyan   { --accent: var(--cyan);        --tint: var(--tint-cyan); }
-	.tone-red    { --accent: var(--red);         --tint: var(--tint-red); }
-	.tone-green  { --accent: var(--green);       --tint: var(--tint-green); }
-	.tone-yellow { --accent: var(--yellow);      --tint: var(--tint-yellow); }
 </style>

@@ -1,0 +1,80 @@
+---
+/**
+ * Two configurations side by side: the rows they must share (a lock between
+ * them) and the rows that differ (the two values, key first).
+ *
+ * Props
+ * - `shared`       keys that are identical in both columns
+ * - `differ`       { key, left, right }[]
+ * - `leftTitle?`   default "production"; `rightTitle?` default "staging"
+ * - `describedBy`  id of the table beneath (aria-describedby)
+ * - `title?`       the SVG <title>
+ */
+interface Props {
+	shared: string[]
+	differ: { key: string; left: string; right: string }[]
+	leftTitle?: string
+	rightTitle?: string
+	describedBy: string
+	title?: string
+}
+const { shared, differ, leftTitle = 'production', rightTitle = 'staging', describedBy, title = 'What the two files share and where they differ' } = Astro.props
+const id = `${describedBy}-svg`
+
+const W = 640
+const PAD = 16
+const HEAD = 34
+const ROW = 38
+const MID = 56
+const colW = (W - 2 * PAD - MID) / 2
+const leftX = PAD
+const rightX = PAD + colW + MID
+const midX = W / 2
+const rows = shared.length + differ.length
+const H = PAD + HEAD + rows * ROW + PAD
+const y = (i: number) => PAD + HEAD + i * ROW
+---
+<svg class="diagram" viewBox={`0 0 ${W} ${H}`} role="img" aria-labelledby={`${id}-title`} aria-describedby={describedBy}>
+	<title id={`${id}-title`}>{title}</title>
+
+	<rect x={leftX} y={PAD} width={colW} height={HEAD + rows * ROW} rx="12" fill="var(--card)" stroke="var(--border-bright)" stroke-width="1.5" />
+	<rect x={rightX} y={PAD} width={colW} height={HEAD + rows * ROW} rx="12" fill="var(--card)" stroke="var(--border-bright)" stroke-width="1.5" />
+	<text class="head" x={leftX + colW / 2} y={PAD + 22} text-anchor="middle">{leftTitle}</text>
+	<text class="head" x={rightX + colW / 2} y={PAD + 22} text-anchor="middle">{rightTitle}</text>
+
+	{shared.map((k, i) => (
+		<g>
+			<line x1={leftX + 10} y1={y(i)} x2={leftX + colW - 10} y2={y(i)} stroke="var(--border)" />
+			<line x1={rightX + 10} y1={y(i)} x2={rightX + colW - 10} y2={y(i)} stroke="var(--border)" />
+			<text class="mono" x={leftX + 16} y={y(i) + 24}>{k}</text>
+			<text class="mono" x={rightX + 16} y={y(i) + 24}>{k}</text>
+			<line x1={leftX + colW} y1={y(i) + ROW / 2} x2={rightX} y2={y(i) + ROW / 2} stroke="var(--green)" stroke-width="1.5" stroke-dasharray="3 3" />
+			<g transform={`translate(${midX - 8} ${y(i) + ROW / 2 - 9})`}>
+				<rect x="0" y="0" width="16" height="18" rx="4" fill="var(--tint-green)" stroke="var(--green)" stroke-width="1.2" />
+				<rect x="2" y="7" width="12" height="9" rx="2" fill="var(--green)" />
+				<path d="M4.5 7V5a3.5 3.5 0 0 1 7 0v2" fill="none" stroke="var(--green)" stroke-width="1.6" />
+			</g>
+		</g>
+	))}
+
+	{differ.map((d, j) => {
+		const i = shared.length + j
+		return (
+			<g>
+				<line x1={leftX + 10} y1={y(i)} x2={leftX + colW - 10} y2={y(i)} stroke="var(--border)" />
+				<line x1={rightX + 10} y1={y(i)} x2={rightX + colW - 10} y2={y(i)} stroke="var(--border)" />
+				<text class="mono" x={leftX + 16} y={y(i) + 24}><tspan class="key">{d.key}</tspan> {d.left}</text>
+				<text class="mono" x={rightX + 16} y={y(i) + 24}><tspan class="key">{d.key}</tspan> {d.right}</text>
+				<text class="neq" x={midX} y={y(i) + 25} text-anchor="middle">≠</text>
+			</g>
+		)
+	})}
+</svg>
+
+<style>
+	.diagram { display: block; width: 100%; height: auto; font-family: var(--sans); }
+	.head { fill: var(--text-muted); font-size: 11.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+	.mono { fill: var(--text-bright); font-family: var(--mono); font-size: 12.5px; }
+	.key { fill: var(--text-muted); }
+	.neq { fill: var(--orange); font-size: 18px; font-weight: 700; }
+</style>

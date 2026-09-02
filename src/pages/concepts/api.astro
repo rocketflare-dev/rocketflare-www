@@ -104,7 +104,7 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		Every failure, including a validation failure, comes back in the same form, and successful bodies
 		are bare — no <code>data</code> wrapper to unwrap:
 	</p>
-	<pre><code>&#123; error, statusCode, code?, details? &#125;</code></pre>
+	<pre><code>&lbrace; error, statusCode, code?, details? &rbrace;</code></pre>
 	<p>
 		Paginated endpoints answer with the items alongside a pagination block of
 		<code>page</code>, <code>pageSize</code>, <code>total</code> and <code>totalPages</code>. Both

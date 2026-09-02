@@ -17,13 +17,23 @@ npx wrangler dev  # the real Worker: static assets AND /api/github-stars
 | Path | What it is |
 |---|---|
 | `src/pages/index.astro` | the landing page |
+| `src/pages/{tour,get-started,who-is-it-for}.astro` | placeholders until their content lands |
 | `src/pages/concepts/*` | one page per subsystem, plus the index |
+| `src/pages/kitchen.astro` | every component with sample props (`noindex`; deleted before the overhaul merges) |
+| `src/pages/llms.txt.ts` | the llms.txt map, generated from the page and concept lists |
+| `src/data/pages.ts` | the page registry — nav, footer, llms.txt and the sitemap filter read it |
 | `src/data/concepts.ts` | the concept list — order, numbering, accent and icon |
 | `src/data/site.ts` | every external URL in one place |
 | `src/layouts/BaseLayout.astro` | the design tokens; **every colour on the site is a token here** |
 | `src/layouts/ConceptLayout.astro` | the concept page shell (sidebar, prose styles, pager) |
+| `src/components/SectionHead.astro` · `Callout` · `Steps` · `Terminal` · `AgentChat` · `Tabs` | content blocks |
+| `src/components/Screenshot.astro` | a day + night screenshot pair in a browser frame |
+| `src/components/Diagram{Stack,Cascade,Steps,Parity,Sequence}.astro` | inline-SVG diagrams that re-theme |
+| `src/components/ConceptIcon.astro` | the icon set |
 | `src/components/SkyScene.astro` | the animated hero illustration |
+| `src/assets/screens/` | screenshot sources and their `MANIFEST.md` |
 | `worker/index.ts` | the only server code: `GET /api/github-stars`, everything else falls through to the static assets |
+| `CLAUDE.md` | the working rules — tokens, motion, scripts, the registry, screenshots, branches |
 
 ## Conventions
 
@@ -31,8 +41,11 @@ npx wrangler dev  # the real Worker: static assets AND /api/github-stars
   `var()` — including inside inline SVG, which is what lets the illustrations re-theme themselves.
   The one exception is `components/LogoMark.astro`, whose brand fills are fixed.
 - Every animation is disabled under `prefers-reduced-motion`.
-- No UI framework and no client-side JavaScript beyond the nav toggle, the theme toggle and one
-  IntersectionObserver for scroll reveals.
+- No UI framework and no client bundles: a handful of small inline `<script>`s (nav toggle, theme
+  toggle, scroll reveals, the copy button, tabs), each progressive — everything works without them.
+- Fonts are self-hosted at build time by Astro's Fonts API (`astro.config.mjs`); nothing is fetched
+  from Google at runtime.
+- Top-level pages are listed in `src/data/pages.ts`; nav, footer and `llms.txt` are generated from it.
 
 ## Adding a concept page
 
@@ -42,6 +55,13 @@ npx wrangler dev  # the real Worker: static assets AND /api/github-stars
    `tenancy.astro`: `<h2>` sections of prose, `<div class="why">` for a decision and its reasoning,
    `<div class="note">` for a caveat, and `source={[...]}` listing real repo paths.
 3. `npm run build`.
+
+## Screenshots
+
+Product screenshots are `src/assets/screens/<stem>.light.png` + `<stem>.dark.png` pairs rendered by
+`components/Screenshot.astro`. Each capture is recorded in
+[`src/assets/screens/MANIFEST.md`](src/assets/screens/MANIFEST.md) with the kit URL and commit it
+was taken from, and the procedure for retaking one is written there.
 
 ## The star counter
 
@@ -63,4 +83,6 @@ check — both run in `npm run build`.
 Pushes to `main` deploy through `.github/workflows/deploy.yml`, which needs the repository secrets
 `CLOUDFLARE_API_TOKEN` (Workers Scripts: Edit, plus Zone → DNS: Edit for the custom domains) and
 `CLOUDFLARE_ACCOUNT_ID`. The Worker is `rocketflare-www` and serves `rocketflare.dev` and
-`www.rocketflare.dev` as custom domains.
+`www.rocketflare.dev` as custom domains. A pull request is built and uploaded as a preview version
+(`wrangler versions upload --preview-alias pr-<n>`), and the preview URL is commented on the PR —
+never commit to `main` directly.

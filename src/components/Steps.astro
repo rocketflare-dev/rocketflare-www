@@ -1,0 +1,100 @@
+---
+/**
+ * A short sequence of steps joined by a timeline line: numbered circles (or
+ * plain dots), a title, an optional body and an optional duration.
+ *
+ * Props
+ * - `steps`      { title, body? (may contain inline HTML), time? }[]
+ * - `direction?` 'row' (default: side by side from 760px, stacked below) or 'column'
+ * - `numbered?`  default true; false renders a small dot instead of a number
+ */
+interface Step {
+	title: string
+	body?: string
+	time?: string
+}
+interface Props {
+	steps: Step[]
+	direction?: 'row' | 'column'
+	numbered?: boolean
+}
+const { steps, direction = 'row', numbered = true } = Astro.props
+---
+<ol class:list={['steps', direction, numbered && 'numbered']} style={`--n: ${steps.length}`}>
+	{steps.map((s, i) => (
+		<li class="step">
+			<span class="marker" aria-hidden="true">{numbered ? i + 1 : ''}</span>
+			<div class="step-body">
+				<strong>{s.title}</strong>
+				{s.time && <span class="time">{s.time}</span>}
+				{s.body && <p set:html={s.body} />}
+			</div>
+		</li>
+	))}
+</ol>
+
+<style>
+	.steps {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: grid;
+		gap: 1.6rem;
+	}
+	.step { position: relative; display: flex; gap: 1rem; }
+	.marker {
+		flex: none;
+		position: relative;
+		z-index: 1;
+		width: 36px;
+		height: 36px;
+		border-radius: 50%;
+		display: grid;
+		place-items: center;
+		font-weight: 800;
+		font-size: 0.92rem;
+		color: var(--on-accent);
+		background: linear-gradient(150deg, var(--orange), var(--red));
+		box-shadow: 0 8px 18px -8px var(--red);
+	}
+	.steps:not(.numbered) .marker {
+		width: 14px;
+		height: 14px;
+		margin: 11px;
+		box-shadow: none;
+	}
+	.step-body { min-width: 0; padding-top: 0.35rem; }
+	.step-body strong { display: block; color: var(--text-bright); font-size: 1.02rem; }
+	.time {
+		display: inline-block;
+		margin-top: 0.2rem;
+		font-family: var(--mono);
+		font-size: 0.74rem;
+		color: var(--text-muted);
+	}
+	.step-body p { margin: 0.35rem 0 0; font-size: 0.93rem; color: var(--text-muted); }
+
+	/* The timeline: a line from each marker to the next one. */
+	.step:not(:last-child)::before {
+		content: '';
+		position: absolute;
+		left: 17px;
+		top: 36px;
+		bottom: -1.6rem;
+		width: 2px;
+		background: var(--border-bright);
+	}
+
+	@media (min-width: 760px) {
+		.steps.row { grid-template-columns: repeat(var(--n), minmax(0, 1fr)); gap: 1.4rem; }
+		.row .step { flex-direction: column; gap: 0.8rem; }
+		.row .step:not(:last-child)::before {
+			left: 36px;
+			right: -1.4rem;
+			top: 17px;
+			bottom: auto;
+			width: auto;
+			height: 2px;
+		}
+	}
+</style>

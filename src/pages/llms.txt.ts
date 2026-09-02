@@ -1,10 +1,12 @@
 import type { APIRoute } from 'astro'
 import { CONCEPTS } from '../data/concepts'
+import { PAGES } from '../data/pages'
 import { GITHUB_URL } from '../data/site'
 
 /**
  * https://llmstxt.org — a plain-text map of the site for AI answer engines,
- * generated from the same concept list the navigation uses so it cannot drift.
+ * generated from the same page registry and concept list the navigation
+ * uses so it cannot drift.
  */
 export const GET: APIRoute = ({ site }) => {
 	const base = site?.toString().replace(/\/$/, '') ?? 'https://rocketflare.dev'
@@ -27,6 +29,12 @@ Getting started: clone the repository, open it in a coding agent, and ask it to
 step by step. Local development needs a free Cloudflare account only because the
 Workers AI binding always calls out; deploying needs Workers Paid for Hyperdrive
 and Workflows.
+
+## Pages
+
+${PAGES.filter((p) => p.ready)
+	.map((p) => `- [${p.nav}](${base}${p.path}): ${p.description}`)
+	.join('\n')}
 
 ## Concepts
 

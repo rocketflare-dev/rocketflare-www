@@ -1,0 +1,98 @@
+---
+/**
+ * A fallback chain — "the first that answers wins": tiers stepped down the
+ * page with an arrow along the left, and optionally a second, shorter chain
+ * beside it (chat beside embeddings).
+ *
+ * Props
+ * - `tiers`           { label, detail? }[] in the order they are tried
+ * - `secondary?`      a second chain, drawn narrower on the right
+ * - `primaryTitle?`   caption over the first chain; `secondaryTitle?` over the second
+ * - `arrowLabel?`     default "first that answers"
+ * - `describedBy`     id of the data table beneath (aria-describedby)
+ * - `title?`          the SVG <title>
+ */
+interface Tier {
+	label: string
+	detail?: string
+}
+interface Props {
+	tiers: Tier[]
+	secondary?: Tier[]
+	primaryTitle?: string
+	secondaryTitle?: string
+	arrowLabel?: string
+	describedBy: string
+	title?: string
+}
+const {
+	tiers,
+	secondary,
+	primaryTitle,
+	secondaryTitle,
+	arrowLabel = 'first that answers',
+	describedBy,
+	title = 'A resolution order',
+} = Astro.props
+const id = `${describedBy}-svg`
+
+const W = 640
+const PAD = 16
+const ROW = 54
+const GAP = 8
+const STEP = 14
+const TOP = PAD + (primaryTitle || secondaryTitle ? 26 : 0)
+const rows = Math.max(tiers.length, secondary?.length ?? 0)
+const H = TOP + rows * (ROW + GAP) - GAP + PAD
+const arrowX = 34
+const col1X = 64
+const col1W = secondary ? 296 : W - col1X - PAD
+const col2X = col1X + col1W + 20
+const col2W = W - col2X - PAD
+const y = (i: number) => TOP + i * (ROW + GAP)
+
+const column = (list: Tier[], x: number, w: number, tone: string) =>
+	list.map((t, i) => ({
+		...t,
+		x: x + i * STEP,
+		y: y(i),
+		w: w - i * STEP,
+		tone,
+		last: i === list.length - 1,
+	}))
+const cols = [column(tiers, col1X, col1W, 'var(--orange)')]
+if (secondary) cols.push(column(secondary, col2X, col2W, 'var(--blue-bright)'))
+---
+<svg class="diagram" viewBox={`0 0 ${W} ${H}`} role="img" aria-labelledby={`${id}-title`} aria-describedby={describedBy}>
+	<title id={`${id}-title`}>{title}</title>
+	<defs>
+		<marker id={`${id}-m`} viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5 0 10z" fill="var(--orange)" /></marker>
+	</defs>
+
+	{primaryTitle && <text class="caption" x={col1X} y={PAD + 12}>{primaryTitle}</text>}
+	{secondary && secondaryTitle && <text class="caption" x={col2X} y={PAD + 12}>{secondaryTitle}</text>}
+
+	<line x1={arrowX} y1={TOP} x2={arrowX} y2={y(tiers.length - 1) + ROW - 6} stroke="var(--orange)" stroke-width="2.5" marker-end={`url(#${id}-m)`} />
+	<text class="arrow-label" fill="var(--orange)" transform={`translate(${arrowX - 14} ${TOP + (y(tiers.length - 1) + ROW - TOP) / 2}) rotate(-90)`} text-anchor="middle">{arrowLabel}</text>
+
+	{cols.map((list) =>
+		list.map((t, i) => (
+			<g>
+				<rect x={t.x} y={t.y} width={t.w} height={ROW} rx="11" fill={t.last ? 'var(--card-alt)' : 'var(--card)'} stroke={t.last ? 'var(--border)' : 'var(--border-bright)'} stroke-width="1.5" stroke-dasharray={t.last ? '4 4' : undefined} />
+				<circle cx={t.x + 20} cy={t.y + ROW / 2} r="10" fill={t.tone} />
+				<text class="num" x={t.x + 20} y={t.y + ROW / 2 + 4} text-anchor="middle">{i + 1}</text>
+				<text class="label" x={t.x + 40} y={t.y + (t.detail ? 23 : 32)}>{t.label}</text>
+				{t.detail && <text class="note" x={t.x + 40} y={t.y + 41}>{t.detail}</text>}
+			</g>
+		)),
+	)}
+</svg>
+
+<style>
+	.diagram { display: block; width: 100%; height: auto; font-family: var(--sans); }
+	.label { fill: var(--text-bright); font-size: 14.5px; font-weight: 600; }
+	.note { fill: var(--text-muted); font-size: 12px; }
+	.num { fill: var(--on-accent); font-size: 11px; font-weight: 800; }
+	.caption { fill: var(--text-muted); font-size: 11.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+	.arrow-label { font-size: 11.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+</style>

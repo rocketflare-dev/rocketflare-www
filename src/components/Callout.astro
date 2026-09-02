@@ -1,0 +1,58 @@
+---
+/**
+ * A boxed aside with an icon chip: a caveat, a cost note, a tip. This is the
+ * landing page's `.cf-note`, generalised.
+ *
+ * Props
+ * - `tone`   'blue' | 'orange' | 'yellow' | 'green' — chip colour via .tone-*
+ * - `title`  bold first line
+ * - slot `icon` (optional) — an SVG; defaults to an "i" glyph
+ * - default slot — the body (one or more <p>)
+ */
+interface Props {
+	tone: 'blue' | 'orange' | 'yellow' | 'green'
+	title: string
+}
+const { tone, title } = Astro.props
+---
+<aside class={`callout tone-${tone}`}>
+	<span class="callout-icon" aria-hidden="true">
+		<slot name="icon">
+			<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+		</slot>
+	</span>
+	<div class="callout-body">
+		<strong>{title}</strong>
+		<slot />
+	</div>
+</aside>
+
+<style>
+	.callout {
+		display: flex;
+		gap: 1rem;
+		align-items: flex-start;
+		margin: 1.8rem 0;
+		padding: 1.2rem 1.4rem;
+		border: 1px dashed color-mix(in srgb, var(--accent) 55%, var(--border-bright));
+		border-radius: 16px;
+		background: var(--card-alt);
+	}
+	.callout-icon {
+		flex: none;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 40px;
+		height: 40px;
+		border-radius: 12px;
+		background: var(--tint);
+		color: var(--accent);
+	}
+	.callout-icon :global(svg) { width: 22px; height: 22px; }
+	.callout-body { min-width: 0; }
+	.callout-body > strong { display: block; color: var(--text-bright); margin-bottom: 0.25rem; }
+	.callout-body :global(p) { margin: 0; font-size: 0.92rem; color: var(--text-muted); }
+	.callout-body :global(p + p) { margin-top: 0.6rem; }
+	.callout-body :global(p strong) { color: var(--text); }
+</style>

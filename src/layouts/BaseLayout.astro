@@ -1,4 +1,5 @@
 ---
+import { Font } from 'astro:assets'
 import Nav from '../components/Nav.astro'
 import Footer from '../components/Footer.astro'
 import { GITHUB_URL } from '../data/site'
@@ -10,6 +11,8 @@ interface Props {
 	ogType?: 'website' | 'article'
 	/** Extra JSON-LD to emit alongside the site-wide graph. */
 	jsonLd?: Record<string, unknown>
+	/** Keep the page out of search results (placeholders, the kitchen sink). */
+	noindex?: boolean
 }
 
 const {
@@ -18,6 +21,7 @@ const {
 	ogImage = '/og-image.png',
 	ogType = 'website',
 	jsonLd,
+	noindex = false,
 } = Astro.props
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site)
@@ -48,10 +52,16 @@ const softwareLd = {
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+	<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+	<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+	<link rel="manifest" href="/site.webmanifest" />
 	<link rel="canonical" href={canonicalURL} />
 	<link rel="sitemap" href="/sitemap-index.xml" />
 	<link rel="llms-txt" href="/llms.txt" />
+	<!-- The browser chrome colour follows the OS scheme; the page itself follows
+	     the persisted data-theme choice (see the boot script below). -->
 	<meta name="theme-color" content="#3B82C4" />
+	<meta name="theme-color" content="#0C182A" media="(prefers-color-scheme: dark)" />
 	<title>{title}</title>
 	<meta name="description" content={description} />
 
@@ -72,19 +82,23 @@ const softwareLd = {
 	<meta name="twitter:image" content={ogImageURL} />
 
 	<meta name="author" content="Rocketflare" />
-	<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+	<meta name="robots" content={noindex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large, max-snippet:-1'} />
 
 	<script type="application/ld+json" is:inline set:html={JSON.stringify(softwareLd)} />
 	{jsonLd && <script type="application/ld+json" is:inline set:html={JSON.stringify(jsonLd)} />}
 
-	<link rel="preconnect" href="https://fonts.googleapis.com" />
-	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-	<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+	<!-- Self-hosted by the Fonts API (astro.config.mjs); only the body face is
+	     preloaded — the mono face is below the fold on every page. -->
+	<Font cssVariable="--font-outfit" preload />
+	<Font cssVariable="--font-mono" />
 
 	<!-- Theme boot before first paint, so there is no flash. Day is the default;
-	     only an explicit saved choice or an OS dark preference switches it. -->
+	     only an explicit saved choice or an OS dark preference switches it.
+	     `html.js` is the progressive-enhancement hook: anything that only makes
+	     sense with a script (the copy button, tab strips) is shown by it. -->
 	<script is:inline>
 		(function () {
+			document.documentElement.classList.add('js')
 			try {
 				var saved = localStorage.getItem('theme')
 				var theme = saved || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'night' : 'day')
@@ -115,7 +129,8 @@ const softwareLd = {
 	 *
 	 * The palette IS the logo: sky blue, cloud cyan, sun yellow, flare
 	 * orange, rocket red, cream. Day is the default; Night is the same
-	 * illustration after dark.
+	 * illustration after dark. Both themes declare every token — a token
+	 * missing from one of them is a bug, not a fallback.
 	 * ==================================================================== */
 	:root,
 	html[data-theme='day'] {
@@ -165,8 +180,40 @@ const softwareLd = {
 		--sun: #F7D257;
 		--star: transparent;
 
-		--mono: 'JetBrains Mono', ui-monospace, monospace;
-		--sans: 'Outfit', ui-sans-serif, system-ui, -apple-system, sans-serif;
+		/* Text on a solid accent (orange/blue buttons, numbered steps) */
+		--on-accent: #FFFFFF;
+		/* A drop-shadow() colour — filters cannot take a box-shadow token */
+		--shadow-ink: rgba(16, 36, 58, 0.25);
+
+		/* Browser chrome around a screenshot */
+		--frame: #E4EEF6;
+		--frame-dots: #B4C8D8;
+
+		/* Terminal */
+		--terminal-bg: #10243A;
+		--terminal-text: #D7E6F5;
+		--terminal-prompt: #4FB3D4;
+		--terminal-ok: #6FD6A5;
+
+		/* Chat bubbles: the person is orange, the agent is blue */
+		--bubble-user: #FCEBDA;
+		--bubble-agent: #E3F0FB;
+
+		/* A dark band section: the code palette by day, lifted a step by night */
+		--band-bg: #10243A;
+		--band-ink: #D7E6F5;
+		--band-muted: #8FA9C2;
+
+		/* Fluid type steps — the h1/h2 sizes below are these, so rhythm is shared */
+		--step-1: clamp(1.05rem, 1.7vw, 1.28rem);
+		--step-2: clamp(1.25rem, 0.8rem + 1.4vw, 1.6rem);
+		--step-3: clamp(1.8rem, 4vw, 2.75rem);
+		--step-4: clamp(2.4rem, 6.5vw, 4.4rem);
+
+		/* The Fonts API (astro.config.mjs) defines --font-outfit / --font-mono
+		   with their fallback stacks; these are the names the site uses. */
+		--mono: var(--font-mono), 'JetBrains Mono', ui-monospace, monospace;
+		--sans: var(--font-outfit), 'Outfit', ui-sans-serif, system-ui, -apple-system, sans-serif;
 
 		color-scheme: light;
 	}
@@ -214,6 +261,24 @@ const softwareLd = {
 		--sun: #F5D371;
 		--star: #DCEBFA;
 
+		--on-accent: #0C182A;
+		--shadow-ink: rgba(0, 0, 0, 0.55);
+
+		--frame: #1F3450;
+		--frame-dots: #4A6A8C;
+
+		--terminal-bg: #081120;
+		--terminal-text: #C7DCF0;
+		--terminal-prompt: #7FD6EE;
+		--terminal-ok: #6FD6A5;
+
+		--bubble-user: #3B2A16;
+		--bubble-agent: #1B3454;
+
+		--band-bg: #16273D;
+		--band-ink: #DCEBFA;
+		--band-muted: #8AA5C0;
+
 		color-scheme: dark;
 	}
 
@@ -237,8 +302,8 @@ const softwareLd = {
 		letter-spacing: -0.02em;
 		margin: 0 0 0.6em;
 	}
-	h1 { font-size: clamp(2.4rem, 6.5vw, 4.4rem); font-weight: 800; }
-	h2 { font-size: clamp(1.8rem, 4vw, 2.75rem); font-weight: 700; }
+	h1 { font-size: var(--step-4); font-weight: 800; }
+	h2 { font-size: var(--step-3); font-weight: 700; }
 	h3 { font-size: 1.2rem; font-weight: 600; }
 	p { margin: 0 0 1rem; }
 
@@ -291,6 +356,29 @@ const softwareLd = {
 	}
 	.section-head { text-align: center; max-width: 720px; margin: 0 auto 3rem; }
 	.section-head p { color: var(--text-muted); font-size: 1.08rem; }
+	.measure { max-width: 62ch; }
+
+	/* Section backgrounds. */
+	.bg-sky { background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 48%, var(--sky-bottom) 100%); }
+	.bg-band { background: var(--band-bg); color: var(--band-ink); }
+	.bg-band h1, .bg-band h2, .bg-band h3, .bg-band h4 { color: var(--band-ink); }
+	.bg-band .text-muted, .bg-band .section-head p { color: var(--band-muted); }
+	.bg-band a:not(.btn) { color: var(--cyan); }
+	.bg-lift {
+		background:
+			radial-gradient(900px 380px at 50% 0%, var(--tint-orange), transparent 70%),
+			var(--card);
+	}
+
+	/* Tones: a section, card or tag picks an accent and its tint with one class.
+	   Defined once here; components read --accent / --tint. */
+	.tone-blue   { --accent: var(--blue-bright); --tint: var(--tint-blue); }
+	.tone-purple { --accent: var(--purple);      --tint: var(--tint-purple); }
+	.tone-orange { --accent: var(--orange);      --tint: var(--tint-orange); }
+	.tone-cyan   { --accent: var(--cyan);        --tint: var(--tint-cyan); }
+	.tone-red    { --accent: var(--red);         --tint: var(--tint-red); }
+	.tone-green  { --accent: var(--green);       --tint: var(--tint-green); }
+	.tone-yellow { --accent: var(--yellow);      --tint: var(--tint-yellow); }
 
 	/* ---------------------------------------------------------- buttons -- */
 	.btn {
@@ -310,17 +398,15 @@ const softwareLd = {
 	.btn:hover { text-decoration: none; transform: translateY(-2px); }
 	.btn-primary {
 		background: var(--orange);
-		color: #fff;
+		color: var(--on-accent);
 		box-shadow: 0 10px 22px -10px var(--orange);
 	}
 	.btn-primary:hover { box-shadow: 0 16px 26px -10px var(--orange); }
 	.btn-secondary {
 		background: var(--blue-bright);
-		color: #fff;
+		color: var(--on-accent);
 		box-shadow: 0 10px 22px -10px var(--blue-bright);
 	}
-	html[data-theme='night'] .btn-primary,
-	html[data-theme='night'] .btn-secondary { color: #0C182A; }
 	.btn-ghost {
 		background: var(--card);
 		color: var(--text-bright);

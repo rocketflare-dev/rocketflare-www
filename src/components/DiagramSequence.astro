@@ -1,0 +1,73 @@
+---
+/**
+ * A sequence diagram: actors across the top with lifelines, messages as
+ * labelled arrows between them in order. Keep labels short; the column width
+ * is what fits a 640-unit viewBox.
+ *
+ * Props
+ * - `actors`       column titles, left to right
+ * - `messages`     { from, to, label }[] — indices into `actors`; from === to is a self-call
+ * - `describedBy`  id of the ordered list beneath (aria-describedby)
+ * - `title?`       the SVG <title>
+ */
+interface Props {
+	actors: string[]
+	messages: { from: number; to: number; label: string }[]
+	describedBy: string
+	title?: string
+}
+const { actors, messages, describedBy, title = 'Who talks to whom, in order' } = Astro.props
+const id = `${describedBy}-svg`
+
+const W = 640
+const PAD = 16
+const HEAD = 40
+const STEP = 46
+const n = actors.length
+const col = (W - 2 * PAD) / n
+const cx = (i: number) => PAD + col * i + col / 2
+const H = PAD + HEAD + messages.length * STEP + PAD + 8
+const my = (i: number) => PAD + HEAD + STEP * (i + 1) - 10
+---
+<svg class="diagram" viewBox={`0 0 ${W} ${H}`} role="img" aria-labelledby={`${id}-title`} aria-describedby={describedBy}>
+	<title id={`${id}-title`}>{title}</title>
+	<defs>
+		<marker id={`${id}-m`} viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5 0 10z" fill="var(--blue-bright)" /></marker>
+	</defs>
+
+	{actors.map((a, i) => (
+		<g>
+			<line x1={cx(i)} y1={PAD + HEAD} x2={cx(i)} y2={H - PAD} stroke="var(--border-bright)" stroke-width="1.5" stroke-dasharray="4 4" />
+			<rect x={cx(i) - col / 2 + 8} y={PAD} width={col - 16} height={HEAD - 6} rx="10" fill="var(--card)" stroke="var(--border-bright)" stroke-width="1.5" />
+			<text class="actor" x={cx(i)} y={PAD + 22} text-anchor="middle">{a}</text>
+		</g>
+	))}
+
+	{messages.map((m, i) => {
+		const y = my(i)
+		if (m.from === m.to) {
+			const x = cx(m.from)
+			return (
+				<g>
+					<path d={`M${x} ${y - 14} h26 v20 h-20`} fill="none" stroke="var(--blue-bright)" stroke-width="2" marker-end={`url(#${id}-m)`} />
+					<text class="msg" x={x + 32} y={y - 2}>{m.label}</text>
+				</g>
+			)
+		}
+		const dir = m.to > m.from ? 1 : -1
+		const x1 = cx(m.from) + dir * 4
+		const x2 = cx(m.to) - dir * 10
+		return (
+			<g>
+				<line x1={x1} y1={y} x2={x2} y2={y} stroke="var(--blue-bright)" stroke-width="2" marker-end={`url(#${id}-m)`} />
+				<text class="msg" x={(x1 + x2) / 2} y={y - 7} text-anchor="middle">{m.label}</text>
+			</g>
+		)
+	})}
+</svg>
+
+<style>
+	.diagram { display: block; width: 100%; height: auto; font-family: var(--sans); }
+	.actor { fill: var(--text-bright); font-size: 13.5px; font-weight: 700; }
+	.msg { fill: var(--text); font-size: 12.5px; font-weight: 500; }
+</style>
