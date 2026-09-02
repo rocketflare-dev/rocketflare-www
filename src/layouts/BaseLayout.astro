@@ -382,7 +382,9 @@ const softwareLd = {
 
 	/* ---------------------------------------------------------- layout -- */
 	.wrap { max-width: 1140px; margin: 0 auto; padding: 0 1.5rem; }
-	.wrap-narrow { max-width: 860px; margin: 0 auto; padding: 0 1.5rem; }
+	/* Same outer edge as .wrap (every page lines up); the content inside stays a readable width. */
+	.wrap-narrow { max-width: 1140px; margin: 0 auto; padding: 0 1.5rem; }
+	.wrap-narrow > * { max-width: 860px; }
 
 	section { position: relative; }
 

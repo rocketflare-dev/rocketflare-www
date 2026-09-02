@@ -254,21 +254,21 @@ const provisionTurns = [
 				{DEPLOY_ACCOUNTS.map((a, i) => (
 					<li>
 						<span class="num">{i + 1}</span>
-						<div>
+						<div class="acct-body">
 							<div class="acct-head">
 								<strong>{a.name}</strong>
 								<span class="role">{a.role}{a.plan && <> · {a.plan}</>}</span>
 							</div>
 							<p class="first">{a.first}</p>
-							<div class="acct-links">
-								<a class="btn btn-secondary" href={a.signupUrl} target="_blank" rel="noopener">Create a {a.name} account ↗</a>
-								{(a.links ?? []).map((l) => <a class="btn btn-ghost" href={l.url} target="_blank" rel="noopener">{l.label} ↗</a>)}
-								<a class="btn btn-ghost" href={tokenUrls[a.name]} target="_blank" rel="noopener">Mint {a.token} ↗</a>
-							</div>
 							<p class="mint">
-								The kit reads it as <span class="vars">{a.envVars.map((v) => <code>{v}</code>)}</span>{a.also && <> — {a.also}</>}.
+								Read by the kit as <span class="vars">{a.envVars.map((v) => <code>{v}</code>)}</span>{a.also && <> — {a.also}</>}
 							</p>
 						</div>
+						<ul class="acct-links" aria-label={`${a.name} links`}>
+							<li><a class="acct-primary" href={a.signupUrl} target="_blank" rel="noopener">Create a {a.name} account ↗</a></li>
+							{(a.links ?? []).map((l) => <li><a href={l.url} target="_blank" rel="noopener">{l.label} ↗</a></li>)}
+							<li><a href={tokenUrls[a.name]} target="_blank" rel="noopener">Mint {a.token} ↗</a></li>
+						</ul>
 					</li>
 				))}
 			</ol>
@@ -419,22 +419,43 @@ const provisionTurns = [
 		padding: 0;
 		margin: 0.5rem 0 0;
 		display: grid;
-		gap: 1.6rem;
+		gap: 1rem;
 	}
-	.accounts li { display: flex; gap: 1rem; align-items: flex-start; padding: 1.2rem 1.3rem; border: 1px solid var(--border); border-radius: 14px; background: var(--card); }
-	.accounts li > div { display: flex; flex-direction: column; gap: 0.55rem; min-width: 0; flex: 1; }
-	.acct-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.3rem 0.8rem; }
+	.accounts > li {
+		display: grid;
+		grid-template-columns: auto minmax(0, 1fr) 15rem;
+		gap: 0.6rem 1.2rem;
+		align-items: start;
+		padding: 1.2rem 1.4rem;
+		border: 1px solid var(--border);
+		border-radius: 14px;
+		background: var(--card);
+	}
+	.acct-body { display: flex; flex-direction: column; gap: 0.5rem; min-width: 0; }
+	.acct-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.2rem 0.7rem; }
 	.accounts strong { color: var(--text-bright); font-size: 1.15rem; }
 	.accounts .role { font-size: 0.88rem; color: var(--text-muted); }
-	.accounts .first { font-size: 0.95rem; margin: 0; max-width: 62ch; }
-	.acct-links { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-	.acct-links .btn { font-size: 0.88rem; padding: 0.45rem 0.85rem; }
-	.accounts .mint { font-size: 0.9rem; margin: 0; }
-	.deploy h3 { font-size: 1.15rem; margin: 2rem 0 0.8rem; color: var(--text-bright); }
-	.accounts .mint a { overflow-wrap: anywhere; }
-	.accounts .vars { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.2rem; }
+	.accounts .first { font-size: 0.95rem; margin: 0; max-width: 60ch; }
+	.accounts .mint { font-size: 0.88rem; margin: 0; color: var(--text-muted); }
+	.accounts .vars { display: inline-flex; flex-wrap: wrap; gap: 0.3rem; vertical-align: middle; }
 	.accounts .vars code { font-size: 0.78rem; }
-	@media (max-width: 760px) { .accounts li { padding: 1rem; } }
+	.acct-links {
+		list-style: none;
+		margin: 0;
+		padding: 0.1rem 0 0 1.2rem;
+		border-left: 1px solid var(--border);
+		display: flex;
+		flex-direction: column;
+		gap: 0.45rem;
+		font-size: 0.92rem;
+	}
+	.acct-links a { font-weight: 600; text-decoration: none; }
+	.acct-links a:hover { text-decoration: underline; }
+	.acct-links .acct-primary { color: var(--orange-ink); font-size: 1rem; }
+	@media (max-width: 760px) {
+		.accounts > li { grid-template-columns: auto minmax(0, 1fr); padding: 1rem; }
+		.acct-links { grid-column: 2; border-left: 0; padding-left: 0; }
+	}
 
 	/* ---------------------------------------------------------- honest -- */
 	.honest {
