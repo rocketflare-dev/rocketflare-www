@@ -190,7 +190,7 @@ const faqLd = {
 				<p class="lede">
 					Rocketflare is a ready-made web app you copy and make your own. Out of the box it has
 					sign-in, teams and permissions, an AI assistant that can read your documents, dashboards,
-					and a clean way to run background jobs — all on Cloudflare, over a normal Postgres
+					a command-line tool, and a clean way to run background jobs — all on Cloudflare, over a normal Postgres
 					database. Run it on your laptop in a couple of minutes; deploy it when you're ready.
 				</p>
 				<p class="engineer-line">One Cloudflare Worker · Hono · React · Postgres · MIT</p>
@@ -295,6 +295,46 @@ const faqLd = {
 	</section>
 
 	<!-- ============================================== 5 · also included -->
+	<!-- ========================================================= cli -->
+	<section class="cli" id="cli">
+		<div class="wrap">
+			<div class="split cli-split">
+				<div class="split-term reveal">
+					<Terminal
+						title="your terminal"
+						lines={[
+							{ cmd: 'pnpm cli login --server http://localhost:3001' },
+							{ out: 'Opening the browser… signed in. Key stored in ~/.rocketflare/config.json', muted: true },
+							{ cmd: 'pnpm cli whoami' },
+							{ out: 'user    owner@example.test' },
+							{ out: 'tenant  Acme Logistics (acme)' },
+							{ out: 'key     rocketflare_Of8D…' },
+							{ cmd: "pnpm cli members list --json | jq '.items[].email'" },
+							{ out: '"owner@example.test"' },
+							{ out: '"marcus.adeyemi@acme.example"' },
+							{ out: '…', muted: true },
+						]}
+					/>
+				</div>
+				<div class="reveal">
+					<SectionHead
+						audience="builder"
+						align="left"
+						eyebrow="Also on the command line"
+						title="A CLI your agents will love"
+						lede="Everything the app does in the browser it also does from the terminal — same routes, same rules, one API key."
+					/>
+					<ul class="cli-points">
+						<li>Log in once from the terminal; it opens the browser, then keeps a key for your organisation.</li>
+						<li>List people, keys and activity. Every command takes <code>--json</code>, so the output pipes into <code>jq</code> — or straight into a coding agent's hands.</li>
+						<li>Add a command for your own feature in three files; the server, the browser and the CLI share one contract, so they cannot drift apart.</li>
+					</ul>
+					<a class="cli-link" href="/concepts/cli/">Behind it: the CLI concept →</a>
+				</div>
+			</div>
+		</div>
+	</section>
+
 	<section class="also">
 		<div class="wrap">
 			<div class="reveal">
@@ -563,6 +603,10 @@ const faqLd = {
 	}
 
 	/* ------------------------------------------------- 5 · also included -- */
+	.cli { padding: 5.5rem 0; background: var(--card); border-top: 1px solid var(--border); }
+	.cli-points { margin: 1.2rem 0 1.4rem; padding-left: 1.2rem; display: grid; gap: 0.7rem; }
+	.cli-points li { line-height: 1.55; }
+	.cli-link { font-weight: 600; color: var(--orange-ink); }
 	.also {
 		padding: 5rem 0;
 		background: var(--card-alt);

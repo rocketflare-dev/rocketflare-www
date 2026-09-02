@@ -41,7 +41,9 @@ import {
 	CLONE_CMD,
 	DEMO,
 	DEPLOY_ACCOUNTS,
-	DEPLOY_EXPORTS,
+	DEPLOY_VARS,
+	PROVISION_TOKENS_CMD,
+	PROVISION_ENV_FILE,
 	INSTALL_CMD,
 	PROVISION_CMD,
 	PROVISION_PHASES,
@@ -50,8 +52,6 @@ import {
 	SKILLS,
 } from '../data/get-started'
 
-import loginLight from '../assets/screens/login.light.png'
-import loginDark from '../assets/screens/login.dark.png'
 import homeLight from '../assets/screens/home.light.png'
 import homeDark from '../assets/screens/home.dark.png'
 
@@ -103,7 +103,7 @@ const provisionTurns = [
 	{ who: 'you' as const, text: SKILLS.provision },
 	{
 		who: 'agent' as const,
-		text: `The four tokens are in the shell. Running the phases in order — each one ends in a ${PROVISION_VERIFY_WORD} line I'll show you, and I stop at the first that fails:`,
+		text: `Tokens found in ${PROVISION_ENV_FILE}. Running the phases in order — each one ends in a ${PROVISION_VERIFY_WORD} line I'll show you, and I stop at the first that fails:`,
 		checks: PROVISION_PHASES.map((p) => `${p.name} — ${p.plain}`),
 	},
 	{
@@ -125,17 +125,6 @@ const provisionTurns = [
 				paste. Pick whichever of the three paths below suits you; they all end in your browser,
 				signed in as the owner of a demo organisation.
 			</p>
-		</div>
-		<div class="wrap">
-			<Screenshot
-				light={loginLight}
-				dark={loginDark}
-				alt="The sign-in page: a magic-link form and the four quick-login buttons for the demo accounts"
-				url="localhost:3000/login"
-				caption="What you see first: the sign-in page, with quick-login buttons for the demo accounts while you develop."
-				width={880}
-				priority
-			/>
 		</div>
 	</section>
 
@@ -258,8 +247,9 @@ const provisionTurns = [
 				audience="builder"
 				align="left"
 				title="Deploy it"
-				lede="Three accounts, four tokens, one command. Each account gives you a token from its dashboard; the kit does the rest."
+				lede="Three accounts you create yourself, one domain, one command. The kit can create projects, databases and DNS records inside your accounts — it cannot create the accounts."
 			/>
+			<h3>Before anything: three accounts</h3>
 			<ol class="accounts">
 				{DEPLOY_ACCOUNTS.map((a, i) => (
 					<li>
@@ -267,6 +257,7 @@ const provisionTurns = [
 						<div>
 							<strong>{a.name}</strong>
 							<span class="role">{a.role}{a.plan && <> · {a.plan}</>}</span>
+							<p class="first">{a.first}</p>
 							<p class="mint">
 								Mint {a.token} at <a href={tokenUrls[a.name]} target="_blank" rel="noopener">{tokenUrls[a.name].replace('https://', '')}</a>{a.also && <>; {a.also}</>}
 							</p>
@@ -275,13 +266,19 @@ const provisionTurns = [
 					</li>
 				))}
 			</ol>
+			<h3>Then hand the tokens to the kit — once, in your own terminal</h3>
 			<p>
-				Export the four in the shell you will open your agent from — the skill reads them from the
-				environment and never asks you to paste one into the chat.
+				<code>{PROVISION_TOKENS_CMD}</code> asks for each token with hidden input, checks it against
+				the service, and writes <code>{PROVISION_ENV_FILE}</code> (git-ignored, readable only by you).
+				Nothing is pasted into a chat. In CI, export the same variables instead — they take precedence.
 			</p>
 			<Terminal
-				title="zsh — before you open Claude Code"
-				lines={DEPLOY_EXPORTS.map((v) => ({ cmd: `export ${v}=…` }))}
+				title="your terminal"
+				lines={[
+					{ cmd: PROVISION_TOKENS_CMD },
+					...DEPLOY_VARS.map((v) => ({ out: `${v.padEnd(22)} paste (hidden) → checked`, ok: true })),
+				]}
+				expect={`Writes ${PROVISION_ENV_FILE}; then /provision, or ${PROVISION_CMD}`}
 			/>
 			<AgentChat agent={AGENT_NAME} turns={provisionTurns} />
 			<p class="after">
@@ -423,7 +420,9 @@ const provisionTurns = [
 	.accounts li > div { display: flex; flex-direction: column; gap: 0.3rem; min-width: 0; }
 	.accounts strong { color: var(--text-bright); font-size: 1.05rem; }
 	.accounts .role { font-size: 0.88rem; color: var(--text-muted); }
+	.accounts .first { font-size: 0.92rem; margin: 0; }
 	.accounts .mint { font-size: 0.9rem; margin: 0; }
+	.deploy h3 { font-size: 1.15rem; margin: 2rem 0 0.8rem; color: var(--text-bright); }
 	.accounts .mint a { overflow-wrap: anywhere; }
 	.accounts .vars { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.2rem; }
 	.accounts .vars code { font-size: 0.78rem; }

@@ -184,7 +184,9 @@ export interface DeployAccount {
 	token: string
 	/** Anything else to collect there that is not the token. */
 	also?: string
-	/** The variables to export. */
+	/** What to do in that account before minting anything — the kit cannot do this part. */
+	first: string
+	/** The variables the kit reads (from apps/web/.provision.env, or the environment in CI). */
 	envVars: string[]
 }
 
@@ -194,6 +196,8 @@ export const DEPLOY_ACCOUNTS: DeployAccount[] = [
 		role: 'runs the app',
 		plan: 'Workers Paid — Hyperdrive and Workflows need it',
 		token: 'an API token',
+		first:
+			'Create the account and put it on Workers Paid. Then add the domain you want the app on — register it there, or move its DNS there — because the app’s hostnames and the email DNS records are created in that zone. No domain yet? Staging gets a workers.dev address and email is skipped.',
 		/** Not on the token page: it sits in the right-hand column of the Workers & Pages overview. */
 		also: 'your account id is in the right-hand column of the Workers & Pages overview',
 		envVars: ['CLOUDFLARE_API_TOKEN', 'CLOUDFLARE_ACCOUNT_ID'],
@@ -201,6 +205,7 @@ export const DEPLOY_ACCOUNTS: DeployAccount[] = [
 	{
 		name: 'Neon',
 		role: 'hosts the Postgres database',
+		first: 'Create the account. The free tier is enough for the two branches the kit makes.',
 		token: 'an API key',
 		envVars: ['NEON_API_KEY'],
 	},
@@ -208,13 +213,19 @@ export const DEPLOY_ACCOUNTS: DeployAccount[] = [
 		name: 'Resend',
 		role: 'sends the sign-in and invitation emails',
 		plan: 'optional — skip it with --skip-email and links are logged instead',
+		first: 'Create the account. You will verify the same domain here; the free tier is enough.',
 		token: 'an API key (full access)',
 		envVars: ['RESEND_API_KEY'],
 	},
 ]
 
 /** The four variables, in the order the script reads them. */
-export const DEPLOY_EXPORTS = DEPLOY_ACCOUNTS.flatMap((a) => a.envVars)
+export const DEPLOY_VARS = DEPLOY_ACCOUNTS.flatMap((a) => a.envVars)
+
+/** Prompts for each token with hidden input, checks it against the vendor, writes the file. */
+export const PROVISION_TOKENS_CMD = 'pnpm provision tokens'
+/** Git-ignored, mode 0600; the environment overrides it (CI). Never .dev.vars — wrangler dev would hand account tokens to the Worker. */
+export const PROVISION_ENV_FILE = 'apps/web/.provision.env'
 
 export const PROVISION_CMD = 'pnpm provision all'
 export const PROVISION_SKIP_EMAIL_FLAG = '--skip-email'
@@ -228,7 +239,7 @@ export interface ProvisionPhase {
 
 /** `pnpm provision all`, in order; each phase ends in one `Verify:` line. */
 export const PROVISION_PHASES: ProvisionPhase[] = [
-	{ name: 'preflight', plain: 'checks the four tokens, the tools and the accounts' },
+	{ name: 'preflight', plain: 'checks the tokens, the tools, the accounts, and that your domain is on Cloudflare' },
 	{ name: 'email create', plain: 'creates the sending domain on Resend and its DNS records on Cloudflare' },
 	{ name: 'neon', plain: 'creates the Neon project with a staging branch' },
 	{ name: 'cloudflare', plain: 'creates Hyperdrive, KV, the queue and the R2 bucket, and writes their ids into both wrangler files' },
