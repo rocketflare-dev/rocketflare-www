@@ -1,8 +1,10 @@
 {
 	"name": "rocketflare-www",
+	"main": "worker/index.ts",
 	"compatibility_date": "2026-03-06",
 	"assets": {
-		"directory": "./dist"
+		"directory": "./dist",
+		"binding": "ASSETS"
 	},
 	"routes": [
 		{ "pattern": "rocketflare.dev", "custom_domain": true },

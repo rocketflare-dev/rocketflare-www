@@ -1,0 +1,72 @@
+---
+import { GITHUB_URL } from '../data/site'
+
+/**
+ * The repository's star count, fetched at runtime from `/api/github-stars`
+ * (the Worker in `worker/index.ts`, edge-cached for an hour).
+ *
+ * It renders as a plain "GitHub" link and upgrades to a count once the fetch
+ * resolves, so the nav never shifts around a number that may not arrive and
+ * the link works with JavaScript disabled.
+ */
+---
+<a class="stars" href={GITHUB_URL} target="_blank" rel="noopener" aria-label="Rocketflare on GitHub">
+	<svg class="gh" width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+	<span class="label">GitHub</span>
+	<span class="count" hidden>
+		<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.5l2.9 5.9 6.5.95-4.7 4.58 1.11 6.47L12 17.35 6.19 20.4 7.3 13.93 2.6 9.35l6.5-.95z"/></svg>
+		<span class="n"></span>
+	</span>
+</a>
+
+<style>
+	.stars {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4rem;
+		font-size: 0.95rem;
+		font-weight: 500;
+		color: var(--text);
+	}
+	.stars:hover { color: var(--blue); text-decoration: none; }
+	.count {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.25rem;
+		padding: 0.1rem 0.5rem 0.1rem 0.4rem;
+		border: 1px solid var(--border-bright);
+		border-radius: 999px;
+		font-family: var(--mono);
+		font-size: 0.78rem;
+		font-weight: 600;
+		line-height: 1.5;
+		color: var(--text-muted);
+		background: var(--card);
+	}
+	.count svg { color: var(--yellow); }
+	.count[hidden] { display: none; }
+	.stars:hover .count { border-color: var(--blue); color: var(--blue); }
+	.count svg { transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+	.stars:hover .count svg { transform: rotate(72deg) scale(1.15); }
+</style>
+
+<script>
+	// One request per page load, answered from the browser cache for an hour.
+	// A failure is silent: the link simply stays a plain "GitHub".
+	const format = (n: number) => (n >= 1000 ? `${(n / 1000).toFixed(1).replace(/\.0$/, '')}k` : String(n))
+
+	fetch('/api/github-stars')
+		.then((r) => (r.ok ? (r.json() as Promise<{ stars: number | null }>) : null))
+		.then((data) => {
+			if (!data || typeof data.stars !== 'number') return
+			for (const el of document.querySelectorAll<HTMLElement>('.stars .count')) {
+				const n = el.querySelector('.n')
+				if (n) n.textContent = format(data.stars)
+				el.hidden = false
+				el.setAttribute('title', `${data.stars} star${data.stars === 1 ? '' : 's'} on GitHub`)
+			}
+		})
+		.catch(() => {
+			/* leave the plain link */
+		})
+</script>

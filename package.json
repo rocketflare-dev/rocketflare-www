@@ -8,10 +8,12 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "build": "astro check && astro build",
+    "build": "astro check && npm run typecheck:worker && astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "deploy": "npm run build && wrangler deploy"
+    "deploy": "npm run build && wrangler deploy",
+    "typecheck:worker": "tsc -p worker/tsconfig.json",
+    "types": "wrangler types"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.2",

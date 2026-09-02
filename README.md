@@ -5,9 +5,11 @@ Astro site served from a Cloudflare Worker.
 
 ```bash
 npm install
-npm run dev       # http://localhost:4321
-npm run build     # astro check && astro build → dist/
+npm run dev       # http://localhost:4321 — Astro only; the /api route is not served
+npm run build     # astro check && tsc (worker) && astro build → dist/
 npm run deploy    # build, then wrangler deploy
+npm run types     # regenerate worker-configuration.d.ts after editing wrangler.jsonc
+npx wrangler dev  # the real Worker: static assets AND /api/github-stars
 ```
 
 ## Layout
@@ -21,6 +23,7 @@ npm run deploy    # build, then wrangler deploy
 | `src/layouts/BaseLayout.astro` | the design tokens; **every colour on the site is a token here** |
 | `src/layouts/ConceptLayout.astro` | the concept page shell (sidebar, prose styles, pager) |
 | `src/components/SkyScene.astro` | the animated hero illustration |
+| `worker/index.ts` | the only server code: `GET /api/github-stars`, everything else falls through to the static assets |
 
 ## Conventions
 
@@ -39,6 +42,21 @@ npm run deploy    # build, then wrangler deploy
    `tenancy.astro`: `<h2>` sections of prose, `<div class="why">` for a decision and its reasoning,
    `<div class="note">` for a caveat, and `source={[...]}` listing real repo paths.
 3. `npm run build`.
+
+## The star counter
+
+`worker/index.ts` proxies the repository's stargazer count at
+`GET /api/github-stars`, so the browser never calls GitHub directly — an
+unauthenticated GitHub request is rate-limited per client IP, and one shared
+call is kinder than one per visitor. The subrequest is edge-cached for an hour
+through `cf.cacheTtl`, so there is **no KV namespace to provision** and a colo
+makes at most 24 upstream calls a day. `components/GitHubStars.astro` renders a
+plain "GitHub" link and upgrades it to a count when the fetch resolves, so the
+nav never shifts and the link still works without JavaScript.
+
+The Worker and the Astro site cannot share one TypeScript program (workerd types
+versus DOM types), so the Worker has its own `worker/tsconfig.json` and its own
+check — both run in `npm run build`.
 
 ## Deployment
 
