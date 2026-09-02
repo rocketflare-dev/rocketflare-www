@@ -17,7 +17,17 @@ import { INSTALL_SH_URL } from './site'
 
 /** The directory every example clones into. */
 export const APP_DIR = 'myapp'
-export const CLONE_CMD = `git clone https://github.com/rocketflare-dev/rocketflare.git ${APP_DIR} && cd ${APP_DIR}`
+/**
+ * `--depth 1` because the kit's history is not yours — it is deleted on the next line. Shown as two
+ * commands, never one bare `git clone`: a copy that keeps the kit's history fights a template that
+ * carries on evolving (docs/ADAPTING.md §0). The one-liner below does both for you.
+ */
+export const CLONE_CMD = `git clone --depth 1 https://github.com/rocketflare-dev/rocketflare.git ${APP_DIR} && cd ${APP_DIR}`
+/** Your history starts here; the kit commit is recorded so you can diff against it later. */
+export const DETACH_CMD =
+  'rm -rf .git && git init -q && git add -A && git commit -qm "Start from Rocketflare"'
+/** Both of the above, as a terminal transcript. */
+export const CLONE_LINES = [{ cmd: CLONE_CMD }, { cmd: DETACH_CMD }]
 
 /** Clones, detaches the kit's history, then runs the bootstrap. */
 export const INSTALL_CMD = `curl -fsSL ${INSTALL_SH_URL} | bash -s -- ${APP_DIR}`

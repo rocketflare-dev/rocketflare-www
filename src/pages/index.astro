@@ -26,12 +26,11 @@ import {
 	AGENT_NAME,
 	AGENT_PROMPT,
 	APP_URL,
-	BOOTSTRAP_CMD,
 	BOOTSTRAP_EXPECT,
 	BOOTSTRAP_READY_LINE,
 	BOOTSTRAP_STEPS,
 	bootstrapLine,
-	CLONE_CMD,
+	INSTALL_CMD,
 	DEMO,
 } from '../data/get-started'
 
@@ -135,7 +134,7 @@ const agentTurns = [
 ]
 
 const terminalLines = [
-	{ cmd: BOOTSTRAP_CMD },
+	{ cmd: INSTALL_CMD },
 	...BOOTSTRAP_STEPS.map((_, i) => ({ out: bootstrapLine(i), ok: true })),
 	{ out: BOOTSTRAP_READY_LINE, ok: true },
 ]
@@ -242,7 +241,7 @@ const faqLd = {
 				<SectionHead
 					audience="builder"
 					title="Running in about two minutes"
-					lede="Ask your coding agent, run one script, or do it by hand. All three end in the same place: your browser, signed in."
+					lede="Run one script, ask your coding agent, or do it by hand. All three end in the same place: your browser, signed in."
 				/>
 			</div>
 			<div class="split">
@@ -250,16 +249,16 @@ const faqLd = {
 					<AgentChat agent={AGENT_NAME} turns={agentTurns} />
 				</div>
 				<div class="split-term reveal">
-					<Terminal title={BOOTSTRAP_CMD} lines={terminalLines} expect={BOOTSTRAP_EXPECT} />
+					<Terminal title="zsh" lines={terminalLines} expect={BOOTSTRAP_EXPECT} />
 				</div>
 			</div>
 			<div class="strip reveal">
 				<Steps
 					direction="row"
 					steps={[
-						{ title: 'Clone', body: `<code>${CLONE_CMD.replaceAll('&', '&amp;')}</code>`, time: '10 s' },
-						{ title: 'Bootstrap', body: `<code>${BOOTSTRAP_CMD}</code> — or ask your agent`, time: '2–3 min' },
-						{ title: "You're in", body: `${APP_URL}, signed in as the demo owner`, time: 'now' },
+						{ title: 'Get a copy', body: 'The installer clones it, makes the history yours from the first commit, and starts the bootstrap.', time: '10 s' },
+						{ title: 'Bootstrap', body: 'Nine checked steps: toolchain, database, migrations, demo data. Or ask your agent.', time: '2–3 min' },
+						{ title: "You're in", body: `${APP_URL}, signed in as the demo owner.`, time: 'now' },
 					]}
 				/>
 			</div>

@@ -38,7 +38,7 @@ import {
 	BOOTSTRAP_STEPS,
 	bootstrapLine,
 	BY_HAND_STEPS,
-	CLONE_CMD,
+	CLONE_LINES,
 	DEMO,
 	DEPLOY_ACCOUNTS,
 	DEPLOY_VARS,
@@ -157,15 +157,15 @@ const provisionTurns = [
 		<SectionHead
 			align="left"
 			title="Three ways in"
-			lede="Ask your coding agent, run one script, or do each step yourself. Same result, your choice of company."
+			lede="Run one script, ask your coding agent, or do each step yourself. Same result, your choice of company."
 		/>
 		<Tabs
 			tabs={[
-				{ id: 'agent', label: 'Ask your agent' },
 				{ id: 'one-command', label: 'One command' },
+				{ id: 'agent', label: 'Ask your agent' },
 				{ id: 'by-hand', label: 'By hand' },
 			]}
-			default="agent"
+			default="one-command"
 		>
 			<Fragment slot="agent">
 				<p class="step-line">
@@ -173,7 +173,7 @@ const provisionTurns = [
 					<span>Install <a href={CLAUDE_CODE_URL} target="_blank" rel="noopener">Claude Code</a>, clone the
 					repository and open the folder in it.</span>
 				</p>
-				<Terminal title="zsh" lines={[{ cmd: CLONE_CMD }, { cmd: AGENT_CLI_CMD }]} />
+				<Terminal title="zsh" lines={[...CLONE_LINES, { cmd: AGENT_CLI_CMD }]} />
 				<p class="step-line">
 					<span class="num">2</span>
 					<span>Type <code>{SKILLS.setup}</code> — or just ask it to set the project up. The skill runs
@@ -189,13 +189,26 @@ const provisionTurns = [
 
 			<Fragment slot="one-command">
 				<p>
-					Clone, then run the bootstrap. It prints one line per step, then opens your browser
-					signed in. It is safe to run again after a fix (<code>{BOOTSTRAP_RERUN_CMD}</code> once
-					dependencies exist).
+					The installer clones, detaches the kit's history so the copy is yours from the first
+					commit, and runs the bootstrap — one line per step, then your browser opens signed in.
+					<a href={INSTALL_SH_SOURCE_URL} target="_blank" rel="noopener">Read it first</a> — it is
+					short.
 				</p>
 				<Terminal
 					title="zsh"
-					lines={[{ cmd: CLONE_CMD }, { cmd: BOOTSTRAP_CMD }, ...bootstrapTail]}
+					lines={[{ cmd: INSTALL_CMD }, ...bootstrapTail]}
+					expect={BOOTSTRAP_EXPECT}
+				/>
+				<h4>Or clone it yourself</h4>
+				<p>
+					The same thing in three commands, if you would rather see each one. The second is what
+					makes the copy yours: the kit is a template, not an upstream, so its history goes and
+					yours starts at commit one. Re-running the bootstrap after a fix is always safe
+					(<code>{BOOTSTRAP_RERUN_CMD}</code> once dependencies exist).
+				</p>
+				<Terminal
+					title="zsh"
+					lines={[...CLONE_LINES, { cmd: BOOTSTRAP_CMD }]}
 					expect={BOOTSTRAP_EXPECT}
 				/>
 				<table class="flags">
@@ -209,14 +222,6 @@ const provisionTurns = [
 						))}
 					</tbody>
 				</table>
-				<h4>Or in one line</h4>
-				<p>
-					The installer clones, detaches the kit's history so the copy is yours from the first
-					commit, and runs the same bootstrap.
-					<a href={INSTALL_SH_SOURCE_URL} target="_blank" rel="noopener">Read it first</a> — it is
-					short.
-				</p>
-				<Terminal title="zsh" lines={[{ cmd: INSTALL_CMD }]} expect={BOOTSTRAP_EXPECT} />
 			</Fragment>
 
 			<Fragment slot="by-hand">
@@ -225,7 +230,7 @@ const provisionTurns = [
 					<a href={SETUP_PART1_URL} target="_blank" rel="noopener">SETUP.md Part 1</a>; every step
 					ends in the line that proves it worked, and the next step waits until you have seen it.
 				</p>
-				<Terminal title="zsh" lines={[{ cmd: CLONE_CMD }]} />
+				<Terminal title="zsh" lines={CLONE_LINES} />
 				<div class="hand">
 					<Steps direction="column" steps={handSteps} />
 				</div>
