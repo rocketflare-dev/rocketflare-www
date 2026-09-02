@@ -176,8 +176,8 @@ const provisionTurns = [
 				<Terminal title="zsh" lines={[{ cmd: CLONE_CMD }, { cmd: AGENT_CLI_CMD }]} />
 				<p class="step-line">
 					<span class="num">2</span>
-					<span>Type <code>{SKILLS.setup}</code>. The skill runs the same script as the other two paths
-					and narrates it.</span>
+					<span>Type <code>{SKILLS.setup}</code> — or just ask it to set the project up. The skill runs
+					the same script as the other two paths and narrates it.</span>
 				</p>
 				<AgentChat agent={AGENT_NAME} turns={setupTurns} />
 				<p class="after">
