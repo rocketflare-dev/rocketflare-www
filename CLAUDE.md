@@ -25,6 +25,44 @@ ls dist/_astro/*.js 2>/dev/null   # nothing — scripts are inlined, never bundl
 grep -rl "fonts.googleapis" dist  # nothing — fonts are self-hosted by the Fonts API
 ```
 
+### The full pass (before a release)
+
+Serve `dist/` through the real Worker, not `astro preview` — preview 404s `/api/github-stars`
+(a console error Lighthouse counts against best-practices) and serves `/install.sh` with no
+`Content-Type`:
+
+```bash
+npm run build && npx wrangler dev --port 4399 --ip 127.0.0.1     # http://127.0.0.1:4399
+curl -sI http://127.0.0.1:4399/install.sh | grep -i content-type  # application/x-sh
+curl -s http://127.0.0.1:4399/install.sh | cmp - ../rocketflare/scripts/install.sh   # byte-identical
+curl -s http://127.0.0.1:4399/sitemap-0.xml | grep -c '/og/'     # 0
+```
+
+Then the three scripts in `scripts/verify/` (plain Node, no dependency in this repo: they borrow
+`puppeteer-core`, `lighthouse` and `axe-core` from the `chrome-devtools-mcp` plugin cache in
+`~/.claude/plugins`, drive the installed Google Chrome headless with a throwaway profile, and read
+`BASE` / `CHROME_PATH` from the environment if the defaults are wrong). All three exit 1 on a miss:
+
+```bash
+node scripts/verify/lighthouse.mjs   # mobile + desktop on /, /tour/, /get-started/, /who-is-it-for/, /concepts/auth/
+                                     # → one row per run, ≥ 95 in every category; failing audits listed under it
+node scripts/verify/axe.mjs          # axe in BOTH themes on those + /concepts/ — the contrast gate (Lighthouse only sees day)
+node scripts/verify/checks.mjs       # everything else, one ok/FAIL line each:
+```
+
+What `checks.mjs` asserts — **LCP** on `/` is `p.lede` at 1440 and 390 (the hero text, not the
+`priority` screenshot) · **widths** 390/768/1024/1440 on `/`, `/tour/`, `/get-started/`:
+`scrollWidth <= innerWidth`, the rocket clear of the lede, every tab ≥ 24px tall · **no JS**: no
+`.reveal` at `opacity: 0`, `.tablist` and `.copy` gone, every panel visible with its heading, nav
+links visible · **JS on**: after scrolling through, nothing left at `opacity: 0` · **reduced motion**:
+nothing animating, nothing hidden · **themes**: `picture.light` / `picture.dark` swap with
+`data-theme`, the rocket renders · **structure**: one `<main>`, one `<h1>`, no heading skipped, every
+`svg.diagram` has a `<title>` and an `aria-describedby` that resolves, no short `alt`, no unnamed
+button · **keyboard**: first Tab is the skip link (on screen after its transition, Enter → `#main`),
+a visible `outline` on the band, on `.bg-lift` and in a terminal, ArrowRight on a tab moves
+selection + focus and syncs the hash. Screenshots in both themes are still read by eye — the
+scripts prove the mechanics, not the taste.
+
 ## Layout
 
 | Path | What it is |
@@ -36,7 +74,8 @@ grep -rl "fonts.googleapis" dist  # nothing — fonts are self-hosted by the Fon
 | `src/data/concepts.ts` | the concept list; `CONCEPT_COUNT`, `numberWord()` |
 | `src/data/site.ts` | every external URL |
 | `src/pages/index.astro` | the landing page |
-| `src/pages/{tour,get-started,who-is-it-for}.astro` | placeholders until their content lands (`ready: false`) |
+| `src/pages/{tour,get-started,who-is-it-for}.astro` | the tour, Get started (literals from `src/data/get-started.ts`), who it's for |
+| `src/pages/og.astro` | the 1200×630 template `public/og-image.png` is captured from (noindex, not in the registry) |
 | `src/pages/concepts/*` | one page per subsystem, plus the index |
 | `src/pages/llms.txt.ts` | the llms.txt map, generated from `pages.ts` + `concepts.ts` |
 | `src/components/SectionHead.astro` | eyebrow / h2 / lede, optional audience tag |
@@ -52,6 +91,7 @@ grep -rl "fonts.googleapis" dist  # nothing — fonts are self-hosted by the Fon
 | `src/assets/screens/` | screenshot sources + `MANIFEST.md` |
 | `public/` | `favicon.svg` (3-fill mark) + PNGs, `logo.svg` (full mark), `og-image.png`, `site.webmanifest` |
 | `worker/index.ts` | the only server code |
+| `scripts/verify/{lighthouse,axe,checks,og}.mjs` | the release pass ("The full pass" above) and the OG capture; `lib.mjs` is the shared headless-Chrome launcher |
 | `.github/workflows/deploy.yml` | main → deploy; PR → build + preview version |
 
 ## Rules
@@ -70,7 +110,9 @@ The palette: `--blue --blue-bright --cyan --cyan-soft --yellow --yellow-bright -
 
 | Token | Use |
 |---|---|
-| `--on-accent` | text on a solid accent (buttons, step numbers) |
+| `--on-accent` | text on a solid blue accent (`.btn-secondary`, the selected tab, step numbers) |
+| `--on-orange` | text on the brand orange (`.btn-primary`, the skip link): white on it is 2.6:1 by day, so day uses the dark ink |
+| `--ink-mix`, `--accent-ink`, `--orange-ink` | an accent used as small TEXT on a light surface — eyebrows, the current sidebar link, a "why" lead-in, the audience tag. `--accent-ink` is set by the `.tone-*` block as `color-mix(var(--accent) var(--ink-mix), var(--text-bright))`, `--orange-ink` is the same for the global `.eyebrow`; `--ink-mix` is 55% by day and 100% by night (the night accents already read on dark). Raw `--accent` / `--orange` stay for fills, borders and text on `.bg-band` |
 | `--shadow-ink` | a colour for `drop-shadow()` (filters can't take `--shadow`) |
 | `--frame`, `--frame-dots` | browser chrome around a screenshot |
 | `--terminal-bg/-text/-prompt/-ok` | the Terminal component |
@@ -125,6 +167,19 @@ at 720/1440 for both and shows one per theme; `priority` makes the day image eag
 lazy); `crop="top"` for tall pages; `frame="none"` for a bare image. Every capture is a row in
 `src/assets/screens/MANIFEST.md` (stem · kit URL · kit commit · captured on) — follow the procedure
 written there so a stale capture can be retaken.
+
+### The OG image
+`public/og-image.png` (1200×630, what `<meta property="og:image">` on every page points at) is a
+screenshot of `src/pages/og.astro` — a token-driven card (sky gradient, the mark, the headline with
+its gradient second line, one subtitle, three pills) that hides the site chrome and pins the
+document to 1200×630. The page is `noindex`, is **not** in `pages.ts` (it would reach the nav) and
+is listed in `SITEMAP_EXCLUDED_PATHS` there. After changing the card or the palette, regenerate
+with `dist/` served on :4399 (as above):
+
+```bash
+node scripts/verify/og.mjs   # 1200×630, deviceScaleFactor 1, day theme, waits for the fonts
+npm run build                # so dist/og-image.png is the new file — then look at it once
+```
 
 ### Branches, previews, deploys
 **Never commit to `main`** — a push to main deploys to rocketflare.dev. Work on a branch, open a PR:

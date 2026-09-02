@@ -35,7 +35,7 @@ const description =
 					<div class="index-grid">
 						{conceptsInGroup(g.key).map((c) => (
 							<a class={`ccard tone-${c.tone} reveal`} href={`/concepts/${c.slug}/`}>
-								<span class="ccard-num">{c.num}</span>
+								<span class="ccard-num" data-num={c.num} aria-hidden="true"></span>
 								<span class="chip"><ConceptIcon name={c.icon} /></span>
 								<h3>{c.title}</h3>
 								<p>{c.blurb}</p>
@@ -104,6 +104,8 @@ const description =
 		color: var(--accent);
 		opacity: 0.22;
 	}
+	/* A watermark, drawn by CSS: it is decoration, not a number a reader is meant to read. */
+	.ccard-num::after { content: attr(data-num); }
 	.chip {
 		display: inline-flex;
 		align-items: center;

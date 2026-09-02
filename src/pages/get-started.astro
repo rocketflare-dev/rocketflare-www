@@ -267,9 +267,9 @@ const provisionTurns = [
 						<div>
 							<strong>{a.name}</strong>
 							<span class="role">{a.role}{a.plan && <> · {a.plan}</>}</span>
-							<span class="mint">
+							<p class="mint">
 								Mint {a.token} at <a href={tokenUrls[a.name]} target="_blank" rel="noopener">{tokenUrls[a.name].replace('https://', '')}</a>{a.also && <>; {a.also}</>}
-							</span>
+							</p>
 							<span class="vars">{a.envVars.map((v) => <code>{v}</code>)}</span>
 						</div>
 					</li>
@@ -307,7 +307,7 @@ const provisionTurns = [
 				</Callout>
 				<Callout tone="green" title="Docker must be running">
 					<ConceptIcon slot="icon" name="database" />
-					<p>Postgres runs in a container. Docker Desktop, or colima on a Mac (<code>brew install colima docker &amp;&amp; colima start</code>), has to be up before step 4.</p>
+					<p>Postgres runs in a container. Docker Desktop, or colima on a Mac (<code>brew install colima docker &amp;&amp; colima start</code>), has to be up before the database step.</p>
 				</Callout>
 				<Callout tone="orange" title="The Cloudflare login, and what it costs">
 					<ConceptIcon slot="icon" name="cloud" />
@@ -423,7 +423,7 @@ const provisionTurns = [
 	.accounts li > div { display: flex; flex-direction: column; gap: 0.3rem; min-width: 0; }
 	.accounts strong { color: var(--text-bright); font-size: 1.05rem; }
 	.accounts .role { font-size: 0.88rem; color: var(--text-muted); }
-	.accounts .mint { font-size: 0.9rem; }
+	.accounts .mint { font-size: 0.9rem; margin: 0; }
 	.accounts .mint a { overflow-wrap: anywhere; }
 	.accounts .vars { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.2rem; }
 	.accounts .vars code { font-size: 0.78rem; }

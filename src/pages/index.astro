@@ -515,7 +515,9 @@ const faqLd = {
 	}
 	.split-term :global(.terminal) { margin: 0; }
 	@media (max-width: 860px) {
-		.split { grid-template-columns: 1fr; }
+		/* minmax(0, …), not 1fr: the terminal's longest line would otherwise set the
+		   column's min-content width and push the page wider than the viewport at 390px. */
+		.split { grid-template-columns: minmax(0, 1fr); }
 	}
 	.strip {
 		padding: 1.8rem 1.6rem 1.2rem;
@@ -680,7 +682,7 @@ const faqLd = {
 	}
 	.who-col:nth-child(2) li::before { background: var(--blue-bright); }
 	.who-link { font-weight: 600; font-size: 1.02rem; }
-	.who-col:first-child .who-link { color: var(--orange); }
+	.who-col:first-child .who-link { color: var(--orange-ink); }
 	.who-more { margin: 2.8rem 0 0; text-align: center; color: var(--text-muted); }
 	@media (max-width: 760px) { .who-grid { grid-template-columns: 1fr; gap: 2.4rem; } }
 

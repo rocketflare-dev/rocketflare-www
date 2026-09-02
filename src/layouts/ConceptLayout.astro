@@ -44,7 +44,7 @@ const reference = c.anchor ? `${CONCEPTS_URL}#${c.anchor}` : `${GITHUB_URL}/blob
 		<div class="wrap concept-body">
 			<aside class="side">
 				<p class="side-head">Concepts</p>
-				<nav>
+				<nav aria-label="Concepts">
 					{CONCEPT_GROUPS.map((g) => (
 						<div class="side-group">
 							<span class="side-group-head">{g.title}</span>
@@ -76,7 +76,7 @@ const reference = c.anchor ? `${CONCEPTS_URL}#${c.anchor}` : `${GITHUB_URL}/blob
 					</div>
 				)}
 
-				<nav class="pager">
+				<nav class="pager" aria-label="Previous and next concept">
 					{prev ? (
 						<a href={`/concepts/${prev.slug}/`} class="pager-link prev">
 							<span>Previous</span>
@@ -132,7 +132,7 @@ const reference = c.anchor ? `${CONCEPTS_URL}#${c.anchor}` : `${GITHUB_URL}/blob
 		box-shadow: var(--shadow-sm);
 	}
 	.chip :global(svg) { width: 28px; height: 28px; }
-	.eyebrow { color: var(--accent); }
+	.eyebrow { color: var(--accent-ink); }
 	.lede { margin-top: 1.2rem; font-size: 1.12rem; color: var(--text-muted); max-width: 62ch; }
 
 	.concept-body {
@@ -161,7 +161,6 @@ const reference = c.anchor ? `${CONCEPTS_URL}#${c.anchor}` : `${GITHUB_URL}/blob
 		letter-spacing: 0.12em;
 		text-transform: uppercase;
 		color: var(--text-muted);
-		opacity: 0.75;
 	}
 	.side-link {
 		display: flex;
@@ -174,8 +173,8 @@ const reference = c.anchor ? `${CONCEPTS_URL}#${c.anchor}` : `${GITHUB_URL}/blob
 		margin-left: -2px;
 	}
 	.side-link:hover { color: var(--text-bright); text-decoration: none; }
-	.side-num { flex: none; font-family: var(--mono); font-size: 0.76rem; opacity: 0.6; padding-top: 0.15em; }
-	.side-link.current { color: var(--accent); font-weight: 600; border-left-color: var(--accent); }
+	.side-num { flex: none; font-family: var(--mono); font-size: 0.76rem; padding-top: 0.15em; }
+	.side-link.current { color: var(--accent-ink); font-weight: 600; border-left-color: var(--accent); }
 	.side-ref {
 		display: inline-flex;
 		align-items: center;
@@ -183,7 +182,7 @@ const reference = c.anchor ? `${CONCEPTS_URL}#${c.anchor}` : `${GITHUB_URL}/blob
 		margin-top: 1.4rem;
 		font-size: 0.86rem;
 		font-weight: 600;
-		color: var(--accent);
+		color: var(--accent-ink);
 	}
 
 	/* ------------------------------------------------------------ prose -- */
@@ -259,7 +258,7 @@ const reference = c.anchor ? `${CONCEPTS_URL}#${c.anchor}` : `${GITHUB_URL}/blob
 		margin: 1.6rem 0;
 	}
 	.prose :global(.why p:last-child) { margin-bottom: 0; }
-	.prose :global(.why strong:first-child) { color: var(--accent); }
+	.prose :global(.why strong:first-child) { color: var(--accent-ink); }
 
 	.prose :global(.note) {
 		border: 1px dashed var(--border-bright);

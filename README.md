@@ -19,7 +19,8 @@ npx wrangler dev  # the real Worker: static assets AND /api/github-stars
 | `src/pages/index.astro` | the landing page |
 | `src/pages/tour.astro` | the tour — thirteen stops, one `stops` array drives the index and the sections |
 | `src/pages/who-is-it-for.astro` | three "what would I build" sketches, the not-for list, the two doors out |
-| `src/pages/get-started.astro` | placeholder until its content lands |
+| `src/pages/get-started.astro` | three ways in (agent · one command · by hand), what the bootstrap did, deploying with `/provision`; every kit literal from `src/data/get-started.ts` |
+| `src/pages/og.astro` | the 1200×630 card `public/og-image.png` is screenshotted from (`CLAUDE.md`, "The OG image") |
 | `src/pages/concepts/*` | one page per subsystem, plus the index |
 | `src/pages/llms.txt.ts` | the llms.txt map, generated from the page and concept lists |
 | `src/data/pages.ts` | the page registry — nav, footer, llms.txt and the sitemap filter read it |
@@ -35,6 +36,7 @@ npx wrangler dev  # the real Worker: static assets AND /api/github-stars
 | `src/assets/screens/` | screenshot sources, `MANIFEST.md` (what each shows, kit commit, known noise) and `capture.sh` (the helpers a capture pass sources) |
 | `public/install.sh` | a byte copy of the kit's `scripts/install.sh`, served at `/install.sh` for `curl -fsSL https://rocketflare.dev/install.sh \| bash` |
 | `worker/index.ts` | the only server code: `GET /api/github-stars`, everything else falls through to the static assets |
+| `scripts/verify/` | the release pass — Lighthouse, axe in both themes, the headless checks, the OG capture (`CLAUDE.md`, "The full pass") |
 | `CLAUDE.md` | the working rules — tokens, motion, scripts, the registry, screenshots, branches |
 
 ## Conventions

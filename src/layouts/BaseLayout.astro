@@ -110,8 +110,11 @@ const softwareLd = {
 	</script>
 </head>
 <body>
+	<a href="#main" class="skip-link">Skip to content</a>
 	<Nav />
-	<slot />
+	<main id="main">
+		<slot />
+	</main>
 	<Footer />
 </body>
 </html>
@@ -163,7 +166,7 @@ const softwareLd = {
 		--border: #D3E6F2;
 		--border-bright: #B4D6E9;
 		--text: #24425C;
-		--text-muted: #5A778E;
+		--text-muted: #52708A;
 		--text-bright: #10243A;
 		--shadow: 24px 30px -18px rgba(16, 36, 58, 0.22);
 		--shadow-sm: 0 4px 14px -6px rgba(16, 36, 58, 0.2);
@@ -180,8 +183,16 @@ const softwareLd = {
 		--sun: #F7D257;
 		--star: transparent;
 
-		/* Text on a solid accent (orange/blue buttons, numbered steps) */
+		/* Text on a solid accent (blue buttons, numbered steps) */
 		--on-accent: #FFFFFF;
+		/* Text on the brand orange: white fails contrast on it by day (2.6:1), so
+		   an orange button carries the dark ink instead (6:1) */
+		--on-orange: #10243A;
+		/* An accent used as TEXT on a light surface: mixed toward the ink until it
+		   reads (the bright brand values are ~2.5–4:1 on the day backgrounds).
+		   `--accent-ink` (per tone, below) and `--orange-ink` derive from this. */
+		--ink-mix: 55%;
+		--orange-ink: color-mix(in srgb, var(--orange) var(--ink-mix), var(--text-bright));
 		/* A drop-shadow() colour — filters cannot take a box-shadow token */
 		--shadow-ink: rgba(16, 36, 58, 0.25);
 
@@ -262,6 +273,10 @@ const softwareLd = {
 		--star: #DCEBFA;
 
 		--on-accent: #0C182A;
+		--on-orange: #0C182A;
+		/* By night the accents are already light on dark: no mixing */
+		--ink-mix: 100%;
+		--orange-ink: var(--orange);
 		--shadow-ink: rgba(0, 0, 0, 0.55);
 
 		--frame: #1F3450;
@@ -309,6 +324,16 @@ const softwareLd = {
 
 	a { color: var(--blue); text-decoration: none; }
 	a:hover { text-decoration: underline; }
+	/* A link inside running text is told apart by more than its colour (the
+	   blue is ~1.5:1 against the body ink). Buttons, tiles (`li > a`) and the
+	   nav/footer/sidebars (not in a p/li) stay clean. */
+	:is(p, li, td, dd, figcaption) a:not(.btn, li > a) {
+		text-decoration: underline;
+		text-decoration-thickness: 1px;
+		text-underline-offset: 0.18em;
+		text-decoration-color: color-mix(in srgb, currentColor 55%, transparent);
+	}
+	:is(p, li, td, dd, figcaption) a:not(.btn):hover { text-decoration-color: currentColor; }
 
 	code {
 		font-family: var(--mono);
@@ -339,6 +364,22 @@ const softwareLd = {
 		border-radius: 4px;
 	}
 
+	/* The skip link: off-screen until it takes focus, then a pill over the nav. */
+	.skip-link {
+		position: absolute;
+		top: 0.6rem;
+		left: 0.6rem;
+		z-index: 100;
+		padding: 0.6rem 1rem;
+		border-radius: 999px;
+		background: var(--orange);
+		color: var(--on-orange);
+		font-weight: 600;
+		transform: translateY(-200%);
+		transition: transform 0.15s ease;
+	}
+	.skip-link:focus-visible { transform: none; text-decoration: none; }
+
 	/* ---------------------------------------------------------- layout -- */
 	.wrap { max-width: 1140px; margin: 0 auto; padding: 0 1.5rem; }
 	.wrap-narrow { max-width: 860px; margin: 0 auto; padding: 0 1.5rem; }
@@ -351,7 +392,7 @@ const softwareLd = {
 		font-weight: 700;
 		letter-spacing: 0.14em;
 		text-transform: uppercase;
-		color: var(--orange);
+		color: var(--orange-ink);
 		margin-bottom: 0.9rem;
 	}
 	.section-head { text-align: center; max-width: 720px; margin: 0 auto 3rem; }
@@ -364,6 +405,7 @@ const softwareLd = {
 	.bg-band h1, .bg-band h2, .bg-band h3, .bg-band h4 { color: var(--band-ink); }
 	.bg-band .text-muted, .bg-band .section-head p { color: var(--band-muted); }
 	.bg-band a:not(.btn) { color: var(--cyan); }
+	.bg-band .eyebrow { color: var(--orange); } /* the mixed ink is for light surfaces */
 	.bg-lift {
 		background:
 			radial-gradient(900px 380px at 50% 0%, var(--tint-orange), transparent 70%),
@@ -371,7 +413,9 @@ const softwareLd = {
 	}
 
 	/* Tones: a section, card or tag picks an accent and its tint with one class.
-	   Defined once here; components read --accent / --tint. */
+	   Defined once here; components read --accent / --tint, and --accent-ink
+	   when the accent is small TEXT on a light surface (eyebrows, the current
+	   sidebar link, a "why" lead-in) — the raw accent is for fills and borders. */
 	.tone-blue   { --accent: var(--blue-bright); --tint: var(--tint-blue); }
 	.tone-purple { --accent: var(--purple);      --tint: var(--tint-purple); }
 	.tone-orange { --accent: var(--orange);      --tint: var(--tint-orange); }
@@ -379,6 +423,7 @@ const softwareLd = {
 	.tone-red    { --accent: var(--red);         --tint: var(--tint-red); }
 	.tone-green  { --accent: var(--green);       --tint: var(--tint-green); }
 	.tone-yellow { --accent: var(--yellow);      --tint: var(--tint-yellow); }
+	[class*='tone-'] { --accent-ink: color-mix(in srgb, var(--accent) var(--ink-mix), var(--text-bright)); }
 
 	/* ---------------------------------------------------------- buttons -- */
 	.btn {
@@ -398,14 +443,15 @@ const softwareLd = {
 	.btn:hover { text-decoration: none; transform: translateY(-2px); }
 	.btn-primary {
 		background: var(--orange);
-		color: var(--on-accent);
+		color: var(--on-orange);
 		box-shadow: 0 10px 22px -10px var(--orange);
 	}
 	.btn-primary:hover { box-shadow: 0 16px 26px -10px var(--orange); }
 	.btn-secondary {
-		background: var(--blue-bright);
+		/* --blue, not --blue-bright: white on the bright blue is 4.05:1 by day */
+		background: var(--blue);
 		color: var(--on-accent);
-		box-shadow: 0 10px 22px -10px var(--blue-bright);
+		box-shadow: 0 10px 22px -10px var(--blue);
 	}
 	.btn-ghost {
 		background: var(--card);
@@ -444,6 +490,8 @@ const softwareLd = {
 	.nav-links a { color: var(--text); font-weight: 500; font-size: 0.95rem; }
 	.nav-links a:hover { color: var(--blue); text-decoration: none; }
 	.nav-links .btn { padding: 0.5rem 1.1rem; font-size: 0.9rem; }
+	/* `.nav-links a` outranks `.btn-primary`; say the ink again so the pill matches the hero's. */
+	.nav-links .btn-primary, .nav-links .btn-primary:hover { color: var(--on-orange); }
 	.icon-btn {
 		display: inline-flex;
 		align-items: center;
@@ -503,12 +551,14 @@ const softwareLd = {
 	footer .footer-links { display: flex; flex-wrap: wrap; gap: 1.25rem; justify-content: center; margin-bottom: 0.75rem; }
 
 	/* ------------------------------------------------------- animation -- */
-	.reveal {
+	/* Hidden only once html.js exists (the observer below is what shows it
+	   again); a reader without scripts sees every block. */
+	html.js .reveal {
 		opacity: 0;
 		transform: translateY(26px);
 		transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
 	}
-	.reveal.in { opacity: 1; transform: none; }
+	html.js .reveal.in { opacity: 1; transform: none; }
 	/* A list that reveals its children one after another: the wrapper carries .reveal too (the
 	   observer watches it) and the children slide in behind it. Hidden only once html.js exists,
 	   so a reader without scripts sees every item. */
@@ -517,7 +567,7 @@ const softwareLd = {
 		transform: translateY(14px);
 		transition: opacity 0.55s ease, transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
 	}
-	.reveal.reveal-stagger { transform: none; }
+	html.js .reveal.reveal-stagger { transform: none; }
 	html.js .reveal-stagger.in > * { opacity: 1; transform: none; }
 	.reveal-stagger > :nth-child(2) { transition-delay: 0.07s; }
 	.reveal-stagger > :nth-child(3) { transition-delay: 0.14s; }

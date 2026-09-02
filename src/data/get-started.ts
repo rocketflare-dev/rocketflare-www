@@ -38,8 +38,8 @@ export const DEMO = {
 	org: 'Acme Logistics',
 } as const
 
-/** The dev-only auto-login the bootstrap opens at the end. */
-export const LOGIN_URL = `${APP_URL}/login?as=${DEMO.ownerEmail}`
+/** The dev-only auto-login the bootstrap opens at the end (the script URL-encodes the address, so `%40`). */
+export const LOGIN_URL = `${APP_URL}/login?as=${encodeURIComponent(DEMO.ownerEmail)}`
 
 export interface BootstrapStep {
 	/** The word the script prints after `n/9`. */

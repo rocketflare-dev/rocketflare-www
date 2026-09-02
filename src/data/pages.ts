@@ -51,7 +51,7 @@ export const PAGES: SitePage[] = [
 		title: 'Get started — running in about two minutes',
 		nav: 'Get started',
 		description:
-			'From git clone to a running app you are signed in to — ask your coding agent, run one script, or do it by hand — then deploy it with three tokens.',
+			'From git clone to a running app you are signed in to — ask your coding agent, run one script, or do it by hand — then deploy it with three accounts and one command.',
 		audience: 'both',
 		order: 2,
 		ready: true,
@@ -83,5 +83,12 @@ export const NAV_PAGES = PAGES.filter((p) => p.path !== '/').sort((a, b) => a.or
 
 export const pageByPath = (path: string) => PAGES.find((p) => p.path === path)
 
-/** Paths left out of the sitemap: every not-yet-ready page. */
-export const SITEMAP_EXCLUDED_PATHS: string[] = PAGES.filter((p) => !p.ready).map((p) => p.path)
+/**
+ * Paths left out of the sitemap: every not-yet-ready page, plus `/og/` — the
+ * 1200×630 template `public/og-image.png` is screenshotted from (noindex, not
+ * in this registry so it never reaches the nav; see CLAUDE.md "The OG image").
+ */
+export const SITEMAP_EXCLUDED_PATHS: string[] = [
+	'/og/',
+	...PAGES.filter((p) => !p.ready).map((p) => p.path),
+]

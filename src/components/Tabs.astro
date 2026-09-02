@@ -76,8 +76,8 @@ const panels = await Promise.all(
 	[role='tab']:hover { color: var(--text-bright); }
 	[role='tab'][aria-selected='true'] {
 		color: var(--on-accent);
-		background: var(--blue-bright);
-		box-shadow: 0 8px 18px -10px var(--blue-bright);
+		background: var(--blue); /* not --blue-bright: white on it is 4.05:1 by day */
+		box-shadow: 0 8px 18px -10px var(--blue);
 	}
 	.panel + .panel { margin-top: 2.4rem; }
 	:global(html.js) .panel + .panel { margin-top: 0; }
