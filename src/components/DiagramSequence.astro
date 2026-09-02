@@ -46,11 +46,14 @@ const my = (i: number) => PAD + HEAD + STEP * (i + 1) - 10
 	{messages.map((m, i) => {
 		const y = my(i)
 		if (m.from === m.to) {
+			// A self-call hooks out to the right — except on the last actor, where it hooks
+			// left and the label is end-anchored so it cannot run past the viewBox edge.
 			const x = cx(m.from)
+			const side = m.from === n - 1 ? -1 : 1
 			return (
 				<g>
-					<path d={`M${x} ${y - 14} h26 v20 h-20`} fill="none" stroke="var(--blue-bright)" stroke-width="2" marker-end={`url(#${id}-m)`} />
-					<text class="msg" x={x + 32} y={y - 2}>{m.label}</text>
+					<path d={`M${x} ${y - 14} h${side * 26} v20 h${side * -20}`} fill="none" stroke="var(--blue-bright)" stroke-width="2" marker-end={`url(#${id}-m)`} />
+					<text class="msg" x={x + side * 32} y={y - 2} text-anchor={side < 0 ? 'end' : undefined}>{m.label}</text>
 				</g>
 			)
 		}

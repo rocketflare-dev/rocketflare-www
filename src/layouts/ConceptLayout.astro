@@ -1,7 +1,7 @@
 ---
 import BaseLayout from './BaseLayout.astro'
 import ConceptIcon from '../components/ConceptIcon.astro'
-import { CONCEPTS, conceptBySlug } from '../data/concepts'
+import { CONCEPTS, CONCEPT_GROUPS, conceptBySlug, conceptsInGroup } from '../data/concepts'
 import { CONCEPTS_URL, GITHUB_URL } from '../data/site'
 
 interface Props {
@@ -45,10 +45,15 @@ const reference = c.anchor ? `${CONCEPTS_URL}#${c.anchor}` : `${GITHUB_URL}/blob
 			<aside class="side">
 				<p class="side-head">Concepts</p>
 				<nav>
-					{CONCEPTS.map((x) => (
-						<a href={`/concepts/${x.slug}/`} class:list={['side-link', x.slug === slug && 'current']}>
-							<span class="side-num">{x.num}</span> {x.title}
-						</a>
+					{CONCEPT_GROUPS.map((g) => (
+						<div class="side-group">
+							<span class="side-group-head">{g.title}</span>
+							{conceptsInGroup(g.key).map((x) => (
+								<a href={`/concepts/${x.slug}/`} class:list={['side-link', x.slug === slug && 'current']}>
+									<span class="side-num">{x.num}</span> {x.title}
+								</a>
+							))}
+						</div>
 					))}
 				</nav>
 				<a class="side-ref" href={reference} target="_blank" rel="noopener">
@@ -147,7 +152,17 @@ const reference = c.anchor ? `${CONCEPTS_URL}#${c.anchor}` : `${GITHUB_URL}/blob
 		color: var(--text-muted);
 		margin-bottom: 0.7rem;
 	}
-	.side nav { display: flex; flex-direction: column; border-left: 2px solid var(--border); }
+	.side nav { display: flex; flex-direction: column; gap: 0.9rem; border-left: 2px solid var(--border); }
+	.side-group { display: flex; flex-direction: column; }
+	.side-group-head {
+		padding: 0 0.9rem 0.25rem;
+		font-size: 0.68rem;
+		font-weight: 700;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		color: var(--text-muted);
+		opacity: 0.75;
+	}
 	.side-link {
 		display: flex;
 		gap: 0.5rem;
@@ -224,6 +239,16 @@ const reference = c.anchor ? `${CONCEPTS_URL}#${c.anchor}` : `${GITHUB_URL}/blob
 		vertical-align: top;
 	}
 	.prose :global(tr:hover td) { background: var(--card-alt); }
+
+	/* A diagram (one of the Diagram* components) with its caption: full prose width. */
+	.prose :global(.figure) { margin: 1.5rem 0; }
+	.prose :global(.figure figcaption) {
+		margin-top: 0.7rem;
+		font-size: 0.88rem;
+		line-height: 1.5;
+		color: var(--text-muted);
+	}
+	.prose :global(.figure + table) { margin-top: 0.6rem; }
 
 	/* A "why" callout: the decision behind the thing just described. */
 	.prose :global(.why) {

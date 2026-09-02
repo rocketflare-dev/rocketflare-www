@@ -38,7 +38,6 @@ grep -rl "fonts.googleapis" dist  # nothing — fonts are self-hosted by the Fon
 | `src/pages/index.astro` | the landing page |
 | `src/pages/{tour,get-started,who-is-it-for}.astro` | placeholders until their content lands (`ready: false`) |
 | `src/pages/concepts/*` | one page per subsystem, plus the index |
-| `src/pages/kitchen.astro` | every component with sample props; `noindex`; **delete before merge** |
 | `src/pages/llms.txt.ts` | the llms.txt map, generated from `pages.ts` + `concepts.ts` |
 | `src/components/SectionHead.astro` | eyebrow / h2 / lede, optional audience tag |
 | `src/components/Callout.astro` | boxed aside with an icon chip (`tone`, `title`, `icon` slot) |

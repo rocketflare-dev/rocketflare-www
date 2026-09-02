@@ -24,11 +24,13 @@ Workflow), Hono 4, zod contracts, CASL, Postgres 17 + pgvector through Hyperdriv
 Drizzle over postgres.js, React 18 + Vite, drizzle-cube for analytics, a commander
 CLI. Node 24, pnpm 10.
 
-Getting started: clone the repository, open it in a coding agent, and ask it to
-"Help me set up this project"; the repository's CLAUDE.md makes it walk SETUP.md
-step by step. Local development needs a free Cloudflare account only because the
-Workers AI binding always calls out; deploying needs Workers Paid for Hyperdrive
-and Workflows.
+Getting started: clone the repository and run "bash scripts/bootstrap.sh" (macOS
+or Linux, Docker running) — it checks the toolchain, starts Postgres, migrates,
+seeds a demo workspace and opens the browser signed in; or open the folder in
+Claude Code and type /setup (the repository ships /setup, /preflight, /adapt and
+/provision as skills). Local development needs a free Cloudflare login only because
+the Workers AI binding always calls out (--offline turns it off); deploying needs
+Workers Paid for Hyperdrive and Workflows and is scripted by "pnpm provision".
 
 ## Pages
 

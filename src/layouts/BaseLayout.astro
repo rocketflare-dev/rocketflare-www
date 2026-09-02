@@ -11,7 +11,7 @@ interface Props {
 	ogType?: 'website' | 'article'
 	/** Extra JSON-LD to emit alongside the site-wide graph. */
 	jsonLd?: Record<string, unknown>
-	/** Keep the page out of search results (placeholders, the kitchen sink). */
+	/** Keep the page out of search results (placeholders). */
 	noindex?: boolean
 }
 
@@ -41,7 +41,7 @@ const softwareLd = {
 	codeRepository: GITHUB_URL,
 	license: 'https://opensource.org/licenses/MIT',
 	description:
-		'An open-source multi-tenant B2B SaaS starter kit for Cloudflare Workers: tenancy, authentication, roles and permissions, background jobs, realtime, file storage, analytics dashboards, an AI agent layer and a CLI, running as one Worker over Postgres.',
+		'A ready-made web app you copy and make your own: sign-in, teams and permissions, an AI assistant that reads your documents, dashboards and background jobs — one Cloudflare Worker over Postgres, MIT licensed, with a one-command first run.',
 	offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
 	keywords:
 		'B2B SaaS Cloudflare, SaaS app Cloudflare Workers, agentic SaaS, multi-tenant SaaS starter kit, Cloudflare Workers boilerplate, Hono, Drizzle, Postgres, AI agents',
@@ -415,7 +415,7 @@ const softwareLd = {
 	.btn-ghost:hover { border-color: var(--blue); color: var(--blue); }
 
 	/* ------------------------------------------------------------ nav --- */
-	nav {
+	nav.site-nav {
 		position: sticky;
 		top: 0;
 		z-index: 50;
@@ -509,10 +509,28 @@ const softwareLd = {
 		transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
 	}
 	.reveal.in { opacity: 1; transform: none; }
+	/* A list that reveals its children one after another: the wrapper carries .reveal too (the
+	   observer watches it) and the children slide in behind it. Hidden only once html.js exists,
+	   so a reader without scripts sees every item. */
+	html.js .reveal-stagger > * {
+		opacity: 0;
+		transform: translateY(14px);
+		transition: opacity 0.55s ease, transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+	}
+	.reveal.reveal-stagger { transform: none; }
+	.reveal-stagger.in > * { opacity: 1; transform: none; }
+	.reveal-stagger > :nth-child(2) { transition-delay: 0.07s; }
+	.reveal-stagger > :nth-child(3) { transition-delay: 0.14s; }
+	.reveal-stagger > :nth-child(4) { transition-delay: 0.21s; }
+	.reveal-stagger > :nth-child(5) { transition-delay: 0.28s; }
+	.reveal-stagger > :nth-child(6) { transition-delay: 0.35s; }
+	.reveal-stagger > :nth-child(7) { transition-delay: 0.42s; }
+	.reveal-stagger > :nth-child(8) { transition-delay: 0.49s; }
 
 	@media (prefers-reduced-motion: reduce) {
 		html { scroll-behavior: auto; }
 		.reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
+		.reveal-stagger > * { opacity: 1 !important; transform: none !important; transition: none !important; }
 		*, *::before, *::after {
 			animation-duration: 0.001ms !important;
 			animation-iteration-count: 1 !important;

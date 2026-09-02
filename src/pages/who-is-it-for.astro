@@ -1,26 +1,319 @@
 ---
 /**
- * Placeholder — the real page lands later on the overhaul branch. It exists so
- * the nav and footer (generated from src/data/pages.ts) never link to a 404;
- * it is `noindex` and left out of the sitemap until `ready` flips to true.
+ * Who the kit is for: three things you would build on it, what is already
+ * done for each, what you add and where to start — then, just as plainly,
+ * who should pick something else, and the two doors out (ship it / read it).
+ *
+ * Plain voice: every mechanism is named only in a trailing "(behind it: …)".
  */
+import type { ImageMetadata } from 'astro'
 import BaseLayout from '../layouts/BaseLayout.astro'
+import Screenshot from '../components/Screenshot.astro'
 import { pageByPath } from '../data/pages'
+import { conceptBySlug } from '../data/concepts'
+
+import peopleLight from '../assets/screens/people.light.png'
+import peopleDark from '../assets/screens/people.dark.png'
+import researchLight from '../assets/screens/agents-research.light.png'
+import researchDark from '../assets/screens/agents-research.dark.png'
+import analyticsLight from '../assets/screens/analytics.light.png'
+import analyticsDark from '../assets/screens/analytics.dark.png'
 
 const page = pageByPath('/who-is-it-for/')
 if (!page) throw new Error('Page not in the registry: /who-is-it-for/')
+
+interface Sketch {
+	id: string
+	eyebrow: string
+	title: string
+	lede: string
+	tone: 'blue' | 'red' | 'green'
+	shot: { light: ImageMetadata; dark: ImageMetadata; alt: string; url: string }
+	done: string[]
+	add: string[]
+	start: string[]
+	/** The concept page that explains the mechanism. */
+	behind: string
+}
+
+const HOST = 'localhost:3000'
+
+const sketches: Sketch[] = [
+	{
+		id: 'internal-tool',
+		eyebrow: 'What would I build · 1',
+		title: 'An internal operations tool',
+		lede: 'The app your team opens every morning: a few tables, a few pages, and the boring parts — who can sign in, who can do what, what happened — already handled.',
+		tone: 'blue',
+		shot: {
+			light: peopleLight,
+			dark: peopleDark,
+			alt: 'The People tab: members with their roles and a pending invitation',
+			url: `${HOST}/settings?tab=people`,
+		},
+		done: [
+			'Sign-in with Google or Microsoft, or an emailed link',
+			'Roles — owner, admin, member — and pages that respect them',
+			'An audit trail of who did what',
+			'Background jobs and a page that refreshes when they finish',
+		],
+		add: ['Your tables', 'Your pages'],
+		start: [
+			'<code>/adapt</code> renames the kit to your name in one pass',
+			'Then one route and one page — the rules and examples show the shape',
+		],
+		behind: 'tenancy',
+	},
+	{
+		id: 'customer-portal',
+		eyebrow: 'What would I build · 2',
+		title: 'A customer portal with AI over documents',
+		lede: 'Each customer uploads their own documents and asks questions about them — and never sees another customer’s.',
+		tone: 'red',
+		shot: {
+			light: researchLight,
+			dark: researchDark,
+			alt: 'A research-topic run: the answer and its citation to the document it read',
+			url: `${HOST}/agents`,
+		},
+		done: [
+			'Per-customer isolation — every row belongs to one organisation',
+			'Document upload, conversion and search',
+			'Chat, and agents that cite the sources they used',
+			'AI usage and cost per customer',
+		],
+		add: ['Your document types', 'Your prompts'],
+		start: [
+			'Ingest one document on the Knowledge page',
+			'Ask <code>research-topic</code> a question about it and read the citation',
+		],
+		behind: 'ai',
+	},
+	{
+		id: 'analytics-product',
+		eyebrow: 'What would I build · 3',
+		title: 'An analytics-heavy B2B product',
+		lede: 'Numbers are the product: each organisation gets dashboards over its own data, kept fresh on a schedule, with a query surface for questions you did not anticipate.',
+		tone: 'green',
+		shot: {
+			light: analyticsLight,
+			dark: analyticsDark,
+			alt: 'The Organisation Overview dashboard: KPIs, sign-ups over time, members by role',
+			url: `${HOST}/analytics`,
+		},
+		done: [
+			'A semantic layer: name a measure once, chart it anywhere',
+			'Dashboards per organisation, copied from templates in the repo',
+			'Summary tables rebuilt on a schedule, one organisation at a time',
+		],
+		add: ['Your cubes — the measures and dimensions of your domain'],
+		start: [
+			'One cube over one of your tables',
+			'Its case in the isolation test, which refuses a cube without one',
+		],
+		behind: 'analytics',
+	},
+]
+
+const behindOf = (slug: string) => {
+	const c = conceptBySlug(slug)
+	if (!c) throw new Error(`Unknown concept slug: ${slug}`)
+	return { href: `/concepts/${c.slug}/`, title: c.title }
+}
+
+const notFor = [
+	{ need: 'Billing or subscriptions out of the box', why: 'there is no payments layer; add Stripe yourself, or start from a kit built around it.' },
+	{ need: 'A marketplace or a multi-sided platform', why: 'the model is organisations with members, not buyers meeting sellers.' },
+	{ need: 'A mobile-first native app', why: 'the UI is a responsive web app; the API is yours to call, but there is no native client.' },
+	{ need: 'Anything that is not Cloudflare Workers', why: 'the whole kit is one Worker over Postgres — there is no Node or Docker target for the app itself.' },
+	{ need: 'A single-user tool with no organisations', why: 'single-tenant mode keeps the organisation concept; it just stops there being more than one.' },
+]
 ---
 <BaseLayout title={page.title} description={page.description} noindex={!page.ready}>
-	<section class="placeholder">
+	<header class="hero bg-sky">
+		<div class="wrap hero-inner">
+			<span class="eyebrow">Who it's for</span>
+			<h1>Who this is for — and who it isn't</h1>
+			<p class="lede">
+				Rocketflare is for a product where people belong to organisations and the organisation is the
+				boundary: a team's internal tool, a customer portal, a B2B product. Three sketches of what you
+				would build on it, then the honest list of what to pick something else for.
+			</p>
+		</div>
+	</header>
+
+	<section class="sketches">
+		<div class="wrap">
+			{sketches.map((s, i) => {
+				const behind = behindOf(s.behind)
+				return (
+					<article id={s.id} class:list={['sketch', 'reveal', `tone-${s.tone}`, i % 2 === 1 && 'flip']} aria-labelledby={`${s.id}-title`}>
+						<div class="media">
+							<Screenshot light={s.shot.light} dark={s.shot.dark} alt={s.shot.alt} url={s.shot.url} crop="top" priority={i === 0} />
+						</div>
+						<div class="text">
+							<span class="eyebrow">{s.eyebrow}</span>
+							<h2 id={`${s.id}-title`}>{s.title}</h2>
+							<p class="sketch-lede">{s.lede}</p>
+							<div class="lists">
+								<div class="list">
+									<h3>Already done</h3>
+									<ul>{s.done.map((x) => <li set:html={x} />)}</ul>
+								</div>
+								<div class="list">
+									<h3>You add</h3>
+									<ul>{s.add.map((x) => <li set:html={x} />)}</ul>
+								</div>
+								<div class="list">
+									<h3>Start</h3>
+									<ul>{s.start.map((x) => <li set:html={x} />)}</ul>
+								</div>
+							</div>
+							<p class="behind">(behind it: <a href={behind.href}>{behind.title}</a>)</p>
+						</div>
+					</article>
+				)
+			})}
+		</div>
+	</section>
+
+	<section class="not-for bg-band">
 		<div class="wrap-narrow">
-			<span class="eyebrow">Coming soon</span>
-			<h1>{page.nav}</h1>
-			<p class="measure">{page.description} This page is coming in this branch.</p>
+			<span class="eyebrow">The honest part</span>
+			<h2>Not for you if…</h2>
+			<ul class="reveal">
+				{notFor.map((n) => (
+					<li>
+						<strong>{n.need}</strong>
+						<span> — {n.why}</span>
+					</li>
+				))}
+			</ul>
+			<p class="text-muted">
+				None of these is a judgement on the idea — they are the shape of this kit. A fork that adds
+				billing is a fine fork; the kit does not carry it.
+			</p>
+		</div>
+	</section>
+
+	<section class="doors">
+		<div class="wrap">
+			<div class="door-grid">
+				<a class="door reveal tone-orange" href="/get-started/">
+					<span class="eyebrow">I want to ship a product</span>
+					<h2>Get started</h2>
+					<p>One command on a laptop with Docker: the app running, you signed in, nothing to sign up for. Then rename it and build your first page.</p>
+					<span class="door-cta">Get started →</span>
+				</a>
+				<a class="door reveal tone-blue" href="/concepts/">
+					<span class="eyebrow">I want to read the design</span>
+					<h2>Read the concepts</h2>
+					<p>One page per subsystem: what it does, the rule it protects, and the decision behind it — the reasoning, not just the result.</p>
+					<span class="door-cta">Read the concepts →</span>
+				</a>
+			</div>
 		</div>
 	</section>
 </BaseLayout>
 
 <style>
-	.placeholder { padding: 5rem 0 6rem; min-height: 50vh; }
-	.placeholder p { color: var(--text-muted); font-size: var(--step-1); }
+	.hero { padding: 3.2rem 0 3.4rem; border-bottom: 1px solid var(--border); }
+	.hero-inner { max-width: 900px; }
+	.hero h1 { font-size: clamp(2.2rem, 5vw, 3.4rem); margin-bottom: 0.4em; }
+	.lede { font-size: 1.12rem; color: var(--text-muted); max-width: 62ch; margin: 0; }
+
+	/* --------------------------------------------------------- sketches -- */
+	.sketches { padding: 3rem 0 4rem; }
+	.sketch {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+		gap: 2.6rem;
+		align-items: center;
+		padding: 3rem 0;
+		border-top: 1px solid var(--border);
+	}
+	.sketch:first-child { border-top: 0; padding-top: 0; }
+	.sketch.flip .media { order: 2; }
+	.media { min-width: 0; }
+	.media :global(.shot) { margin: 0; }
+	.media :global(figure.shot.crop-top .body) { max-height: 340px; } /* outranks the component's 420px */
+	.text { min-width: 0; }
+	.text .eyebrow { color: var(--accent); margin-bottom: 0.5rem; }
+	.text h2 { font-size: var(--step-2); margin-bottom: 0.5rem; }
+	.sketch-lede { color: var(--text-muted); margin-bottom: 1.3rem; }
+	.lists { display: grid; gap: 1.1rem; }
+	.list h3 {
+		font-size: 0.74rem;
+		font-weight: 700;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		color: var(--text-muted);
+		margin: 0 0 0.35rem;
+	}
+	.list ul { list-style: none; margin: 0; padding: 0; }
+	.list li { position: relative; padding-left: 1.2rem; margin-bottom: 0.3rem; font-size: 0.95rem; }
+	.list li::before {
+		content: '';
+		position: absolute;
+		left: 0;
+		top: 0.62em;
+		width: 7px;
+		height: 7px;
+		border-radius: 2px;
+		background: var(--accent);
+		transform: rotate(45deg);
+	}
+	.behind { margin: 1.2rem 0 0; font-size: 0.9rem; color: var(--text-muted); }
+
+	/* ----------------------------------------------------------- not for -- */
+	.not-for { padding: 4.5rem 0; }
+	.not-for h2 { margin-bottom: 1.4rem; }
+	.not-for ul { list-style: none; margin: 0 0 1.6rem; padding: 0; }
+	.not-for li {
+		padding: 0.9rem 0;
+		border-top: 1px solid color-mix(in srgb, var(--band-ink) 14%, transparent);
+		font-size: 1.02rem;
+	}
+	.not-for li:last-child { border-bottom: 1px solid color-mix(in srgb, var(--band-ink) 14%, transparent); }
+	.not-for strong { color: var(--band-ink); }
+	.not-for li span { color: var(--band-muted); }
+
+	/* ------------------------------------------------------------- doors -- */
+	.doors { padding: 4.5rem 0 5rem; }
+	.door-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.6rem; }
+	.door {
+		display: flex;
+		flex-direction: column;
+		padding: 1.8rem 1.9rem 1.6rem;
+		border: 1px solid var(--border);
+		border-radius: 20px;
+		background:
+			radial-gradient(520px 220px at 0% 0%, var(--tint), transparent 70%),
+			var(--card);
+		box-shadow: var(--shadow-sm);
+		color: var(--text);
+		transition: transform 0.18s ease, border-color 0.18s ease;
+	}
+	.door:hover { text-decoration: none; transform: translateY(-3px); border-color: var(--accent); }
+	.door .eyebrow { color: var(--accent); }
+	.door h2 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+	.door p { color: var(--text-muted); margin-bottom: 1.2rem; }
+	.door-cta { margin-top: auto; font-weight: 700; color: var(--accent); }
+
+	@media (max-width: 860px) {
+		.sketch, .sketch.flip { grid-template-columns: minmax(0, 1fr); gap: 1.4rem; padding: 2.2rem 0; }
+		.sketch.flip .media { order: 0; }
+		.door-grid { grid-template-columns: 1fr; }
+	}
+	/* "Already done" is the long list: full width, with "You add" and "Start"
+	   side by side under it. */
+	@media (min-width: 560px) {
+		.lists { grid-template-columns: 1fr 1fr; }
+		.list:first-child { grid-column: 1 / -1; }
+		.list:first-child ul { columns: 2; column-gap: 1.4rem; }
+		.list:first-child li { break-inside: avoid; }
+	}
+	@media (max-width: 860px) {
+		.sketch, .sketch.flip { grid-template-columns: minmax(0, 1fr); }
+	}
 </style>

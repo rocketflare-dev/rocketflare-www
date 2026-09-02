@@ -1,5 +1,18 @@
 ---
 import ConceptLayout from '../../layouts/ConceptLayout.astro'
+import DiagramSequence from '../../components/DiagramSequence.astro'
+
+/** `rocketflare login` (apps/cli/src/auth.ts ↔ GET /auth/cli; docs/CONCEPTS.md §2, §11). */
+const loginMessages = [
+	{ from: 0, to: 0, label: 'listen on 127.0.0.1:<port>' },
+	{ from: 0, to: 1, label: 'open /auth/cli?redirect_uri=…' },
+	{ from: 1, to: 2, label: 'sign in, pick a tenant' },
+	{ from: 2, to: 2, label: 'mint key cli:<hostname>' },
+	{ from: 2, to: 1, label: '302 → callback?key=&tenant_id=' },
+	{ from: 1, to: 0, label: 'GET /callback?key=…' },
+	{ from: 0, to: 2, label: 'GET /api/me verifies the key' },
+	{ from: 0, to: 0, label: 'write config.json (0600)' },
+]
 ---
 <ConceptLayout
 	slug="cli"
@@ -44,7 +57,19 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		<code>rocketflare login</code> avoids asking anyone to paste a token. The sequence is small
 		enough to describe completely:
 	</p>
-	<ol>
+	<figure class="figure">
+		<DiagramSequence
+			actors={['Terminal', 'Browser', 'App']}
+			messages={loginMessages}
+			describedBy="cli-login-steps"
+			title="rocketflare login: the terminal opens the browser, the app mints a key and sends it back to a loopback listener"
+		/>
+		<figcaption>
+			The key crosses exactly one boundary — the app to a listener on the same machine — and only
+			because the callback address is pinned to <code>127.0.0.1</code> or <code>localhost</code>.
+		</figcaption>
+	</figure>
+	<ol id="cli-login-steps">
 		<li>The CLI starts a loopback HTTP listener on the first free port in <code>8765–8770</code>.</li>
 		<li>
 			It opens the browser at <code>/auth/cli</code> on the server, passing the callback URL and
@@ -62,8 +87,8 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		</li>
 		<li>
 			The listener answers with a self-closing page, verifies the key against
-			<code>/api/me</code>, stores it, and shuts down. The whole thing times out after five
-			minutes.
+			<code>/api/me</code>, writes it to <code>~/.rocketflare/config.json</code> with mode
+			<code>0600</code>, and shuts down. The whole thing times out after five minutes.
 		</li>
 	</ol>
 	<p>

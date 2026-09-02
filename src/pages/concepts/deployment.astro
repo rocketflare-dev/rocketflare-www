@@ -1,5 +1,26 @@
 ---
 import ConceptLayout from '../../layouts/ConceptLayout.astro'
+import DiagramParity from '../../components/DiagramParity.astro'
+
+/** What wrangler-parity.test.ts locks together and what it lets differ (docs/CONCEPTS.md §10, docs/DEPLOY.md). */
+const shared = [
+	'binding names',
+	'class_name (DO, Workflow)',
+	'compatibility_date + flags',
+	'[limits]',
+	'[triggers] crons',
+	'[assets]',
+	'[[migrations]]',
+	'[vars] keys',
+]
+const differ = [
+	{ key: 'name', left: 'rocketflare', right: 'rocketflare-staging' },
+	{ key: 'APP_URL', left: 'https://app host', right: 'https://staging host' },
+	{ key: 'hyperdrive, kv ids', left: 'production', right: 'staging' },
+	{ key: 'queue', left: 'rocketflare-jobs', right: 'rocketflare-jobs-staging' },
+	{ key: 'workflow', left: 'rocketflare-agent-run', right: '…-agent-run-staging' },
+	{ key: 'bucket', left: 'rocketflare-files', right: 'rocketflare-files-staging' },
+]
 ---
 <ConceptLayout
 	slug="deployment"
@@ -36,7 +57,22 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		from the repository root and from inside <code>apps/web</code>. It asserts what may differ and
 		what may not:
 	</p>
-	<table>
+	<figure class="figure">
+		<DiagramParity
+			shared={shared}
+			differ={differ}
+			leftTitle="wrangler.toml"
+			rightTitle="wrangler.staging.toml"
+			describedBy="toml-parity"
+			title="The two wrangler files: what the parity test locks together, and where the values must differ"
+		/>
+		<figcaption>
+			Locked rows are compared verbatim between the two files. The rows that differ are the
+			worker's identity and its account-scoped resources — every one of those names ends in
+			<code>-staging</code> in the staging file.
+		</figcaption>
+	</figure>
+	<table id="toml-parity">
 		<thead><tr><th>Must differ</th><th>Must be identical</th></tr></thead>
 		<tbody>
 			<tr>

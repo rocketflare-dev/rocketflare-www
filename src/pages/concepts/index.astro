@@ -2,7 +2,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import ConceptIcon from '../../components/ConceptIcon.astro'
 import CloudDivider from '../../components/CloudDivider.astro'
-import { CONCEPTS, CONCEPT_COUNT, numberWord } from '../../data/concepts'
+import { CONCEPT_COUNT, CONCEPT_GROUPS, conceptsInGroup, numberWord } from '../../data/concepts'
 import { CONCEPTS_URL } from '../../data/site'
 
 const title = 'Concepts — how a multi-tenant SaaS on Cloudflare Workers fits together'
@@ -26,16 +26,24 @@ const description =
 
 	<section class="index-grid-wrap">
 		<div class="wrap">
-			<div class="index-grid">
-				{CONCEPTS.map((c) => (
-					<a class={`ccard tone-${c.tone} reveal`} href={`/concepts/${c.slug}/`}>
-						<span class="ccard-num">{c.num}</span>
-						<span class="chip"><ConceptIcon name={c.icon} /></span>
-						<h2>{c.title}</h2>
-						<p>{c.blurb}</p>
-					</a>
-				))}
-			</div>
+			{CONCEPT_GROUPS.map((g) => (
+				<div class="group">
+					<div class="group-head">
+						<h2>{g.title}</h2>
+						<p>{g.lede}</p>
+					</div>
+					<div class="index-grid">
+						{conceptsInGroup(g.key).map((c) => (
+							<a class={`ccard tone-${c.tone} reveal`} href={`/concepts/${c.slug}/`}>
+								<span class="ccard-num">{c.num}</span>
+								<span class="chip"><ConceptIcon name={c.icon} /></span>
+								<h3>{c.title}</h3>
+								<p>{c.blurb}</p>
+							</a>
+						))}
+					</div>
+				</div>
+			))}
 		</div>
 	</section>
 </BaseLayout>
@@ -50,6 +58,18 @@ const description =
 	.lede { max-width: 62ch; font-size: 1.1rem; color: var(--text-muted); }
 
 	.index-grid-wrap { padding: 0 0 5rem; background: var(--bg); }
+	.group + .group { margin-top: 3.6rem; }
+	.group-head {
+		display: flex;
+		align-items: baseline;
+		flex-wrap: wrap;
+		gap: 0.4rem 1.2rem;
+		margin-bottom: 1.3rem;
+		padding-bottom: 0.8rem;
+		border-bottom: 1px solid var(--border);
+	}
+	.group-head h2 { font-size: 1.35rem; margin: 0; }
+	.group-head p { margin: 0; color: var(--text-muted); font-size: 0.98rem; }
 	.index-grid {
 		display: grid;
 		grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -72,7 +92,7 @@ const description =
 		box-shadow: var(--shadow);
 		border-color: var(--accent);
 	}
-	.ccard h2 { font-size: 1.15rem; margin: 0 0 0.4rem; }
+	.ccard h3 { font-size: 1.15rem; margin: 0 0 0.4rem; }
 	.ccard p { margin: 0; font-size: 0.93rem; color: var(--text-muted); }
 	.ccard-num {
 		position: absolute;

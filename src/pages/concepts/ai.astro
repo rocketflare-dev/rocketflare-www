@@ -1,5 +1,21 @@
 ---
 import ConceptLayout from '../../layouts/ConceptLayout.astro'
+import DiagramCascade from '../../components/DiagramCascade.astro'
+
+/** resolveChat / resolveEmbeddings in services/ai/resolve.ts (docs/CONCEPTS.md §9): first that answers wins. */
+const chatTiers = [
+	{ label: 'Per-agent assignment', detail: 'agent_models (tenant, prompt key)' },
+	{ label: 'Tenant default provider', detail: 'ai_configs, scope = chat' },
+	{ label: 'Platform Anthropic key', detail: 'ANTHROPIC_API_KEY' },
+	{ label: 'Workers AI', detail: 'the AI binding — zero key' },
+	{ label: '503', detail: 'ai_not_configured' },
+]
+const embeddingTiers = [
+	{ label: 'Tenant default provider', detail: 'ai_configs (embeddings)' },
+	{ label: 'Workers AI', detail: 'bge-m3, 1024 dimensions' },
+	{ label: 'Platform OpenAI key', detail: 'EMBEDDINGS_API_KEY' },
+	{ label: '503', detail: 'ai_not_configured' },
+]
 ---
 <ConceptLayout
 	slug="ai"
@@ -20,23 +36,49 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		key: it asks for a client and calls it.
 	</p>
 	<p>
-		Chat resolves in this order, stopping at the first tier that can answer:
+		Chat resolves in this order, stopping at the first tier that can answer; embeddings take a
+		shorter chain of their own:
 	</p>
-	<table>
-		<thead><tr><th>Tier</th><th>What it is</th></tr></thead>
-		<tbody>
-			<tr><td>Agent</td><td>a per-agent model assignment, so one agent can run on a different provider or model from everything else</td></tr>
-			<tr><td>Tenant</td><td>the organisation's own default chat provider, configured in settings with its key encrypted at rest</td></tr>
-			<tr><td>Platform</td><td>an Anthropic key held by the deployment, used by every tenant that has not brought its own</td></tr>
-			<tr><td>Workers AI</td><td>the binding, with no key at all</td></tr>
-			<tr><td>None</td><td>a clean 503 saying AI is not configured</td></tr>
-		</tbody>
-	</table>
+	<figure class="figure">
+		<DiagramCascade
+			tiers={chatTiers}
+			secondary={embeddingTiers}
+			primaryTitle="chat"
+			secondaryTitle="embeddings"
+			describedBy="ai-resolver"
+			title="How a model client is resolved: the first tier that can answer wins, for chat and for embeddings"
+		/>
+		<figcaption>
+			Each column is tried top to bottom and the first tier that can build a client wins. Note the
+			two chains order their platform tiers differently: chat prefers a platform Anthropic key over
+			Workers AI, embeddings prefer Workers AI over a platform OpenAI key.
+		</figcaption>
+	</figure>
+	<div id="ai-resolver">
+		<table>
+			<thead><tr><th>Chat tier</th><th>What it is</th></tr></thead>
+			<tbody>
+				<tr><td>Agent</td><td>a per-agent model assignment, so one agent can run on a different provider or model from everything else</td></tr>
+				<tr><td>Tenant</td><td>the organisation's own default chat provider, configured in settings with its key encrypted at rest</td></tr>
+				<tr><td>Platform</td><td>an Anthropic key held by the deployment, used by every tenant that has not brought its own</td></tr>
+				<tr><td>Workers AI</td><td>the binding, with no key at all</td></tr>
+				<tr><td>None</td><td>a clean 503 saying AI is not configured</td></tr>
+			</tbody>
+		</table>
+		<table>
+			<thead><tr><th>Embeddings tier</th><th>What it is</th></tr></thead>
+			<tbody>
+				<tr><td>Tenant</td><td>the organisation's own embeddings provider</td></tr>
+				<tr><td>Workers AI</td><td>the binding, running <code>@cf/baai/bge-m3</code> at 1024 dimensions, with no key</td></tr>
+				<tr><td>Platform</td><td>an OpenAI key held by the deployment, for <code>text-embedding-3-small</code> reduced to the same width</td></tr>
+				<tr><td>None</td><td>the same 503</td></tr>
+			</tbody>
+		</table>
+	</div>
 	<p>
-		Embeddings resolve the same way with a shorter chain: the tenant's own embeddings provider, then
-		Workers AI, then a platform OpenAI key, then the same 503. Both platform tiers are one function
-		that the resolver, the readiness endpoint and the model-assignment screen all read, so the thing
-		the settings page tells you is ready is by construction the thing the runtime will pick.
+		Both platform tiers of the chat chain are one function that the resolver, the readiness endpoint
+		and the model-assignment screen all read, so the thing the settings page tells you is ready is by
+		construction the thing the runtime will pick.
 	</p>
 
 	<div class="why">

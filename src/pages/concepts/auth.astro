@@ -40,8 +40,9 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 
 	<h2>The magic link is the zero-credential path</h2>
 	<p>
-		A magic link is an HMAC-signed token, valid for fifteen minutes, usable once, and stored as a
-		SHA-256 hash rather than in the clear. Nothing about it depends on an email provider being
+		A magic link carries 256 random bits — an unguessable token, not a signed one — valid for
+		fifteen minutes, usable once, and stored as a SHA-256 hash rather than in the clear, so a copy of
+		the database cannot be replayed as a login. Nothing about it depends on an email provider being
 		configured: without <code>RESEND_API_KEY</code> the URL is written to the log instead of sent, so
 		a freshly cloned repository can be signed into with no accounts, no keys and no external service
 		at all.
@@ -53,15 +54,23 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 	</p>
 	<p>
 		A development login route exists alongside it for convenience and returns a 404 in production —
-		it is not gated by a flag that somebody can set wrongly, it simply is not there.
+		it is not gated by a flag that somebody can set wrongly, it simply is not there. In development,
+		<code>/login?as=&lt;email&gt;</code> signs straight in as one of the seeded demo accounts through
+		that route — it is what the bootstrap opens — and the page honours it only when the server
+		reports that dev login is available and the address is on the seeded allow-list; any other
+		address in the URL does nothing.
 	</p>
 
 	<h2>OAuth is a registry, not a copy-paste</h2>
 	<p>
 		Rather than a file per provider, there is one generic pair of routes —
 		<code>/auth/:provider</code> and <code>/auth/:provider/callback</code> — over a list of provider
-		definitions. Google and Microsoft ship; adding a third is one definition file with its endpoints,
-		scopes and profile mapping, and no new routing.
+		definitions. The OAuth client underneath is
+		<a href="https://arcticjs.dev" rel="noopener">arctic</a>, which already speaks to more than fifty
+		providers — GitHub, GitLab, Slack, Apple, Okta, Auth0, Discord, LinkedIn, Keycloak and the rest —
+		so the kit is not limited to the two it ships with. Google and Microsoft are wired; adding
+		another is one definition file with its arctic client, scopes and profile mapping, and no new
+		routing.
 	</p>
 	<p>
 		Redirect URIs are derived from <code>APP_URL</code>, so there is no
@@ -75,20 +84,24 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		unique, so the same external account cannot be attached to two people.
 	</p>
 
-	<h2>What encrypts what, and why they are separate</h2>
+	<h2>What protects what</h2>
 	<table>
-		<thead><tr><th>Secret</th><th>Job</th></tr></thead>
+		<thead><tr><th>Thing</th><th>Protected by</th></tr></thead>
 		<tbody>
-			<tr><td><code>AUTH_SIGNING_KEY</code></td><td>signs magic-link tokens</td></tr>
-			<tr><td><code>OAUTH_ENCRYPTION_KEY</code></td><td>AES-GCM encryption of OAuth tokens, and of tenant AI credentials, at rest</td></tr>
+			<tr><td>magic-link and invitation tokens</td><td>no key at all: 256 random bits in the URL, only the SHA-256 hash in the row</td></tr>
+			<tr><td>session cookies and tenant API keys</td><td>the same shape — a random token in the client's hands, its hash in the database; an API key's plaintext is shown once</td></tr>
+			<tr><td>OAuth tokens and tenant AI provider keys</td><td><code>OAUTH_ENCRYPTION_KEY</code> — AES-GCM encryption at rest</td></tr>
 		</tbody>
 	</table>
 	<p>
-		They are two values on purpose, so either can be rotated without invalidating what the other
-		protects. Neither is derived from the database URL, which would tie the ability to forge a login
-		token to the ability to read a connection string. Key material comes from
-		<code>crypto.getRandomValues</code>, and there is no plaintext pass-through when the encryption
-		key is missing — the app refuses instead.
+		There is one secret to manage, and it is an encryption key rather than a signing key. Nothing on
+		the login path is signed, so there is no key whose theft lets somebody forge a login — a token is
+		either the random value that was issued or it is not, and a stolen database holds only hashes.
+		The one key that does exist is never derived from the database URL, which would tie the ability
+		to read a connection string to the ability to read every stored credential. Random material comes
+		from <code>crypto.getRandomValues</code>, and there is no plaintext pass-through when the
+		encryption key is missing — the operation refuses instead. Rotating it invalidates every
+		stored provider credential, since there is no re-encrypt path; administrators re-enter the key.
 	</p>
 
 	<h2>Hardening at the edges</h2>

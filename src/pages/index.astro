@@ -1,139 +1,144 @@
 ---
+/**
+ * The landing page. Nine sections, no two neighbours sharing a layout family:
+ * hero (sky) → proof (one big screenshot) → first run (chat | terminal, on a
+ * card between two cloud edges) → what it does (triptych) → also included
+ * (flat icon list) → under the hood (dark band) → who it is for (two columns)
+ * → before you start (three callouts) → call to action.
+ *
+ * Every kit literal quoted here comes from src/data/get-started.ts.
+ */
 import BaseLayout from '../layouts/BaseLayout.astro'
 import SkyScene from '../components/SkyScene.astro'
 import CloudDivider from '../components/CloudDivider.astro'
 import ConceptIcon from '../components/ConceptIcon.astro'
-import { GITHUB_URL, SETUP_URL, ADAPTING_URL } from '../data/site'
-import { CONCEPT_COUNT, numberWord } from '../data/concepts'
+import LogoMark from '../components/LogoMark.astro'
+import SectionHead from '../components/SectionHead.astro'
+import Screenshot from '../components/Screenshot.astro'
+import AgentChat from '../components/AgentChat.astro'
+import Terminal from '../components/Terminal.astro'
+import Steps from '../components/Steps.astro'
+import Callout from '../components/Callout.astro'
+import { GITHUB_URL } from '../data/site'
+import { CONCEPT_COUNT, conceptBySlug, numberWord } from '../data/concepts'
+import { pageByPath } from '../data/pages'
+import {
+	AGENT_NAME,
+	AGENT_PROMPT,
+	APP_URL,
+	BOOTSTRAP_CMD,
+	BOOTSTRAP_EXPECT,
+	BOOTSTRAP_READY_LINE,
+	BOOTSTRAP_STEPS,
+	bootstrapLine,
+	CLONE_CMD,
+	DEMO,
+} from '../data/get-started'
 
-const title = 'Rocketflare — multi-tenant B2B SaaS starter kit for Cloudflare Workers'
+import homeLight from '../assets/screens/home.light.png'
+import homeDark from '../assets/screens/home.dark.png'
+import chatLight from '../assets/screens/chat.light.png'
+import chatDark from '../assets/screens/chat.dark.png'
+import agentsLight from '../assets/screens/agents-run.light.png'
+import agentsDark from '../assets/screens/agents-run.dark.png'
+import documentsLight from '../assets/screens/documents.light.png'
+import documentsDark from '../assets/screens/documents.dark.png'
+import analyticsLight from '../assets/screens/analytics.light.png'
+import analyticsDark from '../assets/screens/analytics.dark.png'
+import peopleLight from '../assets/screens/people.light.png'
+import peopleDark from '../assets/screens/people.dark.png'
+
+const page = pageByPath('/')
+if (!page) throw new Error('Page not in the registry: /')
+
 const description =
-	'Open-source starter kit for building a multi-tenant B2B SaaS app on Cloudflare Workers: tenancy, authentication, roles, background jobs, realtime, file storage, analytics dashboards, AI agents and a CLI — already built and tested, running as one Worker over Postgres, and designed to be worked on by coding agents.'
+	'Rocketflare is a ready-made web app you copy and make your own: sign-in, teams and permissions, an AI assistant that reads your documents, dashboards and background jobs — one Cloudflare Worker over Postgres, open source, running on your laptop in about two minutes.'
 
-/** The things you get, mapped 1:1 to the README's feature groups — the copy
- *  below counts them from this array, so add one here and nothing else. `href`
- *  points at the concept page; `icon` is a ConceptIcon name. */
-const features = [
-	{
-		tone: 'orange',
-		title: 'Agent-first by design',
-		lead: 'Built from the start to be worked on by a coding agent.',
-		points: [
-			'A root <code>CLAUDE.md</code> (and <code>AGENTS.md</code>) that is the map, read every session',
-			'Layer rules in <code>.claude/rules/</code> that load themselves by path, so the API rules arrive when you open a route',
-			'A guide in every significant directory, plus a written record of why each subsystem is the way it is',
-			'One gate — lint, typecheck, test, build — whose tests enforce the rules an agent would otherwise forget',
-		],
-		href: '/concepts/agent-first/',
-		icon: 'robot',
-	},
-	{
-		tone: 'blue',
-		title: 'Tenancy and access',
-		lead: 'Multi- or single-tenant from one schema — flip a var, no migration.',
-		points: [
-			'Every domain row carries a <code>tenant_id</code>; every query filters by the session tenant',
-			'<code>owner · admin · member</code> plus platform support and global admins, CASL abilities shared by API and UI',
-			'Invitations, role changes, ownership transfer, an activity log and an admin area',
-			'Row-level security policies ship inert, with a catalog test that fails CI if a table is missed',
-		],
-		href: '/concepts/tenancy/',
-		icon: 'building',
-	},
-	{
-		tone: 'purple',
-		title: 'Authentication',
-		lead: 'Sign in on the first run with no credentials at all.',
-		points: [
-			'Magic link — HMAC-signed, single-use, hashed at rest, logged locally when no mail provider exists',
-			'Google and Microsoft OAuth from one provider registry; adding a third is one file',
-			'Sessions as rows behind a <code>__Host-</code> cookie; hashed, scoped tenant API keys',
-			'CSRF, rate limits, security headers, body limits and gitleaks in CI',
-		],
-		href: '/concepts/auth/',
-		icon: 'key',
-	},
-	{
-		tone: 'orange',
-		title: 'Background work and realtime',
-		lead: 'Routes enqueue. They never run long work.',
-		points: [
-			'One typed jobs queue — poison messages are acked, handler errors retry with capped backoff',
-			'Durable Workflows where the database row is the claim, so a retry re-claims and settled rows stay settled',
-			'A cron dispatcher for nightly pruning and hourly fact rebuilds',
-			'One stateless Durable Object per tenant: the server nudges, the UI re-queries',
-		],
-		href: '/concepts/background-work/',
-		icon: 'bolt',
-	},
-	{
-		tone: 'cyan',
-		title: 'Email and files',
-		lead: 'Both degrade gracefully instead of failing.',
-		points: [
-			'Resend over plain <code>fetch</code> with shared templates; without a key, mail is logged, never lost',
-			'R2 storage behind a service seam with tenant-prefixed keys and per-scope MIME and size limits',
-			'An indexed <code>files</code> table, ETag/304 downloads, avatars wired end to end',
-		],
-		href: '/concepts/email-and-files/',
-		icon: 'inbox',
-	},
-	{
-		tone: 'red',
-		title: 'AI layer',
-		lead: 'Chat, agents and retrieval — with a zero-key floor on Workers AI.',
-		points: [
-			'Per-agent model → tenant provider → platform key → Workers AI → a clean 503, resolved in one place',
-			'Streamed chat over SSE, a prompt registry tenants can override, agents that run on Workflows',
-			'Document ingest and hybrid search: dense pgvector cosine fused with lexical ranking',
-			'A per-call usage ledger with costs, plus optional Langfuse tracing',
-		],
-		href: '/concepts/ai/',
-		icon: 'sparkles',
-	},
-	{
-		tone: 'green',
-		title: 'Analytics and dashboards',
-		lead: 'A semantic layer that is tenant-scoped by construction.',
-		points: [
-			'drizzle-cube at <code>/cubejs-api</code> and <code>/mcp</code> behind the app’s own auth',
-			'A mandatory test queries every cube as two tenants and asserts disjoint rows',
-			'Fact tables rebuilt per tenant on a cron, with a freshness endpoint for ops',
-			'TypeScript dashboard templates copied per tenant, editable with autosave and reset',
-		],
-		href: '/concepts/analytics/',
-		icon: 'chart',
-	},
-	{
-		tone: 'yellow',
-		title: 'A real CLI',
-		lead: 'Because every internal tool ends up wanting one.',
-		points: [
-			'<code>rocketflare login</code> opens the browser and lands a tenant API key on a loopback callback',
-			'<code>whoami · status · members · keys · activity</code>, each with <code>--json</code> that pipes into <code>jq</code>',
-			'Responses parsed with the same zod schema the server validated with',
-			'Exit codes that tell “not logged in” apart from “forbidden”',
-		],
-		href: '/concepts/cli/',
-		icon: 'terminal',
-	},
-	{
-		tone: 'blue',
-		title: 'Contracts, tests and releases',
-		lead: 'The plumbing that keeps three consumers honest.',
-		points: [
-			'One zod package the API validates with and the UI and CLI parse with — no build step, no drift',
-			'Two wrangler files kept identical by a parity test; tag-driven staging then production releases',
-			'Tests that drive the real app against real Postgres — queues, workflows and cron included',
-			'A single gate for the whole workspace: lint, typecheck, test, build',
-		],
-		href: '/concepts/contracts/',
-		icon: 'compass',
-	},
-] as const
+/** The four thumbnails under the big screenshot; ids are the tour page's anchors. */
+const thumbs = [
+	{ id: 'chat', label: 'Chat', light: chatLight, dark: chatDark, alt: 'A chat thread with the built-in assistant' },
+	{ id: 'agents', label: 'Agents', light: agentsLight, dark: agentsDark, alt: 'An agent run with its timeline of steps' },
+	{ id: 'knowledge', label: 'Knowledge', light: documentsLight, dark: documentsDark, alt: 'The Knowledge page listing indexed documents' },
+	{ id: 'analytics', label: 'Analytics', light: analyticsLight, dark: analyticsDark, alt: 'The Organisation Overview dashboard' },
+]
 
-/** The headline says how many; derived, never typed. */
-const featureCount = numberWord(features.length, { capital: true })
+/** The triptych: one screenshot, one title, three outcomes. */
+const panels = [
+	{
+		title: 'People and sign-in',
+		light: peopleLight,
+		dark: peopleDark,
+		alt: 'The People page: members with their roles and a pending invitation',
+		url: 'localhost:3000/settings?tab=people',
+		points: [
+			'Sign in with a link in your email, or with Google, Microsoft or any other single sign-on provider.',
+			'Owners, admins and members — one rule decides what a page shows and what the server allows.',
+			'Invite people; the list updates live in every open browser.',
+		],
+	},
+	{
+		title: 'An assistant and agents',
+		light: agentsLight,
+		dark: agentsDark,
+		alt: 'An agent run: the timeline of steps and the finished summary',
+		url: 'localhost:3000/agents',
+		points: [
+			'Chat that streams answers and remembers the thread.',
+			'Agents that run long tasks in the background and show their steps as they go.',
+			'Drop in PDFs and documents; search them by meaning and let the assistant cite them.',
+		],
+	},
+	{
+		title: 'Dashboards',
+		light: analyticsLight,
+		dark: analyticsDark,
+		alt: 'The Organisation Overview dashboard with live member and activity numbers',
+		url: 'localhost:3000/analytics',
+		points: [
+			'An organisation overview on day one, with live numbers.',
+			'Build your own pages from the same data, no SQL required.',
+			'Every AI call is recorded with what it cost, before Cloudflare sends the bill.',
+		],
+	},
+]
+
+/** Also included — one line each, linking to the concept page that explains it. */
+const also = [
+	{ slug: 'background-work', icon: 'bolt', title: 'Background jobs and realtime', line: 'Long work runs off the request; open pages hear about it and refresh.' },
+	{ slug: 'email-and-files', icon: 'inbox', title: 'Email and files', line: 'Sign-in and invitation mail, plus uploads with avatars wired end to end.' },
+	{ slug: 'cli', icon: 'terminal', title: 'A command-line tool', line: 'Log in from the terminal and script what the app can do.' },
+	{ slug: 'auth', icon: 'key', title: 'API keys', line: 'Per-organisation keys you can mint and revoke in Settings.' },
+	{ slug: 'tenancy', icon: 'building', title: 'An admin area', line: 'See every organisation, approve sign-ups, step in to help a customer.' },
+	{ slug: 'ai', icon: 'gauge', title: 'A priced AI usage ledger', line: 'Every model call, with its tokens and its cost, per organisation.' },
+	{ slug: 'database', icon: 'database', title: 'Tests that guard isolation', line: 'The suite fails if one organisation could ever see another’s rows.' },
+	{ slug: 'deployment', icon: 'cloud', title: 'One-command deploys', line: 'Staging from a tag, production from a release, secrets never in a file.' },
+].map((a) => {
+	const c = conceptBySlug(a.slug)
+	if (!c) throw new Error(`Unknown concept: ${a.slug}`)
+	return { ...a, href: `/concepts/${c.slug}/`, tone: c.tone }
+})
+
+const conceptCount = numberWord(CONCEPT_COUNT)
+
+/** What the agent says it did — the nine steps in plain words. */
+const agentTurns = [
+	{ who: 'you' as const, text: AGENT_PROMPT },
+	{
+		who: 'agent' as const,
+		text: 'Reading CLAUDE.md, then running the first-run script. Here is what it did:',
+		checks: BOOTSTRAP_STEPS.map((s) => s.plain),
+	},
+	{
+		who: 'agent' as const,
+		text: `You're signed in as the demo owner. Try Chat, Agents, Knowledge or Analytics.`,
+	},
+]
+
+const terminalLines = [
+	{ cmd: BOOTSTRAP_CMD },
+	...BOOTSTRAP_STEPS.map((_, i) => ({ out: bootstrapLine(i), ok: true })),
+	{ out: BOOTSTRAP_READY_LINE, ok: true },
+]
 
 const faqLd = {
 	'@context': 'https://schema.org',
@@ -144,635 +149,581 @@ const faqLd = {
 			name: 'What is Rocketflare?',
 			acceptedAnswer: {
 				'@type': 'Answer',
-				text: 'Rocketflare is an open-source, MIT-licensed starter kit for building a multi-tenant B2B SaaS product or internal tool on Cloudflare Workers. It ships tenancy, authentication, roles and permissions, background jobs, realtime, file storage, analytics dashboards, an AI agent layer and a CLI as one Worker over Postgres.',
+				text: 'Rocketflare is a ready-made web app you copy and make your own. Out of the box it has sign-in, teams and permissions, an AI assistant that can read your documents, dashboards, and a clean way to run background jobs. It runs as one Cloudflare Worker over a normal Postgres database and is open source under the MIT licence.',
 			},
 		},
 		{
 			'@type': 'Question',
-			name: 'Do I need a Cloudflare account to run it locally?',
+			name: 'Do I need a Cloudflare account?',
 			acceptedAnswer: {
 				'@type': 'Answer',
-				text: 'A free one. Local development emulates every binding except Workers AI, which always calls Cloudflare, so the first run asks you to log in. Comment the AI binding out of both wrangler files to stay entirely offline. Deploying needs a Workers Paid account, because Hyperdrive and Workflows do.',
+				text: 'To run it on your laptop, a free one — and only because the built-in AI runs on Cloudflare, so the first start asks you to log in. Run the bootstrap with --offline and no account is needed at all; chat and agents then wait for an AI key of your own. Deploying needs a Workers Paid plan.',
 			},
 		},
 		{
 			'@type': 'Question',
-			name: 'What makes it agentic or agent-first?',
+			name: 'Can it be one organisation or many?',
 			acceptedAnswer: {
 				'@type': 'Answer',
-				text: 'Two things. The kit ships an AI layer — streamed chat, agents running on Cloudflare Workflows, hybrid retrieval over pgvector, a usage ledger — and it is itself written to be worked on by a coding agent: a root CLAUDE.md, path-scoped rules that load themselves, a guide in every significant directory, and a test gate that enforces them.',
+				text: 'Both, from the same database. One setting switches between many organisations, each with its own members and roles, and a single organisation that everyone joins. You can change your mind later without touching the data.',
 			},
 		},
 		{
 			'@type': 'Question',
-			name: 'Is it multi-tenant or single-tenant?',
+			name: 'What does "agent-first" mean?',
 			acceptedAnswer: {
 				'@type': 'Answer',
-				text: 'Either, from one schema. TENANCY_MODE switches between many organisations and one, with no migration between them; every domain row carries a tenant id in both modes.',
+				text: 'The kit is written to be worked on by a coding agent such as Claude Code: a map at the root of the repository, rules that load with the files they apply to, a guide in every important folder, and one test gate that enforces them. Ask the agent to set up, rename or deploy the project and it follows the same steps a person would, showing each result as it goes.',
 			},
 		},
 	],
 }
-
-const stack: { label: string; note: string; href?: string }[] = [
-	{ label: 'Cloudflare Workers', note: 'one Worker: fetch + queue + scheduled, a DO and a Workflow' },
-	{ label: 'Hono 4', note: 'zod contracts, CASL abilities, one error envelope' },
-	{ label: 'Postgres + pgvector', note: 'Neon through Hyperdrive, Docker locally, Drizzle over postgres.js' },
-	{ label: 'React 18 + Vite', note: 'DaisyUI 5 on Tailwind v4, TanStack Query 5' },
-	{ label: 'Queues · Workflows · DO · R2', note: 'async and realtime without a second service' },
-	{ label: 'drizzle-cube', note: 'the semantic layer, and an MCP endpoint for free', href: 'https://try.drizzle-cube.dev' },
-	{ label: 'commander CLI', note: 'browser login → tenant API key' },
-	{ label: 'Biome · vitest · gitleaks', note: 'one CI gate for the whole workspace' },
-]
 ---
 
-<BaseLayout title={title} description={description} jsonLd={faqLd}>
-	<!-- ============================================================ hero -->
+<BaseLayout title={page.title} description={description} jsonLd={faqLd}>
+	<!-- ====================================================== 1 · hero -->
 	<header class="hero">
 		<SkyScene />
 		<div class="hero-inner wrap">
 			<div class="hero-copy">
-				<div class="badges">
-					<span class="badge badge-yellow">MIT licensed</span>
-					<span class="badge badge-cyan">No API keys to start</span>
-					<span class="badge badge-orange">One Worker, one deploy</span>
-				</div>
 				<h1>Ship the product.<br /><span class="grad">Not the platform.</span></h1>
 				<p class="lede">
-					Rocketflare is one repository that already solves everything an internal tool or a B2B
-					product needs <em>before</em> its first real feature — tenancy, sign-in, roles, jobs,
-					realtime, files, analytics, an AI layer and a CLI — running as a single Cloudflare
-					Worker over Postgres.
+					Rocketflare is a ready-made web app you copy and make your own. Out of the box it has
+					sign-in, teams and permissions, an AI assistant that can read your documents, dashboards,
+					and a clean way to run background jobs — all on Cloudflare, over a normal Postgres
+					database. Run it on your laptop in a couple of minutes; deploy it when you're ready.
 				</p>
+				<p class="engineer-line">One Cloudflare Worker · Hono · React · Postgres · MIT</p>
 				<div class="hero-actions">
-					<a href="#start" class="btn btn-primary">
-						Launch it locally
-						<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+					<a href="/get-started/" class="btn btn-primary">
+						Get it running
+						<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
 					</a>
-					<a href={GITHUB_URL} class="btn btn-secondary" target="_blank" rel="noopener">
-						<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-						Source
-					</a>
+					<a href="/tour/" class="btn btn-secondary">See what's inside</a>
 				</div>
-				<p class="hero-note">
-					<code>git clone</code> → <code>pnpm install</code> → <code>pnpm dev</code>. Nothing to sign
-					up for and no keys to paste: you sign in through a magic link printed in your own
-					terminal, and the AI features run with no key at all.
-				</p>
 			</div>
 		</div>
-		<CloudDivider />
+		<CloudDivider fill="var(--sky-mid)" />
 	</header>
 
-	<!-- ========================================================== counts -->
-	<section class="stats">
-		<div class="wrap stat-grid">
-			<div class="stat reveal"><strong>0</strong><span>API keys to paste on the first run</span></div>
-			<div class="stat reveal"><strong>1</strong><span>Worker to deploy, and to reason about</span></div>
-			<div class="stat reveal"><strong>{CONCEPT_COUNT}</strong><span>concepts, written up with the reasoning behind them</span></div>
-			<div class="stat reveal"><strong>∞</strong><span>tenants, on one schema</span></div>
+	<!-- ===================================================== 2 · proof -->
+	<section class="proof" aria-labelledby="proof-title">
+		<div class="wrap">
+			<h2 id="proof-title" class="sr-only">What it looks like</h2>
+			<div class="bleed reveal">
+				<Screenshot
+					light={homeLight}
+					dark={homeDark}
+					alt={`The Home page of a Rocketflare app, signed in as ${DEMO.ownerName}, owner of the demo organisation ${DEMO.org}`}
+					url="localhost:3000"
+					caption="This is the first thing you see: signed in, with a demo organisation already there."
+					priority
+					tilt
+				/>
+			</div>
+			<ul class="thumbs reveal reveal-stagger">
+				{thumbs.map((t) => (
+					<li>
+						<a href={`/tour/#${t.id}`}>
+							<Screenshot light={t.light} dark={t.dark} alt={t.alt} frame="none" width={260} />
+							<span class="thumb-label">{t.label} <span aria-hidden="true">→</span></span>
+						</a>
+					</li>
+				))}
+			</ul>
 		</div>
 	</section>
 
-	<!-- ====================================================== everything -->
-	<section class="everything" id="everything">
+	<!-- ================================================= 3 · first run -->
+	<section class="firstrun" id="first-run">
+		<CloudDivider flip fill="var(--sky-bottom)" />
 		<div class="wrap">
-			<div class="section-head reveal">
-				<span class="eyebrow">What you get on day one</span>
-				<h2>{featureCount} things you do not have to build</h2>
-				<p>
-					Not a scaffold that leaves the hard parts as an exercise. Each of these is finished,
-					tested and documented — follow any card through to a page on what it does, and why it
-					works that way.
-				</p>
+			<div class="reveal">
+				<SectionHead
+					audience="builder"
+					title="Running in about two minutes"
+					lede="Ask your coding agent, run one script, or do it by hand. All three end in the same place: your browser, signed in."
+				/>
 			</div>
-			<div class="feature-grid">
-				{features.map((f) => (
-					<a class={`card tone-${f.tone} reveal`} href={f.href}>
-						<span class="chip">
-							<ConceptIcon name={f.icon} />
-						</span>
-						<h3>{f.title}</h3>
-						<p class="card-lead">{f.lead}</p>
+			<div class="split">
+				<div class="split-chat reveal">
+					<AgentChat agent={AGENT_NAME} turns={agentTurns} />
+				</div>
+				<div class="split-term reveal">
+					<Terminal title={BOOTSTRAP_CMD} lines={terminalLines} expect={BOOTSTRAP_EXPECT} />
+				</div>
+			</div>
+			<div class="strip reveal">
+				<Steps
+					direction="row"
+					steps={[
+						{ title: 'Clone', body: `<code>${CLONE_CMD.replaceAll('&', '&amp;')}</code>`, time: '10 s' },
+						{ title: 'Bootstrap', body: `<code>${BOOTSTRAP_CMD}</code> — or ask your agent`, time: '2–3 min' },
+						{ title: "You're in", body: `${APP_URL}, signed in as the demo owner`, time: 'now' },
+					]}
+				/>
+			</div>
+			<p class="strip-more">
+				<a href="/get-started/">Every path, step by step <span aria-hidden="true">→</span></a>
+			</p>
+		</div>
+		<CloudDivider fill="var(--bg)" />
+	</section>
+
+	<!-- =============================================== 4 · what it does -->
+	<section class="what">
+		<div class="wrap">
+			<div class="reveal">
+				<SectionHead
+					eyebrow="Out of the box"
+					title="What it does"
+					lede="The parts every app needs and nobody wants to build twice — finished, tested, and already on the screen."
+				/>
+			</div>
+			<div class="tri">
+				{panels.map((p) => (
+					<article class="tri-panel reveal">
+						<Screenshot light={p.light} dark={p.dark} alt={p.alt} url={p.url} crop="top" width={360} />
+						<h3>{p.title}</h3>
 						<ul>
-							{f.points.map((p) => <li set:html={p} />)}
+							{p.points.map((pt) => <li>{pt}</li>)}
 						</ul>
-						<span class="card-link">
-							Read the concept
-							<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-						</span>
-					</a>
+					</article>
 				))}
 			</div>
-			<p class="all-concepts reveal">
-				<a href="/concepts/">Browse all {numberWord(CONCEPT_COUNT)} concepts
-					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-				</a>
+		</div>
+	</section>
+
+	<!-- ============================================== 5 · also included -->
+	<section class="also">
+		<div class="wrap">
+			<div class="reveal">
+				<SectionHead
+					title="Also included"
+					lede={`Each of these has its own page among the ${conceptCount} concepts, with the reasoning behind it.`}
+				/>
+			</div>
+			<ul class="also-grid reveal reveal-stagger">
+				{also.map((a) => (
+					<li class={`tone-${a.tone}`}>
+						<a href={a.href}>
+							<span class="chip"><ConceptIcon name={a.icon} /></span>
+							<span class="also-text">
+								<strong>{a.title}</strong>
+								<span>{a.line}</span>
+							</span>
+						</a>
+					</li>
+				))}
+			</ul>
+		</div>
+	</section>
+
+	<!-- ============================================== 6 · under the hood -->
+	<section class="bg-band hood">
+		<div class="wrap">
+			<div class="reveal">
+				<SectionHead
+					audience="engineer"
+					title="Boring choices, made once"
+					lede={`One Worker, one router, one database, one contract package — and every choice written down among the ${conceptCount} concepts so you can disagree with it on purpose.`}
+				/>
+			</div>
+			<ol class="flow reveal" aria-label="How a request travels">
+				<li class="node"><strong>Browser</strong><span>React, served by the Worker</span></li>
+				<li class="arrow" aria-hidden="true">→</li>
+				<li class="node"><strong>one Worker</strong><span>Hono · React</span></li>
+				<li class="arrow" aria-hidden="true">→</li>
+				<li class="node"><strong>Postgres</strong><span>Neon via Hyperdrive</span></li>
+			</ol>
+			<ul class="chips reveal reveal-stagger" aria-label="Cloudflare services the Worker uses">
+				<li>Queues</li>
+				<li>Workflows</li>
+				<li>Durable Objects</li>
+				<li>R2</li>
+				<li>KV</li>
+				<li>Workers AI</li>
+			</ul>
+			<p class="hood-link reveal">
+				<a href="/concepts/">Read the concepts <span aria-hidden="true">→</span></a>
 			</p>
 		</div>
 	</section>
 
-	<!-- =========================================================== stack -->
-	<section class="stack" id="stack">
+	<!-- ============================================== 7 · who it is for -->
+	<section class="who">
 		<div class="wrap">
-			<div class="section-head reveal">
-				<span class="eyebrow">Under the hood</span>
-				<h2>Boring choices, made once</h2>
-				<p>A complete B2B SaaS application stack on Cloudflare Workers — one driver, one router, one queue, one contract package. Every choice is written down with the reason behind it, so you can disagree with it deliberately.</p>
+			<div class="who-grid">
+				<div class="who-col reveal">
+					<h2>I want to ship a product</h2>
+					<ul>
+						<li>You have an idea and a customer, and no wish to build sign-in again.</li>
+						<li>You work with a coding agent and want it to know its way around from the first session.</li>
+						<li>You want to deploy on a Sunday and not think about it on Monday.</li>
+					</ul>
+					<a class="who-link" href="/get-started/">Start here <span aria-hidden="true">→</span></a>
+				</div>
+				<div class="who-col reveal">
+					<h2>I want to read the design</h2>
+					<ul>
+						<li>You want to know how organisations stay apart in one database, and what enforces it.</li>
+						<li>You want to see how long work, realtime and AI fit on Cloudflare without a second service.</li>
+						<li>You would rather disagree with a written decision than guess at an unwritten one.</li>
+					</ul>
+					<a class="who-link" href="/concepts/">Every decision, with its reasons <span aria-hidden="true">→</span></a>
+				</div>
 			</div>
-			<div class="stack-grid">
-				{stack.map((s) => (
-					<div class="stack-item reveal">
-						<strong>{s.href ? <a href={s.href} target="_blank" rel="noopener">{s.label}</a> : s.label}</strong>
-						<span>{s.note}</span>
-					</div>
-				))}
+			<p class="who-more reveal"><a href="/who-is-it-for/">More on who it's for <span aria-hidden="true">→</span></a></p>
+		</div>
+	</section>
+
+	<!-- ============================================ 8 · before you start -->
+	<section class="before">
+		<div class="wrap">
+			<div class="reveal">
+				<SectionHead title="Before you start" lede="Three things worth knowing, so nothing surprises you." />
+			</div>
+			<div class="notes reveal reveal-stagger">
+				<Callout tone="blue" title="A Mac or Linux machine, with Docker running">
+					<svg slot="icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 18v3"/></svg>
+					<p>Postgres runs in a container on your laptop, so Docker Desktop (or colima) has to be up. Windows works through WSL2, but that path is untested.</p>
+				</Callout>
+				<Callout tone="orange" title="A free Cloudflare login the first time it starts">
+					<ConceptIcon slot="icon" name="cloud" />
+					<p>The built-in AI runs on Workers AI, which always calls Cloudflare — 10 000 free neurons a day, then metered, billed to that account. Start with <code>--offline</code> and it is never asked for; chat and agents then wait for a key of your own.</p>
+				</Callout>
+				<Callout tone="yellow" title="Workers Paid to deploy">
+					<ConceptIcon slot="icon" name="rocket" />
+					<p>Running it on your laptop costs nothing. Deploying needs the paid Workers plan, because the database connection pool and the workflows the agents run on are paid features.</p>
+				</Callout>
 			</div>
 		</div>
 	</section>
 
-	<!-- =========================================================== start -->
-	<section class="start" id="start">
-		<CloudDivider flip />
-		<div class="wrap-narrow">
-			<div class="section-head reveal">
-				<span class="eyebrow">Get started</span>
-				<h2>Ask your agent to launch it</h2>
-				<p>Node 24, pnpm 10 and Docker running. That is the whole prerequisite list — everything else the kit does for itself.</p>
-			</div>
-
-			<div class="agent-panel reveal">
-				<div class="agent-panel-head">
-					<span class="robot">
-						<ConceptIcon name="robot" />
-					</span>
-					<div>
-						<h3>The intended path</h3>
-						<p>Two moves, and the kit sets itself up.</p>
-					</div>
-					<span class="pill">Recommended</span>
-				</div>
-
-				<ol class="agent-steps">
-					<li>
-						<span class="dot">1</span>
-						<div>
-							<strong>Clone it</strong>
-							<pre><code>git clone https://github.com/rocketflare-dev/rocketflare.git myapp
-cd myapp</code></pre>
-						</div>
-					</li>
-					<li>
-						<span class="dot">2</span>
-						<div>
-							<strong>Open it in your coding agent and ask</strong>
-							<p class="bubble">Help me set up this project</p>
-						</div>
-					</li>
-				</ol>
-
-				<p class="agent-outcome">
-					<code>CLAUDE.md</code> makes the agent walk
-					<a href={SETUP_URL} target="_blank" rel="noopener">SETUP.md</a> one step at a time —
-					showing each command's output, confirming the verification line before it moves on,
-					stopping on failure, and installing anything missing instead of handing the problem back
-					to you. It ends with the app running and you signed in. Then ask it to do the rename
-					checklist in <a href={ADAPTING_URL} target="_blank" rel="noopener">ADAPTING.md</a>, and
-					the kit is your app.
-				</p>
-				<a class="agent-more" href="/concepts/agent-first/">
-					Why the kit is built this way
-					<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-				</a>
-			</div>
-
-			<div class="cf-note reveal">
-				<span class="cf-icon">
-					<ConceptIcon name="cloud" />
-				</span>
-				<div>
-					<strong>What about Cloudflare?</strong>
-					<p>
-						Local development emulates every binding except one: Workers AI always calls
-						Cloudflare, so the first <code>pnpm dev</code> on a new machine asks you to log in —
-						a <strong>free account is enough</strong>, and the AI features then work with no key
-						of your own. Prefer to stay entirely offline? Comment the <code>[ai]</code> block out
-						of both wrangler files and everything else still runs; chat and agents wait for a
-						provider. Deploying for real is a <strong>Workers Paid</strong> account, because
-						Hyperdrive and Workflows need one.
-					</p>
-				</div>
-			</div>
-
-			<div class="or-divider reveal"><span>or drive it yourself</span></div>
-
-			<div class="step reveal">
-				<span class="step-num">1</span>
-				<div class="step-body">
-					<h3>Take a copy and cut it loose</h3>
-					<p>The kit is a starting point, not a dependency. There is nothing to merge back.</p>
-					<pre><code>git clone https://github.com/rocketflare-dev/rocketflare.git myapp && cd myapp
-rm -rf .git && git init && git add -A && git commit -m "Start from Rocketflare"</code></pre>
-				</div>
-			</div>
-
-			<div class="step reveal">
-				<span class="step-num">2</span>
-				<div class="step-body">
-					<h3>Install, migrate, seed, run</h3>
-					<pre><code>corepack enable && pnpm install
-cp apps/web/.dev.vars.example apps/web/.dev.vars   # two random secrets
-pnpm dev:db:up && pnpm db:migrate && pnpm seed     # Postgres :5432 → demo tenant + users
-pnpm dev                                           # http://localhost:3000</code></pre>
-					<p class="muted">Sign in with the seeded owner's email — the magic-link URL is printed by <code>wrangler dev</code>.</p>
-				</div>
-			</div>
-
-			<div class="step reveal">
-				<span class="step-num">3</span>
-				<div class="step-body">
-					<h3>Log the CLI in, and run the suite</h3>
-					<pre><code>pnpm cli login --server http://localhost:3001   # browser sign-in → tenant API key
-pnpm cli whoami
-pnpm test:db:up && pnpm test                    # full suite, throwaway Postgres :5433</code></pre>
-				</div>
-			</div>
-		</div>
-	</section>
-
-	<!-- ============================================================= cta -->
+	<!-- ======================================================= 9 · cta -->
 	<section class="cta bg-lift">
 		<div class="wrap-narrow cta-inner reveal">
+			<LogoMark size={48} class="cta-mark" />
 			<h2>Everything above is already written.</h2>
 			<p>Your first commit can be a feature.</p>
-			<div class="hero-actions" style="justify-content:center">
-				<a href={GITHUB_URL} class="btn btn-primary" target="_blank" rel="noopener">Get Rocketflare on GitHub</a>
-				<a href="/concepts/" class="btn btn-ghost">Read the concepts</a>
+			<div class="cta-actions">
+				<a href="/get-started/" class="btn btn-primary">Get started</a>
+				<a href={GITHUB_URL} class="btn btn-ghost" target="_blank" rel="noopener">
+					<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+					GitHub
+				</a>
 			</div>
 		</div>
 	</section>
 </BaseLayout>
 
 <style>
-	/* ------------------------------------------------------------- hero -- */
+	.sr-only {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip: rect(0 0 0 0);
+		white-space: nowrap;
+	}
+
+	/* --------------------------------------------------------- 1 · hero -- */
 	.hero {
 		position: relative;
-		min-height: min(94vh, 900px);
+		min-height: min(92vh, 880px);
 		display: flex;
 		align-items: center;
-		padding: 5rem 0 14rem;
+		padding: 5rem 0 13rem;
 		overflow: hidden;
 	}
 	.hero-inner { position: relative; z-index: 2; width: 100%; }
-	.hero-copy { max-width: 660px; }
-
-	.badges { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.4rem; }
-	.badge {
-		font-size: 0.78rem;
-		font-weight: 700;
-		padding: 0.3rem 0.85rem;
-		border-radius: 999px;
-		border: 1.5px solid currentColor;
-		background: var(--card);
-	}
-	.badge-yellow { color: var(--yellow); }
-	.badge-cyan   { color: var(--cyan); }
-	.badge-orange { color: var(--orange); }
-
+	.hero-copy { max-width: 640px; }
 	.grad {
 		background: linear-gradient(100deg, var(--orange), var(--red) 40%, var(--blue-bright));
 		-webkit-background-clip: text;
 		background-clip: text;
 		color: transparent;
 	}
-
 	.lede {
-		font-size: clamp(1.05rem, 1.7vw, 1.28rem);
+		font-size: var(--step-1);
 		color: var(--text);
-		max-width: 60ch;
+		max-width: 58ch;
+		margin-bottom: 1.1rem;
+	}
+	.engineer-line {
+		font-family: var(--mono);
+		font-size: 0.82rem;
+		color: var(--text-muted);
+		letter-spacing: 0.02em;
 		margin-bottom: 1.9rem;
 	}
 	.hero-actions { display: flex; flex-wrap: wrap; gap: 0.8rem; }
-	.hero-note {
-		margin-top: 1.6rem;
-		font-size: 0.92rem;
-		color: var(--text-muted);
-		max-width: 52ch;
-	}
 
-	/* ------------------------------------------------------------ stats -- */
-	.stats { background: var(--card); border-bottom: 1px solid var(--border); }
-	.stat-grid {
+	/* -------------------------------------------------------- 2 · proof -- */
+	.proof {
+		padding: 1rem 0 5rem;
+		background: linear-gradient(180deg, var(--sky-mid) 0%, var(--sky-bottom) 100%);
+	}
+	.bleed { position: relative; z-index: 2; }
+	@media (min-width: 1100px) {
+		.bleed {
+			width: min(1320px, calc(100vw - 3rem));
+			margin-left: calc(50% - min(660px, 50vw - 1.5rem));
+		}
+	}
+	.thumbs {
+		list-style: none;
+		margin: 2.6rem 0 0;
+		padding: 0;
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-		gap: 1.5rem;
-		padding-top: 3rem;
-		padding-bottom: 3rem;
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+		gap: 1.2rem;
+	}
+	.thumbs a {
+		display: block;
+		color: var(--text-bright);
+		border-radius: 14px;
+		transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+	}
+	.thumbs a:hover { text-decoration: none; transform: translateY(-4px); }
+	/* The component's own figure margin, unwanted inside a tile. */
+	.thumbs :global(.shot) { margin: 0; }
+	.thumb-label {
+		display: block;
+		margin-top: 0.6rem;
+		font-weight: 600;
+		font-size: 0.95rem;
 		text-align: center;
 	}
-	.stat strong {
-		display: block;
-		font-size: clamp(2.4rem, 5vw, 3.4rem);
-		font-weight: 800;
-		line-height: 1;
-		background: linear-gradient(160deg, var(--blue-bright), var(--cyan));
-		-webkit-background-clip: text;
-		background-clip: text;
-		color: transparent;
+	.thumbs a:hover .thumb-label { color: var(--blue); }
+	@media (max-width: 760px) {
+		.thumbs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 	}
-	.stat:nth-child(2) strong { background: linear-gradient(160deg, var(--orange), var(--yellow)); -webkit-background-clip: text; background-clip: text; }
-	.stat:nth-child(3) strong { background: linear-gradient(160deg, var(--red), var(--orange)); -webkit-background-clip: text; background-clip: text; }
-	.stat:nth-child(4) strong { background: linear-gradient(160deg, var(--purple), var(--blue-bright)); -webkit-background-clip: text; background-clip: text; }
-	.stat span { display: block; margin-top: 0.5rem; color: var(--text-muted); font-size: 0.92rem; }
 
-	/* --------------------------------------------------------- features -- */
-	.everything { padding: 5.5rem 0; background: var(--bg); }
-	.feature-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-		gap: 1.5rem;
-	}
-	.card {
-		display: flex;
-		flex-direction: column;
-		background: var(--card);
-		border: 1px solid var(--border);
-		border-top: 4px solid var(--accent);
-		border-radius: 18px;
-		padding: 1.7rem 1.6rem 1.4rem;
-		color: var(--text);
-		box-shadow: var(--shadow-sm);
-		transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s ease, border-color 0.25s ease;
-	}
-	.card:hover {
-		text-decoration: none;
-		transform: translateY(-6px);
-		box-shadow: var(--shadow);
-		border-color: var(--accent);
-	}
-	.card h3 { margin-bottom: 0.35rem; }
-	.card-lead { color: var(--accent); font-weight: 600; font-size: 0.96rem; margin-bottom: 0.9rem; }
-	.card ul { margin: 0 0 1.2rem; padding: 0; list-style: none; }
-	.card li {
+	/* ---------------------------------------------------- 3 · first run -- */
+	.firstrun {
 		position: relative;
-		padding-left: 1.45rem;
+		background: var(--card);
+		padding: clamp(7rem, 12vw, 10rem) 0 clamp(7rem, 11vw, 9.5rem);
+	}
+	.split {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+		gap: 2rem;
+		align-items: start;
+		margin-bottom: 3.2rem;
+	}
+	.split-term :global(.terminal) { margin: 0; }
+	@media (max-width: 860px) {
+		.split { grid-template-columns: 1fr; }
+	}
+	.strip {
+		padding: 1.8rem 1.6rem 1.2rem;
+		border: 1px solid var(--border);
+		border-radius: 18px;
+		background: var(--card-alt);
+	}
+	/* The clone command is one long token in a third-width column. */
+	.strip :global(code) { overflow-wrap: anywhere; }
+	.strip-more { text-align: center; margin: 1.6rem 0 0; font-weight: 600; }
+
+	/* -------------------------------------------------- 4 · what it does -- */
+	.what { padding: 5.5rem 0; background: var(--bg); }
+	.tri {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 2.2rem;
+	}
+	.tri-panel :global(.shot) { margin: 0 0 1.2rem; }
+	.tri-panel h3 { margin-bottom: 0.6rem; }
+	.tri-panel ul { list-style: none; margin: 0; padding: 0; }
+	.tri-panel li {
+		position: relative;
+		padding-left: 1.35rem;
 		margin-bottom: 0.55rem;
-		font-size: 0.93rem;
+		font-size: 0.95rem;
 		color: var(--text-muted);
 		line-height: 1.55;
 	}
-	.card li::before {
+	.tri-panel li::before {
 		content: '';
 		position: absolute;
 		left: 0;
-		top: 0.55em;
+		top: 0.6em;
 		width: 8px;
 		height: 8px;
 		border-radius: 2px;
-		background: var(--accent);
+		background: var(--cyan);
 		transform: rotate(45deg);
 	}
-	.card-link {
-		margin-top: auto;
-		display: inline-flex;
-		align-items: center;
-		gap: 0.4rem;
-		font-weight: 600;
-		font-size: 0.9rem;
-		color: var(--accent);
+	@media (max-width: 900px) {
+		.tri { grid-template-columns: 1fr; gap: 3rem; max-width: 560px; margin: 0 auto; }
 	}
-	.card:hover .card-link svg { transform: translateX(4px); }
-	.card-link svg { transition: transform 0.2s ease; }
 
+	/* ------------------------------------------------- 5 · also included -- */
+	.also {
+		padding: 5rem 0;
+		background: var(--card-alt);
+		border-top: 1px solid var(--border);
+		border-bottom: 1px solid var(--border);
+	}
+	.also-grid {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: grid;
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+		gap: 1.4rem 2rem;
+	}
+	.also-grid a {
+		display: flex;
+		gap: 0.9rem;
+		align-items: flex-start;
+		color: var(--text);
+		padding: 0.6rem 0.4rem;
+		border-radius: 12px;
+	}
+	.also-grid a:hover { text-decoration: none; background: var(--card); }
+	.also-grid a:hover strong { color: var(--accent); }
 	.chip {
+		flex: none;
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		width: 46px;
-		height: 46px;
-		border-radius: 14px;
-		background: var(--tint);
-		color: var(--accent);
-		margin-bottom: 1rem;
-		transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-	}
-	.chip :global(svg) { width: 23px; height: 23px; }
-	.card:hover .chip { transform: rotate(-8deg) scale(1.08); }
-
-	/* --accent / --tint come from the global .tone-* classes in BaseLayout. */
-	.all-concepts { text-align: center; margin: 2.6rem 0 0; }
-	.all-concepts a {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.45rem;
-		font-weight: 600;
-		font-size: 1.02rem;
-	}
-	.all-concepts a:hover { text-decoration: none; }
-	.all-concepts svg { transition: transform 0.2s ease; }
-	.all-concepts a:hover svg { transform: translateX(4px); }
-
-	/* ------------------------------------------------------------ stack -- */
-	.stack { padding: 5rem 0; background: var(--card); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
-	.stack-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; }
-	.stack-item {
-		background: var(--card-alt);
-		border: 1px solid var(--border);
-		border-left: 4px solid var(--cyan);
-		border-radius: 12px;
-		padding: 1rem 1.1rem;
-	}
-	.stack-item:nth-child(2n) { border-left-color: var(--orange); }
-	.stack-item:nth-child(3n) { border-left-color: var(--blue-bright); }
-	.stack-item:nth-child(5n) { border-left-color: var(--purple); }
-	.stack-item strong { display: block; color: var(--text-bright); font-size: 0.98rem; }
-	.stack-item span { font-size: 0.87rem; color: var(--text-muted); }
-
-	/* ------------------------------------------------------------ start -- */
-	.start { position: relative; padding: 0 0 5.5rem; background: var(--bg); }
-	.start .wrap-narrow { padding-top: 4.5rem; }
-	.step { display: flex; gap: 1.2rem; margin-bottom: 2.2rem; }
-	.step-num {
-		flex: none;
 		width: 42px;
 		height: 42px;
-		border-radius: 50%;
-		display: grid;
-		place-items: center;
-		font-weight: 800;
-		color: var(--on-accent);
-		background: linear-gradient(150deg, var(--orange), var(--red));
-		box-shadow: 0 8px 18px -8px var(--red);
-	}
-	.step-body { flex: 1; min-width: 0; }
-	.step-body h3 { margin-bottom: 0.3rem; }
-	.step-body p { color: var(--text-muted); font-size: 0.95rem; }
-	.muted { color: var(--text-muted); font-size: 0.9rem; margin-top: 0.75rem; }
-
-	.agent-panel {
-		background: var(--card);
-		border: 1px solid var(--border);
-		border-top: 5px solid var(--orange);
-		border-radius: 20px;
-		padding: 1.8rem;
-		box-shadow: var(--shadow);
-	}
-	.agent-panel-head { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.6rem; }
-	.agent-panel-head h3 { margin: 0; }
-	.agent-panel-head p { margin: 0; color: var(--text-muted); font-size: 0.93rem; }
-	.robot {
-		flex: none;
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		width: 48px;
-		height: 48px;
-		border-radius: 14px;
-		background: var(--tint-orange);
-		color: var(--orange);
-	}
-	.robot svg { width: 26px; height: 26px; }
-	.pill {
-		margin-left: auto;
-		flex: none;
-		font-size: 0.72rem;
-		font-weight: 700;
-		letter-spacing: 0.06em;
-		text-transform: uppercase;
-		color: var(--orange);
-		background: var(--tint-orange);
-		border-radius: 999px;
-		padding: 0.3rem 0.75rem;
-	}
-
-	.agent-steps { list-style: none; margin: 0; padding: 0; }
-	.agent-steps li { display: flex; gap: 0.9rem; margin-bottom: 1.4rem; }
-	.agent-steps li:last-child { margin-bottom: 0; }
-	.agent-steps li > div { flex: 1; min-width: 0; }
-	.agent-steps strong { display: block; color: var(--text-bright); margin-bottom: 0.5rem; }
-	.agent-steps pre { margin: 0; }
-	.dot {
-		flex: none;
-		width: 28px;
-		height: 28px;
-		border-radius: 50%;
-		display: grid;
-		place-items: center;
-		font-size: 0.85rem;
-		font-weight: 700;
-		color: var(--orange);
-		background: var(--tint-orange);
-	}
-
-	/* The prompt you type, rendered as what it is: a line of chat. */
-	.bubble {
-		position: relative;
-		margin: 0;
-		font-family: var(--mono);
-		font-size: 0.95rem;
-		color: var(--text-bright);
-		background: var(--tint-orange);
-		border: 1.5px solid var(--orange);
-		border-radius: 14px 14px 14px 4px;
-		padding: 0.85rem 1.1rem;
-		display: inline-block;
-	}
-	.bubble::before { content: '“'; opacity: 0.5; margin-right: 0.1rem; }
-	.bubble::after { content: '”'; opacity: 0.5; margin-left: 0.1rem; }
-
-	.agent-outcome {
-		margin: 1.6rem 0 0;
-		padding-top: 1.3rem;
-		border-top: 1px solid var(--border);
-		font-size: 0.95rem;
-		color: var(--text-muted);
-	}
-	.agent-more {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.4rem;
-		font-weight: 600;
-		font-size: 0.92rem;
-		color: var(--orange);
-	}
-	.agent-more:hover { text-decoration: none; }
-	.agent-more svg { transition: transform 0.2s ease; }
-	.agent-more:hover svg { transform: translateX(4px); }
-
-	.cf-note {
-		display: flex;
-		gap: 1rem;
-		align-items: flex-start;
-		margin-top: 1.8rem;
-		padding: 1.2rem 1.4rem;
-		border: 1px dashed var(--border-bright);
-		border-radius: 16px;
-		background: var(--card-alt);
-	}
-	.cf-note > div > strong { display: block; color: var(--text-bright); margin-bottom: 0.25rem; }
-	.cf-note p strong { color: var(--text); }
-	.cf-note p { margin: 0; font-size: 0.92rem; color: var(--text-muted); }
-	.cf-icon {
-		flex: none;
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		width: 40px;
-		height: 40px;
 		border-radius: 12px;
-		background: var(--tint-cyan);
-		color: var(--cyan);
+		background: var(--tint);
+		color: var(--accent);
 	}
-	.cf-icon svg { width: 22px; height: 22px; }
+	.chip :global(svg) { width: 22px; height: 22px; }
+	.also-text { display: flex; flex-direction: column; gap: 0.15rem; min-width: 0; }
+	.also-text strong { color: var(--text-bright); font-size: 0.98rem; line-height: 1.3; }
+	.also-text span { font-size: 0.88rem; color: var(--text-muted); line-height: 1.5; }
+	@media (max-width: 980px) { .also-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+	@media (max-width: 520px) { .also-grid { grid-template-columns: 1fr; } }
 
-	/* A labelled rule between the two routes. */
-	.or-divider {
+	/* ------------------------------------------------- 6 · under the hood -- */
+	.hood { padding: 5.5rem 0; }
+	.flow {
+		list-style: none;
+		margin: 0 auto 2rem;
+		padding: 0;
 		display: flex;
+		flex-wrap: wrap;
 		align-items: center;
-		gap: 1rem;
-		margin: 3.4rem 0 2.4rem;
-		color: var(--text-muted);
-		font-size: 0.78rem;
-		font-weight: 700;
-		letter-spacing: 0.14em;
-		text-transform: uppercase;
+		justify-content: center;
+		gap: 0.9rem 1.2rem;
 	}
-	.or-divider::before, .or-divider::after {
-		content: '';
-		flex: 1;
-		height: 1px;
-		background: var(--border);
+	.node {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		text-align: center;
+		min-width: 190px;
+		padding: 1rem 1.3rem;
+		border-radius: 16px;
+		background: color-mix(in srgb, var(--band-ink) 8%, transparent);
+		border: 1px solid color-mix(in srgb, var(--band-ink) 18%, transparent);
+	}
+	.node strong { color: var(--band-ink); font-size: 1.05rem; }
+	.node span { color: var(--band-muted); font-size: 0.85rem; }
+	.arrow { color: var(--cyan); font-size: 1.6rem; font-weight: 700; line-height: 1; }
+	.chips {
+		list-style: none;
+		margin: 0 auto 2rem;
+		padding: 0;
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		gap: 0.6rem;
+	}
+	.chips li {
+		font-family: var(--mono);
+		font-size: 0.82rem;
+		color: var(--band-ink);
+		padding: 0.4rem 0.9rem;
+		border-radius: 999px;
+		border: 1px solid color-mix(in srgb, var(--cyan) 45%, transparent);
+		background: color-mix(in srgb, var(--cyan) 12%, transparent);
+	}
+	.hood-link { text-align: center; margin: 0; font-weight: 600; }
+	@media (max-width: 700px) {
+		.flow { flex-direction: column; }
+		.arrow { transform: rotate(90deg); }
 	}
 
-	/* -------------------------------------------------------------- cta -- */
+	/* ------------------------------------------------- 7 · who it is for -- */
+	.who { padding: 5.5rem 0 4.5rem; background: var(--bg); }
+	.who-grid {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 3rem;
+	}
+	.who-col h2 { font-size: var(--step-2); margin-bottom: 1rem; }
+	.who-col ul { list-style: none; margin: 0 0 1.4rem; padding: 0; }
+	.who-col li {
+		position: relative;
+		padding-left: 1.5rem;
+		margin-bottom: 0.7rem;
+		color: var(--text-muted);
+		line-height: 1.55;
+	}
+	.who-col li::before {
+		content: '';
+		position: absolute;
+		left: 0;
+		top: 0.7em;
+		width: 10px;
+		height: 2px;
+		background: var(--orange);
+	}
+	.who-col:nth-child(2) li::before { background: var(--blue-bright); }
+	.who-link { font-weight: 600; font-size: 1.02rem; }
+	.who-col:first-child .who-link { color: var(--orange); }
+	.who-more { margin: 2.8rem 0 0; text-align: center; color: var(--text-muted); }
+	@media (max-width: 760px) { .who-grid { grid-template-columns: 1fr; gap: 2.4rem; } }
+
+	/* ----------------------------------------------- 8 · before you start -- */
+	.before {
+		padding: 4.5rem 0 5.5rem;
+		background: var(--card-alt);
+		border-top: 1px solid var(--border);
+	}
+	.notes {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 1.2rem;
+		align-items: stretch;
+	}
+	/* The component's own vertical margin, unwanted in a row. */
+	.notes :global(.callout) { margin: 0; flex-direction: column; }
+	.notes :global(.callout code) { font-size: 0.82em; }
+	@media (max-width: 900px) { .notes { grid-template-columns: 1fr; max-width: 620px; margin: 0 auto; } }
+
+	/* ---------------------------------------------------------- 9 · cta -- */
 	.cta {
 		padding: 5.5rem 0 6rem;
 		text-align: center;
 		border-top: 1px solid var(--border);
 	}
+	.cta-inner :global(.cta-mark) { display: block; margin: 0 auto 1.2rem; }
 	.cta h2 { margin-bottom: 0.3rem; }
 	.cta p { color: var(--text-muted); font-size: 1.1rem; margin-bottom: 2rem; }
+	.cta-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.8rem; }
 
-	/* Narrow screens: everything in the hero becomes one left-aligned column and
-	   leaves the right-hand third to the rocket. */
+	/* Narrow screens: the hero copy becomes one column and leaves the
+	   right-hand third to the rocket (SkyScene positions it there). */
 	@media (max-width: 860px) {
-		.hero { padding: 2.5rem 0 4rem; min-height: 0; }
+		.hero { padding: 2.5rem 0 5rem; min-height: 0; }
 		.hero-copy { max-width: none; }
-		.badges { max-width: 88%; }
 		.lede { max-width: none; padding-right: 26%; }
+		.engineer-line { padding-right: 26%; }
 		.hero-actions { flex-direction: column; align-items: stretch; width: min(15rem, 62%); }
 		.hero-actions .btn { justify-content: center; }
-		.hero-note { padding-right: 26%; max-width: none; }
 	}
-
 	@media (max-width: 560px) {
-		.lede, .hero-note { padding-right: 20%; }
+		.lede, .engineer-line { padding-right: 20%; }
 		.hero-actions { width: min(14rem, 68%); }
-	}
-
-	@media (max-width: 700px) {
-		.agent-panel { padding: 1.4rem; }
-		.agent-panel-head { flex-wrap: wrap; }
-		.pill { margin-left: 0; order: 3; }
 	}
 </style>

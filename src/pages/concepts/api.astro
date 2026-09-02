@@ -1,5 +1,20 @@
 ---
 import ConceptLayout from '../../layouts/ConceptLayout.astro'
+import DiagramStack from '../../components/DiagramStack.astro'
+
+/** The middleware order of apps/web/src/api/index.ts (docs/CONCEPTS.md §3), top to bottom. */
+const middleware = [
+	{ label: 'onError', note: 'every failure, config included, gets the JSON envelope' },
+	{ label: 'request logger', note: 'a request id for everything below' },
+	{ label: 'config', note: 'loadConfig(env), validated once per isolate' },
+	{ label: 'security headers', note: 'applied after the handler; a 101 passes through untouched' },
+	{ label: 'body limit', note: '1 MB JSON; upload routes mount their own larger cap' },
+	{ label: 'CORS', note: 'before CSRF, so preflights are answered' },
+	{ label: 'CSRF', note: 'cookie-only, no database — cheap to reject' },
+	{ label: 'database', note: 'one client per request, closed in waitUntil' },
+	{ label: 'tracer', note: 'Langfuse batcher or a no-op, flushed after the handler' },
+	{ label: 'route mounts', note: 'auth per mount, never global' },
+]
 ---
 <ConceptLayout
 	slug="api"
@@ -58,7 +73,14 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		Each layer sits where it does because of what has to be true before it runs, and what must still
 		be catchable after it.
 	</p>
-	<table>
+	<figure class="figure">
+		<DiagramStack layers={middleware} describedBy="api-middleware" title="The middleware order: a request runs down the stack and its response comes back up" />
+		<figcaption>
+			A request enters at the top and runs down; the response comes back up through the same
+			layers. Authentication is not a layer at all — it is mounted per route group at the bottom.
+		</figcaption>
+	</figure>
+	<table id="api-middleware">
 		<thead><tr><th>Layer</th><th>Why here</th></tr></thead>
 		<tbody>
 			<tr><td>error handler</td><td>outermost, so even a configuration failure comes back as the JSON envelope</td></tr>

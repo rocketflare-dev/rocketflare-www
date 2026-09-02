@@ -1,5 +1,6 @@
 ---
 import ConceptLayout from '../../layouts/ConceptLayout.astro'
+import DiagramSteps from '../../components/DiagramSteps.astro'
 ---
 <ConceptLayout
 	slug="background-work"
@@ -94,6 +95,26 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		mark the row running and increment its attempt count, but only where the status is still queued
 		or running, returning the row. Every terminal write carries the same predicate.
 	</p>
+	<figure class="figure">
+		<DiagramSteps
+			steps={['claim', 'execute', 'finish']}
+			retryFrom={1}
+			retryLabel="retry re-claims"
+			note="The row is the claim; a settled row is never rewritten."
+			describedBy="agent-run-steps"
+			title="The agent-run workflow: claim, execute, finish — a retried execute step re-claims the same row"
+		/>
+		<figcaption>
+			The three workflow steps. A fault the platform can retry — an unreachable provider, a database
+			outage — throws out of <em>execute</em>, and the retried step re-claims the row through the
+			same conditional update rather than re-running the first step.
+		</figcaption>
+	</figure>
+	<ol id="agent-run-steps">
+		<li><strong>claim</strong> — the conditional update: running, attempt + 1, only where the status is still queued or running. Nothing to claim means the run was cancelled before it started, and the workflow exits here.</li>
+		<li><strong>execute</strong> — the agent itself, with two retries and a ten-minute timeout. It throws only for a fault a retry can fix; the retry re-claims the row. Anything else settles the run as failed at once.</li>
+		<li><strong>finish</strong> — the terminal write, guarded by the same predicate, plus the nudge that tells any open viewer to re-read.</li>
+	</ol>
 	<p>
 		That one predicate buys two properties at once. A retried step re-claims the row instead of
 		fighting a lock, and a row that has already settled — succeeded, failed, cancelled — can never

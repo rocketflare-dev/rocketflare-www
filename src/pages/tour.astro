@@ -1,26 +1,607 @@
 ---
 /**
- * Placeholder — the real page lands later on the overhaul branch. It exists so
- * the nav and footer (generated from src/data/pages.ts) never link to a 404;
- * it is `noindex` and left out of the sitemap until `ready` flips to true.
+ * The tour: what a fresh run of the kit gives you, screen by screen, in the
+ * order of the kit's own demo. One `stops` array drives BOTH the sticky index
+ * and the sections, so the two cannot drift; every stop has an `id` the
+ * landing page and Get Started link to (`/tour/#chat`).
+ *
+ * Screenshots are pairs in src/assets/screens/ (see MANIFEST.md there). The
+ * admin stop has none yet — see the TODO by it.
  */
+import type { ImageMetadata } from 'astro'
 import BaseLayout from '../layouts/BaseLayout.astro'
+import Screenshot from '../components/Screenshot.astro'
+import Callout from '../components/Callout.astro'
+import Terminal from '../components/Terminal.astro'
 import { pageByPath } from '../data/pages'
+import { conceptBySlug } from '../data/concepts'
+
+import loginLight from '../assets/screens/login.light.png'
+import loginDark from '../assets/screens/login.dark.png'
+import homeLight from '../assets/screens/home.light.png'
+import homeDark from '../assets/screens/home.dark.png'
+import peopleLight from '../assets/screens/people.light.png'
+import peopleDark from '../assets/screens/people.dark.png'
+import settingsAiLight from '../assets/screens/settings-ai.light.png'
+import settingsAiDark from '../assets/screens/settings-ai.dark.png'
+import chatLight from '../assets/screens/chat.light.png'
+import chatDark from '../assets/screens/chat.dark.png'
+import agentsRunLight from '../assets/screens/agents-run.light.png'
+import agentsRunDark from '../assets/screens/agents-run.dark.png'
+import agentsResearchLight from '../assets/screens/agents-research.light.png'
+import agentsResearchDark from '../assets/screens/agents-research.dark.png'
+import documentsLight from '../assets/screens/documents.light.png'
+import documentsDark from '../assets/screens/documents.dark.png'
+import searchLight from '../assets/screens/search.light.png'
+import searchDark from '../assets/screens/search.dark.png'
+import analyticsLight from '../assets/screens/analytics.light.png'
+import analyticsDark from '../assets/screens/analytics.dark.png'
+import analyticsExploreLight from '../assets/screens/analytics-explore.light.png'
+import analyticsExploreDark from '../assets/screens/analytics-explore.dark.png'
+import usageLight from '../assets/screens/usage.light.png'
+import usageDark from '../assets/screens/usage.dark.png'
+import mHomeLight from '../assets/screens/m-home.light.png'
+import mHomeDark from '../assets/screens/m-home.dark.png'
+import mChatLight from '../assets/screens/m-chat.light.png'
+import mChatDark from '../assets/screens/m-chat.dark.png'
 
 const page = pageByPath('/tour/')
 if (!page) throw new Error('Page not in the registry: /tour/')
+
+interface Shot {
+	light: ImageMetadata
+	dark: ImageMetadata
+	alt: string
+	/** The text in the frame's URL bar. */
+	url: string
+	caption?: string
+}
+interface Stop {
+	/** The anchor: the landing page and Get Started link to `/tour/#<id>`. */
+	id: string
+	/** The label in the index. */
+	label: string
+	title: string
+	/** Two sentences, outcome first. Inline HTML allowed (<code>, <a>). */
+	body: string[]
+	/** Concept slugs (src/data/concepts.ts) for the "Behind it →" link. */
+	concepts: string[]
+	shot?: Shot
+	/** A second, smaller frame under the first. */
+	extraShot?: Shot
+	callout?: { tone: 'blue' | 'orange' | 'yellow' | 'green'; title: string; body: string }
+}
+
+const HOST = 'localhost:3000'
+
+const stops: Stop[] = [
+	{
+		id: 'sign-in',
+		label: 'Sign in',
+		title: 'Sign in with a link printed in your terminal',
+		body: [
+			'Sign in with a link printed in your terminal — or, locally, one click on a demo account. Nothing to configure: with no email service set up, the magic-link URL is logged where you started the app.',
+			'The demo accounts sign you in as an owner, an admin, a member or a global admin, so you can see every screen from each side.',
+		],
+		concepts: ['auth'],
+		shot: {
+			light: loginLight,
+			dark: loginDark,
+			alt: 'The sign-in page: an email field for a magic link, and four dev quick-login buttons for the demo owner, admin, member and global admin',
+			url: `${HOST}/login`,
+			caption: 'Magic link, or a demo account while developing. Google and Microsoft appear once their keys are set.',
+		},
+		callout: {
+			tone: 'blue',
+			title: 'Google and Microsoft too',
+			body: 'Add a client id and secret and the button appears; a provider whose email is not verified is refused. The demo-account buttons do not exist in production.',
+		},
+	},
+	{
+		id: 'home',
+		label: 'Home',
+		title: 'Your organisation, your role, what happened last',
+		body: [
+			'One page tells you where you are: the organisation, your role in it, and the last few things that happened. Every screen from here on belongs to that organisation — the demo one is Acme Logistics.',
+			'A person can belong to several organisations and switch between them; a deployment that only ever needs one turns switching off with a setting, not a fork.',
+		],
+		concepts: ['tenancy'],
+		shot: {
+			light: homeLight,
+			dark: homeDark,
+			alt: 'The home page for Acme Logistics, signed in as the owner: quick links and the five most recent activity rows',
+			url: `${HOST}/`,
+			caption: 'Home for the demo owner: quick links and recent activity.',
+		},
+	},
+	{
+		id: 'people',
+		label: 'People',
+		title: 'Invite someone, pick a role, change it later',
+		body: [
+			'Invite by email, assign owner, admin or member, and every change lands in the activity trail. The invitation email goes out from a queue, so the button answers the moment the row exists.',
+			'Open the page in a second browser and it refreshes live when the invitation is accepted — the database is the truth, the socket is only a nudge.',
+		],
+		concepts: ['tenancy', 'background-work'],
+		shot: {
+			light: peopleLight,
+			dark: peopleDark,
+			alt: 'The People tab: a members table of eight people with their roles, and a pending invitations panel below it',
+			url: `${HOST}/settings?tab=people`,
+			caption: 'Members with roles; pending invitations below. Refreshes live in a second browser.',
+		},
+	},
+	{
+		id: 'ai-settings',
+		label: 'AI settings',
+		title: 'AI works on day one, with no key',
+		body: [
+			'Chat, agents and search are ready on a fresh workspace with nothing configured: Workers AI is the floor. The settings page shows exactly which model will answer and where that choice came from.',
+			'Add an Anthropic key, or let each organisation bring its own provider, and it ranks above the floor — test the connection before you save.',
+		],
+		concepts: ['ai'],
+		shot: {
+			light: settingsAiLight,
+			dark: settingsAiDark,
+			alt: 'Settings → AI: chat readiness shows Cloudflare Workers AI, llama-3.3-70b-instruct-fp8-fast, platform default, and embeddings show bge-m3; no tenant providers yet',
+			url: `${HOST}/settings?tab=ai`,
+			caption: 'Readiness with nothing configured: the zero-key floor for chat and for embeddings.',
+		},
+		callout: {
+			tone: 'orange',
+			title: 'The floor is not free forever',
+			body: 'Every Workers AI call bills the Cloudflare account that owns the Worker: 10,000 free neurons a day, then metered. For zero spend, comment the <code>[ai]</code> block out of both wrangler files; chat then answers 503 until a key or a provider exists.',
+		},
+	},
+	{
+		id: 'chat',
+		label: 'Chat',
+		title: 'Ask a question, watch the answer stream in',
+		body: [
+			'The reply streams in as it is written, the thread is saved, and each turn shows what it cost in tokens. Come back tomorrow and the conversation is still there.',
+			'Threads are private to the person who started them — an admin in the same organisation cannot open yours.',
+		],
+		concepts: ['ai'],
+		shot: {
+			light: chatLight,
+			dark: chatDark,
+			alt: 'The chat page: three conversations in the list, the thread “Late deliveries on the Rotterdam lane” open, with token counts under each turn',
+			url: `${HOST}/chat`,
+			caption: 'Streamed answers; threads and token counts persist.',
+		},
+	},
+	{
+		id: 'agents',
+		label: 'Agents',
+		title: 'An agent is a run you can watch',
+		body: [
+			'Start an agent and it becomes a row: queued, running, done, with every step on a timeline you can open. This one is <code>summarize-text</code>, the kit’s single-call example — its answer is checked against a schema before it is stored.',
+			'A run that stalls can be cancelled; a second request while one is already running for the organisation gets that run back instead of starting another.',
+		],
+		concepts: ['background-work'],
+		shot: {
+			light: agentsRunLight,
+			dark: agentsRunDark,
+			alt: 'A succeeded summarize-text run opened in a drawer over the runs list: the timeline with the “Submit summary” step expanded, and the summary with its key points',
+			url: `${HOST}/agents`,
+			caption: 'A summarize-text run: the timeline, the validated output, the key points.',
+		},
+	},
+	{
+		id: 'knowledge',
+		label: 'Knowledge',
+		title: 'Drop in a PDF and watch it go Indexing → Indexed',
+		body: [
+			'Upload PDFs, Word and Excel files, HTML, Markdown or plain text — or paste text — and each row goes Indexing → Indexed within seconds. The original is kept and downloadable.',
+			'Behind the row, the text is split into passages and embedded, so search and every agent can find it. Documents belong to the organisation that uploaded them and to nobody else.',
+		],
+		concepts: ['ai', 'email-and-files'],
+		shot: {
+			light: documentsLight,
+			dark: documentsDark,
+			alt: 'The Knowledge page: a table of six documents with one shown as Indexing, a download icon on an uploaded file, and the paste-text form below',
+			url: `${HOST}/documents`,
+			caption: 'Six documents, one still indexing; the original is one click away.',
+		},
+		callout: {
+			tone: 'green',
+			title: 'Conversion is free',
+			body: 'PDF and Office files are turned into text by Workers AI on the same binding as the embeddings, at no charge for documents. Images are not accepted — their conversion is the one that bills.',
+		},
+	},
+	{
+		id: 'search',
+		label: 'Search',
+		title: 'Search by meaning and by words, ranked',
+		body: [
+			'One box searches by meaning and by exact words at once and fuses the two rankings — every hit shows how it ranked on each. A phrase from a PDF you uploaded a minute ago is already findable.',
+			'Each passage says which document it came from and where in it, so a reader — or an agent — can jump straight to the spot.',
+		],
+		concepts: ['ai'],
+		shot: {
+			light: searchLight,
+			dark: searchDark,
+			alt: 'The Search page with the query “customs paperwork EU shipments”: the first hit is the document “Customs paperwork: EU shipments” with dense and lexical rank badges',
+			url: `${HOST}/search`,
+			caption: 'Hybrid search: the badges show the dense and the lexical rank of each hit.',
+		},
+	},
+	{
+		id: 'research',
+		label: 'Research',
+		title: 'An agent that reads your documents and cites them',
+		body: [
+			'Ask <code>research-topic</code> a question and it searches the knowledge base itself, reads what it needs and answers in Markdown with sources. This is the agentic example: a tool loop over the same search you just used.',
+			'Citations are checked against the documents the tools actually returned, so an invented one is dropped rather than shown.',
+		],
+		concepts: ['ai'],
+		shot: {
+			light: agentsResearchLight,
+			dark: agentsResearchDark,
+			alt: 'A succeeded research-topic run: the Markdown answer, and under Sources the citation “Customs paperwork: EU shipments”',
+			url: `${HOST}/agents`,
+			caption: 'research-topic: the answer and its citation to the document it read.',
+		},
+	},
+	{
+		id: 'analytics',
+		label: 'Analytics',
+		title: 'A dashboard every organisation gets on its first visit',
+		body: [
+			'The seeded Organisation Overview shows members, sign-ups over time, roles and daily activity — copied from a template in the repo the first time an organisation opens the page.',
+			'Explore is for your own questions: pick a measure and a breakdown and get a chart. Every number is computed inside one organisation; no organisation can see another’s.',
+		],
+		concepts: ['analytics'],
+		shot: {
+			light: analyticsLight,
+			dark: analyticsDark,
+			alt: 'The Organisation Overview dashboard: a KPI strip of members, owners, admins and active users, a sign-ups-over-time line and a members-by-role bar',
+			url: `${HOST}/analytics`,
+			caption: 'Organisation Overview, the default dashboard: KPIs, sign-ups, roles.',
+		},
+		extraShot: {
+			light: analyticsExploreLight,
+			dark: analyticsExploreDark,
+			alt: 'Explore: a query with the measure ActivityEvents.count broken down by ActivityEvents.type, rendered as a bar chart',
+			url: `${HOST}/analytics/explore`,
+			caption: 'Explore: one measure, one breakdown, a chart.',
+		},
+		callout: {
+			tone: 'blue',
+			title: 'Fresh numbers on the hour',
+			body: 'The daily-activity numbers come from a table rebuilt on a schedule, one organisation at a time. The local dev server never fires the schedule itself — run <code>pnpm web db:refresh-facts</code> or curl the cron endpoint.',
+		},
+	},
+	{
+		id: 'usage',
+		label: 'Usage',
+		title: 'Every AI call, priced',
+		body: [
+			'Every model call is a row: which feature, which provider and model, how many tokens in and out, what it cost. The last thirty days add up at the top.',
+			'Prices live in one table in the repo and are frozen onto each row when it is written; a model the table does not know is counted as unpriced, never guessed.',
+		],
+		concepts: ['ai'],
+		shot: {
+			light: usageLight,
+			dark: usageDark,
+			alt: 'Settings → Usage: 40 AI calls in the last 30 days, 134,788 tokens in and 10,112 out, $0.1498 estimated, with nine priced rows across Anthropic and Workers AI',
+			url: `${HOST}/settings?tab=usage`,
+			caption: 'Forty calls, two providers, fifteen cents — with the estimate labelled as one.',
+		},
+	},
+	{
+		id: 'admin',
+		label: 'Admin',
+		title: 'Every organisation from one place',
+		body: [
+			'A global admin sees every organisation from one screen — the demo has three: Acme Logistics, Northwind Freight and Bluebird Clinics — plus the access requests waiting for a decision.',
+			'To help a customer, “enter” their organisation: that creates a real support membership, visible to them by design, and everything you do there is logged like any other member’s actions.',
+		],
+		concepts: ['tenancy'],
+		callout: {
+			tone: 'yellow',
+			title: 'The only cross-organisation screen',
+			body: 'The admin area is the one place that queries across organisations, on purpose — so the code that can see everything is one file, not a habit.',
+		},
+	},
+	{
+		id: 'cli',
+		label: 'CLI',
+		title: 'The same app from a terminal',
+		body: [
+			'The CLI logs in through your browser and ends up with an API key scoped to one organisation; from then on it calls the same routes the UI does and parses the same schemas.',
+			'<code>--json</code> prints only the response, so any command pipes into <code>jq</code> — and the key is revocable from the same settings page as every other.',
+		],
+		concepts: ['cli'],
+	},
+]
+
+const total = stops.length
+const conceptLinks = (slugs: string[]) =>
+	slugs.map((slug) => {
+		const c = conceptBySlug(slug)
+		if (!c) throw new Error(`Unknown concept slug in tour: ${slug}`)
+		return { href: `/concepts/${c.slug}/`, title: c.title }
+	})
+const pad = (n: number) => String(n).padStart(2, '0')
 ---
 <BaseLayout title={page.title} description={page.description} noindex={!page.ready}>
-	<section class="placeholder">
-		<div class="wrap-narrow">
-			<span class="eyebrow">Coming soon</span>
-			<h1>{page.nav}</h1>
-			<p class="measure">{page.description} This page is coming in this branch.</p>
+	<header class="tour-hero bg-sky">
+		<div class="wrap tour-hero-inner">
+			<span class="eyebrow">Tour · {total} stops</span>
+			<h1>Take the tour</h1>
+			<p class="lede">
+				Every screenshot below is from a fresh <code>bash scripts/bootstrap.sh</code> with the demo
+				workspace seeded — nothing configured, no keys pasted. Light and dark follow this site's
+				theme toggle; the app has both.
+			</p>
 		</div>
-	</section>
+	</header>
+
+	<div class="wrap tour-body">
+		<aside class="side">
+			<p class="side-head">{total} stops</p>
+			<nav aria-label="Tour stops">
+				{stops.map((s, i) => (
+					<a href={`#${s.id}`} class="side-link" data-stop={s.id}>
+						<span class="side-num">{pad(i + 1)}</span> {s.label}
+					</a>
+				))}
+			</nav>
+		</aside>
+
+		<article class="stops">
+			{stops.map((s, i) => {
+				const links = conceptLinks(s.concepts)
+				return (
+					<section id={s.id} class:list={['stop', 'reveal', !s.shot && 'no-media']} aria-labelledby={`${s.id}-title`}>
+						{s.shot && (
+							<div class="media">
+								<Screenshot light={s.shot.light} dark={s.shot.dark} alt={s.shot.alt} url={s.shot.url} caption={s.shot.caption} priority={i === 0} />
+								{s.extraShot && (
+									<div class="extra">
+										<Screenshot light={s.extraShot.light} dark={s.extraShot.dark} alt={s.extraShot.alt} url={s.extraShot.url} caption={s.extraShot.caption} width={420} />
+									</div>
+								)}
+							</div>
+						)}
+						<div class="text">
+							<span class="eyebrow">Stop {i + 1} of {total}</span>
+							<h2 id={`${s.id}-title`}>{s.title}</h2>
+							{s.body.map((p) => <p set:html={p} />)}
+							{s.id === 'cli' && (
+								<Terminal
+									title="zsh — myapp"
+									lines={[
+										{ cmd: 'pnpm cli login --server http://localhost:3001' },
+										{ out: 'Opening the browser… signed in, key stored in ~/.rocketflare/config.json', ok: true },
+										{ cmd: 'pnpm cli whoami' },
+										{ out: 'user   owner@example.test' },
+										{ out: 'tenant Acme Logistics' },
+										{ out: 'key    rocketflare_…' },
+										{ cmd: "pnpm cli members list --json | jq '.items[].email'" },
+										{ out: '"owner@example.test"', muted: true },
+										{ out: '"admin@example.test"', muted: true },
+										{ out: '"member@example.test"', muted: true },
+									]}
+								/>
+							)}
+							{s.callout && (
+								<Callout tone={s.callout.tone} title={s.callout.title}>
+									<p set:html={s.callout.body} />
+								</Callout>
+							)}
+							{s.id === 'admin' && (
+								<Fragment>{/* TODO admin-tenants: capture src/assets/screens/admin-tenants.{light,dark}.png (the seeded global admin has no tenant membership, so /admin redirects — see MANIFEST.md) and give this stop a `shot`. */}</Fragment>
+							)}
+							<p class="behind">
+								<span>Behind it →</span>
+								{links.map((l, j) => (
+									<Fragment>{j > 0 && <span class="sep" aria-hidden="true">·</span>}<a href={l.href}>{l.title}</a></Fragment>
+								))}
+							</p>
+						</div>
+					</section>
+				)
+			})}
+
+			<section class="phones reveal" aria-labelledby="phones-title">
+				<div class="phones-text">
+					<span class="eyebrow">Also</span>
+					<h2 id="phones-title">It works on a phone too</h2>
+					<p>The same app at 390 pixels: home and a chat thread. Nothing here is a second front end — one UI, one set of routes.</p>
+				</div>
+				<div class="phones-grid">
+					<Screenshot light={mHomeLight} dark={mHomeDark} alt="Home on a phone: the organisation, quick links and recent activity stacked in one column" frame="none" width={300} />
+					<Screenshot light={mChatLight} dark={mChatDark} alt="A chat thread on a phone, scrolled to the last assistant turn" frame="none" width={300} />
+				</div>
+			</section>
+
+			<section class="close reveal" aria-labelledby="close-title">
+				<h2 id="close-title">Now run it yourself</h2>
+				<p>One command on a laptop with Docker gets you to the first stop, signed in. The concept pages explain the decisions behind each one.</p>
+				<div class="actions">
+					<a class="btn btn-primary" href="/get-started/">Get started</a>
+					<a class="btn btn-ghost" href="/concepts/">Read the concepts</a>
+				</div>
+			</section>
+		</article>
+	</div>
 </BaseLayout>
 
 <style>
-	.placeholder { padding: 5rem 0 6rem; min-height: 50vh; }
-	.placeholder p { color: var(--text-muted); font-size: var(--step-1); }
+	.tour-hero { padding: 3.2rem 0 3.4rem; border-bottom: 1px solid var(--border); }
+	.tour-hero-inner { max-width: 900px; }
+	.tour-hero h1 { font-size: clamp(2.2rem, 5vw, 3.4rem); margin-bottom: 0.4em; }
+	.lede { font-size: 1.12rem; color: var(--text-muted); max-width: 62ch; margin: 0; }
+
+	/* The sticky index — the same shape as ConceptLayout's `.side`, copied so
+	   this page does not import a layout built for a different kind of page. */
+	.tour-body {
+		display: grid;
+		grid-template-columns: 220px minmax(0, 1fr);
+		gap: 3rem;
+		padding-top: 3rem;
+		padding-bottom: 5rem;
+		align-items: start;
+	}
+	.side { position: sticky; top: 5.5rem; min-width: 0; }
+	.side-head {
+		font-size: 0.72rem;
+		font-weight: 700;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: var(--text-muted);
+		margin-bottom: 0.7rem;
+	}
+	/* BaseLayout styles every <nav> as the site header (sticky, centred, padded,
+	   bordered) — undo that here; this one is an index. */
+	.side nav {
+		display: flex;
+		flex-direction: column;
+		align-items: stretch;
+		gap: 0;
+		position: static;
+		padding: 0;
+		background: none;
+		backdrop-filter: none;
+		border: 0;
+		border-left: 2px solid var(--border);
+	}
+	.side-link {
+		display: flex;
+		gap: 0.5rem;
+		padding: 0.34rem 0.9rem;
+		font-size: 0.9rem;
+		line-height: 1.4;
+		color: var(--text-muted);
+		border-left: 2px solid transparent;
+		margin-left: -2px;
+		white-space: nowrap;
+	}
+	.side-link:hover { color: var(--text-bright); text-decoration: none; }
+	.side-num { flex: none; font-family: var(--mono); font-size: 0.76rem; opacity: 0.6; padding-top: 0.15em; }
+	.side-link.current { color: var(--orange); font-weight: 600; border-left-color: var(--orange); }
+
+	/* ------------------------------------------------------------ stops -- */
+	.stops { min-width: 0; }
+	.stop {
+		display: grid;
+		grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+		gap: 2.4rem;
+		align-items: center;
+		padding: 3rem 0;
+		border-top: 1px solid var(--border);
+		scroll-margin-top: 5rem;
+	}
+	.stop:first-of-type { border-top: 0; padding-top: 0; }
+	/* Alternate: the image walks from the left column to the right one, and
+	   the wider column follows it. */
+	.stop:nth-of-type(even) { grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); }
+	.stop:nth-of-type(even) .media { order: 2; }
+	.stop.no-media { grid-template-columns: minmax(0, 1fr); }
+	.media { min-width: 0; }
+	.media :global(.shot) { margin: 0; }
+	.extra { margin-top: 1.2rem; }
+	.extra :global(.shot) { margin-left: auto; margin-right: auto; }
+	.text { min-width: 0; }
+	.text .eyebrow { margin-bottom: 0.5rem; }
+	.text h2 { font-size: var(--step-2); margin-bottom: 0.6rem; }
+	.text p { color: var(--text); }
+	.text :global(.callout) { margin: 1.4rem 0; }
+	.text :global(.terminal) { margin: 1.2rem 0 1.4rem; }
+	.behind {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.45rem;
+		align-items: baseline;
+		font-size: 0.92rem;
+		font-weight: 600;
+		margin: 0.4rem 0 0;
+	}
+	.behind > span:first-child { color: var(--text-muted); font-weight: 500; }
+	.behind .sep { color: var(--text-muted); }
+
+	/* --------------------------------------------------------- phones ---- */
+	.phones {
+		display: grid;
+		grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+		gap: 2.4rem;
+		align-items: center;
+		padding: 3rem 0;
+		border-top: 1px solid var(--border);
+	}
+	.phones h2 { font-size: var(--step-2); }
+	.phones p { color: var(--text-muted); }
+	.phones-grid {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 1.4rem;
+		max-width: 640px;
+		margin: 0 auto;
+	}
+	.phones-grid :global(.shot) { margin: 0; }
+	/* figure.…: outranks the component's own .frame-none rule */
+	.phones-grid :global(figure.shot.frame-none .window) {
+		border: 1px solid var(--border-bright);
+		border-radius: 22px;
+		box-shadow: var(--shadow);
+		background: var(--frame);
+		padding: 8px;
+	}
+	.phones-grid :global(figure.shot.frame-none .body) { border-radius: 16px; overflow: hidden; }
+
+	/* ---------------------------------------------------------- close ---- */
+	.close {
+		padding: 3rem 0 0;
+		border-top: 1px solid var(--border);
+		text-align: center;
+	}
+	.close h2 { font-size: var(--step-3); }
+	.close p { color: var(--text-muted); max-width: 52ch; margin: 0 auto 1.6rem; }
+	.actions { display: flex; flex-wrap: wrap; gap: 0.8rem; justify-content: center; }
+
+	@media (max-width: 1000px) {
+		/* minmax(0, …): a scrolling index inside a 1fr column would otherwise
+		   widen the column to its content and push the frames off-screen. */
+		.tour-body { grid-template-columns: minmax(0, 1fr); gap: 1.6rem; padding-top: 2rem; }
+		/* The index becomes a scrolling strip. */
+		.side { position: static; }
+		.side nav {
+			flex-direction: row;
+			gap: 0.3rem;
+			overflow-x: auto;
+			border-left: 0;
+			border-bottom: 2px solid var(--border);
+			padding-bottom: 0.4rem;
+			scrollbar-width: thin;
+		}
+		.side-link { border-left: 0; margin-left: 0; padding: 0.3rem 0.6rem; border-radius: 999px; }
+		.side-link.current { border-left: 0; background: var(--tint-orange); }
+		.stop,
+		.stop:nth-of-type(even),
+		.phones { grid-template-columns: minmax(0, 1fr); gap: 1.4rem; padding: 2.2rem 0; }
+		.stop:nth-of-type(even) .media { order: 0; }
+		.phones-grid { gap: 1rem; }
+	}
 </style>
+
+<script>
+	// Mark the stop in view in the index. Progressive: the links work without it.
+	const links = new Map<string, HTMLElement>()
+	for (const a of document.querySelectorAll<HTMLElement>('.side-link[data-stop]')) links.set(a.dataset.stop ?? '', a)
+	const stops = document.querySelectorAll<HTMLElement>('.stop[id]')
+	if ('IntersectionObserver' in window && stops.length) {
+		const io = new IntersectionObserver(
+			(entries) => {
+				for (const e of entries) {
+					if (!e.isIntersecting) continue
+					links.forEach((a) => a.classList.remove('current'))
+					links.get(e.target.id)?.classList.add('current')
+				}
+			},
+			{ rootMargin: '-35% 0px -55% 0px', threshold: 0 }
+		)
+		stops.forEach((s) => io.observe(s))
+	}
+</script>

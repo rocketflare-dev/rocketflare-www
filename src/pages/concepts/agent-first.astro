@@ -58,6 +58,7 @@ globs:
   - apps/web/src/api/**
   - apps/web/src/worker.ts
   - apps/web/src/config.ts
+  - packages/shared/src/**
 ---
 
 # API Patterns</code></pre>
@@ -80,7 +81,7 @@ globs:
 
 	<h2>A guide in every significant directory</h2>
 	<p>
-		Fourteen directories carry their own <code>CLAUDE.md</code> — the routes, the middleware, the
+		Thirteen directories carry their own <code>CLAUDE.md</code> — the routes, the middleware, the
 		permission model, the database schema, the AI services, the agent runtime, the workflows, the
 		cubes, the fact tables, the dashboard templates, the UI, the CLI and the shared package. Each
 		one describes the local shape: what a file in this folder looks like, what it must not do, and
@@ -154,11 +155,21 @@ globs:
 
 	<h2>It sets itself up, too</h2>
 	<p>
-		The same approach covers the first hour. Ask a coding agent <strong>"help me set up this
-		project"</strong> and the root brief tells it to walk the setup guide step by step, showing each
-		command's output, confirming the stated verification line, stopping on failure, and fixing
-		missing prerequisites rather than reporting them. When you are ready to make the kit your own,
-		<code>docs/ADAPTING.md</code> is an explicit rename checklist — every token, every file it
-		appears in, and the order to do them in.
+		The same approach covers the first hour, and the first deploy. Ask a coding agent
+		<strong>"help me set up this project"</strong> and the root brief routes it to a skill that
+		drives the bootstrap script for you — showing each step's line as it passes, stopping on the
+		first failure, and fixing a missing prerequisite rather than reporting it. Four skills ship in
+		<code>.claude/skills/</code>, one per moment where a person used to follow a checklist:
+	</p>
+	<ul>
+		<li><code>/setup</code> — the first run on a machine. Drives <code>scripts/bootstrap.sh</code>: toolchain, Postgres, migrations, demo data, and a browser signed in as the demo owner.</li>
+		<li><code>/preflight</code> — read-only diagnosis when <code>pnpm dev</code>, the migrations or the tests misbehave. It changes nothing; it names the failure and the fix.</li>
+		<li><code>/adapt</code> — the rename. <code>scripts/rename.mjs</code> does the mechanical rows of <code>docs/ADAPTING.md</code> in one pass and reports the handful that need a person.</li>
+		<li><code>/provision</code> — from a laptop to a URL: Cloudflare resources, a Neon project and branches, Resend, the secrets, migrations and the first staging deploy.</li>
+	</ul>
+	<p>
+		Each is a written procedure with a verification line at every step, in the same imperative
+		style as the rules — so the agent walking it, and the person watching, both know what "done"
+		looks like before it is claimed.
 	</p>
 </ConceptLayout>

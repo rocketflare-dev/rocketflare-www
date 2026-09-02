@@ -28,43 +28,43 @@ export interface SitePage {
 export const PAGES: SitePage[] = [
 	{
 		path: '/',
-		title: 'Rocketflare — multi-tenant B2B SaaS starter kit for Cloudflare Workers',
+		title: 'Rocketflare — ship the product, not the platform',
 		nav: 'Home',
 		description:
-			'Open-source starter kit for building a multi-tenant B2B SaaS app on Cloudflare Workers, designed to be worked on by coding agents.',
+			'A ready-made multi-tenant web app you copy and make your own — sign-in, teams, an AI assistant over your documents, dashboards and background jobs on one Cloudflare Worker. Running on your laptop in about two minutes.',
 		audience: 'both',
 		order: 0,
 		ready: true,
 	},
 	{
 		path: '/tour/',
-		title: 'Tour — what a Rocketflare app looks like',
+		title: 'Tour — what you get on the first run, screen by screen',
 		nav: 'Tour',
 		description:
-			'A walk through the app the kit gives you: sign-in, organisations and roles, jobs and realtime, files, analytics, chat and agents, the CLI.',
+			'What you get on the first run, screen by screen: sign-in, people and roles, AI settings, chat, agents, knowledge and search, analytics, usage, the admin area and the CLI.',
 		audience: 'builder',
 		order: 1,
-		ready: false,
+		ready: true,
 	},
 	{
 		path: '/get-started/',
-		title: 'Get started — launch Rocketflare locally',
+		title: 'Get started — running in about two minutes',
 		nav: 'Get started',
 		description:
-			'From git clone to a running app you are signed in to, with your coding agent or by hand. Nothing to sign up for, no keys to paste.',
+			'From git clone to a running app you are signed in to — ask your coding agent, run one script, or do it by hand — then deploy it with three tokens.',
 		audience: 'both',
 		order: 2,
-		ready: false,
+		ready: true,
 	},
 	{
 		path: '/who-is-it-for/',
-		title: 'Who Rocketflare is for',
+		title: 'Who Rocketflare is for — and who it isn’t',
 		nav: "Who it's for",
 		description:
-			'Builders who want the product shipped, and engineers who want to know exactly how the platform underneath it works.',
+			'Three things you would build on it — an internal operations tool, a customer portal with AI over documents, an analytics-heavy B2B product — what is already done for each, and when to pick something else.',
 		audience: 'both',
 		order: 3,
-		ready: false,
+		ready: true,
 	},
 	{
 		path: '/concepts/',
@@ -83,12 +83,5 @@ export const NAV_PAGES = PAGES.filter((p) => p.path !== '/').sort((a, b) => a.or
 
 export const pageByPath = (path: string) => PAGES.find((p) => p.path === path)
 
-/**
- * Paths left out of the sitemap: every not-yet-ready page, plus the
- * kitchen-sink scratch page (`src/pages/kitchen.astro`), which is not a
- * page of the site and is deleted before the overhaul branch merges.
- */
-export const SITEMAP_EXCLUDED_PATHS: string[] = [
-	...PAGES.filter((p) => !p.ready).map((p) => p.path),
-	'/kitchen/',
-]
+/** Paths left out of the sitemap: every not-yet-ready page. */
+export const SITEMAP_EXCLUDED_PATHS: string[] = PAGES.filter((p) => !p.ready).map((p) => p.path)

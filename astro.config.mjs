@@ -10,9 +10,9 @@ export default defineConfig({
 	site: 'https://rocketflare.dev',
 	integrations: [
 		sitemap({
-			// The kitchen-sink page and the not-yet-written placeholders are
-			// `noindex`; a noindex URL inside a sitemap is something search
-			// consoles flag, so they are left out here too (src/data/pages.ts).
+			// Not-yet-written placeholder pages are `noindex`; a noindex URL inside a
+			// sitemap is something search consoles flag, so they are left out here too
+			// (src/data/pages.ts).
 			filter: (page) => !SITEMAP_EXCLUDED_PATHS.some((p) => page.endsWith(p)),
 		}),
 	],

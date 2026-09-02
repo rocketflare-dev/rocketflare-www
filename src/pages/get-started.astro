@@ -1,26 +1,451 @@
 ---
 /**
- * Placeholder — the real page lands later on the overhaul branch. It exists so
- * the nav and footer (generated from src/data/pages.ts) never link to a 404;
- * it is `noindex` and left out of the sitemap until `ready` flips to true.
+ * Get started: three ways from a clone to a browser you are signed in to
+ * (ask your agent · one command · by hand), what the bootstrap did, how to
+ * deploy with /provision, the honest notes, and the rename that makes the
+ * kit yours. Every kit literal comes from src/data/get-started.ts.
  */
 import BaseLayout from '../layouts/BaseLayout.astro'
+import SectionHead from '../components/SectionHead.astro'
+import Callout from '../components/Callout.astro'
+import Steps from '../components/Steps.astro'
+import Terminal from '../components/Terminal.astro'
+import AgentChat from '../components/AgentChat.astro'
+import Tabs from '../components/Tabs.astro'
+import Screenshot from '../components/Screenshot.astro'
+import ConceptIcon from '../components/ConceptIcon.astro'
 import { pageByPath } from '../data/pages'
+import {
+	ADAPTING_URL,
+	CLAUDE_CODE_URL,
+	CLOUDFLARE_TOKENS_URL,
+	INSTALL_SH_SOURCE_URL,
+	NEON_API_KEYS_URL,
+	RESEND_API_KEYS_URL,
+	SETUP_PART1_URL,
+	SETUP_PART3_URL,
+} from '../data/site'
+import {
+	AGENT_CLI_CMD,
+	AGENT_NAME,
+	API_URL,
+	APP_URL,
+	BOOTSTRAP_CMD,
+	BOOTSTRAP_EXPECT,
+	BOOTSTRAP_FLAGS_SHORT,
+	BOOTSTRAP_READY_LINE,
+	BOOTSTRAP_RERUN_CMD,
+	BOOTSTRAP_STEPS,
+	bootstrapLine,
+	BY_HAND_STEPS,
+	CLONE_CMD,
+	DEMO,
+	DEPLOY_ACCOUNTS,
+	DEPLOY_EXPORTS,
+	INSTALL_CMD,
+	PROVISION_CMD,
+	PROVISION_PHASES,
+	PROVISION_SKIP_EMAIL_FLAG,
+	PROVISION_VERIFY_WORD,
+	SKILLS,
+} from '../data/get-started'
+
+import loginLight from '../assets/screens/login.light.png'
+import loginDark from '../assets/screens/login.dark.png'
+import homeLight from '../assets/screens/home.light.png'
+import homeDark from '../assets/screens/home.dark.png'
 
 const page = pageByPath('/get-started/')
 if (!page) throw new Error('Page not in the registry: /get-started/')
+
+const description =
+	'Run Rocketflare on your laptop in about two minutes — ask your coding agent, run one script, or follow the steps by hand — then deploy it to Cloudflare with one command. A Mac or Linux machine, Docker, and a free Cloudflare login are the whole list.'
+
+/** Steps bodies are inline HTML; the commands need their ampersands escaped. */
+const esc = (s: string) => s.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
+
+const tokenUrls: Record<string, string> = {
+	Cloudflare: CLOUDFLARE_TOKENS_URL,
+	Neon: NEON_API_KEYS_URL,
+	Resend: RESEND_API_KEYS_URL,
+}
+
+const bootstrapTail = [
+	...BOOTSTRAP_STEPS.map((_, i) => ({ out: bootstrapLine(i), ok: true })),
+	{ out: BOOTSTRAP_READY_LINE, ok: true },
+]
+
+const handSteps = BY_HAND_STEPS.map((s) => ({
+	title: s.title,
+	body: [
+		...s.cmds.map((c) => `<code>${esc(c)}</code>`),
+		s.note ? `<span class="note">${esc(s.note)}</span>` : '',
+		`<span class="verify"><strong>Verify:</strong> ${esc(s.verify)}</span>`,
+	]
+		.filter(Boolean)
+		.join('<br />'),
+}))
+
+const setupTurns = [
+	{ who: 'you' as const, text: SKILLS.setup },
+	{
+		who: 'agent' as const,
+		text: 'Running the first-run script and explaining each line as it lands. It will fix anything missing — Docker, Node 24, pnpm — and ask whether to log in to Cloudflare or stay offline.',
+		checks: BOOTSTRAP_STEPS.map((s) => s.plain),
+	},
+	{
+		who: 'agent' as const,
+		text: `Opened ${APP_URL}. You're signed in as ${DEMO.ownerName}, owner of ${DEMO.org}. Try Chat, Agents, Knowledge or Analytics.`,
+	},
+]
+
+const provisionTurns = [
+	{ who: 'you' as const, text: SKILLS.provision },
+	{
+		who: 'agent' as const,
+		text: `The four tokens are in the shell. Running the phases in order — each one ends in a ${PROVISION_VERIFY_WORD} line I'll show you, and I stop at the first that fails:`,
+		checks: PROVISION_PHASES.map((p) => `${p.name} — ${p.plain}`),
+	},
+	{
+		who: 'agent' as const,
+		text: `${PROVISION_VERIFY_WORD} staging answers at its /api/health with status ok, and the sending domain is verified. Publish a GitHub release when you want production.`,
+	},
+]
 ---
-<BaseLayout title={page.title} description={page.description} noindex={!page.ready}>
-	<section class="placeholder">
+
+<BaseLayout title={page.title} description={description} noindex={!page.ready}>
+	<!-- ========================================================= intro -->
+	<section class="intro bg-sky">
 		<div class="wrap-narrow">
-			<span class="eyebrow">Coming soon</span>
-			<h1>{page.nav}</h1>
-			<p class="measure">{page.description} This page is coming in this branch.</p>
+			<span class="eyebrow">From a clone to signed in</span>
+			<h1>Get started</h1>
+			<p class="lede measure">
+				You need a Mac or a Linux machine, Docker Desktop running, and a free Cloudflare login the
+				first time it starts — that's the list. Nothing to sign up for beyond that, no keys to
+				paste. Pick whichever of the three paths below suits you; they all end in your browser,
+				signed in as the owner of a demo organisation.
+			</p>
+		</div>
+		<div class="wrap">
+			<Screenshot
+				light={loginLight}
+				dark={loginDark}
+				alt="The sign-in page: a magic-link form and the four quick-login buttons for the demo accounts"
+				url="localhost:3000/login"
+				caption="What you see first: the sign-in page, with quick-login buttons for the demo accounts while you develop."
+				width={880}
+				priority
+			/>
+		</div>
+	</section>
+
+	<!-- ===================================================== three ways -->
+	<section class="ways">
+		<div class="wrap-narrow">
+			<SectionHead
+				align="left"
+				title="Three ways in"
+				lede="Ask your coding agent, run one script, or do each step yourself. Same result, your choice of company."
+			/>
+			<Tabs
+				tabs={[
+					{ id: 'agent', label: 'Ask your agent' },
+					{ id: 'one-command', label: 'One command' },
+					{ id: 'by-hand', label: 'By hand' },
+				]}
+				default="agent"
+			>
+				<Fragment slot="agent">
+					<p class="step-line">
+						<span class="num">1</span>
+						<span>Install <a href={CLAUDE_CODE_URL} target="_blank" rel="noopener">Claude Code</a>, clone the
+						repository and open the folder in it.</span>
+					</p>
+					<Terminal title="zsh" lines={[{ cmd: CLONE_CMD }, { cmd: AGENT_CLI_CMD }]} />
+					<p class="step-line">
+						<span class="num">2</span>
+						<span>Type <code>{SKILLS.setup}</code>. The skill runs the same script as the other two paths
+						and narrates it.</span>
+					</p>
+					<AgentChat agent={AGENT_NAME} turns={setupTurns} />
+					<p class="after">
+						Then <code>{SKILLS.adapt}</code> renames everything — package names, the Worker, the
+						database, the command-line tool, the theme — and <code>{SKILLS.provision}</code> deploys
+						it (<a href="#deploy">below</a>).
+					</p>
+				</Fragment>
+
+				<Fragment slot="one-command">
+					<p>
+						Clone, then run the bootstrap. It prints one line per step, then opens your browser
+						signed in. It is safe to run again after a fix (<code>{BOOTSTRAP_RERUN_CMD}</code> once
+						dependencies exist).
+					</p>
+					<Terminal
+						title="zsh"
+						lines={[{ cmd: CLONE_CMD }, { cmd: BOOTSTRAP_CMD }, ...bootstrapTail]}
+						expect={BOOTSTRAP_EXPECT}
+					/>
+					<table class="flags">
+						<caption>Flags worth knowing (<code>--help</code> lists them all)</caption>
+						<tbody>
+							{BOOTSTRAP_FLAGS_SHORT.map((f) => (
+								<tr>
+									<th scope="row"><code>{f.flag}</code></th>
+									<td>{f.what}</td>
+								</tr>
+							))}
+						</tbody>
+					</table>
+					<h4>Or in one line</h4>
+					<p>
+						The installer clones, detaches the kit's history so the copy is yours from the first
+						commit, and runs the same bootstrap.
+						<a href={INSTALL_SH_SOURCE_URL} target="_blank" rel="noopener">Read it first</a> — it is
+						short.
+					</p>
+					<Terminal title="zsh" lines={[{ cmd: INSTALL_CMD }]} expect={BOOTSTRAP_EXPECT} />
+				</Fragment>
+
+				<Fragment slot="by-hand">
+					<p>
+						The bootstrap, unrolled. This is
+						<a href={SETUP_PART1_URL} target="_blank" rel="noopener">SETUP.md Part 1</a>; every step
+						ends in the line that proves it worked, and the next step waits until you have seen it.
+					</p>
+					<Terminal title="zsh" lines={[{ cmd: CLONE_CMD }]} />
+					<div class="hand">
+						<Steps direction="column" steps={handSteps} />
+					</div>
+				</Fragment>
+			</Tabs>
+		</div>
+	</section>
+
+	<!-- ============================================== what just happened -->
+	<section class="happened">
+		<div class="wrap">
+			<SectionHead
+				title="What just happened"
+				lede="Whichever path you took, this is now true on your machine."
+			/>
+			<Steps
+				direction="row"
+				numbered={false}
+				steps={[
+					{ title: 'Postgres in Docker', body: 'One container on port 5432, with the vector extension for search.' },
+					{ title: 'Schema migrated', body: 'Every table, with the row-level policies in place but not yet enforced.' },
+					{ title: 'Demo organisation seeded', body: `${DEMO.org}: people with roles, documents, chats and a dashboard.` },
+					{ title: 'App on :3000, API on :3001', body: 'The interface and the Worker, each reloading as you edit.' },
+					{ title: 'You, signed in as the owner', body: `${DEMO.ownerName} (${DEMO.ownerEmail}) — the dev quick-login, which does not exist when deployed.` },
+				]}
+			/>
+			<Screenshot
+				light={homeLight}
+				dark={homeDark}
+				alt={`Home, signed in as ${DEMO.ownerName}, owner of ${DEMO.org}, with quick links and recent activity`}
+				url="localhost:3000"
+				caption="Home, the moment the bootstrap finishes."
+				width={960}
+			/>
+		</div>
+	</section>
+
+	<!-- ========================================================= deploy -->
+	<section class="deploy" id="deploy">
+		<div class="wrap-narrow">
+			<SectionHead
+				audience="builder"
+				align="left"
+				title="Deploy it"
+				lede="Three accounts, four tokens, one command. Each account gives you a token from its dashboard; the kit does the rest."
+			/>
+			<ol class="accounts">
+				{DEPLOY_ACCOUNTS.map((a, i) => (
+					<li>
+						<span class="num">{i + 1}</span>
+						<div>
+							<strong>{a.name}</strong>
+							<span class="role">{a.role}{a.plan && <> · {a.plan}</>}</span>
+							<span class="mint">
+								Mint {a.token} at <a href={tokenUrls[a.name]} target="_blank" rel="noopener">{tokenUrls[a.name].replace('https://', '')}</a>{a.also && <>; {a.also}</>}
+							</span>
+							<span class="vars">{a.envVars.map((v) => <code>{v}</code>)}</span>
+						</div>
+					</li>
+				))}
+			</ol>
+			<p>
+				Export the four in the shell you will open your agent from — the skill reads them from the
+				environment and never asks you to paste one into the chat.
+			</p>
+			<Terminal
+				title="zsh — before you open Claude Code"
+				lines={DEPLOY_EXPORTS.map((v) => ({ cmd: `export ${v}=…` }))}
+			/>
+			<AgentChat agent={AGENT_NAME} turns={provisionTurns} />
+			<p class="after">
+				Without an agent, the same thing is <code>{PROVISION_CMD}</code> (add
+				<code>{PROVISION_SKIP_EMAIL_FLAG}</code> when there is no Resend account). It creates the
+				Neon project and its staging branch; Hyperdrive, KV, the queue and the R2 bucket; writes the
+				ids into both wrangler files; runs the migrations; sets the GitHub environment secrets;
+				deploys staging; sets the Worker secrets over stdin; and creates and verifies the Resend
+				domain with its DNS records on Cloudflare. The step-by-step manual path is
+				<a href={SETUP_PART3_URL} target="_blank" rel="noopener">SETUP.md Part 3</a>.
+			</p>
+		</div>
+	</section>
+
+	<!-- =================================================== honest notes -->
+	<section class="honest">
+		<div class="wrap">
+			<SectionHead title="Honest notes" lede="Four things that are true and worth knowing before you start." />
+			<div class="notes">
+				<Callout tone="blue" title="macOS or Linux">
+					<svg slot="icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 18v3"/></svg>
+					<p>The bootstrap is a shell script and refuses other systems. Windows works through WSL2, but that path is untested.</p>
+				</Callout>
+				<Callout tone="green" title="Docker must be running">
+					<ConceptIcon slot="icon" name="database" />
+					<p>Postgres runs in a container. Docker Desktop, or colima on a Mac (<code>brew install colima docker &amp;&amp; colima start</code>), has to be up before step 4.</p>
+				</Callout>
+				<Callout tone="orange" title="The Cloudflare login, and what it costs">
+					<ConceptIcon slot="icon" name="cloud" />
+					<p>The built-in AI runs on Workers AI, which always calls Cloudflare, so the first <code>pnpm dev</code> asks for a login — a free account is enough. Every AI call is billed to that account: 10 000 free neurons a day, then metered. Start with <code>--offline</code> and it is never asked for; chat, agents and search then wait for a key of your own.</p>
+				</Callout>
+				<Callout tone="yellow" title="Deploying needs Workers Paid">
+					<ConceptIcon slot="icon" name="rocket" />
+					<p>Running it on your laptop costs nothing. Deploying needs the paid Workers plan, because the database connection pool (Hyperdrive) and the workflows the agents run on are paid features.</p>
+				</Callout>
+			</div>
+		</div>
+	</section>
+
+	<!-- ================================================= make it yours -->
+	<section class="yours bg-lift">
+		<div class="wrap-narrow">
+			<h2>Then make it yours</h2>
+			<p class="measure">
+				A fresh copy is still called Rocketflare in a few dozen places — package names, the Worker,
+				the database, the command-line tool, the theme colours, the email sender.
+				<code>{SKILLS.adapt}</code> renames the mechanical ones in one reviewable commit and walks
+				you through the handful that need a person. The same list, for doing it by hand, is
+				<a href={ADAPTING_URL} target="_blank" rel="noopener">docs/ADAPTING.md</a>.
+			</p>
+			<p class="measure">
+				After that, the kit is your app. The command-line tool speaks to it at
+				<code>{API_URL}</code> while you develop and at your own host once deployed.
+			</p>
 		</div>
 	</section>
 </BaseLayout>
 
 <style>
-	.placeholder { padding: 5rem 0 6rem; min-height: 50vh; }
-	.placeholder p { color: var(--text-muted); font-size: var(--step-1); }
+	/* ----------------------------------------------------------- intro -- */
+	.intro { padding: 4rem 0 4.5rem; }
+	.intro h1 { margin-bottom: 0.8rem; }
+	.lede { font-size: var(--step-1); color: var(--text); }
+	.intro .wrap { margin-top: 1.5rem; }
+
+	/* ------------------------------------------------------ three ways -- */
+	.ways { padding: 5rem 0; background: var(--bg); }
+	.ways h4 { margin: 2.2rem 0 0.4rem; font-size: 1.05rem; }
+	.step-line {
+		display: flex;
+		gap: 0.8rem;
+		align-items: flex-start;
+		margin: 1.4rem 0 0.6rem;
+	}
+	.num {
+		flex: none;
+		display: inline-grid;
+		place-items: center;
+		width: 28px;
+		height: 28px;
+		border-radius: 50%;
+		font-size: 0.85rem;
+		font-weight: 800;
+		color: var(--on-accent);
+		background: linear-gradient(150deg, var(--orange), var(--red));
+	}
+	.after { margin-top: 1.4rem; color: var(--text-muted); }
+
+	.flags {
+		width: 100%;
+		border-collapse: collapse;
+		margin: 0.4rem 0 0;
+		font-size: 0.92rem;
+	}
+	.flags caption {
+		caption-side: top;
+		text-align: left;
+		font-weight: 600;
+		color: var(--text-bright);
+		padding: 0 0 0.5rem;
+	}
+	.flags th, .flags td {
+		text-align: left;
+		vertical-align: top;
+		padding: 0.55rem 0.6rem 0.55rem 0;
+		border-top: 1px solid var(--border);
+	}
+	.flags th { white-space: nowrap; padding-right: 1.2rem; font-weight: 500; }
+	.flags td { color: var(--text-muted); }
+
+	/* The by-hand list: commands, an optional note, then the verify line. */
+	.hand { margin-top: 1.6rem; }
+	.hand :global(.step-body p) { line-height: 1.8; }
+	.hand :global(.step-body code) { font-size: 0.86em; }
+	.hand :global(.note) { color: var(--text-muted); }
+	.hand :global(.verify) { color: var(--text); }
+	.hand :global(.verify strong) { color: var(--green); font-weight: 700; }
+
+	/* -------------------------------------------------- what happened -- */
+	.happened {
+		padding: 5rem 0;
+		background: var(--card);
+		border-top: 1px solid var(--border);
+		border-bottom: 1px solid var(--border);
+	}
+	.happened :global(.shot) { margin-top: 3rem; }
+
+	/* ---------------------------------------------------------- deploy -- */
+	.deploy { padding: 5rem 0; background: var(--bg); }
+	.accounts {
+		list-style: none;
+		margin: 0 0 2rem;
+		padding: 0;
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 1.4rem;
+	}
+	.accounts li { display: flex; gap: 0.8rem; align-items: flex-start; }
+	.accounts li > div { display: flex; flex-direction: column; gap: 0.3rem; min-width: 0; }
+	.accounts strong { color: var(--text-bright); font-size: 1.05rem; }
+	.accounts .role { font-size: 0.88rem; color: var(--text-muted); }
+	.accounts .mint { font-size: 0.9rem; }
+	.accounts .mint a { overflow-wrap: anywhere; }
+	.accounts .vars { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.2rem; }
+	.accounts .vars code { font-size: 0.78rem; }
+	@media (max-width: 760px) { .accounts { grid-template-columns: 1fr; } }
+
+	/* ---------------------------------------------------------- honest -- */
+	.honest {
+		padding: 5rem 0;
+		background: var(--card-alt);
+		border-top: 1px solid var(--border);
+	}
+	.notes {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 1.2rem;
+	}
+	/* The component's own vertical margin, unwanted in a grid. */
+	.notes :global(.callout) { margin: 0; }
+	@media (max-width: 760px) { .notes { grid-template-columns: 1fr; } }
+
+	/* ----------------------------------------------------------- yours -- */
+	.yours { padding: 5rem 0 6rem; border-top: 1px solid var(--border); }
+	.yours p { color: var(--text-muted); }
+	.yours p code { font-size: 0.85em; }
 </style>
