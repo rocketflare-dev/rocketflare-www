@@ -184,6 +184,10 @@ export interface DeployAccount {
 	token: string
 	/** Anything else to collect there that is not the token. */
 	also?: string
+	/** Where to create the account. */
+	signupUrl: string
+	/** Extra links that belong to the "before anything" step (plan, domain). */
+	links?: { label: string; url: string }[]
 	/** What to do in that account before minting anything — the kit cannot do this part. */
 	first: string
 	/** The variables the kit reads (from apps/web/.provision.env, or the environment in CI). */
@@ -193,6 +197,12 @@ export interface DeployAccount {
 export const DEPLOY_ACCOUNTS: DeployAccount[] = [
 	{
 		name: 'Cloudflare',
+		signupUrl: 'https://dash.cloudflare.com/sign-up',
+		links: [
+			{ label: 'Upgrade to Workers Paid', url: 'https://dash.cloudflare.com/?to=/:account/workers/plans' },
+			{ label: 'Register a domain', url: 'https://dash.cloudflare.com/?to=/:account/domains/register' },
+			{ label: 'Or add a domain you own', url: 'https://dash.cloudflare.com/?to=/:account/add-site' },
+		],
 		role: 'runs the app',
 		plan: 'Workers Paid — Hyperdrive and Workflows need it',
 		token: 'an API token',
@@ -204,6 +214,7 @@ export const DEPLOY_ACCOUNTS: DeployAccount[] = [
 	},
 	{
 		name: 'Neon',
+		signupUrl: 'https://console.neon.tech/signup',
 		role: 'hosts the Postgres database',
 		first: 'Create the account. The free tier is enough for the two branches the kit makes.',
 		token: 'an API key',
@@ -211,6 +222,7 @@ export const DEPLOY_ACCOUNTS: DeployAccount[] = [
 	},
 	{
 		name: 'Resend',
+		signupUrl: 'https://resend.com/signup',
 		role: 'sends the sign-in and invitation emails',
 		plan: 'optional — skip it with --skip-email and links are logged instead',
 		first: 'Create the account. You will verify the same domain here; the free tier is enough.',

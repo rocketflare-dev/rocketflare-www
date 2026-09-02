@@ -255,13 +255,19 @@ const provisionTurns = [
 					<li>
 						<span class="num">{i + 1}</span>
 						<div>
-							<strong>{a.name}</strong>
-							<span class="role">{a.role}{a.plan && <> · {a.plan}</>}</span>
+							<div class="acct-head">
+								<strong>{a.name}</strong>
+								<span class="role">{a.role}{a.plan && <> · {a.plan}</>}</span>
+							</div>
 							<p class="first">{a.first}</p>
+							<div class="acct-links">
+								<a class="btn btn-secondary" href={a.signupUrl} target="_blank" rel="noopener">Create a {a.name} account ↗</a>
+								{(a.links ?? []).map((l) => <a class="btn btn-ghost" href={l.url} target="_blank" rel="noopener">{l.label} ↗</a>)}
+								<a class="btn btn-ghost" href={tokenUrls[a.name]} target="_blank" rel="noopener">Mint {a.token} ↗</a>
+							</div>
 							<p class="mint">
-								Mint {a.token} at <a href={tokenUrls[a.name]} target="_blank" rel="noopener">{tokenUrls[a.name].replace('https://', '')}</a>{a.also && <>; {a.also}</>}
+								The kit reads it as <span class="vars">{a.envVars.map((v) => <code>{v}</code>)}</span>{a.also && <> — {a.also}</>}.
 							</p>
-							<span class="vars">{a.envVars.map((v) => <code>{v}</code>)}</span>
 						</div>
 					</li>
 				))}
@@ -410,23 +416,25 @@ const provisionTurns = [
 	.deploy { padding: 5rem 0; background: var(--bg); }
 	.accounts {
 		list-style: none;
-		margin: 0 0 2rem;
 		padding: 0;
+		margin: 0.5rem 0 0;
 		display: grid;
-		grid-template-columns: repeat(3, minmax(0, 1fr));
-		gap: 1.4rem;
+		gap: 1.6rem;
 	}
-	.accounts li { display: flex; gap: 0.8rem; align-items: flex-start; }
-	.accounts li > div { display: flex; flex-direction: column; gap: 0.3rem; min-width: 0; }
-	.accounts strong { color: var(--text-bright); font-size: 1.05rem; }
+	.accounts li { display: flex; gap: 1rem; align-items: flex-start; padding: 1.2rem 1.3rem; border: 1px solid var(--border); border-radius: 14px; background: var(--card); }
+	.accounts li > div { display: flex; flex-direction: column; gap: 0.55rem; min-width: 0; flex: 1; }
+	.acct-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.3rem 0.8rem; }
+	.accounts strong { color: var(--text-bright); font-size: 1.15rem; }
 	.accounts .role { font-size: 0.88rem; color: var(--text-muted); }
-	.accounts .first { font-size: 0.92rem; margin: 0; }
+	.accounts .first { font-size: 0.95rem; margin: 0; max-width: 62ch; }
+	.acct-links { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+	.acct-links .btn { font-size: 0.88rem; padding: 0.45rem 0.85rem; }
 	.accounts .mint { font-size: 0.9rem; margin: 0; }
 	.deploy h3 { font-size: 1.15rem; margin: 2rem 0 0.8rem; color: var(--text-bright); }
 	.accounts .mint a { overflow-wrap: anywhere; }
 	.accounts .vars { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.2rem; }
 	.accounts .vars code { font-size: 0.78rem; }
-	@media (max-width: 760px) { .accounts { grid-template-columns: 1fr; } }
+	@media (max-width: 760px) { .accounts li { padding: 1rem; } }
 
 	/* ---------------------------------------------------------- honest -- */
 	.honest {

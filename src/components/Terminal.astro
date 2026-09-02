@@ -34,7 +34,7 @@ const copyText = copy ?? lines.filter((l) => l.cmd !== undefined).map((l) => l.c
 			<span class="copy-label">Copy</span>
 		</button>
 	</div>
-	<pre><code>{lines.map((l) => l.cmd !== undefined ? <span class="line cmd">{l.cmd}</span> : <span class:list={['line', 'out', l.ok && 'ok', l.muted && 'muted']}>{l.out}</span>)}</code></pre>
+	<pre tabindex="0"><code>{lines.map((l) => l.cmd !== undefined ? <span class="line cmd">{l.cmd}</span> : <span class:list={['line', 'out', l.ok && 'ok', l.muted && 'muted']}>{l.out}</span>)}</code></pre>
 	{expect && <figcaption class="expect"><span aria-hidden="true">→ </span>{expect}</figcaption>}
 </figure>
 
