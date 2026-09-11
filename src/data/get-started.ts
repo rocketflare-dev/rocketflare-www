@@ -23,7 +23,11 @@ export const APP_DIR = 'myapp'
  * carries on evolving (docs/ADAPTING.md §0). The one-liner below does both for you.
  */
 export const CLONE_CMD = `git clone --depth 1 https://github.com/rocketflare-dev/rocketflare.git ${APP_DIR} && cd ${APP_DIR}`
-/** Your history starts here; the kit commit is recorded so you can diff against it later. */
+/**
+ * Your history starts here. Provenance does not depend on this line: `.rocketflare.json` ships with
+ * the kit version already set, so a copy made by hand still knows what it descends from and can be
+ * upgraded later. The installer additionally stamps the exact commit.
+ */
 export const DETACH_CMD =
   'rm -rf .git && git init -q && git add -A && git commit -qm "Start from Rocketflare"'
 /** Both of the above, as a terminal transcript. */
@@ -118,12 +122,30 @@ export const AGENT_NAME = 'Claude Code'
 export const AGENT_CLI_CMD = 'claude'
 export const AGENT_PROMPT = 'Help me set up this project'
 
-/** The skills the kit ships in `.claude/skills/`, as you type them. */
+/**
+ * The skills the kit ships in `.claude/skills/`, as you type them. All prefixed `rf-` so they are
+ * unambiguous next to whatever else is installed, and so `/rf-upgrade` cannot be mistaken for
+ * upgrading dependencies.
+ */
 export const SKILLS = {
-	setup: '/setup',
-	adapt: '/adapt <slug> "Your App"',
-	provision: '/provision',
+	setup: '/rf-setup',
+	adapt: '/rf-adapt <slug> "Your App"',
+	provision: '/rf-provision',
+	upgrade: '/rf-upgrade',
 } as const
+
+// ---- Staying current ------------------------------------------------------
+
+/**
+ * The file that makes an upgrade possible: which kit version and commit the copy came from, the
+ * rename applied to it, and the manifest of parts that are meant to be replaced. Deleting it is
+ * the one thing that costs an adopter the upgrade path.
+ */
+export const KIT_MANIFEST_FILE = '.rocketflare.json'
+/** Ports later kit releases into a copy. The skill above drives this. */
+export const UPGRADE_CMD = 'pnpm kit:upgrade --apply'
+/** Where the porting notes live in a copy, and in the kit. */
+export const UPGRADE_NOTES_DIR = 'docs/upgrades/'
 
 // ---- By hand (SETUP.md Part 1) --------------------------------------------
 
@@ -182,7 +204,7 @@ export const BY_HAND_STEPS: HandStep[] = [
 	},
 ]
 
-// ---- Deploying (the /provision skill, SETUP.md Part 3) --------------------
+// ---- Deploying (the /rf-provision skill, SETUP.md Part 3) -----------------
 
 export interface DeployAccount {
 	name: string

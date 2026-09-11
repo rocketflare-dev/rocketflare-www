@@ -162,10 +162,11 @@ globs:
 		<code>.claude/skills/</code>, one per moment where a person used to follow a checklist:
 	</p>
 	<ul>
-		<li><code>/setup</code> — the first run on a machine. Drives <code>scripts/bootstrap.sh</code>: toolchain, Postgres, migrations, demo data, and a browser signed in as the demo owner.</li>
-		<li><code>/preflight</code> — read-only diagnosis when <code>pnpm dev</code>, the migrations or the tests misbehave. It changes nothing; it names the failure and the fix.</li>
-		<li><code>/adapt</code> — the rename. <code>scripts/rename.mjs</code> does the mechanical rows of <code>docs/ADAPTING.md</code> in one pass and reports the handful that need a person.</li>
-		<li><code>/provision</code> — from a laptop to a URL: Cloudflare resources, a Neon project and branches, Resend, the secrets, migrations and the first staging deploy.</li>
+		<li><code>/rf-setup</code> — the first run on a machine. Drives <code>scripts/bootstrap.sh</code>: toolchain, Postgres, migrations, demo data, and a browser signed in as the demo owner.</li>
+		<li><code>/rf-preflight</code> — read-only diagnosis when <code>pnpm dev</code>, the migrations or the tests misbehave. It changes nothing; it names the failure and the fix.</li>
+		<li><code>/rf-adapt</code> — the rename. <code>scripts/rename.mjs</code> does the mechanical rows of <code>docs/ADAPTING.md</code> in one pass and reports the handful that need a person.</li>
+		<li><code>/rf-provision</code> — from a laptop to a URL: Cloudflare resources, a Neon project and branches, Resend, the secrets, migrations and the first staging deploy.</li>
+		<li><code>/rf-upgrade</code> — later, when the kit has moved on: it fetches the kit, rewrites its changes into the names your copy uses, and skips every part you deleted rather than putting it back.</li>
 	</ul>
 	<p>
 		Each is a written procedure with a verification line at every step, in the same imperative

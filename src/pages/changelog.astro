@@ -1,0 +1,205 @@
+---
+/**
+ * Every release of the kit, and — in the same place — the one command that brings it into a copy
+ * somebody has already renamed and made their own. Those two questions are always asked together,
+ * so the page answers both rather than sending the reader to GitHub for the second.
+ *
+ * The entries come from `src/data/releases.ts`, which mirrors the frontmatter of the kit's
+ * `docs/upgrades/*.md`. The porting instructions themselves stay in the kit and are linked, never
+ * restated: they are what the upgrade tooling reads, and a second copy here would drift.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro'
+import SectionHead from '../components/SectionHead.astro'
+import Callout from '../components/Callout.astro'
+import ConceptIcon from '../components/ConceptIcon.astro'
+import Terminal from '../components/Terminal.astro'
+import { pageByPath } from '../data/pages'
+import { RELEASES_NEWEST_FIRST } from '../data/releases'
+import { KIT_MANIFEST_FILE, SKILLS, UPGRADE_CMD, UPGRADE_NOTES_DIR } from '../data/get-started'
+import { ADAPTING_URL, UPGRADES_URL, upgradeNote } from '../data/site'
+
+const page = pageByPath('/changelog/')
+if (!page) throw new Error('Page not in the registry: /changelog/')
+
+const dateLabel = (iso: string) =>
+	new Date(`${iso}T00:00:00Z`).toLocaleDateString('en-GB', {
+		day: 'numeric',
+		month: 'long',
+		year: 'numeric',
+		timeZone: 'UTC',
+	})
+---
+
+<BaseLayout title={page.title} description={page.description}>
+	<div class="page-hero wrap-narrow">
+		<p class="eyebrow">Releases</p>
+		<h1>Changelog</h1>
+		<p class="lede">
+			What each release of the kit added — and, because you will have renamed and rewritten your
+			copy by the time you read this, how to bring it across.
+		</p>
+	</div>
+
+	<div class="wrap-narrow cl-body">
+		<!-- ============================================== how to get it -->
+		<section class="how">
+			<SectionHead
+				eyebrow="First"
+				title="How a release reaches your copy"
+				lede="You took a copy and cut it loose, so there is nothing to merge. There is something better: a copy knows which release it came from, and which parts of the kit it still has."
+			/>
+			<p class="measure">
+				<code>{KIT_MANIFEST_FILE}</code> at the root of your app records both. Ask your coding
+				agent for <code>{SKILLS.upgrade}</code>, or run it yourself:
+			</p>
+			<Terminal
+				title="zsh"
+				lines={[{ cmd: UPGRADE_CMD }]}
+				expect="Lists what applies, what it skipped because you deleted it, and what it left for you to decide"
+			/>
+			<p class="measure">
+				It fetches the kit, rewrites its changes into your names, and drops everything belonging
+				to a part you removed. The example agent you deleted stays deleted. Your database
+				migrations, your Cloudflare configuration and your version number are yours and are left
+				alone — it tells you what it left rather than guessing.
+			</p>
+			<Callout tone="blue" title="Keep the manifest file">
+				<ConceptIcon slot="icon" name="link" />
+				<p>
+					Deleting <code>{KIT_MANIFEST_FILE}</code> is the one thing that costs you this. It holds
+					no secrets and is safe to commit. If a copy predates it, there is a one-line command to
+					put it back — see <a href={ADAPTING_URL} target="_blank" rel="noopener">docs/ADAPTING.md</a>.
+				</p>
+			</Callout>
+		</section>
+
+		<!-- ==================================================== releases -->
+		<section class="releases">
+			<SectionHead
+				eyebrow="Then"
+				title="The releases"
+				lede="Each one ships a porting note saying what changed and how to apply it. That note is what the upgrade reads, so it is the honest description — this list is the index."
+			/>
+			<ol class="rel-list">
+				{RELEASES_NEWEST_FIRST.map((r) => (
+					<li class="rel">
+						<div class="rel-head">
+							<h3 id={`v${r.version}`}>{r.version}</h3>
+							<time datetime={r.date}>{dateLabel(r.date)}</time>
+						</div>
+						<p class="rel-summary">{r.summary}</p>
+						<p class="rel-meta">
+							{r.breaking && <span class="tag tag-breaking">Needs a change from you</span>}
+							{r.migrations && <span class="tag tag-db">Schema change</span>}
+							<span class="areas">{r.areas.join(' · ')}</span>
+						</p>
+						<p class="rel-link">
+							<a href={upgradeNote(r.version)} target="_blank" rel="noopener">
+								Porting note for {r.version}
+							</a>
+						</p>
+					</li>
+				))}
+			</ol>
+			<p class="measure all-notes">
+				Every note lives in <code>{UPGRADE_NOTES_DIR}</code> —
+				<a href={UPGRADES_URL} target="_blank" rel="noopener">read them all</a>. Your copy
+				collects them as it upgrades, so the next person to open it can see what it has absorbed.
+			</p>
+		</section>
+	</div>
+</BaseLayout>
+
+<style>
+	.cl-body {
+		padding-block: 2rem 5rem;
+		display: grid;
+		gap: 4rem;
+	}
+
+	.measure {
+		max-width: var(--measure, 68ch);
+		color: var(--text-2);
+	}
+
+	/* ------------------------------------------------------- releases -- */
+	.rel-list {
+		list-style: none;
+		margin: 2rem 0 0;
+		padding: 0;
+		display: grid;
+		gap: 1.25rem;
+	}
+
+	.rel {
+		background: var(--surface-panel);
+		border: 1px solid var(--border-subtle);
+		border-radius: var(--radius-lg, 14px);
+		padding: 1.25rem 1.5rem;
+	}
+
+	.rel-head {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 1rem;
+		flex-wrap: wrap;
+	}
+
+	.rel-head h3 {
+		margin: 0;
+		font-size: 1.25rem;
+		font-variant-numeric: tabular-nums;
+	}
+
+	.rel-head time {
+		color: var(--text-3);
+		font-size: 0.9rem;
+	}
+
+	.rel-summary {
+		margin: 0.6rem 0 0;
+		color: var(--text-2);
+		max-width: var(--measure, 68ch);
+	}
+
+	.rel-meta {
+		margin: 0.75rem 0 0;
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		flex-wrap: wrap;
+		font-size: 0.85rem;
+	}
+
+	.tag {
+		border-radius: 999px;
+		padding: 0.15rem 0.6rem;
+		border: 1px solid var(--border-subtle);
+		color: var(--text-2);
+	}
+
+	.tag-breaking {
+		border-color: var(--tone-red-border, var(--border-subtle));
+		color: var(--tone-red-text, var(--text-1));
+	}
+
+	.tag-db {
+		border-color: var(--tone-blue-border, var(--border-subtle));
+		color: var(--tone-blue-text, var(--text-1));
+	}
+
+	.areas {
+		color: var(--text-3);
+		font-family: var(--font-mono);
+	}
+
+	.rel-link {
+		margin: 0.75rem 0 0;
+		font-size: 0.9rem;
+	}
+
+	.all-notes {
+		margin-top: 2rem;
+	}
+</style>

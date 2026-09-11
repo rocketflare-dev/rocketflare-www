@@ -7,6 +7,10 @@ export const CONCEPTS_URL = `${DOCS}/docs/CONCEPTS.md`
 export const SETUP_URL = `${DOCS}/SETUP.md`
 export const ADAPTING_URL = `${DOCS}/docs/ADAPTING.md`
 export const DEPLOY_URL = `${DOCS}/docs/DEPLOY.md`
+export const CHANGELOG_URL = `${DOCS}/CHANGELOG.md`
+export const UPGRADES_URL = `${GITHUB_URL}/tree/main/docs/upgrades`
+/** One release's porting note — what changed and how to bring it into a copy. */
+export const upgradeNote = (version: string) => `${DOCS}/docs/upgrades/${version}.md`
 
 /** SETUP.md parts, by their GitHub heading anchors. */
 export const SETUP_PART1_URL = `${SETUP_URL}#part-1--first-run-local-ready`

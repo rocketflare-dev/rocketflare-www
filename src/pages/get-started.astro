@@ -2,7 +2,7 @@
 /**
  * Get started: three ways from a clone to a browser you are signed in to
  * (ask your agent · one command · by hand), what the bootstrap did, how to
- * deploy with /provision, the honest notes, and the rename that makes the
+ * deploy with /rf-provision, the honest notes, and the rename that makes the
  * kit yours. Every kit literal comes from src/data/get-started.ts.
  */
 import BaseLayout from '../layouts/BaseLayout.astro'
@@ -50,6 +50,9 @@ import {
 	PROVISION_SKIP_EMAIL_FLAG,
 	PROVISION_VERIFY_WORD,
 	SKILLS,
+	KIT_MANIFEST_FILE,
+	UPGRADE_CMD,
+	UPGRADE_NOTES_DIR,
 } from '../data/get-started'
 
 import homeLight from '../assets/screens/home.light.png'
@@ -106,6 +109,7 @@ const SECTIONS = [
 	{ id: 'deploy', label: 'Deploy it' },
 	{ id: 'honest', label: 'Honest notes' },
 	{ id: 'yours', label: 'Make it yours' },
+	{ id: 'current', label: 'Stay current' },
 ]
 
 const provisionTurns = [
@@ -363,6 +367,31 @@ const provisionTurns = [
 		<p class="measure">
 			After that, the kit is your app. The command-line tool speaks to it at
 			<code>{API_URL}</code> while you develop and at your own host once deployed.
+		</p>
+	</section>
+
+	<!-- ================================================= stay current -->
+	<section class="current" id="current">
+		<h2>Staying current</h2>
+		<p class="measure">
+			Your copy has no upstream — you will rename, delete and rewrite freely, and you never merge
+			from us. That does not mean you are stuck on the version you copied. A file at the root,
+			<code>{KIT_MANIFEST_FILE}</code>, records which release you came from, the names you renamed
+			to, and which of the kit's replaceable parts you still have. Run
+			<code>{SKILLS.upgrade}</code> (or <code>{UPGRADE_CMD}</code>) and it fetches the kit,
+			rewrites its changes into your names, and hands you the ones that still apply.
+		</p>
+		<p class="measure">
+			The part that makes this safe is what it refuses to do. Delete the example agent, the
+			example dashboard or the command-line commands you did not want — and an upgrade will never
+			bring them back. It leaves your database migrations, your Cloudflare configuration and your
+			version number alone, and tells you what it left for you. Every release ships a note in
+			<code>{UPGRADE_NOTES_DIR}</code> saying what changed and how to port it; the
+			<a href="/changelog/">changelog</a> is the list.
+		</p>
+		<p class="measure">
+			One thing to know: keep <code>{KIT_MANIFEST_FILE}</code>. Deleting it is the only way to
+			lose the upgrade path.
 		</p>
 	</section>
 		</div>

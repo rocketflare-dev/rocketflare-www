@@ -27,8 +27,8 @@ CLI. Node 24, pnpm 10.
 Getting started: clone the repository and run "bash scripts/bootstrap.sh" (macOS
 or Linux, Docker running) — it checks the toolchain, starts Postgres, migrates,
 seeds a demo workspace and opens the browser signed in; or open the folder in
-Claude Code and type /setup (the repository ships /setup, /preflight, /adapt and
-/provision as skills). Local development needs a free Cloudflare login only because
+Claude Code and type /rf-setup (the repository ships /rf-setup, /rf-preflight,
+/rf-adapt, /rf-provision and /rf-upgrade as skills). Local development needs a free Cloudflare login only because
 the Workers AI binding always calls out (--offline turns it off); deploying needs
 Workers Paid for Hyperdrive and Workflows and is scripted by "pnpm provision".
 

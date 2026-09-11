@@ -9,7 +9,7 @@ import { AXE, launch, open } from './lib.mjs'
 
 const pages = process.argv.slice(2).length
 	? process.argv.slice(2)
-	: ['/', '/tour/', '/get-started/', '/who-is-it-for/', '/concepts/', '/concepts/auth/']
+	: ['/', '/tour/', '/get-started/', '/who-is-it-for/', '/changelog/', '/concepts/', '/concepts/auth/']
 const browser = await launch()
 let violations = 0
 for (const theme of ['day', 'night']) {

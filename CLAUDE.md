@@ -36,6 +36,7 @@ npm run build && npx wrangler dev --port 4399 --ip 127.0.0.1     # http://127.0.
 curl -sI http://127.0.0.1:4399/install.sh | grep -i content-type  # application/x-sh
 curl -s http://127.0.0.1:4399/install.sh | cmp - ../rocketflare/scripts/install.sh   # byte-identical
 curl -s http://127.0.0.1:4399/sitemap-0.xml | grep -c '/og/'     # 0
+npm run check:releases                                           # /changelog/ matches the kit's docs/upgrades/
 ```
 
 Then the three scripts in `scripts/verify/` (plain Node, no dependency in this repo: they borrow
@@ -44,7 +45,7 @@ Then the three scripts in `scripts/verify/` (plain Node, no dependency in this r
 `BASE` / `CHROME_PATH` from the environment if the defaults are wrong). All three exit 1 on a miss:
 
 ```bash
-node scripts/verify/lighthouse.mjs   # mobile + desktop on /, /tour/, /get-started/, /who-is-it-for/, /concepts/auth/
+node scripts/verify/lighthouse.mjs   # mobile + desktop on /, /tour/, /get-started/, /who-is-it-for/, /changelog/, /concepts/auth/
                                      # → one row per run, ≥ 95 in every category; failing audits listed under it
 node scripts/verify/axe.mjs          # axe in BOTH themes on those + /concepts/ — the contrast gate (Lighthouse only sees day)
 node scripts/verify/checks.mjs       # everything else, one ok/FAIL line each:
@@ -75,6 +76,7 @@ scripts prove the mechanics, not the taste.
 | `src/data/site.ts` | every external URL |
 | `src/pages/index.astro` | the landing page |
 | `src/pages/{tour,get-started,who-is-it-for}.astro` | the tour, Get started (literals from `src/data/get-started.ts`), who it's for |
+| `src/pages/changelog.astro` | the kit's releases + how one reaches an existing copy; entries from `src/data/releases.ts`, which mirrors the kit's `docs/upgrades/*.md` frontmatter — regenerate with `npm run sync:releases`, gate with `npm run check:releases` before a release. Porting instructions stay in the kit and are linked, never restated |
 | `src/pages/og.astro` | the 1200×630 template `public/og-image.png` is captured from (noindex, not in the registry) |
 | `src/pages/concepts/*` | one page per subsystem, plus the index |
 | `src/pages/llms.txt.ts` | the llms.txt map, generated from `pages.ts` + `concepts.ts` |

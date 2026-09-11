@@ -1,0 +1,41 @@
+/**
+ * The kit's releases, mirroring the frontmatter of `docs/upgrades/*.md` in the kit repository.
+ *
+ * Hand-maintained on purpose, like every other kit literal on this site (CLAUDE.md, "kit literals"):
+ * the site is a separate repository and must build without the kit checked out beside it. Keep it in
+ * step when you cut a release — `npm run sync:releases` regenerates it from a sibling
+ * `../rocketflare` checkout and is the easiest way to be sure.
+ *
+ * `summary` is the site's own one-line voice, not a copy of the note. The note itself is the
+ * porting instruction and lives in the kit; link to it, never restate it.
+ */
+export interface Release {
+	/** `X.Y.Z`, matching the git tag and the porting note's filename. */
+	version: string
+	/** ISO date, as in the note's frontmatter. */
+	date: string
+	summary: string
+	/** True when an adopter has to change their own code, not just accept ours. */
+	breaking: boolean
+	/** True when the release ships a schema change (a copy regenerates its own migration). */
+	migrations: boolean
+	/** The areas it touches, for someone deciding whether to bother now. */
+	areas: string[]
+}
+
+export const RELEASES: Release[] = [
+	{
+		version: '0.1.0',
+		date: '2026-09-11',
+		summary:
+			'The first release: the whole kit, and the upgrade path that lets a copy absorb what comes next.',
+		breaking: false,
+		migrations: false,
+		areas: ['api', 'ui', 'shared', 'db', 'cli', 'config', 'docs'],
+	},
+]
+
+/** Newest first — the order the changelog reads in. */
+export const RELEASES_NEWEST_FIRST = [...RELEASES].reverse()
+
+export const LATEST_RELEASE = RELEASES_NEWEST_FIRST[0]

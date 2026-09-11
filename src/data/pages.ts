@@ -76,6 +76,16 @@ export const PAGES: SitePage[] = [
 		order: 4,
 		ready: true,
 	},
+	{
+		path: '/changelog/',
+		title: 'Changelog — what each Rocketflare release added, and how to get it',
+		nav: 'Changelog',
+		description:
+			'Every release of the kit, what it changed, and the one command that ports it into a copy you have already renamed and made your own.',
+		audience: 'both',
+		order: 5,
+		ready: true,
+	},
 ]
 
 /** The pages that appear in the nav and footer, in order — the home link is the logo. */

@@ -138,10 +138,16 @@ const differ = [
 		the deploy job fails if it does not. One tag ships the web app and the CLI together, so the
 		per-package versions are informational.
 	</p>
-	<pre><code>1. bump the root version, commit
+	<pre><code>1. pnpm kit:release X.Y.Z, commit        -> bumps the version, writes the porting note
 2. git tag X.Y.Z && git push origin X.Y.Z   -> staging deploys
 3. check staging
 4. gh release create X.Y.Z                  -> production deploys the same tag</code></pre>
+	<p>
+		A release of the kit itself also ships a porting note, and the deploy refuses a tag without
+		one. Copies of the kit are detached and renamed, so they never merge from upstream — they
+		replay a translated diff guided by those notes. A release with no note would be a gap every
+		copy has to step over, permanently. The <a href="/changelog/">changelog</a> is the list.
+	</p>
 	<p>
 		Publishing the GitHub release is the promotion gate. Production does not re-run the full gate;
 		it ships the exact commit staging validated, with the release version injected at deploy time
