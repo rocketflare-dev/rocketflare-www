@@ -22,6 +22,8 @@ import homeLight from '../assets/screens/home.light.png'
 import homeDark from '../assets/screens/home.dark.png'
 import peopleLight from '../assets/screens/people.light.png'
 import peopleDark from '../assets/screens/people.dark.png'
+import groupsLight from '../assets/screens/groups.light.png'
+import groupsDark from '../assets/screens/groups.dark.png'
 import settingsAiLight from '../assets/screens/settings-ai.light.png'
 import settingsAiDark from '../assets/screens/settings-ai.dark.png'
 import chatLight from '../assets/screens/chat.light.png'
@@ -129,6 +131,28 @@ const stops: Stop[] = [
 			alt: 'The People tab: a members table of eight people with their roles, and a pending invitations panel below it',
 			url: `${HOST}/settings?tab=people`,
 			caption: 'Members with roles; pending invitations below. Refreshes live in a second browser.',
+		},
+	},
+	{
+		id: 'groups',
+		label: 'Groups',
+		title: 'Departments, regions, clients — and what each can see',
+		body: [
+			'An organisation can declare group types — Department, Region, Client — each holding groups, each holding people. Membership then decides who may read a knowledge document or a dashboard, with no second permission system to keep in step.',
+			'It stays out of the way until somebody uses it: every document and every dashboard starts visible to the whole organisation, so an app that never creates a group type behaves exactly as it did before.',
+		],
+		concepts: ['tenancy'],
+		shot: {
+			light: groupsLight,
+			dark: groupsDark,
+			alt: 'Settings → Groups with the Finance dialog open: the three people not in the group on the left, the five already in it on the right',
+			url: `${HOST}/settings?tab=groups`,
+			caption: 'Group types on the left, the groups of the selected type beside them; the dialog moves people in and out.',
+		},
+		callout: {
+			tone: 'blue',
+			title: 'Removing the last group narrows, never publishes',
+			body: 'Being restricted is a value on the row, not the presence of grants — so deleting the last group a document was shared with leaves it visible to its owner and to admins, never to everyone. Deleting a group that still grants something is refused, with a count of what it would affect.',
 		},
 	},
 	{

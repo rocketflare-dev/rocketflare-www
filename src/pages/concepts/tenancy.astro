@@ -8,6 +8,7 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		'apps/web/src/permissions/',
 		'apps/web/src/api/routes/admin.ts',
 		'apps/web/src/api/middleware/auth.ts',
+		'apps/web/src/api/services/access.ts',
 	]}
 >
 	<h2>One schema, one or many tenants</h2>
@@ -80,6 +81,54 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 			Two actions ignore the ability system on purpose and check the role directly: deleting an
 			organisation, and changing who owns it. Those are one-way doors, and an explicit
 			<code>role === 'owner'</code> test is easier to audit than a rule buried in a policy.
+		</p>
+	</div>
+
+	<h2>Groups, and who can see what</h2>
+	<p>
+		A role says what kind of thing you may do. A group says which rows you may see. An organisation
+		declares group <em>types</em> — Department, Region, Client — each holding groups, each holding
+		members; that membership joins the authenticated context and decides who may read a knowledge
+		document or a dashboard.
+	</p>
+	<p>
+		It is part of the core rather than an optional extra, and it is inert until somebody uses it:
+		every row ships visible to the whole organisation, so an app that never creates a group type
+		behaves exactly as it did before one existed.
+	</p>
+
+	<div class="why">
+		<p>
+			<strong>Why being restricted is a column.</strong> Restriction is an explicit value on the
+			row, not "has rows in the grants table". Infer it from the grants instead, and deleting the last group
+			a document was shared with publishes that document to the entire organisation, silently. Here
+			the row stays restricted with an empty grant list, which matches nobody — so it narrows to its
+			owner and to admins. Deleting a group that still grants something is refused with a count of
+			what it would affect, and forcing it still only ever narrows.
+		</p>
+	</div>
+
+	<p>
+		The check itself is SQL, written once: a predicate <em>added to</em> the tenant predicate, never
+		a replacement for it, and never a condition buried in the ability system — the same rule "is
+		this row mine?" has always followed here. Owners, admins and support are not narrowed. A row you
+		may not see answers the same 404 as one that does not exist, so the API is not an existence
+		oracle in either direction.
+	</p>
+	<p>
+		Every read path follows it: the documents list, the hybrid search, the three tools an agent uses
+		to read the knowledge base, the answers the chat box gives, the uploaded original behind a
+		document, and the dashboards. An agent run resolves its requester's groups when it runs rather
+		than when it was queued, so a run started before somebody left a group does not read on their
+		old access. Being in a group grants read only — editing a document or a dashboard stays with its
+		owner or an admin.
+	</p>
+
+	<div class="note">
+		<p>
+			A membership change is a nudge to the people it moved, so somebody who loses a group watches
+			the content disappear rather than clicking into a 404. There is no directory sync yet: SCIM
+			groups and SAML group claims are the obvious next step, and the kit speaks neither protocol.
 		</p>
 	</div>
 

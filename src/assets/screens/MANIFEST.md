@@ -1,6 +1,7 @@
 # Rocketflare product screenshots
 
 - Kit commit: `39790e4` (`git -C <kit> rev-parse --short HEAD` at capture time; working tree carried uncommitted doc/rules edits)
+- `groups` was added in a later pass: kit commit `3fa71eb` (clean tree), captured 2026-09-14, same stack and same signed-in account. The viewport is set with `emulate --viewport 1440x900x2` — `resize_page` alone leaves the device pixel ratio at 1 and produces a 1440×900 file rather than 2880×1800
 - Captured: 2026-09-02, against the kit's local dev stack (Vite http://localhost:3000, wrangler http://localhost:3001), read-only
 - Signed in as Olivia Bennett, owner of "Acme Logistics" (`/login?as=owner@example.test`, dev-only auto login)
 - Files: `<stem>.<light|dark>.png`, PNG, viewport only (not full page)
@@ -45,6 +46,7 @@ Wait strategy: poll `document.body.innerText.includes('<text>')` once a second (
 | `login` | `/login` | signed out: magic-link form + the four DEV QUICK LOGIN buttons (Owner, Admin, Member, Global admin) | 1440×900 @2 | tour `#sign-in` |
 | `home` | `/` | Home: Acme Logistics · Owner, quick links, 5 recent activity rows | 1440×900 @2 | tour `#home`, landing |
 | `people` | `/settings?tab=people` | Members table, 8 people with roles, plus the "Pending invitations" panel (`invited@example.test`) at the bottom | 1440×900 @2 | tour `#people`, who-is-it-for |
+| `groups` | `/settings?tab=groups` | Settings → Groups with the Finance **Members dialog open** (click the first `Members` button): group types Department (3) and Team (0) behind the overlay, dialog showing 3 people not in the group and the 5 in it | 1440×900 @2 | tour `#groups` |
 | `settings-ai` | `/settings?tab=ai` | Readiness: Chat = Cloudflare Workers AI · llama-3.3-70b-instruct-fp8-fast · platform default (Ready); Embeddings = Workers AI · bge-m3 (Ready); no tenant providers | 1440×900 @2 | tour `#ai-settings` |
 | `chat` | `/chat/eb7c618a-…` ("Late deliveries on the Rotterdam lane") | 3 conversations in the list, thread open, scrolled to the last two turns with token counts | 1440×900 @2 | tour `#chat` |
 | `agents-run` | `/agents/runs/50e1bef0-…` | Summarize text run (29 Aug, Succeeded) drawer over the runs list; timeline with the "Submit summary" Details expanded; output + key points | 1440×900 @2 | tour `#agents` |
@@ -74,3 +76,4 @@ Not produced: `admin-tenants` — see below. The tour's Admin stop is text only 
 10. No console errors on any captured page except the expected 401 from `/auth/session` on the signed-out login page. The very first load through the Vite proxy took ~19 s (one-off).
 11. **`/search` is not deep-linkable**: `SearchPage` reads only `?documentId=`, not `?q=`, so `/search?q=…` renders an empty page. The `search` frames were produced by filling the box and pressing Search.
 12. The `DEV` environment badge was hidden in every frame after `login` by the hide-chrome step (see above).
+13. **`groups`: two rows behind the dialog are not seed data** — a `Sales` group (1 person) and an empty `Team` group type, both created by hand in dev. The demo seed makes one type, `Department`, with `Finance` and `Operations` only. They sit behind the dimmed overlay in the captured frame and read as ordinary data; delete them before any frame that shows the Groups page *without* the dialog open.
