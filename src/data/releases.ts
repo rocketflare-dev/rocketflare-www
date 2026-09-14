@@ -33,6 +33,15 @@ export const RELEASES: Release[] = [
 		migrations: false,
 		areas: ['api', 'ui', 'shared', 'db', 'cli', 'config', 'docs'],
 	},
+	{
+		version: '0.2.0',
+		date: '2026-09-14',
+		summary:
+			'Groups: decide who in an organisation can see which documents and dashboards. Chat and agent runs now speak AG-UI on the wire, a long thread forgets deliberately instead of overflowing, and every document has a viewer.',
+		breaking: true,
+		migrations: true,
+		areas: ['api', 'ui', 'shared', 'config', 'docs'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */

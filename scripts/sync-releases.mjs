@@ -36,19 +36,61 @@ for (let i = 0; i < args.length; i++) {
 }
 
 const upgrades = path.join(kitDir, 'docs', 'upgrades')
+const unquote = (s) => s.replace(/^["']|["']$/g, '')
+
+/**
+ * Split the inside of an inline `[a, b]` list. Quote-aware: a `migrations` entry is a human
+ * sentence and sentences contain commas, so splitting on every one turns a description into
+ * fragments.
+ */
+const splitInlineList = (inner) => {
+	if (inner.trim() === '') return []
+	const items = []
+	let current = ''
+	let quote = null
+	for (const ch of inner) {
+		if (quote) {
+			if (ch === quote) quote = null
+			else current += ch
+		} else if (ch === '"' || ch === "'") quote = ch
+		else if (ch === ',') {
+			items.push(current.trim())
+			current = ''
+		} else current += ch
+	}
+	items.push(current.trim())
+	return items.filter((s) => s !== '')
+}
+
+/**
+ * The kit's note frontmatter. Mirrors `parseNote` in the kit's `scripts/lib/upgrade-lib.mjs` —
+ * a list may be inline (`areas: [api, ui]`) or a block sequence, one `  - item` per line.
+ *
+ * Reading a block sequence as a scalar is not a cosmetic bug here: `migrations` decides the
+ * "migrations" flag on the changelog, so a missed list tells a reader that a release carrying
+ * three schema changes needs no schema work.
+ */
 const frontmatter = (text) => {
 	const m = text.match(/^---\n([\s\S]*?)\n---\n/)
 	if (!m) return null
 	const data = {}
-	for (const line of m[1].split('\n')) {
-		const kv = line.match(/^([a-z_]+):\s*(.*)$/)
+	const lines = m[1].split('\n')
+	for (let i = 0; i < lines.length; i++) {
+		const kv = lines[i].match(/^([a-z_]+):\s*(.*)$/)
 		if (!kv) continue
 		const value = kv[2].trim()
-		if (value === 'true' || value === 'false') data[kv[1]] = value === 'true'
-		else if (value.startsWith('[')) {
-			const inner = value.slice(1, -1).trim()
-			data[kv[1]] = inner === '' ? [] : inner.split(',').map((s) => s.trim().replace(/^["']|["']$/g, ''))
-		} else data[kv[1]] = value.replace(/^["']|["']$/g, '')
+		if (value.startsWith('[')) data[kv[1]] = splitInlineList(value.slice(1, -1))
+		else if (value === '') {
+			const items = []
+			for (let j = i + 1; j < lines.length; j++) {
+				const item = lines[j].match(/^\s+-\s+(.*)$/)
+				if (!item) break
+				items.push(unquote(item[1].trim()))
+				i = j
+			}
+			data[kv[1]] = items.length > 0 ? items : ''
+		} else if (value === 'true' || value === 'false') data[kv[1]] = value === 'true'
+		else data[kv[1]] = unquote(value)
 	}
 	return data
 }
