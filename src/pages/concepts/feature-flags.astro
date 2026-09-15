@@ -1,0 +1,202 @@
+---
+import ConceptLayout from '../../layouts/ConceptLayout.astro'
+import DiagramCascade from '../../components/DiagramCascade.astro'
+
+/** How one flag is decided for one organisation (apps/web/src/permissions/features.ts). */
+const evaluation = [
+	{ label: 'Release gate', detail: 'dark in this environment → off' },
+	{ label: 'Override', detail: 'this organisation was forced on or off' },
+	{ label: 'On / Off', detail: 'the platform state, for everyone' },
+	{ label: 'Rollout', detail: 'inside the percentage?' },
+	{ label: 'Default', detail: 'what the registry entry says' },
+]
+---
+<ConceptLayout
+	slug="feature-flags"
+	source={[
+		'packages/shared/src/features.ts',
+		'apps/web/src/permissions/features.ts',
+		'apps/web/src/api/middleware/feature.ts',
+		'apps/web/src/api/services/features.ts',
+		'apps/web/src/ui/lib/feature-guards.ts',
+	]}
+>
+	<h2>Two questions, not one</h2>
+	<p>
+		"Is this feature on?" is really two questions, and conflating them is how flag systems go
+		wrong. <em>Does this surface exist in this deployment at all?</em> is a release decision, made
+		when you deploy. <em>Which organisations have it yet?</em> is a rollout decision, made by an
+		administrator afterwards, without shipping anything.
+	</p>
+	<p>
+		So there are two layers. The release gate is a single deployment variable listing the keys this
+		environment ships — blank means none, which is the direction you want a mistake to fail in.
+		The rollout lives in the database: a platform state per flag, plus an override per
+		organisation, both edited from the admin area. One function composes them, in this order:
+	</p>
+	<figure class="figure">
+		<DiagramCascade
+			tiers={evaluation}
+			arrowLabel="first that answers"
+			describedBy="flag-evaluation"
+			title="How one feature flag is decided for one organisation: the release gate first, then an override, then the platform state"
+		/>
+		<figcaption>
+			The release gate is consulted only for a flag that asked to be gated, so an everyday rollout
+			needs no deployment change — only a genuinely dark feature does.
+		</figcaption>
+	</figure>
+	<table id="flag-evaluation">
+		<thead><tr><th>Step</th><th>What it decides</th></tr></thead>
+		<tbody>
+			<tr><td>Release gate</td><td>the flag asked to be environment-gated and this environment does not list it — off, and nothing below is consulted</td></tr>
+			<tr><td>Override</td><td>this organisation was forced on or forced off; that beats the percentage in either direction</td></tr>
+			<tr><td>On / Off</td><td>the platform state, applying to everyone with no override</td></tr>
+			<tr><td>Rollout</td><td>the organisation (or the person) falls inside the percentage, decided by a hash rather than a coin toss</td></tr>
+			<tr><td>Default</td><td>no row exists at all, so the flag's own registry entry answers</td></tr>
+		</tbody>
+	</table>
+
+	<div class="why">
+		<p>
+			<strong>Why the override beats the rollout.</strong> That is what an override is for: the
+			design partner who must have it on day one, and the customer who must not get it at all.
+			Being forced is an explicit value on the row and the row's presence is the exception — so the
+			admin screen offers On, Off or Default, never a checkbox that cannot express "I have not
+			decided".
+		</p>
+	</div>
+
+	<h2>A flag is not a permission</h2>
+	<p>
+		This is the load-bearing rule on the page, and it comes from a real incident rather than a
+		principle. It is tempting to express a flag as something the permission system can answer —
+		the vocabulary is already there, the guards are already written. Do that and a platform
+		administrator, whose permissions are a wildcard over everything, satisfies the check for every
+		flag that exists.
+	</p>
+	<p>
+		An application built on this kit shipped exactly that. Five routes were open in production to
+		platform staff, while the same feature's dashboards and reporting — gated a different way —
+		stayed correctly dark. Two sources of truth, disagreeing, in a design whose whole point was to
+		have one.
+	</p>
+	<div class="why">
+		<p>
+			<strong>So every gate reads the same list.</strong> The resolved flags travel on the
+			authenticated context as a plain array of strings, and the server, the browser and the
+			command line all ask that array. A wildcard permission cannot widen a string comparison. The
+			permission-shaped form still exists for an application that genuinely wants entitlements per
+			customer, but nothing that hides an unreleased surface may use it.
+		</p>
+	</div>
+
+	<h2>Every door, including the three without a nav item</h2>
+	<p>
+		Hiding the navigation entry is the part everyone remembers. The kit treats a feature as
+		something with four doors, and the sharp one is not the nav:
+	</p>
+	<table>
+		<thead><tr><th>Door</th><th>How it is gated</th></tr></thead>
+		<tbody>
+			<tr>
+				<td>API routes</td>
+				<td>one optional entry beside the route prefix, so the whole surface is dark at once — declared once, like authentication</td>
+			</tr>
+			<tr>
+				<td>The analytics layer</td>
+				<td>the cube list is filtered per request, so a gated feature's data is not queryable either</td>
+			</tr>
+			<tr>
+				<td>Dashboard templates</td>
+				<td>the one that <em>creates rows</em> — templates seed themselves into every organisation on first load, so an ungated template arrives everywhere the moment you deploy</td>
+			</tr>
+			<tr>
+				<td>Nav, routes, settings tabs</td>
+				<td>a guard that takes a flag and a permission as two separate facts, rather than pretending a flag is a permission</td>
+			</tr>
+		</tbody>
+	</table>
+	<p>
+		A gated API route answers 404, not 403. A 403 tells the caller the feature exists and they are
+		not allowed it, which is exactly the thing a dark release is trying not to say.
+	</p>
+
+	<h2>Keys are code, and the rollout is arithmetic</h2>
+	<p>
+		A flag key is declared in the shared package beside its description, the same way prompts and
+		agents are. Adding one needs no migration; mistyping one in a gate is a type error rather than
+		a route that quietly 404s for ever. Evaluation walks the registry, so a database row whose key
+		no longer exists is inert by construction — retiring a flag is: remove the gate, deploy, delete
+		the line.
+	</p>
+	<p>
+		The cost of that choice, stated plainly: an administrator cannot invent a flag key without a
+		deploy. That is deliberate. A flag no code reads does nothing, so the code and its registry
+		line ship together.
+	</p>
+	<p>
+		Who falls inside a percentage is a hash of the flag key and the unit — an organisation, or a
+		person — rather than a random draw, which buys three properties worth naming:
+	</p>
+	<ul>
+		<li>
+			<strong>Raising a percentage only ever adds.</strong> The percentage is not part of what is
+			hashed, so nobody who is already inside a rollout falls out of it when you go from 10% to 25%.
+		</li>
+		<li>
+			<strong>Flags do not correlate.</strong> The key is part of what is hashed, so one flag's
+			first 10% is not the same 10% as the next flag's — otherwise every early rollout lands on the
+			same unlucky customers.
+		</li>
+		<li>
+			<strong>The same unit always gets the same answer</strong>, on every request and in every
+			isolate, with nothing stored.
+		</li>
+	</ul>
+	<div class="note">
+		<p>
+			That hash is a wire format, not an implementation detail: changing it reshuffles every live
+			rollout under way. It is pinned by tests with fixed expected values, so a well-meaning
+			improvement fails loudly instead of silently moving customers in and out of a beta.
+		</p>
+	</div>
+
+	<h2>Resolved with the session, not fetched</h2>
+	<p>
+		Flags are resolved where the session is resolved — one more part of the query that already
+		loads the user, their organisation and their groups — so a request costs nothing extra to know
+		what is on. API-key callers read theirs alongside, with no cache, so a rollout reaches a script
+		on its very next call.
+	</p>
+	<p>
+		Changing an override for one organisation nudges that organisation, and open browser tabs
+		refresh what they can see without a reload. A platform-wide change does not fan out — that
+		would be one message per organisation on the platform — so it reaches open sessions the next
+		time they ask who they are, which for a rollout is the right trade.
+	</p>
+	<div class="note">
+		<p>
+			<strong>Client-side hiding is cosmetic, as everywhere else in the kit.</strong> The gated
+			code still ships in the browser bundle and a determined reader can find it. The server is the
+			protection: the routes are 404, the data is not queryable, and the dashboards do not exist.
+		</p>
+	</div>
+
+	<h2>What it is not</h2>
+	<p>
+		There is no per-person targeting beyond choosing to count people rather than organisations in a
+		rollout, no scheduling, and no experiment framework — a flag here answers "who has this yet",
+		not "which variant performed better".
+	</p>
+	<p>
+		Cloudflare ships a flag product, and it was considered and turned down for this job: its model
+		is your account, your apps, your flags, with no notion of <em>your customers</em>, so
+		per-organisation state would have to live as targeting-rule data that an application writes
+		through an operator API. A toggle is a whole-object write with no safe concurrent update, the
+		audit trail records a token rather than a person, and there is no local store — which would
+		break the promise that this kit runs from a clone with nothing configured. It remains the right
+		tool for rolling the kit's own code across deployments; that is a different job from deciding
+		which of your customers has what.
+	</p>
+</ConceptLayout>

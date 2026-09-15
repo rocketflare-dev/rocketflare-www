@@ -182,6 +182,16 @@ export const CONCEPTS: Concept[] = [
 		anchor: '12-shared-package',
 		group: 'foundation',
 	},
+	{
+		slug: 'feature-flags',
+		num: '14',
+		title: 'Feature flags',
+		blurb: 'Ship a surface to production dark, then turn it on for one customer at a time — a percentage or an override, with no redeploy.',
+		tone: 'yellow',
+		icon: 'gauge',
+		anchor: '15-feature-flags',
+		group: 'platform',
+	},
 ]
 
 export const conceptBySlug = (slug: string) => CONCEPTS.find((c) => c.slug === slug)

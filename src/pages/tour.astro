@@ -42,6 +42,10 @@ import analyticsExploreLight from '../assets/screens/analytics-explore.light.png
 import analyticsExploreDark from '../assets/screens/analytics-explore.dark.png'
 import usageLight from '../assets/screens/usage.light.png'
 import usageDark from '../assets/screens/usage.dark.png'
+import adminTenantsLight from '../assets/screens/admin-tenants.light.png'
+import adminTenantsDark from '../assets/screens/admin-tenants.dark.png'
+import featureFlagsLight from '../assets/screens/feature-flags.light.png'
+import featureFlagsDark from '../assets/screens/feature-flags.dark.png'
 import mHomeLight from '../assets/screens/m-home.light.png'
 import mHomeDark from '../assets/screens/m-home.dark.png'
 import mChatLight from '../assets/screens/m-chat.light.png'
@@ -322,10 +326,39 @@ const stops: Stop[] = [
 			'To help a customer, “enter” their organisation: that creates a real support membership, visible to them by design, and everything you do there is logged like any other member’s actions.',
 		],
 		concepts: ['tenancy'],
+		shot: {
+			light: adminTenantsLight,
+			dark: adminTenantsDark,
+			alt: 'Admin → Organisations: three organisations with their member counts, when each was last active and when it was created',
+			url: `${HOST}/admin/tenants`,
+			caption: 'Every organisation on the deployment, with Open to enter one as support.',
+		},
 		callout: {
 			tone: 'yellow',
 			title: 'The only cross-organisation screen',
 			body: 'The admin area is the one place that queries across organisations, on purpose — so the code that can see everything is one file, not a habit.',
+		},
+	},
+	{
+		id: 'feature-flags',
+		label: 'Feature flags',
+		title: 'Ship it dark, then turn it on one customer at a time',
+		body: [
+			'A half-built surface can go to production switched off, and be turned on later for one organisation without shipping anything. A flag is either on, off, or on for a percentage chosen by a hash — so raising that percentage only ever adds people, and nobody already inside a rollout drops out of it.',
+			'An override beats the percentage in both directions: the design partner who must have it on day one, and the customer who must never get it. Removing the override puts that organisation back on the platform setting.',
+		],
+		concepts: ['feature-flags'],
+		shot: {
+			light: featureFlagsLight,
+			dark: featureFlagsDark,
+			alt: 'Admin → Feature flags: one flag set to a 50% rollout counting organisations, with two per-organisation overrides, one forced on and one forced off',
+			url: `${HOST}/admin/feature-flags`,
+			caption: 'The flag gating “Example feature” in the sidebar beside it — one screen decides who sees that nav item.',
+		},
+		callout: {
+			tone: 'orange',
+			title: 'A flag is not a permission',
+			body: 'Gating on the permission system looks tidy and is a trap: a platform administrator holds a wildcard, so they satisfy the check for every flag that exists and see surfaces the deployment has not released. Every gate here reads the same plain list of enabled keys instead — and a gated route answers 404, because a 403 would confirm the feature exists.',
 		},
 	},
 	{
