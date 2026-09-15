@@ -445,21 +445,21 @@ const pad = (n: number) => String(n).padStart(2, '0')
 									]}
 								/>
 							)}
-							{s.callout && (
-								<Callout tone={s.callout.tone} title={s.callout.title}>
-									<p set:html={s.callout.body} />
-								</Callout>
-							)}
-							{s.id === 'admin' && (
-								<Fragment>{/* TODO admin-tenants: capture src/assets/screens/admin-tenants.{light,dark}.png (the seeded global admin has no tenant membership, so /admin redirects — see MANIFEST.md) and give this stop a `shot`. */}</Fragment>
-							)}
-							<p class="behind">
-								<span>Behind it →</span>
-								{links.map((l, j) => (
-									<Fragment>{j > 0 && <span class="sep" aria-hidden="true">·</span>}<a href={l.href}>{l.title}</a></Fragment>
-								))}
-							</p>
 						</div>
+						{/* The callout and the "Behind it" line are their own full-width row
+						    beneath both columns: inside .text a long callout stretches that
+						    column far past the screenshot beside it. */}
+						{s.callout && (
+							<Callout tone={s.callout.tone} title={s.callout.title}>
+								<p set:html={s.callout.body} />
+							</Callout>
+						)}
+						<p class="behind">
+							<span>Behind it →</span>
+							{links.map((l, j) => (
+								<Fragment>{j > 0 && <span class="sep" aria-hidden="true">·</span>}<a href={l.href}>{l.title}</a></Fragment>
+							))}
+						</p>
 					</section>
 				)
 			})}
@@ -565,16 +565,26 @@ const pad = (n: number) => String(n).padStart(2, '0')
 	.text .eyebrow { margin-bottom: 0.5rem; }
 	.text h2 { font-size: var(--step-2); margin-bottom: 0.6rem; }
 	.text p { color: var(--text); }
-	.text :global(.callout) { margin: 1.4rem 0; }
 	.text :global(.terminal) { margin: 1.2rem 0 1.4rem; }
+	/* Row two, spanning both columns. `order` rather than `grid-row`, because the
+	   even stops reorder .media to swap sides and auto-placement follows order. */
+	.stop :global(.callout) {
+		grid-column: 1 / -1;
+		order: 3;
+		margin: 0;
+	}
+	/* Full width, but not a full-width line: the body keeps a readable measure. */
+	.stop :global(.callout-body) { max-width: 74ch; }
 	.behind {
+		grid-column: 1 / -1;
+		order: 4;
 		display: flex;
 		flex-wrap: wrap;
 		gap: 0.45rem;
 		align-items: baseline;
 		font-size: 0.92rem;
 		font-weight: 600;
-		margin: 0.4rem 0 0;
+		margin: 0;
 	}
 	.behind > span:first-child { color: var(--text-muted); font-weight: 500; }
 	.behind .sep { color: var(--text-muted); }
