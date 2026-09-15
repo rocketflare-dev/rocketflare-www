@@ -42,6 +42,15 @@ export const RELEASES: Release[] = [
 		migrations: true,
 		areas: ['api', 'ui', 'shared', 'config', 'docs'],
 	},
+	{
+		version: '0.3.0',
+		date: '2026-09-15',
+		summary:
+			'Feature flags: ship a half-built surface to production dark, then turn it on for one customer at a time — a percentage rollout or a per-organisation override, changed from the admin area with no redeploy.',
+		breaking: false,
+		migrations: true,
+		areas: ['shared', 'db', 'api', 'ui', 'cli', 'config', 'docs'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */

@@ -2,6 +2,7 @@
 
 - Kit commit: `39790e4` (`git -C <kit> rev-parse --short HEAD` at capture time; working tree carried uncommitted doc/rules edits)
 - `groups` was added in a later pass: kit commit `3fa71eb` (clean tree), captured 2026-09-14, same stack and same signed-in account. The viewport is set with `emulate --viewport 1440x900x2` — `resize_page` alone leaves the device pixel ratio at 1 and produces a 1440×900 file rather than 2880×1800
+- `feature-flags` and `admin-tenants` were added in a later pass again: kit commit `cffb14a` (clean tree), captured 2026-09-15, same stack, signed in as the **global admin** (`/login?as=admin@rocketflare.local`) rather than Olivia Bennett — both are `/admin` screens. That account holds a `support` membership in Acme Logistics from an earlier dev session, which is why the sidebar is full and the footer carries a Support badge; signed in with no membership at all the nav is only Home + Admin and the frames read as empty
 - Captured: 2026-09-02, against the kit's local dev stack (Vite http://localhost:3000, wrangler http://localhost:3001), read-only
 - Signed in as Olivia Bennett, owner of "Acme Logistics" (`/login?as=owner@example.test`, dev-only auto login)
 - Files: `<stem>.<light|dark>.png`, PNG, viewport only (not full page)
@@ -56,15 +57,17 @@ Wait strategy: poll `document.body.innerText.includes('<text>')` once a second (
 | `analytics` | `/analytics/1b2364b4-…` (Organisation Overview, default template) | KPI strip (Members 8 / Owners 1 / Admins 2 / Active users 2), Sign-ups over time line, Members by role proportion bar, Daily activity below the fold | 1440×900 @2 | tour `#analytics`, who-is-it-for |
 | `analytics-explore` | `/analytics/explore` | Query built: metric `ActivityEvents.count`, breakdown `ActivityEvents.type`, chart type "Bar Chart" (15 rows) | 1440×900 @2 | tour `#analytics` (second frame) |
 | `usage` | `/settings?tab=usage` | AI usage, last 30 days: 40 calls, 134,788 in / 10,112 out, $0.1498 estimated; 9 priced rows across anthropic and workers_ai | 1440×900 @2 | tour `#usage` |
+| `admin-tenants` | `/admin/tenants` | Admin → Organisations: 3 total — Acme Logistics (8 members, active 34 minutes ago), Northwind Freight (1), Bluebird Clinics (1) | 1440×900 @2 | tour `#admin` |
+| `feature-flags` | `/admin/feature-flags` | Admin → Feature flags: the one shipped flag `example-feature` set to **Rollout 50%** counting organisations, **overrides expanded** showing Bluebird Clinics forced off and Northwind Freight forced on. The sidebar shows the “Example feature” nav item the flag gates | 1440×900 @2 | tour `#feature-flags` |
 | `m-home` | `/` | mobile Home | 390×844 @3 | tour, phone pair |
 | `m-chat` | `/chat/eb7c618a-…` | mobile chat thread, scrolled to the last assistant turn | 390×844 @3 | tour, phone pair |
 | `m-agents` | `/agents` | mobile Agents: available agents + runs list | 390×844 @3 | unused — dev noise in the runs list (see below) |
 
-Not produced: `admin-tenants` — see below. The tour's Admin stop is text only until it exists.
+Every stop with a frame now has one; the tour's CLI stop is text only by choice (it is a terminal, and `Terminal.astro` renders that better than a screenshot would).
 
 ## Known noise — what to fix in the seed before the next pass
 
-1. **`admin-tenants` could not be captured.** The seeded global admin (`admin@rocketflare.local`, quick-login "Global admin") has no tenant membership, so the UI's `ProtectedRoute` (requireTenant) redirects every shell route including `/admin` and `/admin/tenants` to `/no-access`. The API works (`GET /api/admin/tenants` → 200 with 4 tenants); the page is simply unreachable in the UI for that user. Either give the global admin a membership in the seed, or let `/admin` bypass the tenant requirement. (The admin API lists four tenants — `Acme Logistics`, `Northwind Freight`, `Bluebird Clinics`, and a junk-named `asdcasdcsdcsdac` with 1 member, presumably created by hand in dev. Delete it before any admin screenshot; the tour copy says three.)
+1. ~~**`admin-tenants` could not be captured.**~~ **Fixed.** `/admin/*` is now `ProtectedRoute`'s one exemption, so a global admin with no membership reaches it; the junk-named `asdcasdcsdcsdac` tenant is also gone, and the list is the three the tour copy names. Captured 2026-09-15.
 2. **Agents runs list is cluttered by ad-hoc dev runs**: 22 runs, most from 1 Sep by user `49604981` (Failed / Cancelled research runs, a 14m47s cancelled run…). The two seeded runs (29–30 Aug) are at the bottom, so the list views behind `agents-run` / `agents-research` and all of `m-agents` show the noisy rows — which is why `m-agents` is not used. "Requested by" renders a short user id rather than a name (known gap in CONCEPTS §9).
 3. **Search results 2–4 come from a dev upload** (`interviewing-techniques-review.md`, 24 chunks) rather than the seeded logistics documents (1–2 chunks each). The seeded docs are small, so dense retrieval fills the list with the big off-topic file. `search` is used anyway — hit #1 and the rank badges are the point. Either remove that document or seed longer logistics texts.
 4. **Knowledge page**: the same `interviewing-techniques-review` Markdown row sits second in the table (created 1 Sep 17:46, uploaded file). Not seed data.
@@ -77,3 +80,4 @@ Not produced: `admin-tenants` — see below. The tour's Admin stop is text only 
 11. **`/search` is not deep-linkable**: `SearchPage` reads only `?documentId=`, not `?q=`, so `/search?q=…` renders an empty page. The `search` frames were produced by filling the box and pressing Search.
 12. The `DEV` environment badge was hidden in every frame after `login` by the hide-chrome step (see above).
 13. **`groups`: two rows behind the dialog are not seed data** — a `Sales` group (1 person) and an empty `Team` group type, both created by hand in dev. The demo seed makes one type, `Department`, with `Finance` and `Operations` only. They sit behind the dimmed overlay in the captured frame and read as ordinary data; delete them before any frame that shows the Groups page *without* the dialog open.
+14. **`feature-flags`: both per-organisation overrides are hand-made dev data**, not seed data — the demo seed ships `example-feature` with no overrides. They were created through the admin UI to show the panel doing the thing it exists for (one organisation forced on, one forced off). Clear them before any frame that is meant to show the default state.
