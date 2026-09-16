@@ -436,6 +436,11 @@ const softwareLd = {
 	.tone-green  { --accent: var(--green);       --tint: var(--tint-green); }
 	.tone-yellow { --accent: var(--yellow);      --tint: var(--tint-yellow); }
 	[class*='tone-'] { --accent-ink: color-mix(in srgb, var(--accent) var(--ink-mix), var(--text-bright)); }
+	/* Yellow is the lightest brand value, so the shared 55% leaves --accent-ink at
+	   4.47:1 on --tint-yellow — below AA for the bold lead-in of a `.why` block.
+	   More ink for this one tone by day (5.6:1); by night --ink-mix is 100% and
+	   the accent already reads on dark, so the override must not apply there. */
+	html[data-theme='day'] [class*='tone-yellow'] { --ink-mix: 45%; }
 
 	/* ---------------------------------------------------------- buttons -- */
 	.btn {
