@@ -32,6 +32,8 @@ import agentsRunLight from '../assets/screens/agents-run.light.png'
 import agentsRunDark from '../assets/screens/agents-run.dark.png'
 import agentsResearchLight from '../assets/screens/agents-research.light.png'
 import agentsResearchDark from '../assets/screens/agents-research.dark.png'
+import agentsApprovalLight from '../assets/screens/agents-approval.light.png'
+import agentsApprovalDark from '../assets/screens/agents-approval.dark.png'
 import documentsLight from '../assets/screens/documents.light.png'
 import documentsDark from '../assets/screens/documents.dark.png'
 import searchLight from '../assets/screens/search.light.png'
@@ -203,16 +205,38 @@ const stops: Stop[] = [
 		label: 'Agents',
 		title: 'An agent is a run you can watch',
 		body: [
-			'Start an agent and it becomes a row: queued, running, done, with every step on a timeline you can open. This one is <code>summarize-text</code>, the kit’s single-call example — its answer is checked against a schema before it is stored.',
+			'Start an agent and it gets a page of its own — every step on a timeline that fills as it happens, not on a refresh. This one is <code>summarize-text</code>, the kit’s single-call example: its answer is checked against a schema before it is stored, and the artifacts it produced are listed beside it.',
 			'A run that stalls can be cancelled; a second request while one is already running for the organisation gets that run back instead of starting another.',
 		],
 		concepts: ['background-work'],
 		shot: {
 			light: agentsRunLight,
 			dark: agentsRunDark,
-			alt: 'A succeeded summarize-text run opened in a drawer over the runs list: the timeline with the “Submit summary” step expanded, and the summary with its key points',
-			url: `${HOST}/agents`,
+			alt: 'A succeeded summarize-text run on its own page: the input, the timeline of steps, and the summary with its key points beside them',
+			url: `${HOST}/agents/runs/50e1bef0-…`,
 			caption: 'A summarize-text run: the timeline, the validated output, the key points.',
+		},
+	},
+	{
+		id: 'approval',
+		label: 'Approval',
+		title: 'An agent that stops and asks you first',
+		body: [
+			'An agent can pause mid-run and wait for a person — approve, choose, or fill in a form — then carry on from where it stopped. The run suspends durably: it costs nothing while it waits, survives a deploy, and holds its place for as long as you give it.',
+			'Here <code>summarize-text</code> has written its summary and is asking before it puts it in the knowledge base. Declining stops the run rather than answering it, because a refusal to act is not an answer.',
+		],
+		concepts: ['background-work', 'ai'],
+		shot: {
+			light: agentsApprovalLight,
+			dark: agentsApprovalDark,
+			alt: 'A summarize-text run marked Awaiting input: a panel above the timeline asks “Index this summary?” with Index it and Cancel the run, and the Agents nav item carries a badge of one',
+			url: `${HOST}/agents/runs/d6565412-…`,
+			caption: 'The decision comes first, above the timeline — and the nav says one run is waiting on you.',
+		},
+		callout: {
+			tone: 'blue',
+			title: 'The pause is free',
+			body: 'A waiting run holds no connection and no worker — it is parked on a Cloudflare Workflow event, and a parked instance does not count against the concurrency limit. Millions can wait at once.',
 		},
 	},
 	{
@@ -267,7 +291,7 @@ const stops: Stop[] = [
 			light: agentsResearchLight,
 			dark: agentsResearchDark,
 			alt: 'A succeeded research-topic run: the Markdown answer, and under Sources the citation “Customs paperwork: EU shipments”',
-			url: `${HOST}/agents`,
+			url: `${HOST}/agents/runs/c9672156-…`,
 			caption: 'research-topic: the answer and its citation to the document it read.',
 		},
 	},
