@@ -69,6 +69,24 @@ export const RELEASES: Release[] = [
 		migrations: true,
 		areas: ['shared', 'api', 'ui', 'cli', 'db', 'config', 'docs', 'scripts', 'provisioning'],
 	},
+	{
+		version: '0.6.0',
+		date: '2026-09-17',
+		summary:
+			'Analytics leaves the kit and becomes a plugin of its own — dashboards, cubes and the query API now arrive by installing a repository rather than by being born in your codebase. A fresh clone still gets all of it; what changed is that you can take it out.',
+		breaking: true,
+		migrations: true,
+		areas: ['shared', 'db', 'api', 'ui', 'cli', 'config', 'docs', 'scripts'],
+	},
+	{
+		version: '0.6.1',
+		date: '2026-09-17',
+		summary:
+			'Install a plugin and the gate stays green. A plugin can now declare the lines a core file needs and the host writes them, so installing one leaves a project that builds — with nothing left on a checklist for you to remember.',
+		breaking: false,
+		migrations: false,
+		areas: ['config', 'scripts', 'ci'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */

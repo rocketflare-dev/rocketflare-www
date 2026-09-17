@@ -34,7 +34,7 @@ if (!install) throw new Error('The analytics plugin should have an install comma
 	<Terminal
 		title="zsh — your app"
 		lines={[{ cmd: install }, { cmd: `${install} --apply` }]}
-		expect="Then pnpm db:generate --name plugin-analytics-1.0.0 && pnpm db:migrate."
+		expect="Then pnpm db:generate --name plugin-analytics-1.0.2 && pnpm db:migrate."
 	/>
 	<p>
 		Nothing below changed when it moved: the code is the same code, at
