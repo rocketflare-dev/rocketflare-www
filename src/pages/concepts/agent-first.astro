@@ -11,7 +11,7 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		'apps/web/src/api/routes/CLAUDE.md',
 	]}
 >
-	<h2>The premise</h2>
+	<h2>Why an agent needs a different starting point</h2>
 	<p>
 		Most of your code from here on will be written with a coding agent in the loop. That changes
 		what a good starting point looks like. An agent does not absorb a codebase by working in it for
@@ -35,7 +35,7 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		</p>
 	</div>
 
-	<h2>One root brief, loaded every session</h2>
+	<h2>CLAUDE.md: one root brief, loaded every session</h2>
 	<p>
 		<code>CLAUDE.md</code> at the repository root is the map: the stack in a table, the commands
 		that matter, the directory layout with a one-line job description each, and a short list of
@@ -47,7 +47,7 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		names; there is exactly one document behind both, so they can never drift apart.
 	</p>
 
-	<h2>Rules that load themselves, by path</h2>
+	<h2>Path-scoped rules that load with the files they cover</h2>
 	<p>
 		A single enormous instruction file is a bad interface: most of it is irrelevant to whatever you
 		are touching, and the part that matters gets lost. So the detail lives in
@@ -93,7 +93,7 @@ globs:
 		result reads like the code beside it.
 	</p>
 
-	<h2>Written-down reasoning, not just rules</h2>
+	<h2>CONCEPTS.md: the reasoning behind each decision</h2>
 	<p>
 		<code>docs/CONCEPTS.md</code> — the same material these concept pages are drawn from — records
 		one section per subsystem: what it does, the invariant it protects, and the decision behind it.
@@ -106,7 +106,7 @@ globs:
 		a place it does not belong.
 	</p>
 
-	<h2>The gate is the contract</h2>
+	<h2>The test gate: lint, typecheck, test, build</h2>
 	<p>
 		Instructions that nothing enforces decay within a month. So the conventions that matter most are
 		tests, and one command runs all of them:
@@ -140,7 +140,7 @@ globs:
 		</p>
 	</div>
 
-	<h2>The loop this produces</h2>
+	<h2>The loop: contract, schema, route, page, command</h2>
 	<p>
 		Because contracts live in one shared package and the API, the UI and the CLI all consume them,
 		adding a feature is a fixed sequence rather than an open-ended design problem: a schema in the
@@ -153,7 +153,7 @@ globs:
 		and for the agent working alongside you.
 	</p>
 
-	<h2>It sets itself up, too</h2>
+	<h2>Setup, rename and deploy as agent skills</h2>
 	<p>
 		The same approach covers the first hour, and the first deploy. Ask a coding agent
 		<strong>"help me set up this project"</strong> and the root brief routes it to a skill that

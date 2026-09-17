@@ -12,7 +12,7 @@ import DiagramSteps from '../../components/DiagramSteps.astro'
 		'apps/web/src/api/services/realtime.ts',
 	]}
 >
-	<h2>A route enqueues. It never runs.</h2>
+	<h2>The rule: a route enqueues, it never runs the work</h2>
 	<p>
 		The rule is one sentence long, and everything else in this section follows from it: a request
 		handler writes the row that records what should happen, hands the work to a primitive built to
@@ -55,7 +55,7 @@ import DiagramSteps from '../../components/DiagramSteps.astro'
 		</p>
 	</div>
 
-	<h2>One queue, typed envelopes, a version seam</h2>
+	<h2>One queue, typed job envelopes, and a version seam</h2>
 	<p>
 		There is a single jobs queue. Every message is a discriminated union validated by a zod schema
 		in the shared package, wrapped in an envelope carrying an id, the type, the payload and when it
@@ -88,7 +88,7 @@ import DiagramSteps from '../../components/DiagramSteps.astro'
 		it to.
 	</p>
 
-	<h2>The database row is the claim</h2>
+	<h2>Durable workflows: the database row is the claim</h2>
 	<p>
 		Durable multi-step work runs as a workflow whose instance id <em>is</em> the row id it operates
 		on. The steps are claim, execute and finish, and the claim is a single conditional update:
@@ -137,7 +137,7 @@ import DiagramSteps from '../../components/DiagramSteps.astro'
 		</p>
 	</div>
 
-	<h2>Cancellation is cooperative</h2>
+	<h2>Cancelling a job: cooperative, then forced</h2>
 	<p>
 		Cancelling a run that has not started yet settles the row outright. Cancelling one that is
 		already executing sets a timestamp on the row, and the run checks it between turns and stops
@@ -150,7 +150,7 @@ import DiagramSteps from '../../components/DiagramSteps.astro'
 		no sweeper cron, because the only rows anybody cares about are the ones somebody is looking at.
 	</p>
 
-	<h2>The database is the truth, the WebSocket is a nudge</h2>
+	<h2>Realtime: a Durable Object per tenant, nudges not payloads</h2>
 	<p>
 		Realtime is one stateless Durable Object per tenant, on the hibernation API. Sockets are
 		accepted with tags for the tenant and the user, per-socket metadata lives in the attachment

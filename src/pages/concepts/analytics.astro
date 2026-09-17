@@ -11,7 +11,7 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		'apps/web/tests/api/cubes/cube-isolation.test.ts',
 	]}
 >
-	<h2>A semantic layer, not a reporting bolt-on</h2>
+	<h2>A semantic layer inside the same Worker</h2>
 	<p>
 		Analytics is <a href="https://try.drizzle-cube.dev" target="_blank" rel="noopener">drizzle-cube</a> mounted inside the same Worker as the rest of the API, behind the same
 		authentication. One router is mounted at two paths — <code>/cubejs-api</code> for the query API
@@ -36,7 +36,7 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		</p>
 	</div>
 
-	<h2>Every cube scopes itself to the tenant</h2>
+	<h2>Tenant scoping: every cube filters on the tenant id</h2>
 	<p>
 		This is the invariant the whole section rests on: a cube's base query filters by the tenant id
 		taken from the security context, which in turn comes from the authenticated session. For a
@@ -63,7 +63,7 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		</p>
 	</div>
 
-	<h2>Member names are frozen</h2>
+	<h2>Why cube member names can never be renamed</h2>
 	<p>
 		A saved dashboard stores references to cube members as strings — <code>Cube.measure</code>,
 		<code>Cube.dimension</code> — inside a JSONB column, in every tenant that has a copy of it.
@@ -86,7 +86,7 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		</p>
 	</div>
 
-	<h2>Fact tables are plain tables</h2>
+	<h2>Fact tables: plain tables rebuilt hourly per tenant</h2>
 	<p>
 		Aggregates that would be expensive to compute on every dashboard load are pre-built into fact
 		tables, rebuilt per tenant by an hourly cron. They are ordinary tables with a declared grain, a
@@ -120,7 +120,7 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		derived data throughout: a rebuild is always safe.
 	</p>
 
-	<h2>Dashboards are TypeScript, copied per tenant</h2>
+	<h2>Dashboard templates are TypeScript, copied per tenant</h2>
 	<p>
 		A dashboard template is a typed configuration object in the repository — rows whose widths sum
 		to a twelve-column grid, groups for a strip of headline numbers, and portlets whose queries are
@@ -150,7 +150,7 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		from a template is refused, because the next read would simply create it again.
 	</p>
 
-	<h2>MCP falls out of the same layer</h2>
+	<h2>The MCP endpoint: the same cubes, for an AI client</h2>
 	<p>
 		The MCP endpoint is not a second implementation. It is the same router, the same cubes and the
 		same tenant scoping, exposed in the shape an AI client expects — so pointing a model at a

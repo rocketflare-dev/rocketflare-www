@@ -11,7 +11,7 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		'packages/shared/src/ai/',
 	]}
 >
-	<h2>One package, three consumers, zero build</h2>
+	<h2>One zod package, three consumers, no build step</h2>
 	<p>
 		<code>packages/shared</code> holds the zod schemas that describe the API, and three things
 		consume them: the server validates requests and responses with them, the browser parses
@@ -35,7 +35,7 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		</p>
 	</div>
 
-	<h2>What lives there</h2>
+	<h2>What lives in the shared package</h2>
 	<p>
 		The package is a vocabulary rather than a library. It contains the entity schemas and the
 		request and query schemas for every route, the error envelope, the pagination shape, the
@@ -59,7 +59,7 @@ export type InviteMemberRequest = z.infer&lt;typeof inviteMemberRequestSchema&gt
 		a schema is a second source of truth that compiles happily while diverging.
 	</p>
 
-	<h2>Contracts first, as a working order</h2>
+	<h2>Contracts first: the order you add a feature in</h2>
 	<p>
 		A new or changed API surface starts here rather than arriving here. The sequence is fixed:
 	</p>
@@ -84,7 +84,7 @@ export type InviteMemberRequest = z.infer&lt;typeof inviteMemberRequestSchema&gt
 		</p>
 	</div>
 
-	<h2>The dependency rule, and why it is strict</h2>
+	<h2>The dependency rule: zod, siblings, nothing else</h2>
 	<p>
 		<code>packages/shared</code> may import <code>zod</code>, its own siblings, and one type-only
 		import for the ability type. That is the entire list. It may never import
@@ -104,7 +104,7 @@ export type InviteMemberRequest = z.infer&lt;typeof inviteMemberRequestSchema&gt
 		mechanical rather than a matter of reviewer memory.
 	</p>
 
-	<h2>The one exception, stated out loud</h2>
+	<h2>The one exception: the dashboard config type</h2>
 	<p>
 		Database columns holding JSON take their type from a schema in this package, so the shape stored
 		and the shape served cannot diverge. There is a single deliberate exception: the dashboard
@@ -118,7 +118,7 @@ export type InviteMemberRequest = z.infer&lt;typeof inviteMemberRequestSchema&gt
 		precedent for the next.
 	</p>
 
-	<h2>Private, and staying that way</h2>
+	<h2>Why the package stays private</h2>
 	<p>
 		The package is marked private and has no publish configuration. It is not a library with users;
 		it is the internal agreement between three parts of one repository, and it is meant to be edited

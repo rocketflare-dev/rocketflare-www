@@ -27,7 +27,7 @@ const embeddingTiers = [
 		'packages/shared/src/ai/',
 	]}
 >
-	<h2>Three tiers, one resolver</h2>
+	<h2>How a model is chosen: three tiers, one resolver</h2>
 	<p>
 		Everything model-shaped in the kit — the chat box, the agents, the embeddings behind search —
 		goes through a single pair of functions that resolve a client. They are the only readers of the
@@ -91,7 +91,7 @@ const embeddingTiers = [
 		</p>
 	</div>
 
-	<h2>The floor is a real model, and it costs real money</h2>
+	<h2>Workers AI as the zero-key default, and what it costs</h2>
 	<p>
 		Because both environment configurations declare the Workers AI binding, chat and agents work on
 		a freshly cloned workspace with nothing configured — no account signup, no key, no credit card
@@ -125,7 +125,7 @@ const embeddingTiers = [
 		</p>
 	</div>
 
-	<h2>Providers, and a toolkit written against an interface</h2>
+	<h2>Supported providers: Anthropic, OpenAI and compatible APIs</h2>
 	<p>
 		The shipped adapters cover Anthropic, an Anthropic-compatible mode for services that speak the
 		same wire format behind a bearer token, OpenAI, an OpenAI-compatible mode that works against any
@@ -162,7 +162,7 @@ const embeddingTiers = [
 		</p>
 	</div>
 
-	<h2>Prompts are code, overrides are rows</h2>
+	<h2>Prompts live in code; a tenant override is a row</h2>
 	<p>
 		Every system prompt lives in a registry in the source — a key, a title, a description, its
 		variables and its default text. Nothing hard-codes a prompt string into a route or an agent. A
@@ -176,7 +176,7 @@ const embeddingTiers = [
 		the per-agent model assignments key off the same registry.
 	</p>
 
-	<h2>Chat: persisted, streamed, and ordered carefully</h2>
+	<h2>Chat: persisted conversations, streamed to the browser</h2>
 	<p>
 		Conversations and messages are ordinary rows. Ownership is enforced as a filter on every query,
 		so another member's thread — an administrator's included — is a 404 rather than a permission
@@ -207,7 +207,7 @@ const embeddingTiers = [
 		closed with it, and all of it is awaited rather than deferred.
 	</p>
 
-	<h2>Agents run on workflows; routes only enqueue</h2>
+	<h2>Agents run on durable workflows; routes only enqueue</h2>
 	<p>
 		An agent is a registry entry: a key, an input and output schema shared with the client, a prompt
 		key, and a function to run. Starting one is a request that validates the input, inserts a queued
@@ -241,7 +241,7 @@ const embeddingTiers = [
 		moment somebody actually cares.
 	</p>
 
-	<h2>Every agent can read the knowledge base</h2>
+	<h2>The three knowledge tools every agent gets</h2>
 	<p>
 		Three tools come attached to every run, all bound to that run's tenant: search the knowledge
 		base, fetch a document as a window of characters, and list what is indexed. Search returns whole
@@ -258,7 +258,7 @@ const embeddingTiers = [
 		guessing.
 	</p>
 
-	<h2>Ingest, retrieval and the ledger</h2>
+	<h2>Document ingest, hybrid search and the usage ledger</h2>
 	<p>
 		Text arrives two ways and takes one path. Pasted text and text-like uploads are chunked
 		paragraph-aware and indexed. Binary uploads — PDF, Office, OpenDocument, HTML — keep the original

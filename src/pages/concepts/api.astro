@@ -26,7 +26,7 @@ const middleware = [
 		'apps/web/src/api/utils/routes/router.ts',
 	]}
 >
-	<h2>One Worker, one app, one environment</h2>
+	<h2>One Worker: fetch, queue and scheduled in one entry point</h2>
 	<p>
 		<code>apps/web/src/worker.ts</code> is the entry point and exports three handlers —
 		<code>fetch</code>, <code>queue</code> and <code>scheduled</code> — alongside the Durable Object
@@ -51,7 +51,7 @@ const middleware = [
 		</p>
 	</div>
 
-	<h2>Configuration is validated once, and routes never read the environment</h2>
+	<h2>Configuration validated once, read from the request context</h2>
 	<p>
 		<code>loadConfig(env)</code> parses the Cloudflare environment through a zod schema at the top of
 		all three handlers, memoised per isolate, so a malformed variable fails loudly at the boundary
@@ -68,7 +68,7 @@ const middleware = [
 		<code>NODE_ENV</code> is a Node concept and stays in the test scripts where it belongs.
 	</p>
 
-	<h2>The middleware order is an argument, not an accident</h2>
+	<h2>The middleware order, layer by layer</h2>
 	<p>
 		Each layer sits where it does because of what has to be true before it runs, and what must still
 		be catchable after it.
@@ -108,7 +108,7 @@ const middleware = [
 		</p>
 	</div>
 
-	<h2>Routes are thin</h2>
+	<h2>What a route does: validate, authorise, query, return</h2>
 	<p>
 		A route reads its authenticated context through one helper, authorises with one ability check,
 		runs a tenant-filtered query, and returns. Bodies, query strings and parameters are validated
@@ -121,7 +121,7 @@ const middleware = [
 		envelope stays identical across a hundred endpoints.
 	</p>
 
-	<h2>One error envelope, one pagination shape</h2>
+	<h2>The error envelope and the pagination shape</h2>
 	<p>
 		Every failure, including a validation failure, comes back in the same form, and successful bodies
 		are bare — no <code>data</code> wrapper to unwrap:
@@ -134,7 +134,7 @@ const middleware = [
 		the same fields the server wrote.
 	</p>
 
-	<h2>Long work never happens in a request</h2>
+	<h2>Long work never runs inside a request</h2>
 	<p>
 		A route enqueues a job or creates a workflow instance and answers immediately. Side effects that
 		may outlive the response — sending mail, flushing traces, nudging a socket, closing the database
@@ -143,7 +143,7 @@ const middleware = [
 		in the stream.
 	</p>
 
-	<h2>The catch-all that never serves HTML to an API client</h2>
+	<h2>The SPA catch-all, and why /api never returns HTML</h2>
 	<p>
 		The single-page application is served from the static-asset binding by a catch-all route, which
 		is what makes client-side routing work. That catch-all explicitly returns a JSON 404 for anything

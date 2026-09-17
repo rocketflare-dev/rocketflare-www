@@ -32,7 +32,7 @@ const differ = [
 		'apps/web/scripts/migrate.ts',
 	]}
 >
-	<h2>Two environments, two files</h2>
+	<h2>Two environments, two wrangler files</h2>
 	<p>
 		Staging and production are two standalone wrangler files — <code>wrangler.staging.toml</code>
 		and <code>wrangler.toml</code> — rather than one file with an environment section layered on
@@ -50,7 +50,7 @@ const differ = [
 		</p>
 	</div>
 
-	<h2>A test holds the two files together</h2>
+	<h2>The parity test that holds both files together</h2>
 	<p>
 		<code>wrangler-parity.test.ts</code> runs in the ordinary test suite on every commit and reads
 		both files relative to the package rather than the working directory, so it behaves the same
@@ -93,7 +93,7 @@ const differ = [
 		impossible to ship one.
 	</p>
 
-	<h2>The account-scoped name hazard</h2>
+	<h2>Account-scoped names: the staging and production hazard</h2>
 	<p>
 		Workflow names, queue names, R2 bucket names and Analytics Engine dataset names are unique per
 		Cloudflare <em>account</em>, not per Worker. Whichever script last deployed a given name owns
@@ -118,7 +118,7 @@ const differ = [
 		</p>
 	</div>
 
-	<h2>The CPU limit is per step</h2>
+	<h2>The CPU limit applies per workflow step</h2>
 	<p>
 		A workflow's CPU budget is applied per <code>step.do</code>, from the script's
 		<code>cpu_ms</code> setting. CPU is not wall clock: a step that is almost entirely waiting on
@@ -132,7 +132,7 @@ const differ = [
 		step draws a fresh budget, which is usually the better fix.
 	</p>
 
-	<h2>Releases move by tag</h2>
+	<h2>Releases: push a tag to ship staging, publish to ship production</h2>
 	<p>
 		The git tag must equal the <code>version</code> in the <em>root</em> <code>package.json</code>;
 		the deploy job fails if it does not. One tag ships the web app and the CLI together, so the
@@ -183,7 +183,7 @@ const differ = [
 		</p>
 	</div>
 
-	<h2>Migrations run against the direct host</h2>
+	<h2>Migrations run against the direct database host</h2>
 	<p>
 		Hyperdrive is itself a connection pooler, so it points at the database's direct host rather than
 		its pooled one — stacking a pooler on a pooler adds a hop and a second transaction-mode layer

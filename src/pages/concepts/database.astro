@@ -11,7 +11,7 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		'apps/web/scripts/migrate.ts',
 	]}
 >
-	<h2>One driver, one client per invocation</h2>
+	<h2>One driver: postgres.js and Drizzle, one client per request</h2>
 	<p>
 		The kit talks to Postgres through <code>postgres.js</code> and Drizzle, and nothing else. There is
 		no second driver for edge cases, no serverless HTTP client alongside the TCP one, and no adapter
@@ -36,7 +36,7 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		</p>
 	</div>
 
-	<h2>One way to resolve the connection string</h2>
+	<h2>How the connection string is resolved</h2>
 	<p>
 		The URL is resolved by a single expression: a preview override if one is set, otherwise
 		Hyperdrive's connection string, otherwise <code>DATABASE_URL</code>. Production goes through
@@ -52,7 +52,7 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		locks.
 	</p>
 
-	<h2>Schema conventions that survive a second author</h2>
+	<h2>Schema conventions: tenant keys, timestamps, enums</h2>
 	<p>
 		One file per table. A shared helper supplies the tenant foreign key — a UUID, cascading on delete,
 		and always the first column of any composite index — and another supplies
@@ -68,7 +68,7 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		crypto helper.
 	</p>
 
-	<h2>Vectors are ordinary rows</h2>
+	<h2>pgvector: embeddings are ordinary rows</h2>
 	<p>
 		Embeddings live in a <code>vector</code> column with an HNSW index using cosine distance, matching
 		the operator the retrieval queries order by. The extension is created by the migration script
@@ -89,7 +89,7 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		</p>
 	</div>
 
-	<h2>Migrations: role first, tables, then grants</h2>
+	<h2>Migrations: role first, then tables, then grants</h2>
 	<p>
 		The workflow is: edit the schema, generate the SQL, <em>read</em> the SQL, apply it. Applying it
 		runs three things in order, and the order is the point.
@@ -109,7 +109,7 @@ db-roles --phase=grants # grant DML, revoke the auth-infrastructure tables</code
 		schema change means writing the compensating migration.
 	</p>
 
-	<h2>Row-level security, shipped inert, with an honest threat model</h2>
+	<h2>Row-level security, shipped inert and ready to switch on</h2>
 	<p>
 		Runtime isolation is the tenant predicate on every query, and that never changes. Alongside it,
 		every tenant table carries an RLS policy, an application role exists that cannot log in, and a

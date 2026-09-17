@@ -11,7 +11,7 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		'apps/web/src/api/routes/auth/cli.ts',
 	]}
 >
-	<h2>Sessions are rows, not tokens</h2>
+	<h2>Sessions are database rows, not tokens</h2>
 	<p>
 		A signed-in browser holds one cookie, <code>__Host-session</code>, whose value points at a row in
 		<code>user_sessions</code>. The row has a seven-day sliding lifetime; the cookie is
@@ -38,7 +38,7 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		</p>
 	</div>
 
-	<h2>The magic link is the zero-credential path</h2>
+	<h2>Magic links: signing in with nothing configured</h2>
 	<p>
 		A magic link carries 256 random bits — an unguessable token, not a signed one — valid for
 		fifteen minutes, usable once, and stored as a SHA-256 hash rather than in the clear, so a copy of
@@ -61,7 +61,7 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		address in the URL does nothing.
 	</p>
 
-	<h2>OAuth is a registry, not a copy-paste</h2>
+	<h2>OAuth: Google and Microsoft from one provider registry</h2>
 	<p>
 		Rather than a file per provider, there is one generic pair of routes —
 		<code>/auth/:provider</code> and <code>/auth/:provider/callback</code> — over a list of provider
@@ -84,7 +84,7 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		unique, so the same external account cannot be attached to two people.
 	</p>
 
-	<h2>What protects what</h2>
+	<h2>What protects each kind of credential</h2>
 	<table>
 		<thead><tr><th>Thing</th><th>Protected by</th></tr></thead>
 		<tbody>
@@ -104,7 +104,7 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		stored provider credential, since there is no re-encrypt path; administrators re-enter the key.
 	</p>
 
-	<h2>Hardening at the edges</h2>
+	<h2>CSRF, rate limiting and origin checks</h2>
 	<p>
 		CSRF is enforced by an origin allow-list built from <code>APP_URL</code> plus the local
 		development ports, and bearer-authenticated requests are exempt because they cannot be made
@@ -121,7 +121,7 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		</p>
 	</div>
 
-	<h2>The CLI login handoff</h2>
+	<h2>The CLI login handoff: browser to terminal</h2>
 	<p>
 		<code>GET /auth/cli</code> is the single bridge between a browser session and a terminal. It takes
 		a <code>redirect_uri</code>, and that URI must be exactly

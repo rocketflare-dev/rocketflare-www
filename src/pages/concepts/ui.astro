@@ -11,7 +11,7 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		'apps/web/src/ui/stores/websocketStore.ts',
 	]}
 >
-	<h2>Tokens, not colours</h2>
+	<h2>Design tokens instead of raw colours</h2>
 	<p>
 		The stylesheet defines two themes, and the brand values for both live in one block at the top of
 		one file. Below them sit semantic tokens — surfaces, borders, text, shape, motion — and a small
@@ -43,7 +43,7 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		</p>
 	</div>
 
-	<h2>Providers, in an order that means something</h2>
+	<h2>The provider tree, and why it is in that order</h2>
 	<p>
 		The tree is an error boundary, then the query client, then auth, then abilities, then the
 		websocket provider, then the router. Each layer depends on the one above it and on nothing
@@ -61,7 +61,7 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		</tbody>
 	</table>
 
-	<h2>One guard, composed</h2>
+	<h2>One guard primitive for pages and navigation alike</h2>
 	<p>
 		There is a single guard primitive. Coarse role guards and fine ability guards are compositions
 		of it, not parallel implementations — and a navigation item uses the same guard as the page it
@@ -73,7 +73,7 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		403. Sharing the guard makes the two agree by construction.
 	</p>
 
-	<h2>The data layer is deliberately boring</h2>
+	<h2>The data layer: one client, one hook per resource</h2>
 	<p>
 		All HTTP goes through one client that sends credentials, turns the shared error envelope into a
 		typed error, and optionally parses the response with a zod schema — the same schema the server
@@ -86,7 +86,7 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		the same key factory. Pagination has one shape everywhere.
 	</p>
 
-	<h2>Server data lives in the cache, and only there</h2>
+	<h2>Server data lives in the query cache, and only there</h2>
 	<p>
 		The query cache owns server state. The one client-side store holds exactly one thing: websocket
 		connection status, written only by the socket client. Component-local interface state is local
@@ -110,7 +110,7 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		</p>
 	</div>
 
-	<h2>Weight is kept out of the shell</h2>
+	<h2>Keeping heavy dependencies out of the main bundle</h2>
 	<p>
 		Heavy dependencies ship in lazy chunks and are imported by path from the pages that need them,
 		never from the shared component barrel that the shell loads eagerly. Markdown rendering lives

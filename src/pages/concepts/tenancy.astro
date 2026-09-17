@@ -11,7 +11,7 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		'apps/web/src/api/services/access.ts',
 	]}
 >
-	<h2>One schema, one or many tenants</h2>
+	<h2>One schema for one organisation or a thousand</h2>
 	<p>
 		Every row of domain data belongs to a tenant, and the schema is identical whether the app runs
 		for a single organisation or a thousand. <code>TENANCY_MODE</code> is configuration, not a fork
@@ -39,7 +39,7 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		</p>
 	</div>
 
-	<h2>Sign-up is a mode too</h2>
+	<h2>Sign-up modes: invite-only, approval or open</h2>
 	<p>
 		<code>SIGNUP_MODE</code> decides what happens when somebody who was never invited signs in.
 		Invite-only is the default.
@@ -63,7 +63,7 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		which is what stops someone who just lost their last organisation from being stranded.
 	</p>
 
-	<h2>Roles and abilities</h2>
+	<h2>Roles and permissions: owner, admin, member, support</h2>
 	<p>
 		A membership carries one of <code>owner</code>, <code>admin</code> or <code>member</code>. A
 		fourth role, <code>support</code>, can only be minted from the admin area, is excluded from
@@ -84,7 +84,7 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		</p>
 	</div>
 
-	<h2>Groups, and who can see what</h2>
+	<h2>Groups: which rows a person can see</h2>
 	<p>
 		A role says what kind of thing you may do. A group says which rows you may see. An organisation
 		declares group <em>types</em> — Department, Region, Client — each holding groups, each holding
@@ -132,7 +132,7 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		</p>
 	</div>
 
-	<h2>Isolation is a predicate you cannot forget quietly</h2>
+	<h2>Tenant isolation: a predicate you cannot forget quietly</h2>
 	<p>
 		Every domain query filters by the tenant id taken from the authenticated context — never from
 		anything the client sent. That predicate is also what keeps the composite indexes selective, so
@@ -151,7 +151,7 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		tested.
 	</p>
 
-	<h2>The admin area, and "entering" a customer</h2>
+	<h2>The admin area, and entering a customer's organisation</h2>
 	<p>
 		Everything cross-tenant lives behind one global-admin middleware, so the blast radius of that
 		capability is one file. When an admin enters a customer's organisation to help them, the app
@@ -160,7 +160,7 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		is in their organisation.
 	</p>
 
-	<h2>The CLI is inside a tenant too</h2>
+	<h2>The CLI runs inside one organisation too</h2>
 	<p>
 		Logging the CLI in ends with a tenant-scoped API key, so every command already runs inside one
 		organisation and travels the same middleware and the same abilities as the UI. There is no

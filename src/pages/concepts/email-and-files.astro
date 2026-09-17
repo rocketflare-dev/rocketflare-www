@@ -11,7 +11,7 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		'packages/shared/src/files.ts',
 	]}
 >
-	<h2>Email is a fetch call, not an SDK</h2>
+	<h2>Email: one fetch call to Resend, no SDK</h2>
 	<p>
 		Sending mail is one function over plain <code>fetch</code> against Resend's HTTP API. There is no
 		vendor SDK in the bundle, because the whole surface being used is a single POST with a JSON body
@@ -24,7 +24,7 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		the branding come from configuration, so changing them is not a code change.
 	</p>
 
-	<h2>No API key means logged, not failed</h2>
+	<h2>With no API key, mail is logged rather than failed</h2>
 	<p>
 		With no mail provider configured, a message is not an error. It is written to the log — loudly,
 		with any link printed on its own line — and reported as delivered-false. Nothing throws, nothing
@@ -40,7 +40,7 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		</p>
 	</div>
 
-	<h2>What is queued, and what deliberately is not</h2>
+	<h2>Which emails are queued, and which are sent inline</h2>
 	<p>
 		Invitation mail — created, bulk, resent — and the access-request decision notice are queued.
 		Those routes answer as soon as the row exists, and a provider outage becomes a retry with
@@ -59,7 +59,7 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		</p>
 	</div>
 
-	<h2>Storage is a seam over R2</h2>
+	<h2>File storage: a small interface over R2</h2>
 	<p>
 		File storage sits behind a small service interface — put, get, head, delete, list — whose one
 		implementation wraps the native R2 binding. Keys are built by a helper and always take the shape
@@ -74,7 +74,7 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		scheme to get wrong.
 	</p>
 
-	<h2>The index table is the only thing the browser can name</h2>
+	<h2>The files table is the only thing the browser can name</h2>
 	<p>
 		A <code>files</code> table records id, tenant, uploader, scope, key, filename, content type,
 		size and creation time. Rows are immutable: there is no <code>updated_at</code>, because a file
@@ -87,7 +87,7 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		file is a 404, not a 403 — and carry an ETag from R2 so a repeat request is a 304.
 	</p>
 
-	<h2>Limits per scope, and one deliberate security default</h2>
+	<h2>Upload limits per scope, and the download default</h2>
 	<p>
 		Upload scopes are declared once in the shared package and mirrored in the database enum. Each
 		carries its own rules: an avatar must be one of a short list of image types, everything is

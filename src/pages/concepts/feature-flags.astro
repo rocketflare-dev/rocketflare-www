@@ -21,7 +21,7 @@ const evaluation = [
 		'apps/web/src/ui/lib/feature-guards.ts',
 	]}
 >
-	<h2>Two questions, not one</h2>
+	<h2>Two questions: does it ship, and who has it yet?</h2>
 	<p>
 		"Is this feature on?" is really two questions, and conflating them is how flag systems go
 		wrong. <em>Does this surface exist in this deployment at all?</em> is a release decision, made
@@ -91,7 +91,7 @@ const evaluation = [
 		</p>
 	</div>
 
-	<h2>Every door, including the three without a nav item</h2>
+	<h2>The four doors a feature has to be gated at</h2>
 	<p>
 		Hiding the navigation entry is the part everyone remembers. The kit treats a feature as
 		something with four doors, and the sharp one is not the nav:
@@ -122,7 +122,7 @@ const evaluation = [
 		not allowed it, which is exactly the thing a dark release is trying not to say.
 	</p>
 
-	<h2>Keys are code, and the rollout is arithmetic</h2>
+	<h2>Flag keys are code; the rollout is a hash</h2>
 	<p>
 		A flag key is declared in the shared package beside its description, the same way prompts and
 		agents are. Adding one needs no migration; mistyping one in a gate is a type error rather than
@@ -162,7 +162,7 @@ const evaluation = [
 		</p>
 	</div>
 
-	<h2>Resolved with the session, not fetched</h2>
+	<h2>Flags resolve with the session, not a second request</h2>
 	<p>
 		Flags are resolved where the session is resolved — one more part of the query that already
 		loads the user, their organisation and their groups — so a request costs nothing extra to know
@@ -183,7 +183,7 @@ const evaluation = [
 		</p>
 	</div>
 
-	<h2>What it is not</h2>
+	<h2>What feature flags here are not</h2>
 	<p>
 		There is no per-person targeting beyond choosing to count people rather than organisations in a
 		rollout, no scheduling, and no experiment framework — a flag here answers "who has this yet",
