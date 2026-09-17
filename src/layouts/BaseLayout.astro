@@ -3,6 +3,7 @@ import { Font } from 'astro:assets'
 import Nav from '../components/Nav.astro'
 import Footer from '../components/Footer.astro'
 import { GITHUB_URL } from '../data/site'
+import { lastmodFor } from '../data/lastmod'
 
 interface Props {
 	title: string
@@ -28,24 +29,73 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site)
 const ogImageURL = new URL(ogImage, Astro.site)
 const siteURL = Astro.site?.toString() ?? 'https://rocketflare.dev/'
 
-// One software-application entity for the whole site: this is what a search
-// engine (and an AI answer engine) reads to know what Rocketflare actually is.
-const softwareLd = {
-	'@context': 'https://schema.org',
-	'@type': 'SoftwareApplication',
-	name: 'Rocketflare',
-	alternateName: 'Rocketflare SaaS starter kit',
-	applicationCategory: 'DeveloperApplication',
-	operatingSystem: 'Cloudflare Workers, Node.js 24',
-	url: siteURL,
-	codeRepository: GITHUB_URL,
-	license: 'https://opensource.org/licenses/MIT',
-	description:
-		'A ready-made web app you copy and make your own: sign-in, teams and permissions, an AI assistant that reads your documents, dashboards and background jobs — one Cloudflare Worker over Postgres, MIT licensed, with a one-command first run.',
-	offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
-	keywords:
-		'B2B SaaS Cloudflare, SaaS app Cloudflare Workers, agentic SaaS, multi-tenant SaaS starter kit, Cloudflare Workers boilerplate, Hono, Drizzle, Postgres, AI agents',
+/**
+ * One graph per page, with stable @ids, rather than the same
+ * SoftwareApplication asserted twenty times as twenty different things:
+ *  - the WebSite and the Organization are declared once and referenced by @id
+ *  - every page is a WebPage carrying its own name, description and
+ *    dateModified (the sitemap's date, from the same helper)
+ *  - the SoftwareApplication — the entity a search or answer engine reads to
+ *    know what Rocketflare IS — is declared on the home page only, where it
+ *    belongs, and pointed at from everywhere else.
+ * A page adds its own type (a TechArticle, an FAQPage) through `jsonLd`.
+ */
+const ORG_ID = `${siteURL}#organization`
+const SITE_ID = `${siteURL}#website`
+const SOFTWARE_ID = `${siteURL}#software`
+const isHome = canonicalURL.pathname === '/'
+const modified = lastmodFor(canonicalURL.toString())
+
+const graph: Record<string, unknown>[] = [
+	{
+		'@type': 'Organization',
+		'@id': ORG_ID,
+		name: 'Rocketflare',
+		url: siteURL,
+		logo: new URL('/logo.svg', Astro.site).toString(),
+	},
+	{
+		'@type': 'WebSite',
+		'@id': SITE_ID,
+		name: 'Rocketflare',
+		url: siteURL,
+		publisher: { '@id': ORG_ID },
+		inLanguage: 'en-GB',
+	},
+	{
+		'@type': 'WebPage',
+		'@id': `${canonicalURL}#webpage`,
+		url: canonicalURL.toString(),
+		name: title,
+		description,
+		isPartOf: { '@id': SITE_ID },
+		inLanguage: 'en-GB',
+		...(modified ? { dateModified: modified.toISOString() } : {}),
+		...(isHome ? { mainEntity: { '@id': SOFTWARE_ID } } : { about: { '@id': SOFTWARE_ID } }),
+	},
+]
+
+if (isHome) {
+	graph.push({
+		'@type': 'SoftwareApplication',
+		'@id': SOFTWARE_ID,
+		name: 'Rocketflare',
+		alternateName: 'Rocketflare SaaS starter kit',
+		applicationCategory: 'DeveloperApplication',
+		operatingSystem: 'Cloudflare Workers, Node.js 24',
+		url: siteURL,
+		codeRepository: GITHUB_URL,
+		license: 'https://opensource.org/licenses/MIT',
+		publisher: { '@id': ORG_ID },
+		description:
+			'A ready-made web app you copy and make your own: sign-in, teams and permissions, an AI assistant that reads your documents, dashboards and background jobs — one Cloudflare Worker over Postgres, MIT licensed, with a one-command first run.',
+		offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+		keywords:
+			'SaaS starter kit, SaaS boilerplate, open source SaaS template, multi-tenant SaaS, B2B SaaS starter, internal tool starter, customer portal template, AI assistant for documents, Cloudflare Workers',
+	})
 }
+
+const siteLd = { '@context': 'https://schema.org', '@graph': graph }
 ---
 <html lang="en">
 <head>
@@ -84,7 +134,7 @@ const softwareLd = {
 	<meta name="author" content="Rocketflare" />
 	<meta name="robots" content={noindex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large, max-snippet:-1'} />
 
-	<script type="application/ld+json" is:inline set:html={JSON.stringify(softwareLd)} />
+	<script type="application/ld+json" is:inline set:html={JSON.stringify(siteLd)} />
 	{jsonLd && <script type="application/ld+json" is:inline set:html={JSON.stringify(jsonLd)} />}
 
 	<!-- Self-hosted by the Fonts API (astro.config.mjs); only the body face is

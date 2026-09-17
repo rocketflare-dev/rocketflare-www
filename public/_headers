@@ -1,0 +1,20 @@
+# Response headers for the static assets, read by Cloudflare Workers Static
+# Assets (this file is served to nobody — wrangler consumes it).
+#
+# Astro fingerprints everything under /_astro/ (CSS and the two self-hosted
+# font families), so those URLs can never change meaning: cache them hard.
+# The HTML keeps wrangler's default must-revalidate, which is what makes a
+# deploy visible immediately.
+
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# The markdown twins (scripts/md-twins.mjs). Served as markdown rather than
+# as a download, so a coding assistant — or a person — can just read one.
+/*.md
+  Content-Type: text/markdown; charset=utf-8
+  Cache-Control: public, max-age=0, must-revalidate
+
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin

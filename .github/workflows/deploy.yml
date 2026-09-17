@@ -21,7 +21,12 @@ jobs:
       contents: read
       pull-requests: write # the preview-URL comment
     steps:
+      # Full history: the sitemap's <lastmod> is each page's own last commit
+      # date (src/data/lastmod.ts). A shallow clone would date every page
+      # at the tip commit, which is worse than no lastmod at all.
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:

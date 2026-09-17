@@ -3,6 +3,7 @@ import BaseLayout from './BaseLayout.astro'
 import ConceptIcon from '../components/ConceptIcon.astro'
 import { CONCEPTS, CONCEPT_GROUPS, conceptBySlug, conceptsInGroup } from '../data/concepts'
 import { CONCEPTS_URL, GITHUB_URL } from '../data/site'
+import { lastmodFor } from '../data/lastmod'
 
 interface Props {
 	slug: string
@@ -17,11 +18,49 @@ const i = CONCEPTS.findIndex((x) => x.slug === slug)
 const prev = CONCEPTS[i - 1]
 const next = CONCEPTS[i + 1]
 const reference = c.anchor ? `${CONCEPTS_URL}#${c.anchor}` : `${GITHUB_URL}/blob/main/CLAUDE.md`
+
+/**
+ * A concept page is an article about one subsystem, two levels down. Both
+ * facts are worth stating: the TechArticle is what an answer engine quotes,
+ * and the BreadcrumbList is what puts "Concepts" above it in a result rather
+ * than a bare URL. The site-wide graph (BaseLayout) carries the rest.
+ */
+const site = Astro.site?.toString() ?? 'https://rocketflare.dev/'
+const url = new URL(`/concepts/${c.slug}/`, Astro.site).toString()
+const modified = lastmodFor(url)
+
+const articleLd = {
+	'@context': 'https://schema.org',
+	'@graph': [
+		{
+			'@type': 'TechArticle',
+			'@id': `${url}#article`,
+			headline: c.title,
+			description: c.blurb,
+			url,
+			isPartOf: { '@id': `${site}#website` },
+			about: { '@id': `${site}#software` },
+			publisher: { '@id': `${site}#organization` },
+			inLanguage: 'en-GB',
+			...(modified ? { dateModified: modified.toISOString() } : {}),
+		},
+		{
+			'@type': 'BreadcrumbList',
+			'@id': `${url}#breadcrumbs`,
+			itemListElement: [
+				{ '@type': 'ListItem', position: 1, name: 'Home', item: site },
+				{ '@type': 'ListItem', position: 2, name: 'Concepts', item: `${site}concepts/` },
+				{ '@type': 'ListItem', position: 3, name: c.title, item: url },
+			],
+		},
+	],
+}
 ---
 <BaseLayout
-	title={`${c.title} — Rocketflare, a SaaS starter kit for Cloudflare Workers`}
-	description={`${c.blurb} How ${c.title.toLowerCase()} works in Rocketflare, the open-source multi-tenant B2B SaaS starter kit for Cloudflare Workers.`}
+	title={`${c.title} — Rocketflare`}
+	description={c.blurb}
 	ogType="article"
+	jsonLd={articleLd}
 >
 	<div class={`concept tone-${c.tone}`}>
 		<header class="concept-hero page-hero">
