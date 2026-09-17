@@ -32,12 +32,24 @@ interface Env {
  * A 301 to the canonical origin, or null when the request is already there.
  * Only the scheme and host move: the path, query and hash are the reader's.
  */
-export function canonicalRedirect(url: URL): Response | null {
+export function canonicalRedirect(url: URL, headers: Headers): Response | null {
+	// Only ever redirect a request that really arrived at Cloudflare's edge.
+	// `wrangler dev` fabricates BOTH the URL and the Host header from the
+	// configured custom domain — the Worker is handed
+	// http://rocketflare.dev/… while the reader is on 127.0.0.1 — and then
+	// rewrites Location back to the local address, so trusting either one
+	// turns every local request into a 301 to itself. `cf-ray` is added by the
+	// edge and is absent locally, which makes it the one honest signal here
+	// (cf-connecting-ip and request.cf are both present under wrangler dev).
+	//
+	// It fails OPEN: no cf-ray means serve the page and let the canonical tag
+	// speak. Losing a redirect costs a little ranking signal; a redirect loop
+	// costs the whole site.
+	if (!headers.get('cf-ray')) return null
+
 	// An allow-list, not a deny-list: only the two public hostnames are ever
-	// redirected. Everything else — localhost, 127.0.0.1, and the workers.dev
-	// preview alias a pull request is reviewed on — serves itself, because a
-	// preview that bounced to production would be impossible to review and a
-	// dev server that did it would be impossible to use.
+	// redirected, so the workers.dev preview alias a pull request is reviewed
+	// on serves itself rather than bouncing to production.
 	const isApex = url.hostname === CANONICAL_HOST
 	const isWww = url.hostname === `www.${CANONICAL_HOST}`
 	if (!isApex && !isWww) return null
@@ -88,7 +100,7 @@ export default {
 	async fetch(request: Request, env: Env): Promise<Response> {
 		const url = new URL(request.url)
 
-		const redirect = canonicalRedirect(url)
+		const redirect = canonicalRedirect(url, request.headers)
 		if (redirect) return redirect
 
 		if (url.pathname === '/api/github-stars') {
