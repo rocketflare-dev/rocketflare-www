@@ -1,16 +1,49 @@
 ---
 import ConceptLayout from '../../layouts/ConceptLayout.astro'
+import Terminal from '../../components/Terminal.astro'
+import { pluginById, installCommand } from '../../data/plugins'
+
+const analytics = pluginById('analytics')
+const install = installCommand(analytics)
+if (!install) throw new Error('The analytics plugin should have an install command')
 ---
 <ConceptLayout
 	slug="analytics"
+	sourceRepo={analytics.repo}
 	source={[
-		'apps/web/src/api/cubes/',
-		'apps/web/src/api/routes/cube-api.ts',
-		'apps/web/src/api/services/fact-tables/',
-		'apps/web/src/dashboards/',
-		'apps/web/tests/api/cubes/cube-isolation.test.ts',
+		'apps/web/src/plugins/analytics/cubes/',
+		'apps/web/src/plugins/analytics/api/routes/cube-api.ts',
+		'apps/web/src/plugins/analytics/services/fact-tables/',
+		'apps/web/src/plugins/analytics/dashboards/',
+		'apps/web/src/plugins/analytics/tests/api/cube-isolation.test.ts',
 	]}
+	reference={{
+		href: `${analytics.repo}/blob/main/README.md`,
+		label: 'The plugin on GitHub',
+	}}
 >
+	<h2>Shipped as the analytics plugin, installed by default</h2>
+	<p>
+		Analytics is not part of the kit. From kit 0.6.0 it is the <strong>analytics plugin</strong> —
+		a repository of its own, copied into your app like any other
+		<a href="/plugins/#analytics">plugin</a> — and it is the one entry in the kit's default set, so
+		a fresh clone still gets dashboards without anybody doing anything. The bootstrap's plugins step
+		installs it; <code>pnpm bootstrap --no-plugins</code> gives you a kit with no dashboards, no
+		query API and no chart library in either bundle.
+	</p>
+	<Terminal
+		title="zsh — your app"
+		lines={[{ cmd: install }, { cmd: `${install} --apply` }]}
+		expect="Then pnpm db:generate --name plugin-analytics-1.0.0 && pnpm db:migrate."
+	/>
+	<p>
+		Nothing below changed when it moved: the code is the same code, at
+		<code>apps/web/src/plugins/analytics/</code> in your tree instead of scattered through the API.
+		What changed is that <strong>the kit's core no longer knows drizzle-cube exists</strong> — a
+		second plugin that wants to contribute cubes, fact tables or dashboard templates declares a
+		dependency on this one and hands them to it.
+	</p>
+
 	<h2>A semantic layer inside the same Worker</h2>
 	<p>
 		Analytics is <a href="https://try.drizzle-cube.dev" target="_blank" rel="noopener">drizzle-cube</a> mounted inside the same Worker as the rest of the API, behind the same
@@ -89,7 +122,9 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 	<h2>Fact tables: plain tables rebuilt hourly per tenant</h2>
 	<p>
 		Aggregates that would be expensive to compute on every dashboard load are pre-built into fact
-		tables, rebuilt per tenant by an hourly cron. They are ordinary tables with a declared grain, a
+		tables, rebuilt per tenant by an hourly cron. One ships —
+		<code>analytics_tenant_activity_daily_facts</code>, named after the plugin like every table a
+		plugin owns. They are ordinary tables with a declared grain, a
 		set of measures and a <code>fact_refreshed_at</code> watermark, carrying the same tenant column
 		and the same row-level-security policy as everything else.
 	</p>
@@ -113,11 +148,18 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 
 	<p>
 		One registry entry per fact table is the only list: the refresh service, the freshness check,
-		the cron task and both operator scripts all iterate it. Freshness is measured as lag — the
-		newest source row against the newest watermark — and a table is called stale once that lag
-		passes twice its refresh interval, so one missed cron is tolerated and two are not. An
-		admin-level endpoint and a command-line check read the same calculation, and the rows are
-		derived data throughout: a rebuild is always safe.
+		the cron task and both commands iterate it. Freshness is measured as lag — the newest source
+		row against the newest watermark — and a table is called stale once that lag passes twice its
+		refresh interval, so one missed cron is tolerated and two are not. The rows are derived data
+		throughout, so a rebuild is always safe.
+	</p>
+	<p>
+		The two operator commands come with the plugin:
+		<code>rocketflare analytics check-facts</code> exits 1 when any table is stale, so a pipeline
+		health check is one line, and <code>rocketflare analytics refresh-facts</code> asks for a
+		rebuild now. Both go through the API for one organisation rather than reaching into the
+		database for every tenant — and the refresh <em>enqueues</em>, because a route never runs long
+		work. An admin-level endpoint reads the same freshness calculation the check does.
 	</p>
 
 	<h2>Dashboard templates are TypeScript, copied per tenant</h2>

@@ -1,0 +1,202 @@
+---
+/**
+ * The first-party plugin catalogue. One card per entry in src/data/plugins.ts —
+ * that file is the only place a plugin is described, so the tour, the personas
+ * and this page cannot drift apart.
+ *
+ * Deliberately not a directory of third-party plugins: a plugin runs inside
+ * your Worker with your database connection, so the honest position is
+ * first-party only, said out loud rather than implied by an empty list.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import CloudDivider from '../../components/CloudDivider.astro'
+import Callout from '../../components/Callout.astro'
+import Terminal from '../../components/Terminal.astro'
+import { pageByPath } from '../../data/pages'
+import { PLUGINS, PLUGIN_COUNT, installCommand } from '../../data/plugins'
+import { numberWord } from '../../data/concepts'
+
+const page = pageByPath('/plugins/')
+if (!page) throw new Error('Page not in the registry: /plugins/')
+
+const cards = PLUGINS.map((p) => ({ p, install: installCommand(p) }))
+---
+<BaseLayout title={page.title} description={page.description} noindex={!page.ready}>
+	<header class="plugins-hero page-hero">
+		<div class="wrap">
+			<div class="hero-copy">
+				<span class="eyebrow">Plugins · {numberWord(PLUGIN_COUNT)} first-party</span>
+				<h1>Capabilities you copy in</h1>
+				<p class="lede">
+					A Rocketflare plugin is a git repository copied into your application — never an npm
+					package. Its code lands as ordinary source, renamed into your own vocabulary on the way
+					in, and deleting its folders takes it back out. Here is what is published today, what
+					each one adds, and the one command that installs it.
+					<a href="/concepts/plugins/">How the seam works →</a>
+				</p>
+			</div>
+		</div>
+		<CloudDivider fill="var(--bg)" />
+	</header>
+
+	<section class="catalogue">
+		<div class="wrap">
+			{cards.map(({ p, install }, i) => (
+				<article id={p.id} class:list={['pcard', 'reveal', i % 2 === 1 ? 'tone-cyan' : 'tone-green']} aria-labelledby={`${p.id}-title`}>
+					<div class="pcard-head">
+						<div>
+							<span class="eyebrow">
+								{p.shipsAs === 'installed' ? 'Installed by default' : 'Ships in the kit'}
+							</span>
+							<h2 id={`${p.id}-title`}>{p.label}</h2>
+							<p class="summary">{p.summary}</p>
+						</div>
+						<dl class="facts">
+							<div><dt>Plugin id</dt><dd><code>{p.id}</code></dd></div>
+							<div><dt>Version</dt><dd><code>{p.version}</code></dd></div>
+							<div><dt>Needs kit</dt><dd><code>{p.requiresKit}</code></dd></div>
+						</dl>
+					</div>
+
+					<div class="pcard-body">
+						<div class="adds">
+							<h3>What it adds</h3>
+							<ul>{p.adds.map((a) => <li set:html={a} />)}</ul>
+						</div>
+						<div class="install">
+							<h3>Installing it</h3>
+							{install ? (
+								<Fragment>
+									<Terminal
+										title={`zsh — your app`}
+										lines={[{ cmd: install }, { cmd: `${install} --apply` }]}
+										expect="The first prints the plan and stops; the second writes it."
+									/>
+									<p class="install-note">
+										Then generate and run its migration —
+										<code>pnpm db:generate --name plugin-{p.id}-{p.version}</code> and
+										<code>pnpm db:migrate</code> — and do the handful of steps the plan lists that a
+										plugin may not do for you.
+									</p>
+								</Fragment>
+							) : (
+								<p class="install-note vendored">
+									Nothing to install: it is already in the tree at
+									<code>apps/web/src/plugins/{p.id}/</code>. It exists to be read and then deleted —
+									<code>pnpm plugin remove {p.id} --apply</code>, then a migration.
+								</p>
+							)}
+							<p class="links">
+								<a href={p.repo} target="_blank" rel="noopener">{p.repoLabel}</a>
+								<span aria-hidden="true">·</span>
+								<a href={p.changelogUrl} target="_blank" rel="noopener">Changelog</a>
+								{p.docsUrl && (
+									<Fragment>
+										<span aria-hidden="true">·</span>
+										<a href={p.docsUrl} target="_blank" rel="noopener">Docs</a>
+									</Fragment>
+								)}
+								{p.id === 'analytics' && (
+									<Fragment>
+										<span aria-hidden="true">·</span>
+										<a href="/concepts/analytics/">How it works</a>
+									</Fragment>
+								)}
+							</p>
+						</div>
+					</div>
+				</article>
+			))}
+		</div>
+	</section>
+
+	<section class="after">
+		<div class="wrap-narrow">
+			<Callout tone="yellow" title="First-party only, and that is a position rather than a stage">
+				<p>
+					A plugin runs inside your Worker with your database connection. There is no sandbox that
+					would make that otherwise, so installing one is as trusting as merging a pull request.
+					Every command prints its plan and stops until you re-run it with <code>--apply</code>, and
+					the published set stays code the kit's own authors wrote — instead of a directory that
+					implies a review process nobody is running.
+				</p>
+			</Callout>
+			<h2>Writing one of your own</h2>
+			<p>
+				A plugin is a repository with a manifest, three directories and four entry files. The kit
+				ships the reference one in its own tree so you can read a small, complete example before
+				writing anything: a table, a gated route, a job, an agent tool, a page, two commands and its
+				own tests. Point <code>pnpm plugin add</code> at a local path and it installs from there,
+				which is the authoring loop.
+			</p>
+			<p class="after-links">
+				<a class="btn btn-primary" href="/concepts/plugins/">Read the concept</a>
+				<a class="btn btn-secondary" href="/get-started/">Get the kit running</a>
+			</p>
+		</div>
+	</section>
+</BaseLayout>
+
+<style>
+	.plugins-hero {
+		position: relative;
+		padding-bottom: 7rem;
+		background: linear-gradient(180deg, var(--sky-top), var(--sky-mid) 60%, var(--bg));
+	}
+
+	.catalogue { padding: 0 0 4rem; background: var(--bg); }
+	.pcard {
+		background: var(--card);
+		border: 1px solid var(--border);
+		border-top: 4px solid var(--accent);
+		border-radius: 18px;
+		padding: 2rem;
+		box-shadow: var(--shadow-sm);
+		scroll-margin-top: 5rem;
+	}
+	.pcard + .pcard { margin-top: 2rem; }
+
+	.pcard-head {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto;
+		gap: 1.6rem 2.4rem;
+		align-items: start;
+		padding-bottom: 1.4rem;
+		border-bottom: 1px solid var(--border);
+	}
+	.pcard-head h2 { margin: 0.2rem 0 0.5rem; font-size: 1.6rem; }
+	.summary { margin: 0; color: var(--text-muted); max-width: 52ch; }
+
+	.facts { display: grid; gap: 0.5rem; margin: 0; }
+	.facts div { display: flex; gap: 0.6rem; align-items: baseline; justify-content: flex-end; }
+	.facts dt { color: var(--text-muted); font-size: 0.85rem; }
+	.facts dd { margin: 0; font-size: 0.85rem; }
+
+	.pcard-body {
+		display: grid;
+		grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+		gap: 2.4rem;
+		padding-top: 1.5rem;
+	}
+	.pcard-body h3 { font-size: 1rem; margin: 0 0 0.8rem; }
+	.adds ul { margin: 0; padding-left: 1.1rem; display: grid; gap: 0.65rem; }
+	.adds li { font-size: 0.95rem; line-height: 1.55; }
+
+	.install-note { font-size: 0.9rem; color: var(--text-muted); margin: 0.9rem 0 0; }
+	.install-note code { font-size: 0.85rem; }
+	.vendored { margin-top: 0; }
+	.links { margin: 1rem 0 0; display: flex; flex-wrap: wrap; gap: 0.5rem; font-size: 0.9rem; }
+	.links span { color: var(--text-muted); }
+
+	.after { padding: 1rem 0 5rem; background: var(--bg); }
+	.after h2 { margin-top: 2.4rem; }
+	.after-links { display: flex; flex-wrap: wrap; gap: 0.8rem; margin-top: 1.6rem; }
+
+	@media (max-width: 900px) {
+		.pcard-head, .pcard-body { grid-template-columns: minmax(0, 1fr); }
+		.facts div { justify-content: flex-start; }
+	}
+	@media (max-width: 560px) {
+		.pcard { padding: 1.4rem; }
+	}
+</style>

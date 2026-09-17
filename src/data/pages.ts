@@ -62,13 +62,23 @@ export const PAGES: SitePage[] = [
 		ready: true,
 	},
 	{
+		path: '/plugins/',
+		title: 'Plugins — capabilities you copy in, and take back out',
+		nav: 'Plugins',
+		description:
+			'A Rocketflare plugin is a git repository copied into your app, not an npm package. The first-party catalogue: what each one adds, the kit release it needs, and the one command that installs it.',
+		audience: 'both',
+		order: 6,
+		ready: true,
+	},
+	{
 		path: '/get-started/',
 		title: 'Get started — your SaaS running locally in two minutes',
 		nav: 'Get started',
 		description:
 			'One command takes you from an empty folder to an app you are signed in to, with demo data. No accounts, no keys, no config. Then deploy it for real with three free accounts and one more command.',
 		audience: 'both',
-		order: 6,
+		order: 7,
 		ready: true,
 		inNav: false,
 	},
@@ -99,7 +109,7 @@ export const PAGES: SitePage[] = [
 		description:
 			'What each release added, and the one command that brings it into a copy you have already renamed and made your own — so starting from a kit does not mean falling behind it.',
 		audience: 'both',
-		order: 7,
+		order: 8,
 		ready: true,
 		inNav: false,
 	},
@@ -110,7 +120,7 @@ export const PAGES: SitePage[] = [
 		description:
 			'An operations tool your team opens every morning. Sign-in, roles, invitations, an audit trail and background jobs are already built and tested, so the first thing you write is a table that belongs to your business.',
 		audience: 'builder',
-		order: 8,
+		order: 9,
 		ready: true,
 		inFooter: false,
 		inNav: false,
@@ -122,7 +132,7 @@ export const PAGES: SitePage[] = [
 		description:
 			'Every customer uploads their own documents, asks questions about them, and never sees anyone else’s. Upload, conversion, search, chat and citations are built in, and isolation is enforced by tests rather than by care.',
 		audience: 'builder',
-		order: 9,
+		order: 10,
 		ready: true,
 		inFooter: false,
 		inNav: false,
@@ -134,7 +144,7 @@ export const PAGES: SitePage[] = [
 		description:
 			'Dashboards per customer over their own data, a semantic layer so a measure is defined once, summary tables rebuilt on a schedule, and a query endpoint for the questions you did not anticipate.',
 		audience: 'builder',
-		order: 10,
+		order: 11,
 		ready: true,
 		inFooter: false,
 		inNav: false,

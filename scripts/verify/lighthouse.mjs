@@ -13,7 +13,7 @@ import { BASE, CHROME, LIGHTHOUSE } from './lib.mjs'
 
 const pages = process.argv.slice(2).length
 	? process.argv.slice(2)
-	: ['/', '/tour/', '/get-started/', '/who-is-it-for/', '/changelog/', '/concepts/auth/', '/concepts/plugins/', '/costs/', '/use-cases/internal-tool/']
+	: ['/', '/tour/', '/get-started/', '/who-is-it-for/', '/changelog/', '/plugins/', '/concepts/auth/', '/concepts/plugins/', '/costs/', '/use-cases/internal-tool/']
 const OUT = '/tmp/rf-verify/lh'
 mkdirSync(OUT, { recursive: true })
 

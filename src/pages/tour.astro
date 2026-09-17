@@ -15,6 +15,7 @@ import Callout from '../components/Callout.astro'
 import Terminal from '../components/Terminal.astro'
 import { pageByPath } from '../data/pages'
 import { conceptBySlug } from '../data/concepts'
+import { pluginById } from '../data/plugins'
 
 import loginLight from '../assets/screens/login.light.png'
 import loginDark from '../assets/screens/login.dark.png'
@@ -69,11 +70,11 @@ interface Stop {
 	id: string
 	/**
 	 * Which group it belongs to. `core` is in every copy of the kit; `plugin` is
-	 * something an app installs. Today nothing has been extracted, so every screen
-	 * stop is core and the plugins stop is the only `plugin` one.
+	 * something an app installs — analytics is installed by default, so its screens
+	 * are here but they are not core.
 	 */
 	section: 'core' | 'plugin'
-	/** For a plugin stop: which plugin installs it. */
+	/** For a plugin stop: the plugin id in src/data/plugins.ts. */
 	plugin?: string
 	/** The label in the index. */
 	label: string
@@ -315,36 +316,6 @@ const stops: Stop[] = [
 		},
 	},
 	{
-		id: 'analytics',
-		section: 'core',
-		label: 'Analytics',
-		title: 'A dashboard every organisation gets on its first visit',
-		body: [
-			'The seeded Organisation Overview shows members, sign-ups over time, roles and daily activity — copied from a template in the repo the first time an organisation opens the page.',
-			'Explore is for your own questions: pick a measure and a breakdown and get a chart. Every number is computed inside one organisation; no organisation can see another’s.',
-		],
-		concepts: ['analytics'],
-		shot: {
-			light: analyticsLight,
-			dark: analyticsDark,
-			alt: 'The Organisation Overview dashboard: a KPI strip of members, owners, admins and active users, a sign-ups-over-time line and a members-by-role bar',
-			url: `${HOST}/analytics`,
-			caption: 'Organisation Overview, the default dashboard: KPIs, sign-ups, roles.',
-		},
-		extraShot: {
-			light: analyticsExploreLight,
-			dark: analyticsExploreDark,
-			alt: 'Explore: a query with the measure ActivityEvents.count broken down by ActivityEvents.type, rendered as a bar chart',
-			url: `${HOST}/analytics/explore`,
-			caption: 'Explore: one measure, one breakdown, a chart.',
-		},
-		callout: {
-			tone: 'blue',
-			title: 'Fresh numbers on the hour',
-			body: 'The daily-activity numbers come from a table rebuilt on a schedule, one organisation at a time. The local dev server never fires the schedule itself — run <code>pnpm web db:refresh-facts</code> or curl the cron endpoint.',
-		},
-	},
-	{
 		id: 'usage',
 		section: 'core',
 		label: 'Usage',
@@ -420,6 +391,37 @@ const stops: Stop[] = [
 		concepts: ['cli'],
 	},
 	{
+		id: 'analytics',
+		section: 'plugin',
+		plugin: 'analytics',
+		label: 'Analytics',
+		title: 'A dashboard every organisation gets on its first visit',
+		body: [
+			'This is the <a href="/plugins/#analytics">analytics plugin</a>, and it is installed by default by the bootstrap’s plugins step — so a fresh clone has it without you asking, and <code>pnpm bootstrap --no-plugins</code> is how you find out what the kit looks like without it.',
+			'The seeded Organisation Overview shows members, sign-ups over time, roles and daily activity — copied from a template the first time an organisation opens the page. Explore is for your own questions: pick a measure and a breakdown and get a chart. Every number is computed inside one organisation; no organisation can see another’s.',
+		],
+		concepts: ['analytics'],
+		shot: {
+			light: analyticsLight,
+			dark: analyticsDark,
+			alt: 'The Organisation Overview dashboard: a KPI strip of members, owners, admins and active users, a sign-ups-over-time line and a members-by-role bar',
+			url: `${HOST}/analytics`,
+			caption: 'Organisation Overview, the default dashboard: KPIs, sign-ups, roles.',
+		},
+		extraShot: {
+			light: analyticsExploreLight,
+			dark: analyticsExploreDark,
+			alt: 'Explore: a query with the measure ActivityEvents.count broken down by ActivityEvents.type, rendered as a bar chart',
+			url: `${HOST}/analytics/explore`,
+			caption: 'Explore: one measure, one breakdown, a chart.',
+		},
+		callout: {
+			tone: 'blue',
+			title: 'Fresh numbers on the hour',
+			body: 'The daily-activity numbers come from a table rebuilt on a schedule, one organisation at a time. The local dev server never fires the schedule itself — run <code>rocketflare analytics refresh-facts</code> or curl the cron endpoint.',
+		},
+	},
+	{
 		id: 'plugins',
 		section: 'plugin',
 		plugin: 'example-feature',
@@ -432,19 +434,24 @@ const stops: Stop[] = [
 		concepts: ['plugins'],
 		callout: {
 			tone: 'yellow',
-			title: 'One plugin ships today, and it exists to be deleted',
-			body: 'The kit ships <code>example-feature</code> — a table, a gated route, a job, an agent tool, a page and a command — so schema and tenant isolation are proved on something removable. Chat, agents, knowledge and analytics are the next candidates to move out, and analytics goes first.',
+			title: 'Analytics has already moved out, and one plugin exists to be deleted',
+			body: 'Analytics is the first real subsystem to leave the kit — it is the <a href="/plugins/#analytics">analytics plugin</a> now, and it took its chart libraries with it. Beside it the kit ships <code>example-feature</code> — a table, a gated route, a job, an agent tool, a page and a command — so the seam is proved on something small and removable. Chat, agents and knowledge are the remaining candidates.',
 		},
 	},
 ]
+
+// A plugin stop must name a plugin the catalogue knows: `pluginById` throws
+// otherwise, so a renamed or retired plugin fails the build rather than
+// leaving the tour describing something /plugins/ does not list.
+for (const s of stops) if (s.plugin) pluginById(s.plugin)
 
 const total = stops.length
 
 /**
  * The tour is presented in two groups. Core is what every copy of the kit has;
- * Plugins is what an app installs on top. The array order already puts the
- * plugin stops last, so the `/tour/#<id>` anchors and the stop numbers are
- * unchanged by the split — the headings are the only new thing.
+ * Plugins is what the default set installs on top. The plugin stops are kept
+ * last in the array so both groups number contiguously; every `/tour/#<id>`
+ * anchor is the stop's id and is unaffected by where it sits.
  */
 const SECTIONS = [
 	{
@@ -455,7 +462,7 @@ const SECTIONS = [
 	{
 		key: 'plugin' as const,
 		title: 'Plugins: what the default set installs',
-		lede: 'A capability copied in from its own repository. Today one plugin ships; the rest of the tour is still core.',
+		lede: 'A capability copied in from its own repository, on top of everything above. Two ship today: analytics, which a fresh clone installs by default, and the reference plugin, which is in the kit already and exists to be deleted.',
 	},
 ]
 

@@ -11,6 +11,7 @@ import BaseLayout from '../layouts/BaseLayout.astro'
 import Screenshot from '../components/Screenshot.astro'
 import { pageByPath } from '../data/pages'
 import { conceptBySlug } from '../data/concepts'
+import { pluginById } from '../data/plugins'
 
 import peopleLight from '../assets/screens/people.light.png'
 import peopleDark from '../assets/screens/people.dark.png'
@@ -39,6 +40,8 @@ interface Sketch {
 }
 
 const HOST = 'localhost:3000'
+
+const analytics = pluginById('analytics')
 
 const sketches: Sketch[] = [
 	{
@@ -110,8 +113,9 @@ const sketches: Sketch[] = [
 			'A semantic layer: name a measure once, chart it anywhere',
 			'Dashboards per organisation, copied from templates in the repo',
 			'Summary tables rebuilt on a schedule, one organisation at a time',
+			`All of it from the <a href="/plugins/#${analytics.id}">${analytics.label.toLowerCase()} plugin</a>, installed by default — so it is there on the first run, and yours to upgrade or remove`,
 		],
-		add: ['Your cubes — the measures and dimensions of your domain', 'Analytics itself is the first part due to become an installable plugin'],
+		add: ['Your cubes — the measures and dimensions of your domain', 'Or your own plugin, handing its cubes and dashboards to this one'],
 		start: [
 			'One cube over one of your tables',
 			'Its case in the isolation test, which refuses a cube without one',

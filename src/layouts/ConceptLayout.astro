@@ -9,15 +9,27 @@ interface Props {
 	slug: string
 	/** Repo paths the reader should open next. */
 	source?: string[]
+	/**
+	 * The repository those paths live in. Defaults to the kit; a subsystem that
+	 * ships as a plugin passes its own repository instead, so "where this lives"
+	 * points at files that exist.
+	 */
+	sourceRepo?: string
+	/** Overrides the "full reference" link, for a concept whose reference is not a CONCEPTS.md section. */
+	reference?: { href: string; label: string }
 }
-const { slug, source = [] } = Astro.props
+const { slug, source = [], sourceRepo = GITHUB_URL, reference: referenceOverride } = Astro.props
 const c = conceptBySlug(slug)
 if (!c) throw new Error(`Unknown concept slug: ${slug}`)
 
 const i = CONCEPTS.findIndex((x) => x.slug === slug)
 const prev = CONCEPTS[i - 1]
 const next = CONCEPTS[i + 1]
-const reference = c.anchor ? `${CONCEPTS_URL}#${c.anchor}` : `${GITHUB_URL}/blob/main/CLAUDE.md`
+const reference =
+	referenceOverride?.href ??
+	(c.anchor ? `${CONCEPTS_URL}#${c.anchor}` : `${GITHUB_URL}/blob/main/CLAUDE.md`)
+const referenceLabel =
+	referenceOverride?.label ?? (c.anchor ? 'Full reference on GitHub' : 'Read CLAUDE.md on GitHub')
 
 /**
  * A concept page is an article about one subsystem, two levels down. Both
@@ -98,7 +110,7 @@ const articleLd = {
 					))}
 				</nav>
 				<a class="side-ref" href={reference} target="_blank" rel="noopener">
-					{c.anchor ? "Full reference on GitHub" : "Read CLAUDE.md on GitHub"}
+					{referenceLabel}
 					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
 				</a>
 			</aside>
@@ -111,7 +123,7 @@ const articleLd = {
 						<h3>Where this lives</h3>
 						<ul>
 							{source.map((p) => (
-								<li><a href={`${GITHUB_URL}/blob/main/${p}`} target="_blank" rel="noopener"><code>{p}</code></a></li>
+								<li><a href={`${sourceRepo}/blob/main/${p}`} target="_blank" rel="noopener"><code>{p}</code></a></li>
 							))}
 						</ul>
 					</div>

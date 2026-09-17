@@ -116,7 +116,7 @@ for (const theme of ['day', 'night']) {
 }
 
 // Structure + keyboard.
-for (const path of ['/', '/tour/', '/get-started/', '/who-is-it-for/', '/changelog/',
+for (const path of ['/', '/tour/', '/get-started/', '/who-is-it-for/', '/changelog/', '/plugins/',
 	'/concepts/auth/', '/concepts/api/', '/concepts/feature-flags/', '/concepts/plugins/',
 	'/use-cases/internal-tool/', '/use-cases/customer-portal/', '/use-cases/analytics-product/', '/costs/', '/compare/']) {
 	const page = await open(browser, path)

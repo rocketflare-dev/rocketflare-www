@@ -73,8 +73,8 @@ export const BOOTSTRAP_STEPS: BootstrapStep[] = [
 	{ name: 'migrate', plain: 'Created the database schema' },
 	{
 		name: 'plugins',
-		plain: 'Installed the default plugins — none, until you declare some',
-		verify: 'no defaultPlugins declared — nothing to install',
+		plain: 'Installed the default plugins — analytics, so you get dashboards on the first run',
+		verify: 'installed analytics; tables generated and migrated',
 	},
 	{ name: 'seed', plain: 'Seeded a demo organisation with people, documents and activity' },
 	{ name: 'cloudflare', plain: 'Checked the free Cloudflare login the built-in AI needs (or turned that off with --offline)' },
@@ -102,9 +102,9 @@ export interface Flag {
 export const BOOTSTRAP_FLAGS: Flag[] = [
 	{ flag: '--offline', what: 'No Cloudflare account: turns the Workers AI binding off in both wrangler files. Chat, agents and embeddings then need a key or a tenant provider.' },
 	{ flag: '--online', what: 'Keep (or restore) the Workers AI binding; fails if wrangler is not logged in.' },
-	{ flag: '--no-dev', what: 'Stop after step 7 and print the commands to run next.' },
+	{ flag: '--no-dev', what: 'Stop after step 8 and print the commands to run next.' },
 	{ flag: '--no-demo', what: 'Seed the organisation and accounts, but no demo data.' },
-	{ flag: '--no-plugins', what: "Skip the plugins step — do not install the default plugins listed in the copy's manifest." },
+	{ flag: '--no-plugins', what: "Skip the plugins step — do not install the default plugins listed in the copy's manifest. In a fresh kit that means no analytics: no dashboards, no query API, and no chart library in either bundle." },
 	{ flag: '--share-db', what: 'Accept a Postgres container started from another checkout.' },
 	{ flag: '--no-open', what: 'Do not open the browser once the server answers.' },
 	{ flag: '--as <email>', what: 'The seeded account to sign in as (default owner@example.test).' },
