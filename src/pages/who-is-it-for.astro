@@ -34,6 +34,8 @@ interface Sketch {
 	start: string[]
 	/** The concept page that explains the mechanism. */
 	behind: string
+	/** The page that covers this shape at length. */
+	more: string
 }
 
 const HOST = 'localhost:3000'
@@ -41,6 +43,7 @@ const HOST = 'localhost:3000'
 const sketches: Sketch[] = [
 	{
 		id: 'internal-tool',
+		more: '/use-cases/internal-tool/',
 		eyebrow: 'What would I build · 1',
 		title: 'An internal operations tool',
 		lede: 'The app your team opens every morning: a few tables, a few pages, and the boring parts — who can sign in, who can do what, what happened — already handled.',
@@ -66,6 +69,7 @@ const sketches: Sketch[] = [
 	},
 	{
 		id: 'customer-portal',
+		more: '/use-cases/customer-portal/',
 		eyebrow: 'What would I build · 2',
 		title: 'A customer portal with AI over documents',
 		lede: 'Each customer uploads their own documents and asks questions about them — and never sees another customer’s.',
@@ -91,6 +95,7 @@ const sketches: Sketch[] = [
 	},
 	{
 		id: 'analytics-product',
+		more: '/use-cases/analytics-product/',
 		eyebrow: 'What would I build · 3',
 		title: 'An analytics-heavy B2B product',
 		lede: 'Numbers are the product: each organisation gets dashboards over its own data, kept fresh on a schedule, with a query surface for questions you did not anticipate.',
@@ -171,7 +176,8 @@ const notFor = [
 									<ul>{s.start.map((x) => <li set:html={x} />)}</ul>
 								</div>
 							</div>
-							<p class="behind">(behind it: <a href={behind.href}>{behind.title}</a>)</p>
+							<p class="more-link"><a href={s.more}>Read the longer version <span aria-hidden="true">→</span></a></p>
+						<p class="behind">(behind it: <a href={behind.href}>{behind.title}</a>)</p>
 						</div>
 					</article>
 				)
@@ -263,7 +269,8 @@ const notFor = [
 		background: var(--accent);
 		transform: rotate(45deg);
 	}
-	.behind { margin: 1.2rem 0 0; font-size: 0.9rem; color: var(--text-muted); }
+	.more-link { margin: 1.2rem 0 0; font-weight: 600; }
+	.behind { margin: 0.4rem 0 0; font-size: 0.9rem; color: var(--text-muted); }
 
 	/* ----------------------------------------------------------- not for -- */
 	.not-for { padding: 4.5rem 0; }

@@ -1,0 +1,303 @@
+---
+/**
+ * What it costs to run: local (nothing), the four bills when deployed, a
+ * worked example with its assumptions stated, and what actually makes the
+ * number go up. Every price is the vendor's own published figure, dated,
+ * with a link, because a price in a page like this goes stale quietly.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro'
+import SectionHead from '../components/SectionHead.astro'
+import Callout from '../components/Callout.astro'
+import ConceptIcon from '../components/ConceptIcon.astro'
+import { pageByPath } from '../data/pages'
+
+const page = pageByPath('/costs/')
+if (!page) throw new Error('Page not in the registry: /costs/')
+
+/** When the figures below were last read off each vendor's pricing page. */
+const CHECKED = 'September 2026'
+
+interface Bill {
+	service: string
+	what: string
+	icon: string
+	tone: 'blue' | 'green' | 'orange' | 'purple'
+	free: string
+	paid: string
+	url: string
+}
+
+const bills: Bill[] = [
+	{
+		service: 'Cloudflare Workers',
+		what: 'runs the app itself',
+		icon: 'cloud',
+		tone: 'orange',
+		free: 'Not an option here. The kit needs the Paid plan, because Workflows and the per-step CPU limits the agents run under need it.',
+		paid: '$5 a month minimum, which includes 10 million requests and 30 million CPU milliseconds. Past that it is $0.30 per further million requests and $0.02 per further million CPU milliseconds.',
+		url: 'https://developers.cloudflare.com/workers/platform/pricing/',
+	},
+	{
+		service: 'Postgres',
+		what: 'every row your app owns',
+		icon: 'database',
+		tone: 'blue',
+		free: 'Neon’s free plan gives you 100 compute hours a month and 0.5 GB of storage. A small internal tool fits inside that.',
+		paid: 'The Launch plan is usage based with no minimum: $0.106 per compute hour and $0.35 per GB-month of storage. The database scales to zero when nobody is using it, so an app that is quiet overnight is not billed for overnight.',
+		url: 'https://neon.com/docs/introduction/plans',
+	},
+	{
+		service: 'Email',
+		what: 'magic links, invitations, notifications',
+		icon: 'inbox',
+		tone: 'green',
+		free: 'Resend sends 3,000 emails a month, capped at 100 a day, across 3 domains. Invitations and sign-in links for a team do not come close.',
+		paid: '$20 a month for 50,000. You only need this when you are emailing customers rather than colleagues.',
+		url: 'https://resend.com/pricing',
+	},
+	{
+		service: 'AI',
+		what: 'chat, agents, document search',
+		icon: 'sparkles',
+		tone: 'purple',
+		free: '10,000 neurons a day on Workers AI at no charge. That is enough to try everything and to run a quiet internal tool.',
+		paid: '$0.011 per 1,000 neurons beyond the daily allowance. The default chat model costs $0.060 per million input tokens and $0.400 per million output tokens; embeddings for document search are $0.012 per million input tokens. Bring your own Anthropic or OpenAI key instead and you pay them directly.',
+		url: 'https://developers.cloudflare.com/workers-ai/platform/pricing/',
+	},
+]
+
+const growth = [
+	{
+		title: 'AI, and it is not close',
+		body: 'A chat turn is cheap. An agent that reads four documents to answer one question is not, because every passage it reads is input tokens. The kit writes a row per model call with the tokens and an estimated cost, so this is a number you can look at rather than guess at.',
+	},
+	{
+		title: 'Database compute, if the app is never idle',
+		body: 'Compute hours are the main Postgres cost and scale-to-zero is what keeps them low. An app with users in one timezone is cheap. A background job that polls every minute keeps the database awake all night, so do not write one.',
+	},
+	{
+		title: 'File storage, once people upload in earnest',
+		body: 'Uploads go to R2 and stay there. Storage is billed by the gigabyte and there are no egress fees, which is the reason R2 is used here at all, but a portal where every customer uploads their year of invoices is a real line on the bill.',
+	},
+	{
+		title: 'Requests, eventually',
+		body: 'Ten million requests a month is a lot for a B2B app. If you get past it you have a different problem, and it is a nice one.',
+	},
+]
+---
+<BaseLayout title={page.title} description={page.description} noindex={!page.ready}>
+	<header class="hero page-hero bg-sky">
+		<div class="wrap">
+			<div class="hero-copy">
+				<span class="eyebrow">What it costs</span>
+				<h1>What it costs to run</h1>
+				<p class="lede">
+					On your laptop it is free and there is nothing to sign up for. Deployed, it starts at
+					about five dollars a month. Below is every line of that bill, each one the vendor's own
+					published price, checked in {CHECKED} and linked so you can check it yourself.
+				</p>
+			</div>
+		</div>
+	</header>
+
+	<section class="local">
+		<div class="wrap-narrow">
+			<SectionHead
+				align="left"
+				eyebrow="Before you deploy anything"
+				title="On your laptop: nothing"
+				lede="The first run needs no accounts, no keys and no card."
+			/>
+			<p>
+				Postgres runs in a container on your machine. Magic links are printed to the terminal
+				instead of being emailed, so sign-in works with no mail provider. Chat and agents fall back
+				to Workers AI, which is the one part that calls out, and it is the only reason the first
+				start asks you to log in to a free Cloudflare account. Start the bootstrap with
+				<code>--offline</code> and even that goes away.
+			</p>
+			<p>
+				You can build your whole first feature, invite nobody, and pay nothing.
+			</p>
+		</div>
+	</section>
+
+	<section class="bills">
+		<div class="wrap">
+			<SectionHead
+				eyebrow="Once it is deployed"
+				title="Four bills, and three of them are usually zero"
+				lede="The only one you are certain to pay is Cloudflare, and you are paying it for the plan rather than for your traffic."
+			/>
+			<div class="bill-grid reveal reveal-stagger">
+				{bills.map((b) => (
+					<article class={`bill tone-${b.tone}`}>
+						<div class="bill-head">
+							<span class="chip"><ConceptIcon name={b.icon} /></span>
+							<div>
+								<h3>{b.service}</h3>
+								<p class="bill-what">{b.what}</p>
+							</div>
+						</div>
+						<dl>
+							<dt>Free</dt>
+							<dd>{b.free}</dd>
+							<dt>Paid</dt>
+							<dd>{b.paid}</dd>
+						</dl>
+						<a class="bill-link" href={b.url} target="_blank" rel="noopener">
+							Their pricing page <span aria-hidden="true">↗</span>
+						</a>
+					</article>
+				))}
+			</div>
+		</div>
+	</section>
+
+	<section class="worked bg-band">
+		<div class="wrap-narrow">
+			<span class="eyebrow">A worked example</span>
+			<h2>A twenty person internal tool</h2>
+			<p class="text-muted">
+				An estimate without its assumptions is a guess, so here are the assumptions. Twenty people
+				who open the app a few times a day. A few thousand rows. Invitations and the occasional
+				notification by email. Nobody is hammering the AI.
+			</p>
+			<ul class="tally">
+				<li><strong>Workers</strong><span>$5. The minimum, not the usage. Twenty people will not trouble ten million requests.</span></li>
+				<li><strong>Postgres</strong><span>$0. Quiet overnight and at weekends, so it sits inside the free plan's compute hours.</span></li>
+				<li><strong>Email</strong><span>$0. Twenty invitations and some notifications is nowhere near 3,000 a month.</span></li>
+				<li><strong>AI</strong><span>$0 to a few dollars, depending entirely on whether anyone actually uses chat.</span></li>
+			</ul>
+			<p class="total">About <strong>$5 a month</strong>, and it stays there until something changes shape.</p>
+		</div>
+	</section>
+
+	<section class="growth">
+		<div class="wrap-narrow">
+			<SectionHead
+				align="left"
+				eyebrow="The honest part"
+				title="What actually makes it go up"
+				lede="In rough order of how likely each one is to surprise you."
+			/>
+			<ol class="growth-list">
+				{growth.map((g) => (
+					<li>
+						<h3>{g.title}</h3>
+						<p>{g.body}</p>
+					</li>
+				))}
+			</ol>
+
+			<Callout tone="yellow" title={`These prices were checked in ${CHECKED}`}>
+				<ConceptIcon slot="icon" name="gauge" />
+				<p>
+					Every figure here is linked to the vendor's own pricing page above. Prices move, free
+					tiers get bigger and smaller, and this page will go stale before they do. If you are
+					reading it much later, trust them and not this.
+				</p>
+			</Callout>
+		</div>
+	</section>
+
+	<section class="next">
+		<div class="wrap-narrow">
+			<h2>Try it before you pay anything</h2>
+			<p>
+				The local run is the whole app with demo data in it. If it is not what you want, you have
+				spent two minutes and no money.
+			</p>
+			<div class="next-actions">
+				<a class="btn btn-primary" href="/get-started/">Get it running</a>
+				<a class="btn btn-ghost" href="/compare/">Or weigh it against building your own</a>
+			</div>
+		</div>
+	</section>
+</BaseLayout>
+
+<style>
+	.hero { border-bottom: 1px solid var(--border); }
+	.local { padding: 3.5rem 0 1rem; }
+	.local p { color: var(--text-muted); max-width: 62ch; }
+
+	.bills { padding: 3.5rem 0 4rem; }
+	.bill-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(330px, 1fr)); gap: 1.5rem; }
+	.bill {
+		display: flex;
+		flex-direction: column;
+		padding: 1.6rem 1.7rem;
+		border: 1px solid var(--border);
+		border-radius: 18px;
+		background: var(--card);
+		box-shadow: var(--shadow-sm);
+	}
+	.bill-head { display: flex; gap: 0.9rem; align-items: center; margin-bottom: 1rem; }
+	.chip {
+		flex: none;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 44px;
+		height: 44px;
+		border-radius: 13px;
+		background: var(--tint);
+		color: var(--accent);
+	}
+	.bill h3 { margin: 0; font-size: 1.1rem; }
+	.bill-what { margin: 0; font-size: 0.85rem; color: var(--text-muted); }
+	.bill dl { margin: 0 0 1rem; }
+	.bill dt {
+		font-size: 0.72rem;
+		font-weight: 700;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		color: var(--accent-ink);
+		margin-top: 0.7rem;
+	}
+	.bill dd { margin: 0.2rem 0 0; font-size: 0.93rem; color: var(--text-muted); }
+	.bill-link { margin-top: auto; font-size: 0.88rem; font-weight: 600; }
+
+	.worked { padding: 4.5rem 0; }
+	.worked h2 { margin-bottom: 0.6rem; }
+	.tally { list-style: none; margin: 1.8rem 0; padding: 0; }
+	.tally li {
+		display: grid;
+		grid-template-columns: 9rem 1fr;
+		gap: 1rem;
+		padding: 0.85rem 0;
+		border-top: 1px solid color-mix(in srgb, var(--band-ink) 14%, transparent);
+	}
+	.tally li:last-child { border-bottom: 1px solid color-mix(in srgb, var(--band-ink) 14%, transparent); }
+	.tally strong { color: var(--band-ink); }
+	.tally span { color: var(--band-muted); }
+	.total { font-size: 1.1rem; }
+
+	.growth { padding: 4rem 0 1rem; }
+	.growth-list { list-style: none; margin: 0 0 2rem; padding: 0; counter-reset: g; }
+	.growth-list li { position: relative; padding-left: 2.6rem; margin-bottom: 1.5rem; counter-increment: g; }
+	.growth-list li::before {
+		content: counter(g);
+		position: absolute;
+		left: 0;
+		top: 0.1rem;
+		width: 1.8rem;
+		height: 1.8rem;
+		display: grid;
+		place-items: center;
+		border-radius: 999px;
+		background: var(--tint-orange);
+		color: var(--orange-ink);
+		font-weight: 700;
+		font-size: 0.85rem;
+	}
+	.growth-list h3 { font-size: 1.05rem; margin-bottom: 0.25rem; }
+	.growth-list p { color: var(--text-muted); margin: 0; }
+
+	.next { padding: 3.5rem 0 5rem; }
+	.next p { color: var(--text-muted); max-width: 62ch; }
+	.next-actions { display: flex; flex-wrap: wrap; gap: 0.9rem; margin-top: 1.4rem; }
+
+	@media (max-width: 560px) {
+		.tally li { grid-template-columns: 1fr; gap: 0.2rem; }
+	}
+</style>

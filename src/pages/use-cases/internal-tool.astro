@@ -1,0 +1,227 @@
+---
+/**
+ * Use case 1: the internal operations tool. What exists on the first run,
+ * what you add, where to start, and the honest limits. Longer than the
+ * sketch on /who-is-it-for/, which links here.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import SectionHead from '../../components/SectionHead.astro'
+import Screenshot from '../../components/Screenshot.astro'
+import Steps from '../../components/Steps.astro'
+import Callout from '../../components/Callout.astro'
+import ConceptIcon from '../../components/ConceptIcon.astro'
+import { pageByPath } from '../../data/pages'
+
+import peopleLight from '../../assets/screens/people.light.png'
+import peopleDark from '../../assets/screens/people.dark.png'
+import flagsLight from '../../assets/screens/feature-flags.light.png'
+import flagsDark from '../../assets/screens/feature-flags.dark.png'
+
+const page = pageByPath('/use-cases/internal-tool/')
+if (!page) throw new Error('Page not in the registry: /use-cases/internal-tool/')
+
+const day1 = [
+	{
+		title: 'People can get in, and only the right people',
+		body: 'Sign in with Google, with Microsoft, or with a link sent by email for anyone who has neither. Sessions are rows in your database, so you can end one. Nobody has to be given a password to forget.',
+		icon: 'key',
+		tone: 'purple' as const,
+	},
+	{
+		title: 'Roles that the pages actually respect',
+		body: 'Owner, admin and member, with a support role that only a platform admin can hand out. The navigation, the pages and the routes read the same rule, so a link never leads somewhere the reader is refused.',
+		icon: 'users',
+		tone: 'blue' as const,
+	},
+	{
+		title: 'An invitation flow that has met reality',
+		body: 'Invite, accept, expire, resend, and the awkward case where the invited address already has an account. The email is queued rather than sent inside the request, so a mail outage does not fail the click.',
+		icon: 'inbox',
+		tone: 'green' as const,
+	},
+	{
+		title: 'A record of who did what',
+		body: 'Activity events are written as things happen, and the admin area can read them. This is the feature nobody specifies and everybody asks for in month three.',
+		icon: 'document',
+		tone: 'cyan' as const,
+	},
+	{
+		title: 'Work that takes longer than a request',
+		body: 'A typed job queue and durable workflows, so the import that takes four minutes does not live inside a click. The page updates when the work finishes instead of asking the reader to refresh.',
+		icon: 'bolt',
+		tone: 'orange' as const,
+	},
+	{
+		title: 'A way to ship something to one team first',
+		body: 'Feature flags with a per organisation override, so the new screen is on for operations and off for everyone else, without a deploy in between.',
+		icon: 'gauge',
+		tone: 'yellow' as const,
+	},
+]
+
+const start = [
+	{
+		title: 'Get it running and sign in',
+		body: 'One command, about two minutes, demo data already in it. Click around as the demo owner before you decide anything.',
+	},
+	{
+		title: 'Rename it to your tool',
+		body: 'One pass renames the package, the Worker, the database, the command line tool and the theme. After this it is your codebase and the kit is just where it came from.',
+	},
+	{
+		title: 'Add your first table',
+		body: 'A schema file, a contract, a route and a page. The tenant key and the permission check are the shape every other table already follows, so there is an example next to you.',
+	},
+	{
+		title: 'Put it in front of two people',
+		body: 'Invite a colleague, give them the member role, and watch what they cannot see. That is the fastest way to know the model fits your team.',
+	},
+]
+---
+<BaseLayout title={page.title} description={page.description} noindex={!page.ready}>
+	<header class="hero page-hero bg-sky">
+		<div class="wrap">
+			<div class="hero-copy">
+				<span class="eyebrow">What would I build</span>
+				<h1>An internal tool, without building the platform first</h1>
+				<p class="lede">
+					The app your team opens every morning. A few tables, a few pages, and a long list of
+					boring things that have to work before any of it is useful: who can sign in, who can do
+					what, who did what, and what happens when a job takes four minutes. That list is already
+					written and tested. You add the tables that belong to your business.
+				</p>
+				<div class="hero-actions">
+					<a class="btn btn-primary" href="/get-started/">Get it running</a>
+					<a class="btn btn-ghost" href="/costs/">What it costs</a>
+				</div>
+			</div>
+		</div>
+	</header>
+
+	<section class="shot-lead">
+		<div class="wrap">
+			<Screenshot
+				light={peopleLight}
+				dark={peopleDark}
+				alt="The People tab, showing members with their roles and one pending invitation"
+				url="yourtool.example/settings?tab=people"
+				caption="People, roles and a pending invitation, on the first run."
+				priority
+				crop="top"
+			/>
+		</div>
+	</section>
+
+	<section class="day1">
+		<div class="wrap">
+			<SectionHead
+				eyebrow="On the first run"
+				title="What is already there"
+				lede="None of this is the reason your tool exists, and all of it has to work before your tool is worth opening."
+			/>
+			<div class="grid reveal reveal-stagger">
+				{day1.map((d) => (
+					<article class={`card tone-${d.tone}`}>
+						<span class="chip"><ConceptIcon name={d.icon} /></span>
+						<h3>{d.title}</h3>
+						<p>{d.body}</p>
+					</article>
+				))}
+			</div>
+		</div>
+	</section>
+
+	<section class="add bg-band">
+		<div class="wrap-narrow">
+			<span class="eyebrow">Your part</span>
+			<h2>What you actually write</h2>
+			<p class="text-muted">
+				Your tables, and the pages that show them. That is close to the whole list. A table gets a
+				key saying which organisation owns it, and from that point the queries, the permission
+				checks and the tests around it follow a shape that is already used a dozen times in the
+				repository.
+			</p>
+			<p class="text-muted">
+				If your team lives in a spreadsheet today, the first version is usually one table, one list
+				page and one form. You can have that on the screen in an afternoon, because the sign-in
+				page, the roles and the audit trail underneath it are not yours to build.
+			</p>
+		</div>
+	</section>
+
+	<section class="flags">
+		<div class="wrap">
+			<div class="split">
+				<div class="reveal">
+					<SectionHead
+						align="left"
+						eyebrow="The bit that saves an argument"
+						title="Ship it to one team first"
+						lede="A flag can be on for one organisation and off for the rest, or on for a percentage, and changing it is not a deploy."
+					/>
+					<p class="muted-p">
+						Internal tools get rolled out to the team that asked for them, then to everyone else
+						once it is clear the thing works. That is a flag and an override, and both are in the
+						admin area on the first run.
+					</p>
+					<a href="/concepts/feature-flags/">How feature flags work here <span aria-hidden="true">→</span></a>
+				</div>
+				<div class="reveal">
+					<Screenshot
+						light={flagsLight}
+						dark={flagsDark}
+						alt="The feature flags admin screen, with a flag set to a percentage rollout"
+						url="yourtool.example/admin/feature-flags"
+						crop="top"
+					/>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section class="start">
+		<div class="wrap-narrow">
+			<SectionHead align="left" eyebrow="Where to start" title="Four steps, in order" />
+			<Steps direction="column" steps={start} />
+		</div>
+	</section>
+
+	<section class="limits">
+		<div class="wrap-narrow">
+			<Callout tone="orange" title="What it will not do for you">
+				<ConceptIcon slot="icon" name="compass" />
+				<p>
+					There is no billing, because an internal tool rarely needs one. There is no report
+					builder or spreadsheet import: if your team wants to upload a CSV every Monday, that is a
+					job you write. And the model is organisations with members, so a tool with no concept of
+					a team at all will feel like it is carrying a passenger.
+				</p>
+			</Callout>
+			<div class="next-actions">
+				<a class="btn btn-primary" href="/get-started/">Get it running</a>
+				<a class="btn btn-ghost" href="/who-is-it-for/">See the other two shapes</a>
+			</div>
+		</div>
+	</section>
+</BaseLayout>
+
+<style>
+	.hero { border-bottom: 1px solid var(--border); }
+	.hero-actions { display: flex; flex-wrap: wrap; gap: 0.9rem; margin-top: 1.6rem; }
+	.shot-lead { padding: 2.5rem 0 1rem; }
+	.day1 { padding: 3.5rem 0 4rem; }
+	.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+	.card { padding: 1.5rem 1.6rem; border: 1px solid var(--border); border-radius: 18px; background: var(--card); box-shadow: var(--shadow-sm); }
+	.chip { display: inline-flex; align-items: center; justify-content: center; width: 42px; height: 42px; border-radius: 13px; background: var(--tint); color: var(--accent); margin-bottom: 0.8rem; }
+	.card h3 { font-size: 1.03rem; margin-bottom: 0.35rem; }
+	.card p { color: var(--text-muted); margin: 0; }
+	.add { padding: 4.5rem 0; }
+	.add h2 { margin-bottom: 1rem; }
+	.flags { padding: 4rem 0; }
+	.split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 2.6rem; align-items: center; }
+	.muted-p { color: var(--text-muted); max-width: 58ch; }
+	.start { padding: 1rem 0 3rem; }
+	.limits { padding: 1rem 0 5rem; }
+	.next-actions { display: flex; flex-wrap: wrap; gap: 0.9rem; margin-top: 1.8rem; }
+	@media (max-width: 860px) { .split { grid-template-columns: minmax(0, 1fr); gap: 1.6rem; } }
+</style>

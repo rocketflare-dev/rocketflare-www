@@ -1,0 +1,347 @@
+---
+/**
+ * Build it yourself, or start from this. The work being replaced, when
+ * writing it yourself is right, how this differs from the Next.js starter
+ * kits, and what you give up by taking a copy. No competitor is named to be
+ * beaten: the honest differences are enough, and one of them is a gap.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro'
+import SectionHead from '../components/SectionHead.astro'
+import Callout from '../components/Callout.astro'
+import ConceptIcon from '../components/ConceptIcon.astro'
+import { pageByPath } from '../data/pages'
+import { conceptBySlug } from '../data/concepts'
+
+const page = pageByPath('/compare/')
+if (!page) throw new Error('Page not in the registry: /compare/')
+
+const conceptHref = (slug: string) => {
+	const c = conceptBySlug(slug)
+	if (!c) throw new Error(`Unknown concept slug: ${slug}`)
+	return `/concepts/${c.slug}/`
+}
+
+/** The platform work, and the part of it people underestimate. */
+const work = [
+	{
+		title: 'Organisations, members and roles',
+		trap: 'The schema is an afternoon. The part that takes the month is every query afterwards remembering to filter by organisation, and the day you find one that did not.',
+		slug: 'tenancy',
+	},
+	{
+		title: 'Sign-in',
+		trap: 'One provider is a morning. Then you want a second, and email links for people without either, and API keys for scripts, and sessions you can revoke.',
+		slug: 'auth',
+	},
+	{
+		title: 'Invitations and an admin area',
+		trap: 'Invite, accept, expire, resend, and what happens when someone accepts an invitation for an email that already has an account. Nobody plans for that one.',
+		slug: 'tenancy',
+	},
+	{
+		title: 'Background work',
+		trap: 'A queue is easy until a message is poison and retries forever, or a job runs twice because nothing claimed it.',
+		slug: 'background-work',
+	},
+	{
+		title: 'An AI layer that is not a demo',
+		trap: 'Streaming a reply is a day. Persisting it, keeping a thread inside a context window, letting an agent stop and ask a person, and knowing what it all cost, is not.',
+		slug: 'ai',
+	},
+	{
+		title: 'Dashboards',
+		trap: 'The first chart is quick. The tenth is a reporting system, and by then the same measure is defined three times and disagrees with itself.',
+		slug: 'analytics',
+	},
+]
+
+const buildYourself = [
+	'Your product is not shaped like organisations with members. A consumer app, a marketplace, a single-user tool: the model here will fight you.',
+	'You have a stack you are fast in and no appetite for Cloudflare Workers, Hono or Drizzle. Being fast in your own tools beats any head start.',
+	'You need one or two of these parts, not all of them. A starter kit is a poor way to get an auth page.',
+	'The platform work is the interesting bit for you. That is a real reason and there is nothing wrong with it.',
+]
+
+const differences = [
+	{
+		title: 'Multi-tenancy is the foundation, not a feature',
+		body: 'Most kits add organisations on top of a single-user app. Here every row belongs to one, a single setting switches between one organisation and a thousand with no migration, and a test fails if a query forgets. The isolation is enforced rather than remembered.',
+		icon: 'building',
+		tone: 'blue' as const,
+	},
+	{
+		title: 'The AI layer is built in and works with no key',
+		body: 'Chat, agents that can stop and ask a person, and search over your own documents are part of the kit rather than a tutorial. On a fresh copy they run on Workers AI with nothing configured, and you can point them at your own provider later.',
+		icon: 'sparkles',
+		tone: 'purple' as const,
+	},
+	{
+		title: 'A copy keeps a link home',
+		body: 'You delete the kit’s history on the first day, so there is nothing to merge and no upstream to fight. What stays is a small file saying which version you came from. When the kit gains a release, one command ports it into your renamed app and skips anything you deleted. Starting from a template does not have to mean falling behind it.',
+		icon: 'rocket',
+		tone: 'orange' as const,
+	},
+]
+
+const table = [
+	{
+		row: 'Time before your first real feature',
+		diy: 'Weeks, and the boring weeks',
+		kit: 'About two minutes to a running app',
+	},
+	{
+		row: 'Multi-tenancy',
+		diy: 'Yours to design, and to keep right in every query',
+		kit: 'Built in, with a test that fails when a query forgets',
+	},
+	{
+		row: 'AI over your own documents',
+		diy: 'A project of its own',
+		kit: 'Built in, no key needed to try it',
+	},
+	{
+		row: 'Billing and subscriptions',
+		diy: 'Yours, whenever you want it',
+		kit: 'Not included. Add Stripe yourself',
+	},
+	{
+		row: 'Stack choice',
+		diy: 'Anything you like',
+		kit: 'Cloudflare Workers, Hono, React, Postgres',
+	},
+	{
+		row: 'Who owns the decisions',
+		diy: 'You, all of them',
+		kit: 'You inherit a few hundred, written down so you can reverse them',
+	},
+]
+---
+<BaseLayout title={page.title} description={page.description} noindex={!page.ready}>
+	<header class="hero page-hero bg-sky">
+		<div class="wrap">
+			<div class="hero-copy">
+				<span class="eyebrow">Compare</span>
+				<h1>Build it yourself, or start from this</h1>
+				<p class="lede">
+					The question is not whether you could write all of this. You could. The question is what
+					the first month costs you, and whether the thing you build in it is the thing anyone is
+					paying you for. Here is the work, when doing it yourself is the right call, and what you
+					give up by taking a copy instead.
+				</p>
+			</div>
+		</div>
+	</header>
+
+	<section class="work">
+		<div class="wrap">
+			<SectionHead
+				eyebrow="What you would write first"
+				title="The platform work, and the part people underestimate"
+				lede="None of this is hard. All of it is slow, and none of it is your product."
+			/>
+			<div class="work-grid reveal reveal-stagger">
+				{work.map((w) => (
+					<article class="work-item">
+						<h3>{w.title}</h3>
+						<p>{w.trap}</p>
+						<a href={conceptHref(w.slug)}>How it works here <span aria-hidden="true">→</span></a>
+					</article>
+				))}
+			</div>
+		</div>
+	</section>
+
+	<section class="diy bg-band">
+		<div class="wrap-narrow">
+			<span class="eyebrow">Be honest with yourself</span>
+			<h2>When writing it yourself is the right call</h2>
+			<ul class="diy-list">
+				{buildYourself.map((b) => <li>{b}</li>)}
+			</ul>
+			<p class="text-muted">
+				If two of those are true, close this page and go and build. A starter kit you spend a week
+				fighting has cost you more than it saved.
+			</p>
+		</div>
+	</section>
+
+	<section class="diffs">
+		<div class="wrap">
+			<SectionHead
+				eyebrow="Against the other kits"
+				title="Three things that are different here"
+				lede="Most SaaS starter kits are a Next.js app with a hosted auth vendor and Stripe already wired in. They are good at what they do. These are the places this one diverges."
+			/>
+			<div class="diff-grid reveal reveal-stagger">
+				{differences.map((d) => (
+					<article class={`diff tone-${d.tone}`}>
+						<span class="chip"><ConceptIcon name={d.icon} /></span>
+						<h3>{d.title}</h3>
+						<p>{d.body}</p>
+					</article>
+				))}
+			</div>
+
+			<Callout tone="orange" title="And one thing they have that this does not">
+				<ConceptIcon slot="icon" name="inbox" />
+				<p>
+					Billing. If your product needs plans, subscriptions and a checkout on day one, a kit
+					built around Stripe will get you there faster than this one plus a week of your time.
+					There is no payments layer here and none is planned.
+				</p>
+			</Callout>
+		</div>
+	</section>
+
+	<section class="table-wrap">
+		<div class="wrap-narrow">
+			<h2>Side by side</h2>
+			<table class="compare">
+				<thead>
+					<tr>
+						<th scope="col"><span class="sr-only">Topic</span></th>
+						<th scope="col">Writing it yourself</th>
+						<th scope="col">Starting from Rocketflare</th>
+					</tr>
+				</thead>
+				<tbody>
+					{table.map((t) => (
+						<tr>
+							<th scope="row">{t.row}</th>
+							<td>{t.diy}</td>
+							<td>{t.kit}</td>
+						</tr>
+					))}
+				</tbody>
+			</table>
+		</div>
+	</section>
+
+	<section class="giveup">
+		<div class="wrap-narrow">
+			<SectionHead
+				align="left"
+				eyebrow="The trade"
+				title="What you give up"
+				lede="Three of them, stated plainly, because you will meet all three."
+			/>
+			<ol class="giveup-list">
+				<li>
+					<h3>Someone else's decisions</h3>
+					<p>
+						You inherit a few hundred choices you did not make. They are written down with the
+						reasoning, one page per part of the app, so you can disagree on purpose rather than by
+						accident. But they are there on day one.
+					</p>
+				</li>
+				<li>
+					<h3>A stack you may not have picked</h3>
+					<p>
+						One Cloudflare Worker over Postgres, with Hono and React. If you want to run this on a
+						Node server in a container, this is the wrong starting point and there is no second
+						target for it.
+					</p>
+				</li>
+				<li>
+					<h3>Reading code you did not write</h3>
+					<p>
+						A copy is yours from the first commit, which also means every bug in it is yours. The
+						tests and the written reasoning exist to make that survivable, and it is still real
+						work.
+					</p>
+				</li>
+			</ol>
+			<div class="next-actions">
+				<a class="btn btn-primary" href="/get-started/">Try it for two minutes</a>
+				<a class="btn btn-ghost" href="/costs/">See what it costs to run</a>
+			</div>
+		</div>
+	</section>
+</BaseLayout>
+
+<style>
+	.sr-only {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip: rect(0 0 0 0);
+		white-space: nowrap;
+	}
+	.hero { border-bottom: 1px solid var(--border); }
+
+	.work { padding: 3.5rem 0 4rem; }
+	.work-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem 2.2rem; }
+	.work-item h3 { font-size: 1.05rem; margin-bottom: 0.35rem; }
+	.work-item p { color: var(--text-muted); margin-bottom: 0.5rem; }
+	.work-item a { font-size: 0.88rem; font-weight: 600; }
+
+	.diy { padding: 4.5rem 0; }
+	.diy h2 { margin-bottom: 1.2rem; }
+	.diy-list { list-style: none; margin: 0 0 1.5rem; padding: 0; }
+	.diy-list li {
+		padding: 0.85rem 0;
+		border-top: 1px solid color-mix(in srgb, var(--band-ink) 14%, transparent);
+		color: var(--band-ink);
+	}
+	.diy-list li:last-child { border-bottom: 1px solid color-mix(in srgb, var(--band-ink) 14%, transparent); }
+
+	.diffs { padding: 4rem 0 2rem; }
+	.diff-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem; }
+	.diff {
+		padding: 1.6rem 1.7rem;
+		border: 1px solid var(--border);
+		border-radius: 18px;
+		background: var(--card);
+		box-shadow: var(--shadow-sm);
+	}
+	.chip {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 44px;
+		height: 44px;
+		border-radius: 13px;
+		background: var(--tint);
+		color: var(--accent);
+		margin-bottom: 0.9rem;
+	}
+	.diff h3 { font-size: 1.05rem; margin-bottom: 0.4rem; }
+	.diff p { color: var(--text-muted); margin: 0; }
+
+	.table-wrap { padding: 2rem 0 3rem; }
+	.compare { width: 100%; border-collapse: collapse; margin-top: 1.2rem; font-size: 0.95rem; }
+	.compare th, .compare td { text-align: left; padding: 0.85rem 1rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+	.compare thead th { font-size: 0.74rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); }
+	.compare tbody th { font-weight: 600; color: var(--text-bright); width: 34%; }
+	.compare td { color: var(--text-muted); }
+
+	.giveup { padding: 2rem 0 5rem; }
+	.giveup-list { list-style: none; margin: 0 0 2rem; padding: 0; counter-reset: g; }
+	.giveup-list li { position: relative; padding-left: 2.6rem; margin-bottom: 1.5rem; counter-increment: g; }
+	.giveup-list li::before {
+		content: counter(g);
+		position: absolute;
+		left: 0;
+		top: 0.1rem;
+		width: 1.8rem;
+		height: 1.8rem;
+		display: grid;
+		place-items: center;
+		border-radius: 999px;
+		background: var(--tint-blue);
+		color: var(--blue);
+		font-weight: 700;
+		font-size: 0.85rem;
+	}
+	.giveup-list h3 { font-size: 1.05rem; margin-bottom: 0.25rem; }
+	.giveup-list p { color: var(--text-muted); margin: 0; }
+	.next-actions { display: flex; flex-wrap: wrap; gap: 0.9rem; }
+
+	@media (max-width: 620px) {
+		.compare thead { display: none; }
+		.compare tbody th, .compare td { display: block; border-bottom: 0; padding: 0.3rem 0; width: auto; }
+		.compare tbody tr { display: block; padding: 0.9rem 0; border-bottom: 1px solid var(--border); }
+		.compare td::before { content: attr(data-label); }
+	}
+</style>

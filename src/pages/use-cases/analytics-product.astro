@@ -1,0 +1,215 @@
+---
+/**
+ * Use case 3: the analytics-heavy B2B product, where the charts are what the
+ * customer is paying for. The semantic layer is the argument on this page.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import SectionHead from '../../components/SectionHead.astro'
+import Screenshot from '../../components/Screenshot.astro'
+import Steps from '../../components/Steps.astro'
+import Callout from '../../components/Callout.astro'
+import ConceptIcon from '../../components/ConceptIcon.astro'
+import { pageByPath } from '../../data/pages'
+import { DRIZZLE_CUBE_URL } from '../../data/site'
+
+import analyticsLight from '../../assets/screens/analytics.light.png'
+import analyticsDark from '../../assets/screens/analytics.dark.png'
+import exploreLight from '../../assets/screens/analytics-explore.light.png'
+import exploreDark from '../../assets/screens/analytics-explore.dark.png'
+
+const page = pageByPath('/use-cases/analytics-product/')
+if (!page) throw new Error('Page not in the registry: /use-cases/analytics-product/')
+
+const day1 = [
+	{
+		title: 'A measure is defined once',
+		body: 'Active users, revenue, whatever your domain calls its numbers: written down in one place as a measure over your own tables, then used by every chart, every filter and every export. The second definition is where reporting systems start disagreeing with themselves.',
+		icon: 'layers',
+		tone: 'blue' as const,
+	},
+	{
+		title: 'Dashboards per customer, from templates you keep in code',
+		body: 'A template is a typed object in the repository. Each organisation gets its own copy on creation, and can edit it without touching yours. Add a template later and existing customers pick it up.',
+		icon: 'chart',
+		tone: 'green' as const,
+	},
+	{
+		title: 'Summary tables, rebuilt on a schedule',
+		body: 'The expensive aggregates are pre-built per organisation by an hourly job rather than computed on every page load. There is a freshness check, so stale is something you can see rather than something a customer reports.',
+		icon: 'database',
+		tone: 'cyan' as const,
+	},
+	{
+		title: 'Every query scoped to one customer',
+		body: 'The scoping lives inside each cube, not in the page that renders it. A test runs every cube as two different organisations and fails if either can see the other, and a new cube without a case in that test fails the build.',
+		icon: 'building',
+		tone: 'orange' as const,
+	},
+	{
+		title: 'A question you did not anticipate',
+		body: 'The same layer is exposed as a query endpoint, so a customer with an analyst can ask something you never built a chart for, still scoped to their own rows.',
+		icon: 'search',
+		tone: 'purple' as const,
+	},
+	{
+		title: 'An endpoint an AI client can point at',
+		body: 'The same cubes, the same scoping, in the shape an MCP client expects. Not a second implementation, which is the only reason it is safe to have at all.',
+		icon: 'sparkles',
+		tone: 'red' as const,
+	},
+]
+
+const start = [
+	{
+		title: 'Look at the dashboard that ships',
+		body: 'The demo organisation has a populated overview built from the same pieces you would use. Open it and then open the template it was copied from.',
+	},
+	{
+		title: 'Write one cube over one of your tables',
+		body: 'A measure, a dimension, and the filter that ties it to the organisation. That filter is the whole safety story, and it is one line.',
+	},
+	{
+		title: 'Add its case to the isolation test',
+		body: 'The test compares its own list of cases against the list of cubes, so this is not optional. That is deliberate.',
+	},
+	{
+		title: 'Put it on a template',
+		body: 'Add the chart to a dashboard template, and every organisation gets it. Existing ones pick it up without a migration.',
+	},
+]
+---
+<BaseLayout title={page.title} description={page.description} noindex={!page.ready}>
+	<header class="hero page-hero bg-sky">
+		<div class="wrap">
+			<div class="hero-copy">
+				<span class="eyebrow">What would I build</span>
+				<h1>An analytics product, where the numbers are the product</h1>
+				<p class="lede">
+					Some products are a workflow with a chart on the end. Others are the chart. If yours is
+					the second kind, the interesting problem is not drawing them: it is defining a measure
+					once, keeping it fast, and being certain that one customer's dashboard can never show
+					another customer's rows.
+				</p>
+				<div class="hero-actions">
+					<a class="btn btn-primary" href="/get-started/">Get it running</a>
+					<a class="btn btn-ghost" href="/concepts/analytics/">How analytics works here</a>
+				</div>
+			</div>
+		</div>
+	</header>
+
+	<section class="shot-lead">
+		<div class="wrap">
+			<Screenshot
+				light={analyticsLight}
+				dark={analyticsDark}
+				alt="An organisation overview dashboard with headline numbers and charts"
+				url="yourapp.example/analytics"
+				caption="A dashboard copied from a template in the repository, showing one organisation's own data."
+				priority
+				crop="top"
+			/>
+		</div>
+	</section>
+
+	<section class="day1">
+		<div class="wrap">
+			<SectionHead
+				eyebrow="On the first run"
+				title="What is already there"
+				lede="The semantic layer is drizzle-cube, which is a separate open source project, wired in and scoped here."
+			/>
+			<div class="grid reveal reveal-stagger">
+				{day1.map((d) => (
+					<article class={`card tone-${d.tone}`}>
+						<span class="chip"><ConceptIcon name={d.icon} /></span>
+						<h3>{d.title}</h3>
+						<p>{d.body}</p>
+					</article>
+				))}
+			</div>
+			<p class="aside">
+				The layer itself is <a href={DRIZZLE_CUBE_URL} target="_blank" rel="noopener">drizzle-cube</a>,
+				open source and usable on its own. What the kit adds is the scoping, the per organisation
+				dashboards and the test that keeps both honest.
+			</p>
+		</div>
+	</section>
+
+	<section class="explore">
+		<div class="wrap">
+			<div class="split">
+				<div class="reveal">
+					<SectionHead
+						align="left"
+						eyebrow="The questions you did not build for"
+						title="One layer, three ways in"
+						lede="A dashboard, an ad hoc query, and an endpoint an AI client can use. All three run the same cubes with the same customer filter."
+					/>
+					<p class="muted-p">
+						This is the part that is hard to retrofit. If charts are built page by page, the ad hoc
+						query is a second implementation with its own idea of what a measure means and its own
+						chance of forgetting the filter. Defining the measure once is what makes the other two
+						free and safe.
+					</p>
+					<a href="/concepts/analytics/">Read the analytics concept <span aria-hidden="true">→</span></a>
+				</div>
+				<div class="reveal">
+					<Screenshot
+						light={exploreLight}
+						dark={exploreDark}
+						alt="The explore view, building a query from measures and dimensions"
+						url="yourapp.example/analytics/explore"
+						crop="top"
+					/>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section class="start">
+		<div class="wrap-narrow">
+			<SectionHead align="left" eyebrow="Where to start" title="Four steps, in order" />
+			<Steps direction="column" steps={start} />
+		</div>
+	</section>
+
+	<section class="limits">
+		<div class="wrap-narrow">
+			<Callout tone="orange" title="What it will not do for you">
+				<ConceptIcon slot="icon" name="compass" />
+				<p>
+					This is Postgres, so it suits the millions of rows an ordinary B2B product has rather than
+					the billions a clickstream warehouse has. There is no scheduled export or emailed PDF
+					report yet. Summary tables are rebuilt whole, one organisation at a time, which is simple
+					and fine until you have several hundred customers, at which point you move that job onto
+					the queue.
+				</p>
+			</Callout>
+			<div class="next-actions">
+				<a class="btn btn-primary" href="/get-started/">Get it running</a>
+				<a class="btn btn-ghost" href="/who-is-it-for/">See the other two shapes</a>
+			</div>
+		</div>
+	</section>
+</BaseLayout>
+
+<style>
+	.hero { border-bottom: 1px solid var(--border); }
+	.hero-actions { display: flex; flex-wrap: wrap; gap: 0.9rem; margin-top: 1.6rem; }
+	.shot-lead { padding: 2.5rem 0 1rem; }
+	.day1 { padding: 3.5rem 0 4rem; }
+	.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+	.card { padding: 1.5rem 1.6rem; border: 1px solid var(--border); border-radius: 18px; background: var(--card); box-shadow: var(--shadow-sm); }
+	.chip { display: inline-flex; align-items: center; justify-content: center; width: 42px; height: 42px; border-radius: 13px; background: var(--tint); color: var(--accent); margin-bottom: 0.8rem; }
+	.card h3 { font-size: 1.03rem; margin-bottom: 0.35rem; }
+	.card p { color: var(--text-muted); margin: 0; }
+	.aside { margin-top: 1.8rem; color: var(--text-muted); font-size: 0.95rem; }
+	.explore { padding: 4rem 0; }
+	.split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 2.6rem; align-items: center; }
+	.muted-p { color: var(--text-muted); max-width: 58ch; }
+	.start { padding: 1rem 0 3rem; }
+	.limits { padding: 1rem 0 5rem; }
+	.next-actions { display: flex; flex-wrap: wrap; gap: 0.9rem; margin-top: 1.8rem; }
+	@media (max-width: 860px) { .split { grid-template-columns: minmax(0, 1fr); gap: 1.6rem; } }
+</style>

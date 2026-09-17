@@ -116,7 +116,9 @@ for (const theme of ['day', 'night']) {
 }
 
 // Structure + keyboard.
-for (const path of ['/', '/tour/', '/get-started/', '/who-is-it-for/', '/changelog/', '/concepts/auth/', '/concepts/api/', '/concepts/feature-flags/']) {
+for (const path of ['/', '/tour/', '/get-started/', '/who-is-it-for/', '/changelog/',
+	'/concepts/auth/', '/concepts/api/', '/concepts/feature-flags/',
+	'/use-cases/internal-tool/', '/use-cases/customer-portal/', '/use-cases/analytics-product/', '/costs/', '/compare/']) {
 	const page = await open(browser, path)
 	const r = await page.evaluate(() => {
 		const levels = [...document.querySelectorAll('h1,h2,h3,h4')].map((h) => +h.tagName[1])

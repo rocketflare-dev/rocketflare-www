@@ -1,0 +1,233 @@
+---
+/**
+ * Use case 2: a customer portal with AI over each customer's own documents.
+ * The isolation claim is the load-bearing one on this page, so it is stated
+ * in terms of what enforces it rather than as a promise.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import SectionHead from '../../components/SectionHead.astro'
+import Screenshot from '../../components/Screenshot.astro'
+import Steps from '../../components/Steps.astro'
+import Callout from '../../components/Callout.astro'
+import ConceptIcon from '../../components/ConceptIcon.astro'
+import { pageByPath } from '../../data/pages'
+
+import documentsLight from '../../assets/screens/documents.light.png'
+import documentsDark from '../../assets/screens/documents.dark.png'
+import researchLight from '../../assets/screens/agents-research.light.png'
+import researchDark from '../../assets/screens/agents-research.dark.png'
+
+const page = pageByPath('/use-cases/customer-portal/')
+if (!page) throw new Error('Page not in the registry: /use-cases/customer-portal/')
+
+const day1 = [
+	{
+		title: 'Upload, and then readable text',
+		body: 'PDFs, Word, Excel, OpenDocument, HTML and plain text. The original goes to object storage and stays downloadable. Anything that is not already text is converted in a background job, so a large upload does not hold a request open.',
+		icon: 'document',
+		tone: 'blue' as const,
+	},
+	{
+		title: 'Search that finds the passage, not the file',
+		body: 'Two searches run at once: one on meaning, one on the words themselves, and the results are merged. A hit carries the passage and where it sits in the document, so a citation can link into the text rather than at it.',
+		icon: 'search',
+		tone: 'cyan' as const,
+	},
+	{
+		title: 'A chat box that has read their documents',
+		body: 'The assistant can search the knowledge base, open a document and list what is indexed. The thread is stored, so a customer can come back to it, and a long one is summarised rather than silently truncated.',
+		icon: 'sparkles',
+		tone: 'purple' as const,
+	},
+	{
+		title: 'Agents that show their working',
+		body: 'A research agent reads what it needs, answers, and cites the documents it used. Citations are filtered against the documents it actually opened, so an invented source is dropped instead of shown.',
+		icon: 'robot',
+		tone: 'red' as const,
+	},
+	{
+		title: 'A cost per customer, not a surprise',
+		body: 'Every model call writes a row with the provider, the model, the tokens and an estimated cost. When a customer asks what their AI usage is costing you, the answer is a query.',
+		icon: 'chart',
+		tone: 'green' as const,
+	},
+	{
+		title: 'Sharing inside a customer, when they need it',
+		body: 'Groups let one customer restrict a document to a department rather than the whole organisation. A document nobody may see returns the same not found as one that does not exist.',
+		icon: 'users',
+		tone: 'orange' as const,
+	},
+]
+
+const start = [
+	{
+		title: 'Ingest one document',
+		body: 'Upload something real on the Knowledge page and watch it move from indexing to indexed. Then search a phrase from the middle of it.',
+	},
+	{
+		title: 'Ask an agent about it',
+		body: 'Run the research agent against a question only that document can answer, and read the citation it comes back with.',
+	},
+	{
+		title: 'Be two customers at once',
+		body: 'Create a second organisation, upload a different document, and try to reach the first one from it. This is the five minutes that tells you whether the isolation story is real.',
+	},
+	{
+		title: 'Point it at your own provider',
+		body: 'It runs on Workers AI with no key. Add an Anthropic or OpenAI key in settings when you want a different model, per organisation or for everyone.',
+	},
+]
+---
+<BaseLayout title={page.title} description={page.description} noindex={!page.ready}>
+	<header class="hero page-hero bg-sky">
+		<div class="wrap">
+			<div class="hero-copy">
+				<span class="eyebrow">What would I build</span>
+				<h1>A customer portal with AI over their documents</h1>
+				<p class="lede">
+					Each customer uploads their own material, asks questions about it, and never sees anyone
+					else's. The upload, the conversion, the search, the chat and the citations are already
+					built. The part that usually goes wrong is the isolation, and here that is enforced by
+					tests rather than by everyone remembering.
+				</p>
+				<div class="hero-actions">
+					<a class="btn btn-primary" href="/get-started/">Get it running</a>
+					<a class="btn btn-ghost" href="/concepts/ai/">How the AI layer works</a>
+				</div>
+			</div>
+		</div>
+	</header>
+
+	<section class="shot-lead">
+		<div class="wrap">
+			<Screenshot
+				light={documentsLight}
+				dark={documentsDark}
+				alt="The Knowledge page, listing uploaded documents with their indexing status"
+				url="portal.example/documents"
+				caption="Documents indexed and searchable, scoped to one customer."
+				priority
+				crop="top"
+			/>
+		</div>
+	</section>
+
+	<section class="day1">
+		<div class="wrap">
+			<SectionHead
+				eyebrow="On the first run"
+				title="What is already there"
+				lede="With no API key configured. The AI runs on the Cloudflare binding until you give it something better."
+			/>
+			<div class="grid reveal reveal-stagger">
+				{day1.map((d) => (
+					<article class={`card tone-${d.tone}`}>
+						<span class="chip"><ConceptIcon name={d.icon} /></span>
+						<h3>{d.title}</h3>
+						<p>{d.body}</p>
+					</article>
+				))}
+			</div>
+		</div>
+	</section>
+
+	<section class="isolation bg-band">
+		<div class="wrap-narrow">
+			<span class="eyebrow">The part that matters</span>
+			<h2>Why one customer cannot read another's documents</h2>
+			<p class="text-muted">
+				Every row belongs to an organisation, and every query filters by the organisation on the
+				signed in session rather than anything the browser sent. That is the rule. The reason to
+				believe it is not that the rule exists, because rules like this are broken by the query
+				somebody adds in a hurry six months from now.
+			</p>
+			<p class="text-muted">
+				It holds because a test reads the code and fails when a query touches a table with an
+				organisation key without naming one, and because the search, the chat tools and the agent
+				tools all go through a single function that takes the reader's access and applies it. An
+				agent reads exactly what the person who started it may read, worked out when it runs rather
+				than when it was queued.
+			</p>
+			<a class="band-link" href="/concepts/tenancy/">How tenancy and access work <span aria-hidden="true">→</span></a>
+		</div>
+	</section>
+
+	<section class="agents">
+		<div class="wrap">
+			<div class="split">
+				<div class="reveal">
+					<Screenshot
+						light={researchLight}
+						dark={researchDark}
+						alt="An agent run: the answer with a citation back to the document it read"
+						url="portal.example/agents"
+						crop="top"
+					/>
+				</div>
+				<div class="reveal">
+					<SectionHead
+						align="left"
+						eyebrow="When an answer is not enough"
+						title="An agent can stop and ask a person"
+						lede="A run that is about to do something consequential can pause, ask, and wait. It can wait for days."
+					/>
+					<p class="muted-p">
+						That matters in a portal, because the useful version of this is rarely just answering
+						questions. It is drafting the reply, filing the claim, or writing the summary back into
+						the customer's own records. Approval is part of the run rather than a screen you bolt
+						on afterwards, and the answer is recorded next to the question.
+					</p>
+					<a href="/concepts/ai/">How agents work here <span aria-hidden="true">→</span></a>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section class="start">
+		<div class="wrap-narrow">
+			<SectionHead align="left" eyebrow="Where to start" title="Four steps, in order" />
+			<Steps direction="column" steps={start} />
+		</div>
+	</section>
+
+	<section class="limits">
+		<div class="wrap-narrow">
+			<Callout tone="orange" title="What it will not do for you">
+				<ConceptIcon slot="icon" name="compass" />
+				<p>
+					Images are not accepted for indexing, so there is no OCR of scanned paper. Converted text
+					is capped, so a thousand page contract is not a single document. There is no billing, so
+					if you are charging customers for usage you are writing that part. And the answers are as
+					good as the model you point it at: the free default is fine for trying it and you will
+					want your own key before customers see it.
+				</p>
+			</Callout>
+			<div class="next-actions">
+				<a class="btn btn-primary" href="/get-started/">Get it running</a>
+				<a class="btn btn-ghost" href="/costs/">What the AI actually costs</a>
+			</div>
+		</div>
+	</section>
+</BaseLayout>
+
+<style>
+	.hero { border-bottom: 1px solid var(--border); }
+	.hero-actions { display: flex; flex-wrap: wrap; gap: 0.9rem; margin-top: 1.6rem; }
+	.shot-lead { padding: 2.5rem 0 1rem; }
+	.day1 { padding: 3.5rem 0 4rem; }
+	.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+	.card { padding: 1.5rem 1.6rem; border: 1px solid var(--border); border-radius: 18px; background: var(--card); box-shadow: var(--shadow-sm); }
+	.chip { display: inline-flex; align-items: center; justify-content: center; width: 42px; height: 42px; border-radius: 13px; background: var(--tint); color: var(--accent); margin-bottom: 0.8rem; }
+	.card h3 { font-size: 1.03rem; margin-bottom: 0.35rem; }
+	.card p { color: var(--text-muted); margin: 0; }
+	.isolation { padding: 4.5rem 0; }
+	.isolation h2 { margin-bottom: 1rem; }
+	.band-link { color: var(--cyan); font-weight: 600; }
+	.agents { padding: 4rem 0; }
+	.split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 2.6rem; align-items: center; }
+	.muted-p { color: var(--text-muted); max-width: 58ch; }
+	.start { padding: 1rem 0 3rem; }
+	.limits { padding: 1rem 0 5rem; }
+	.next-actions { display: flex; flex-wrap: wrap; gap: 0.9rem; margin-top: 1.8rem; }
+	@media (max-width: 860px) { .split { grid-template-columns: minmax(0, 1fr); gap: 1.6rem; } }
+</style>

@@ -23,6 +23,15 @@ export interface SitePage {
 	 * (so no link 404s) but are `noindex` and left out of the sitemap.
 	 */
 	ready: boolean
+	/**
+	 * Whether the page appears in the nav and footer. Default true. The use
+	 * cases and the costs page are set false: they are written for someone
+	 * arriving from a search with a specific question, and are linked from the
+	 * pages that raise that question. Putting all of them in the nav would
+	 * double its length and bury the five links that suit a first visit.
+	 * They are still in the sitemap and in llms.txt, which read this list.
+	 */
+	inNav?: boolean
 }
 
 export const PAGES: SitePage[] = [
@@ -86,10 +95,67 @@ export const PAGES: SitePage[] = [
 		order: 5,
 		ready: true,
 	},
+	{
+		path: '/use-cases/internal-tool/',
+		title: 'Build an internal tool without building the platform first',
+		nav: 'Internal tools',
+		description:
+			'An operations tool your team opens every morning. Sign-in, roles, invitations, an audit trail and background jobs are already built and tested, so the first thing you write is a table that belongs to your business.',
+		audience: 'builder',
+		order: 6,
+		ready: true,
+		inNav: false,
+	},
+	{
+		path: '/use-cases/customer-portal/',
+		title: 'A customer portal with AI over each customer’s documents',
+		nav: 'Customer portals',
+		description:
+			'Every customer uploads their own documents, asks questions about them, and never sees anyone else’s. Upload, conversion, search, chat and citations are built in, and isolation is enforced by tests rather than by care.',
+		audience: 'builder',
+		order: 7,
+		ready: true,
+		inNav: false,
+	},
+	{
+		path: '/use-cases/analytics-product/',
+		title: 'An analytics product where the numbers are the product',
+		nav: 'Analytics products',
+		description:
+			'Dashboards per customer over their own data, a semantic layer so a measure is defined once, summary tables rebuilt on a schedule, and a query endpoint for the questions you did not anticipate.',
+		audience: 'builder',
+		order: 8,
+		ready: true,
+		inNav: false,
+	},
+	{
+		path: '/costs/',
+		title: 'What it costs to run',
+		nav: 'Costs',
+		description:
+			'Running it on your laptop is free. Running it for real starts at about five dollars a month. Every line of that bill, with the price each vendor publishes and the date it was checked.',
+		audience: 'both',
+		order: 9,
+		ready: true,
+		inNav: false,
+	},
+	{
+		path: '/compare/',
+		title: 'Build it yourself, or start from this',
+		nav: 'Compare',
+		description:
+			'What the platform work actually is, when writing it yourself is the right call, how this differs from the Next.js starter kits, and what you give up by taking a copy.',
+		audience: 'both',
+		order: 10,
+		ready: true,
+		inNav: false,
+	},
 ]
 
 /** The pages that appear in the nav and footer, in order — the home link is the logo. */
-export const NAV_PAGES = PAGES.filter((p) => p.path !== '/').sort((a, b) => a.order - b.order)
+export const NAV_PAGES = PAGES.filter((p) => p.path !== '/' && p.inNav !== false).sort(
+	(a, b) => a.order - b.order
+)
 
 export const pageByPath = (path: string) => PAGES.find((p) => p.path === path)
 
