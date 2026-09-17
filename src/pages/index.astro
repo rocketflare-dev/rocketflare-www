@@ -139,43 +139,59 @@ const terminalLines = [
 	{ out: BOOTSTRAP_READY_LINE, ok: true },
 ]
 
+/**
+ * The questions people actually ask before they commit a weekend to a starter
+ * kit. Rendered as a section AND as the FAQPage schema below, from this one
+ * array — structured data has to mirror what a reader can see, and the way to
+ * guarantee that is to have one source for both.
+ */
+const FAQS: { q: string; a: string }[] = [
+	{
+		q: 'What is Rocketflare?',
+		a: 'A free, open-source web app you copy and make your own. Sign-in, organisations, teams and permissions, an AI assistant that answers from your own documents, dashboards, file uploads and background jobs are already built and tested. You add the product. It runs as one Cloudflare Worker over a normal Postgres database, under the MIT licence.',
+	},
+	{
+		q: 'Do I need to be a developer to use it?',
+		a: 'You need to be comfortable running commands in a terminal, and you will be editing code eventually — this is a codebase, not a no-code builder. You do not need to know Cloudflare, Postgres or any of the libraries beforehand. The repository is written to be driven by a coding agent such as Claude Code: open the folder, type /rf-setup, and it does the setup, the rename and the deploy for you, showing each step as it goes.',
+	},
+	{
+		q: 'What does it cost?',
+		a: 'The kit is free. Running it on your laptop costs nothing at all. Deploying it costs the Cloudflare Workers Paid plan, because the database connection pool and the workflows the agents run on are paid features, plus a Postgres database — a free Neon tier is enough to start. The built-in AI is billed per call to your own Cloudflare account, with a free daily allowance, and you can switch it off or bring your own key.',
+	},
+	{
+		q: 'Can I use it for a commercial product or for client work?',
+		a: 'Yes. It is MIT licensed: build a product on it, charge for that product, keep your changes private, and you owe nothing and need not credit anyone. Take a copy, cut it loose from the original history, and it is your codebase.',
+	},
+	{
+		q: 'Do I need a Cloudflare account?',
+		a: 'To run it on your laptop, a free one — and only because the built-in AI runs on Cloudflare, so the first start asks you to log in. Run the bootstrap with --offline and no account is needed at all; chat and agents then wait for an AI key of your own. Deploying needs a Workers Paid plan.',
+	},
+	{
+		q: 'Can it serve one organisation or many?',
+		a: 'Both, from the same database. One setting switches between many organisations, each with its own members and roles, and a single organisation that everyone joins. You can change your mind later without touching the data or running a migration.',
+	},
+	{
+		q: 'What is not included?',
+		a: 'Billing and subscriptions are the big one — there is no Stripe integration, no plans and no metering of your customers. There is also no marketing site, no blog or CMS, and no mobile app. What is included is the platform underneath a product: tenancy, sign-in, roles, files, email, background jobs, realtime, dashboards, an AI layer and a command-line tool.',
+	},
+	{
+		q: 'How is it different from other SaaS starter kits?',
+		a: 'Three things. Multi-tenancy is the foundation rather than an add-on, so every row belongs to an organisation and the tests fail if one does not. The AI layer — chat, agents and search over your own documents — is built in and works on a fresh copy with no API key. And a copy keeps a link home: when the kit gains a release, one command ports it into your renamed app without recreating anything you deleted, so starting from a template does not mean falling behind it.',
+	},
+	{
+		q: 'What does “agent-first” mean?',
+		a: 'The kit is written to be worked on by a coding agent: a map at the root of the repository, rules that load with the files they apply to, a guide in every important folder, and one test gate that enforces them. Ask the agent to set up, rename or deploy the project and it follows the same steps a person would, showing each result as it goes.',
+	},
+]
+
 const faqLd = {
 	'@context': 'https://schema.org',
 	'@type': 'FAQPage',
-	mainEntity: [
-		{
-			'@type': 'Question',
-			name: 'What is Rocketflare?',
-			acceptedAnswer: {
-				'@type': 'Answer',
-				text: 'Rocketflare is a ready-made web app you copy and make your own. Out of the box it has sign-in, teams and permissions, an AI assistant that can read your documents, dashboards, and a clean way to run background jobs. It runs as one Cloudflare Worker over a normal Postgres database and is open source under the MIT licence.',
-			},
-		},
-		{
-			'@type': 'Question',
-			name: 'Do I need a Cloudflare account?',
-			acceptedAnswer: {
-				'@type': 'Answer',
-				text: 'To run it on your laptop, a free one — and only because the built-in AI runs on Cloudflare, so the first start asks you to log in. Run the bootstrap with --offline and no account is needed at all; chat and agents then wait for an AI key of your own. Deploying needs a Workers Paid plan.',
-			},
-		},
-		{
-			'@type': 'Question',
-			name: 'Can it be one organisation or many?',
-			acceptedAnswer: {
-				'@type': 'Answer',
-				text: 'Both, from the same database. One setting switches between many organisations, each with its own members and roles, and a single organisation that everyone joins. You can change your mind later without touching the data.',
-			},
-		},
-		{
-			'@type': 'Question',
-			name: 'What does "agent-first" mean?',
-			acceptedAnswer: {
-				'@type': 'Answer',
-				text: 'The kit is written to be worked on by a coding agent such as Claude Code: a map at the root of the repository, rules that load with the files they apply to, a guide in every important folder, and one test gate that enforces them. Ask the agent to set up, rename or deploy the project and it follows the same steps a person would, showing each result as it goes.',
-			},
-		},
-	],
+	mainEntity: FAQS.map(({ q, a }) => ({
+		'@type': 'Question',
+		name: q,
+		acceptedAnswer: { '@type': 'Answer', text: a },
+	})),
 }
 ---
 
@@ -439,7 +455,27 @@ const faqLd = {
 		</div>
 	</section>
 
-	<!-- ======================================================= 9 · cta -->
+	<!-- ============================================== 9 · questions -->
+	<section class="faq">
+		<div class="wrap">
+			<div class="reveal">
+				<SectionHead
+					title="Questions people ask first"
+					lede="Before you spend an evening on it — what it costs, what it does not do, and who it is for."
+				/>
+			</div>
+			<div class="faq-list reveal reveal-stagger">
+				{FAQS.map(({ q, a }) => (
+					<div class="faq-item">
+						<h3>{q}</h3>
+						<p>{a}</p>
+					</div>
+				))}
+			</div>
+		</div>
+	</section>
+
+	<!-- ====================================================== 10 · cta -->
 	<section class="cta bg-lift">
 		<div class="wrap cta-inner reveal">
 			<LogoMark size={48} class="cta-mark" />
@@ -773,4 +809,16 @@ const faqLd = {
 		.lede, .engineer-line { padding-right: 20%; }
 		.hero-actions { width: min(14rem, 68%); }
 	}
+
+	/* ---------------------------------------------------- 9 · questions -- */
+	.faq { padding: 5rem 0; background: var(--card-alt); border-top: 1px solid var(--border); }
+	.faq-list {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+		gap: 1.6rem 2.4rem;
+		max-width: 1000px;
+		margin: 0 auto;
+	}
+	.faq-item h3 { margin-bottom: 0.4rem; }
+	.faq-item p { color: var(--text-muted); margin: 0; }
 </style>

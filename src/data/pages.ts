@@ -28,60 +28,60 @@ export interface SitePage {
 export const PAGES: SitePage[] = [
 	{
 		path: '/',
-		title: 'Rocketflare — ship your product, not the platform',
+		title: 'Rocketflare — the open-source SaaS starter kit you copy and ship',
 		nav: 'Home',
 		description:
-			'A ready-made multi-tenant web app you copy and make your own — sign-in, teams, an AI assistant over your documents, dashboards and background jobs on one Cloudflare Worker. Running on your laptop in about two minutes.',
+			'A free, open-source SaaS starter kit: sign-in, teams and permissions, an AI assistant over your documents, dashboards and background jobs are already built. Copy it, rename it, ship your product — running on your laptop in about two minutes.',
 		audience: 'both',
 		order: 0,
 		ready: true,
 	},
 	{
 		path: '/tour/',
-		title: 'Tour — what you get on the first run, screen by screen',
+		title: 'Tour — every screen you get on day one',
 		nav: 'Tour',
 		description:
-			'What you get on the first run, screen by screen: sign-in, people and roles, AI settings, chat, agents, knowledge and search, analytics, usage, the admin area and the CLI.',
+			'See what is already built before you commit a weekend to it: sign-in, people and roles, chat, AI agents, document search, dashboards, usage and the admin area — every screen, as it looks on the first run.',
 		audience: 'builder',
 		order: 1,
 		ready: true,
 	},
 	{
 		path: '/get-started/',
-		title: 'Get started — running in about two minutes',
+		title: 'Get started — your SaaS running locally in two minutes',
 		nav: 'Get started',
 		description:
-			'From git clone to a running app you are signed in to — ask your coding agent, run one script, or do it by hand — then deploy it with three accounts and one command.',
+			'One command takes you from an empty folder to an app you are signed in to, with demo data. No accounts, no keys, no config. Then deploy it for real with three free accounts and one more command.',
 		audience: 'both',
 		order: 2,
 		ready: true,
 	},
 	{
 		path: '/who-is-it-for/',
-		title: 'Who Rocketflare is for — and who it isn’t',
+		title: 'Who it’s for — internal tools, customer portals, B2B products',
 		nav: "Who it's for",
 		description:
-			'Three things you would build on it — an internal operations tool, a customer portal with AI over documents, an analytics-heavy B2B product — what is already done for each, and when to pick something else.',
+			'Three products people build on it — an internal operations tool, a customer portal with AI over documents, an analytics-heavy B2B app — what is already done for each, what you add, and when to pick something else.',
 		audience: 'both',
 		order: 3,
 		ready: true,
 	},
 	{
 		path: '/concepts/',
-		title: 'Concepts — how a multi-tenant SaaS on Cloudflare Workers fits together',
+		title: 'How it works — the parts of a multi-tenant SaaS, explained',
 		nav: 'Concepts',
 		description:
-			'One page per subsystem: what it does, the invariant it protects, and the decision behind it.',
+			'One short page per part of the app — teams, sign-in, files, background jobs, AI, dashboards — what it does, and the decision behind it. Written to be read before you build on it.',
 		audience: 'engineer',
 		order: 4,
 		ready: true,
 	},
 	{
 		path: '/changelog/',
-		title: 'Changelog — what each Rocketflare release added, and how to get it',
+		title: 'Changelog — every Rocketflare release',
 		nav: 'Changelog',
 		description:
-			'Every release of the kit, what it changed, and the one command that ports it into a copy you have already renamed and made your own.',
+			'What each release added, and the one command that brings it into a copy you have already renamed and made your own — so starting from a kit does not mean falling behind it.',
 		audience: 'both',
 		order: 5,
 		ready: true,

@@ -13,24 +13,35 @@ export const GET: APIRoute = ({ site }) => {
 
 	const body = `# Rocketflare
 
-> An open-source, MIT-licensed starter kit for building a multi-tenant B2B SaaS
-> product or internal tool on Cloudflare Workers. It ships tenancy, authentication,
-> roles and permissions, background jobs, realtime, file storage, analytics
-> dashboards, an AI agent layer and a CLI as a single Worker over Postgres — and it
-> is written to be worked on by coding agents.
+> A free, open-source (MIT) SaaS starter kit. It is a complete, working web app
+> you copy and make your own: sign-in, organisations, teams and permissions, an
+> AI assistant that answers from your own documents, dashboards, file uploads,
+> background jobs and a command-line tool are already built and tested. You add
+> the product. It runs as one Cloudflare Worker over a normal Postgres database.
 
-Stack: Cloudflare Workers (fetch + queue + scheduled, a Durable Object and a
-Workflow), Hono 4, zod contracts, CASL, Postgres 17 + pgvector through Hyperdrive,
-Drizzle over postgres.js, React 18 + Vite, drizzle-cube for analytics, a commander
-CLI. Node 24, pnpm 10.
+Who it is for: founders, small product teams and solo builders who want to ship
+an internal tool, a customer portal or a B2B SaaS without spending the first
+month rebuilding sign-in, teams, permissions and billing-adjacent plumbing. You
+do need to be comfortable running commands in a terminal; you do not need to
+know Cloudflare, and a coding agent can drive the whole setup.
+
+What it costs: the kit is free and MIT licensed — use it commercially, keep your
+changes private, no attribution required. Running it locally is free. Deploying
+needs a Cloudflare Workers Paid plan and a Postgres database (a free Neon tier
+works to start).
+
+Stack, for anyone who wants it: Cloudflare Workers (fetch + queue + scheduled, a
+Durable Object and a Workflow), Hono 4, zod contracts, CASL, Postgres 17 +
+pgvector through Hyperdrive, Drizzle over postgres.js, React 18 + Vite,
+drizzle-cube for analytics, a commander CLI. Node 24, pnpm 10.
 
 Getting started: clone the repository and run "bash scripts/bootstrap.sh" (macOS
 or Linux, Docker running) — it checks the toolchain, starts Postgres, migrates,
 seeds a demo workspace and opens the browser signed in; or open the folder in
 Claude Code and type /rf-setup (the repository ships /rf-setup, /rf-preflight,
-/rf-adapt, /rf-provision and /rf-upgrade as skills). Local development needs a free Cloudflare login only because
-the Workers AI binding always calls out (--offline turns it off); deploying needs
-Workers Paid for Hyperdrive and Workflows and is scripted by "pnpm provision".
+/rf-adapt, /rf-provision and /rf-upgrade as skills). Local development needs a
+free Cloudflare login only because the Workers AI binding always calls out
+(--offline turns it off); deploying is scripted by "pnpm provision".
 
 ## Pages
 
