@@ -51,6 +51,24 @@ export const RELEASES: Release[] = [
 		migrations: true,
 		areas: ['shared', 'db', 'api', 'ui', 'cli', 'config', 'docs'],
 	},
+	{
+		version: '0.4.0',
+		date: '2026-09-16',
+		summary:
+			'Human-in-the-loop agents: a run can stop and ask a person — approve this, which did you mean, fill this in — wait days for the answer, and carry on from where it parked. Every run has a page of its own that fills live while it works.',
+		breaking: false,
+		migrations: true,
+		areas: ['shared', 'db', 'api', 'ui', 'config', 'docs'],
+	},
+	{
+		version: '0.5.0',
+		date: '2026-09-17',
+		summary:
+			'Plugins: a feature is a git repository copied into your app — never an npm package — that brings its own contracts, tables, routes, jobs, agent tools, pages and CLI commands. pnpm plugin installs, upgrades, removes and audits them; example-feature is the reference one, and it exists to be deleted.',
+		breaking: false,
+		migrations: true,
+		areas: ['shared', 'api', 'ui', 'cli', 'db', 'config', 'docs', 'scripts', 'provisioning'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
