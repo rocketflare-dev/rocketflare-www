@@ -118,7 +118,7 @@ const table = [
 ---
 <BaseLayout title={page.title} description={page.description} noindex={!page.ready}>
 	<header class="hero page-hero bg-sky">
-		<div class="wrap">
+		<div class="wrap hero-grid">
 			<div class="hero-copy">
 				<span class="eyebrow">Compare</span>
 				<h1>Build it yourself, or start from this</h1>
@@ -129,6 +129,29 @@ const table = [
 					give up by taking a copy instead.
 				</p>
 			</div>
+			<aside class="glance" aria-label="At a glance">
+				<div class="glance-block">
+					<p class="glance-label">Already written</p>
+					<p class="glance-body">
+						Organisations and roles, sign-in, invitations, an audit trail, a job queue, file
+						storage, email, realtime, dashboards, an AI layer and a command line tool.
+					</p>
+				</div>
+				<div class="glance-block">
+					<p class="glance-label">Not included</p>
+					<p class="glance-body">
+						Billing. If you need plans and a checkout on day one, a kit built around Stripe will
+						beat this one.
+					</p>
+				</div>
+				<div class="glance-block">
+					<p class="glance-label">The trade</p>
+					<p class="glance-body">
+						A few hundred decisions you did not make, each written down so you can reverse it
+						on purpose.
+					</p>
+				</div>
+			</aside>
 		</div>
 	</header>
 
@@ -269,6 +292,32 @@ const table = [
 		white-space: nowrap;
 	}
 	.hero { border-bottom: 1px solid var(--border); }
+	/* The copy keeps the left edge every other hero on the site uses; the card
+	   fills the right, which is the job SkyScene does on the landing page. */
+	.hero-grid {
+		display: grid;
+		grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+		gap: 3rem;
+		align-items: center;
+	}
+	.glance {
+		border: 1px solid var(--border-bright);
+		border-radius: 20px;
+		background: var(--card);
+		box-shadow: var(--shadow);
+		padding: 0.4rem 1.8rem 1.2rem;
+	}
+	.glance-block { padding: 1.1rem 0 0; }
+	.glance-block + .glance-block { border-top: 1px solid var(--border); margin-top: 0.4rem; }
+	.glance-label {
+		margin: 0 0 0.25rem;
+		font-size: 0.72rem;
+		font-weight: 700;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: var(--orange-ink);
+	}
+	.glance-body { margin: 0; font-size: 0.92rem; color: var(--text-muted); }
 
 	.work { padding: 3.5rem 0 4rem; }
 	.work-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem 2.2rem; }
@@ -338,6 +387,9 @@ const table = [
 	.giveup-list p { color: var(--text-muted); margin: 0; }
 	.next-actions { display: flex; flex-wrap: wrap; gap: 0.9rem; }
 
+	@media (max-width: 900px) {
+		.hero-grid { grid-template-columns: minmax(0, 1fr); gap: 2rem; }
+	}
 	@media (max-width: 620px) {
 		.compare thead { display: none; }
 		.compare tbody th, .compare td { display: block; border-bottom: 0; padding: 0.3rem 0; width: auto; }

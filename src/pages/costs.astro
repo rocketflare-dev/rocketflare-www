@@ -87,7 +87,7 @@ const growth = [
 ---
 <BaseLayout title={page.title} description={page.description} noindex={!page.ready}>
 	<header class="hero page-hero bg-sky">
-		<div class="wrap">
+		<div class="wrap hero-grid">
 			<div class="hero-copy">
 				<span class="eyebrow">What it costs</span>
 				<h1>What it costs to run</h1>
@@ -97,6 +97,16 @@ const growth = [
 					published price, checked in {CHECKED} and linked so you can check it yourself.
 				</p>
 			</div>
+			<aside class="price-card" aria-label="Cost summary">
+				<p class="price-from">From</p>
+				<p class="price"><span class="price-num">$5</span> <span class="price-per">a month</span></p>
+				<ul class="price-lines">
+					<li><strong>Your laptop</strong><span>Free. No accounts, no card.</span></li>
+					<li><strong>Cloudflare Workers</strong><span>$5 a month minimum, and you are paying for the plan rather than the traffic.</span></li>
+					<li><strong>Postgres, email, AI</strong><span>Usually nothing at the size most apps start at.</span></li>
+				</ul>
+				<p class="price-note">Prices checked {CHECKED}. Each one is linked below.</p>
+			</aside>
 		</div>
 	</header>
 
@@ -217,6 +227,38 @@ const growth = [
 
 <style>
 	.hero { border-bottom: 1px solid var(--border); }
+	/* The copy keeps the left edge every other hero on the site uses; the card
+	   fills the right, which is the job SkyScene does on the landing page. */
+	.hero-grid {
+		display: grid;
+		grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+		gap: 3rem;
+		align-items: center;
+	}
+	.price-card {
+		border: 1px solid var(--border-bright);
+		border-radius: 20px;
+		background: var(--card);
+		box-shadow: var(--shadow);
+		padding: 1.6rem 1.8rem;
+	}
+	.price-from {
+		margin: 0;
+		font-size: 0.74rem;
+		font-weight: 700;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: var(--text-muted);
+	}
+	.price { margin: 0.1rem 0 1.1rem; display: flex; align-items: baseline; gap: 0.5rem; }
+	.price-num { font-size: 3.2rem; font-weight: 800; color: var(--text-bright); letter-spacing: -0.03em; }
+	.price-per { color: var(--text-muted); font-size: 1rem; }
+	.price-lines { list-style: none; margin: 0; padding: 0; }
+	.price-lines li { padding: 0.7rem 0; border-top: 1px solid var(--border); }
+	.price-lines strong { display: block; color: var(--text-bright); font-size: 0.95rem; }
+	.price-lines span { color: var(--text-muted); font-size: 0.9rem; }
+	.price-note { margin: 1rem 0 0; font-size: 0.82rem; color: var(--text-muted); }
+
 	.local { padding: 3.5rem 0 1rem; }
 	.local p { color: var(--text-muted); max-width: 62ch; }
 
@@ -297,7 +339,11 @@ const growth = [
 	.next p { color: var(--text-muted); max-width: 62ch; }
 	.next-actions { display: flex; flex-wrap: wrap; gap: 0.9rem; margin-top: 1.4rem; }
 
+	@media (max-width: 900px) {
+		.hero-grid { grid-template-columns: minmax(0, 1fr); gap: 2rem; }
+	}
 	@media (max-width: 560px) {
 		.tally li { grid-template-columns: 1fr; gap: 0.2rem; }
+		.price-num { font-size: 2.6rem; }
 	}
 </style>
