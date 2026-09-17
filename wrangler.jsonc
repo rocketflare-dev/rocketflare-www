@@ -4,7 +4,14 @@
 	"compatibility_date": "2026-03-06",
 	"assets": {
 		"directory": "./dist",
-		"binding": "ASSETS"
+		"binding": "ASSETS",
+		// Static Assets answers before the Worker by default, so /, /tour/ and
+		// every other page URL never reached worker/index.ts: the canonical
+		// redirect only ever ran on /api/*, the one path with no asset behind
+		// it. Everything goes through the Worker now except the fingerprinted
+		// files under /_astro/, which need no canonicalising and are most of
+		// the requests.
+		"run_worker_first": ["/*", "!/_astro/*"]
 	},
 	// Lets `wrangler versions upload --preview-alias pr-<n>` (deploy.yml) publish a
 	// pull request at pr-<n>-rocketflare-www.<subdomain>.workers.dev.
