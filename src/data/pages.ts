@@ -24,7 +24,7 @@ export interface SitePage {
 	 */
 	ready: boolean
 	/**
-	 * Whether the page appears in the nav and footer. Default true. The use
+	 * Whether the page appears in the top nav. Default true. The use
 	 * cases and the costs page are set false: they are written for someone
 	 * arriving from a search with a specific question, and are linked from the
 	 * pages that raise that question. Putting all of them in the nav would
@@ -32,6 +32,12 @@ export interface SitePage {
 	 * They are still in the sitemap and in llms.txt, which read this list.
 	 */
 	inNav?: boolean
+	/**
+	 * Whether the page appears in the footer. Default true. The footer carries
+	 * more than the nav on purpose: it is where the pages a returning reader
+	 * wants live (the changelog) and where a crawler finds everything.
+	 */
+	inFooter?: boolean
 }
 
 export const PAGES: SitePage[] = [
@@ -62,8 +68,9 @@ export const PAGES: SitePage[] = [
 		description:
 			'One command takes you from an empty folder to an app you are signed in to, with demo data. No accounts, no keys, no config. Then deploy it for real with three free accounts and one more command.',
 		audience: 'both',
-		order: 2,
+		order: 6,
 		ready: true,
+		inNav: false,
 	},
 	{
 		path: '/who-is-it-for/',
@@ -72,7 +79,7 @@ export const PAGES: SitePage[] = [
 		description:
 			'Three products people build on it — an internal operations tool, a customer portal with AI over documents, an analytics-heavy B2B app — what is already done for each, what you add, and when to pick something else.',
 		audience: 'both',
-		order: 3,
+		order: 4,
 		ready: true,
 	},
 	{
@@ -82,7 +89,7 @@ export const PAGES: SitePage[] = [
 		description:
 			'One short page per part of the app — teams, sign-in, files, background jobs, AI, dashboards — what it does, and the decision behind it. Written to be read before you build on it.',
 		audience: 'engineer',
-		order: 4,
+		order: 5,
 		ready: true,
 	},
 	{
@@ -92,8 +99,9 @@ export const PAGES: SitePage[] = [
 		description:
 			'What each release added, and the one command that brings it into a copy you have already renamed and made your own — so starting from a kit does not mean falling behind it.',
 		audience: 'both',
-		order: 5,
+		order: 7,
 		ready: true,
+		inNav: false,
 	},
 	{
 		path: '/use-cases/internal-tool/',
@@ -102,8 +110,9 @@ export const PAGES: SitePage[] = [
 		description:
 			'An operations tool your team opens every morning. Sign-in, roles, invitations, an audit trail and background jobs are already built and tested, so the first thing you write is a table that belongs to your business.',
 		audience: 'builder',
-		order: 6,
+		order: 8,
 		ready: true,
+		inFooter: false,
 		inNav: false,
 	},
 	{
@@ -113,8 +122,9 @@ export const PAGES: SitePage[] = [
 		description:
 			'Every customer uploads their own documents, asks questions about them, and never sees anyone else’s. Upload, conversion, search, chat and citations are built in, and isolation is enforced by tests rather than by care.',
 		audience: 'builder',
-		order: 7,
+		order: 9,
 		ready: true,
+		inFooter: false,
 		inNav: false,
 	},
 	{
@@ -124,8 +134,9 @@ export const PAGES: SitePage[] = [
 		description:
 			'Dashboards per customer over their own data, a semantic layer so a measure is defined once, summary tables rebuilt on a schedule, and a query endpoint for the questions you did not anticipate.',
 		audience: 'builder',
-		order: 8,
+		order: 10,
 		ready: true,
+		inFooter: false,
 		inNav: false,
 	},
 	{
@@ -135,9 +146,8 @@ export const PAGES: SitePage[] = [
 		description:
 			'Running it on your laptop is free. Running it for real starts at about five dollars a month. Every line of that bill, with the price each vendor publishes and the date it was checked.',
 		audience: 'both',
-		order: 9,
+		order: 2,
 		ready: true,
-		inNav: false,
 	},
 	{
 		path: '/compare/',
@@ -146,9 +156,8 @@ export const PAGES: SitePage[] = [
 		description:
 			'What the platform work actually is, when writing it yourself is the right call, how this differs from the Next.js starter kits, and what you give up by taking a copy.',
 		audience: 'both',
-		order: 10,
+		order: 3,
 		ready: true,
-		inNav: false,
 	},
 ]
 
@@ -156,6 +165,11 @@ export const PAGES: SitePage[] = [
 export const NAV_PAGES = PAGES.filter((p) => p.path !== '/' && p.inNav !== false).sort(
 	(a, b) => a.order - b.order
 )
+
+/** The footer's list, which is the nav's plus the pages demoted out of it. */
+export const FOOTER_PAGES = PAGES.filter(
+	(p) => p.path !== '/' && p.ready && p.inFooter !== false
+).sort((a, b) => a.order - b.order)
 
 export const pageByPath = (path: string) => PAGES.find((p) => p.path === path)
 

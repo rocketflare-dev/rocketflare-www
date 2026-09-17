@@ -1,12 +1,12 @@
 ---
 import LogoMark from './LogoMark.astro'
 import { GITHUB_URL } from '../data/site'
-import { NAV_PAGES } from '../data/pages'
+import { FOOTER_PAGES } from '../data/pages'
 ---
 <footer>
 	<div class="footer-logo"><LogoMark size={22} /> Rocketflare</div>
 	<div class="footer-links">
-		{NAV_PAGES.map((p) => <a href={p.path}>{p.nav}</a>)}
+		{FOOTER_PAGES.map((p) => <a href={p.path}>{p.nav}</a>)}
 		<a href={GITHUB_URL} target="_blank" rel="noopener">GitHub</a>
 	</div>
 	<p>MIT licensed. Take a copy, cut it loose, make it yours.</p>
