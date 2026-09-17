@@ -111,6 +111,7 @@ const also = [
 	{ slug: 'ai', icon: 'gauge', title: 'A priced AI usage ledger', line: 'Every model call, with its tokens and its cost, per organisation.' },
 	{ slug: 'database', icon: 'database', title: 'Tests that guard isolation', line: 'The suite fails if one organisation could ever see another’s rows.' },
 	{ slug: 'deployment', icon: 'cloud', title: 'One-command deploys', line: 'Staging from a tag, production from a release, secrets never in a file.' },
+	{ slug: 'plugins', icon: 'puzzle', title: 'Plugins', line: 'Add a capability by copying a repository in, not by installing a package.' },
 ].map((a) => {
 	const c = conceptBySlug(a.slug)
 	if (!c) throw new Error(`Unknown concept: ${a.slug}`)
@@ -119,7 +120,7 @@ const also = [
 
 const conceptCount = numberWord(CONCEPT_COUNT)
 
-/** What the agent says it did — the nine steps in plain words. */
+/** What the agent says it did — every bootstrap step in plain words. */
 const agentTurns = [
 	{ who: 'you' as const, text: AGENT_PROMPT },
 	{
@@ -273,7 +274,7 @@ const faqLd = {
 					direction="row"
 					steps={[
 						{ title: 'Get a copy', body: 'The installer clones it, makes the history yours from the first commit, and starts the bootstrap.', time: '10 s' },
-						{ title: 'Bootstrap', body: 'Nine checked steps: toolchain, database, migrations, demo data. Or ask your agent.', time: '2–3 min' },
+						{ title: 'Bootstrap', body: `${numberWord(BOOTSTRAP_STEPS.length, { capital: true })} checked steps: toolchain, database, migrations, plugins, demo data. Or ask your agent.`, time: '2–3 min' },
 						{ title: "You're in", body: `${APP_URL}, signed in as the demo owner.`, time: 'now' },
 					]}
 				/>
@@ -658,7 +659,7 @@ const faqLd = {
 		margin: 0;
 		padding: 0;
 		display: grid;
-		grid-template-columns: repeat(4, minmax(0, 1fr));
+		grid-template-columns: repeat(3, minmax(0, 1fr));
 		gap: 1.4rem 2rem;
 	}
 	.also-grid a {

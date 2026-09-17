@@ -187,7 +187,9 @@ const provisionTurns = [
 				<p class="after">
 					Then <code>{SKILLS.adapt}</code> renames everything — package names, the Worker, the
 					database, the command-line tool, the theme — and <code>{SKILLS.provision}</code> deploys
-					it (<a href="#deploy">below</a>).
+					it (<a href="#deploy">below</a>). <code>{SKILLS.upgrade}</code> ports later kit releases
+					in, and <code>{SKILLS.plugin}</code> installs, upgrades or removes a
+					<a href="/concepts/plugins/">plugin</a>.
 				</p>
 			</Fragment>
 
@@ -383,8 +385,10 @@ const provisionTurns = [
 		</p>
 		<p class="measure">
 			The part that makes this safe is what it refuses to do. Delete the example agent, the
-			example dashboard or the command-line commands you did not want — and an upgrade will never
-			bring them back. It leaves your database migrations, your Cloudflare configuration and your
+			example dashboard or the command-line commands you did not want — or add a
+			<a href="/concepts/plugins/">plugin</a>, which is a repository copied in rather than a
+			package installed — and an upgrade will never bring back what you removed, nor touch a file
+			a plugin owns. It leaves your database migrations, your Cloudflare configuration and your
 			version number alone, and tells you what it left for you. Every release ships a note in
 			<code>{UPGRADE_NOTES_DIR}</code> saying what changed and how to port it; the
 			<a href="/changelog/">changelog</a> is the list.

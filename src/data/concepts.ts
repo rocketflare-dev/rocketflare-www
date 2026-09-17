@@ -192,6 +192,16 @@ export const CONCEPTS: Concept[] = [
 		anchor: '15-feature-flags',
 		group: 'platform',
 	},
+	{
+		slug: 'plugins',
+		num: '15',
+		title: 'Plugins',
+		blurb: 'A capability is a git repository copied into your app, not an npm package — it lands as ordinary source, reaches the app through five lines, and deleting the folder uninstalls it.',
+		tone: 'cyan',
+		icon: 'puzzle',
+		anchor: '16-plugins',
+		group: 'foundation',
+	},
 ]
 
 export const conceptBySlug = (slug: string) => CONCEPTS.find((c) => c.slug === slug)

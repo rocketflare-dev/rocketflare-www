@@ -56,27 +56,38 @@ export const DEMO = {
 export const LOGIN_URL = `${APP_URL}/login?as=${encodeURIComponent(DEMO.ownerEmail)}`
 
 export interface BootstrapStep {
-	/** The word the script prints after `n/9`. */
+	/** The word the script prints after `n/10`. */
 	name: string
 	/** The same step in plain words, for a checklist. */
 	plain: string
+	/** What the script prints after the name, where it is worth quoting. */
+	verify?: string
 }
 
-/** In order; the script prints `✔ 1/9 toolchain` … `✔ 9/9 run`. */
+/** In order; the script prints `✔ 1/10 toolchain` … `✔ 10/10 run`. */
 export const BOOTSTRAP_STEPS: BootstrapStep[] = [
 	{ name: 'toolchain', plain: 'Checked Node 24, pnpm and Docker, and installed what was missing' },
 	{ name: 'install', plain: 'Installed the dependencies' },
 	{ name: 'secrets', plain: 'Wrote the local secrets file with a fresh encryption key' },
 	{ name: 'database', plain: 'Started Postgres in Docker' },
 	{ name: 'migrate', plain: 'Created the database schema' },
+	{
+		name: 'plugins',
+		plain: 'Installed the default plugins — none, until you declare some',
+		verify: 'no defaultPlugins declared — nothing to install',
+	},
 	{ name: 'seed', plain: 'Seeded a demo organisation with people, documents and activity' },
 	{ name: 'cloudflare', plain: 'Checked the free Cloudflare login the built-in AI needs (or turned that off with --offline)' },
 	{ name: 'cli', plain: 'Signed the command-line tool in' },
 	{ name: 'run', plain: 'Started the app on :3000 and the API on :3001' },
 ]
 
-/** `1/9 toolchain` — what the script prints for step `i`, minus the ✔. */
-export const bootstrapLine = (i: number) => `${i + 1}/${BOOTSTRAP_STEPS.length} ${BOOTSTRAP_STEPS[i].name}`
+/** `1/10 toolchain` — what the script prints for step `i`, minus the ✔. */
+export const bootstrapLine = (i: number) => {
+	const step = BOOTSTRAP_STEPS[i]
+	const label = `${i + 1}/${BOOTSTRAP_STEPS.length} ${step.name.padEnd(10)}`
+	return (step.verify ? `${label} ${step.verify}` : label).trimEnd()
+}
 
 /** The last line the script prints before it opens the browser (minus the ✔). */
 export const BOOTSTRAP_READY_LINE = `ready  ${LOGIN_URL}`
@@ -93,6 +104,7 @@ export const BOOTSTRAP_FLAGS: Flag[] = [
 	{ flag: '--online', what: 'Keep (or restore) the Workers AI binding; fails if wrangler is not logged in.' },
 	{ flag: '--no-dev', what: 'Stop after step 7 and print the commands to run next.' },
 	{ flag: '--no-demo', what: 'Seed the organisation and accounts, but no demo data.' },
+	{ flag: '--no-plugins', what: "Skip the plugins step — do not install the default plugins listed in the copy's manifest." },
 	{ flag: '--share-db', what: 'Accept a Postgres container started from another checkout.' },
 	{ flag: '--no-open', what: 'Do not open the browser once the server answers.' },
 	{ flag: '--as <email>', what: 'The seeded account to sign in as (default owner@example.test).' },
@@ -132,6 +144,7 @@ export const SKILLS = {
 	adapt: '/rf-adapt <slug> "Your App"',
 	provision: '/rf-provision',
 	upgrade: '/rf-upgrade',
+	plugin: '/rf-plugin',
 } as const
 
 // ---- Staying current ------------------------------------------------------

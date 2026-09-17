@@ -67,6 +67,14 @@ interface Shot {
 interface Stop {
 	/** The anchor: the landing page and Get Started link to `/tour/#<id>`. */
 	id: string
+	/**
+	 * Which group it belongs to. `core` is in every copy of the kit; `plugin` is
+	 * something an app installs. Today nothing has been extracted, so every screen
+	 * stop is core and the plugins stop is the only `plugin` one.
+	 */
+	section: 'core' | 'plugin'
+	/** For a plugin stop: which plugin installs it. */
+	plugin?: string
 	/** The label in the index. */
 	label: string
 	title: string
@@ -85,6 +93,7 @@ const HOST = 'localhost:3000'
 const stops: Stop[] = [
 	{
 		id: 'sign-in',
+		section: 'core',
 		label: 'Sign in',
 		title: 'Sign in with a link printed in your terminal',
 		body: [
@@ -107,6 +116,7 @@ const stops: Stop[] = [
 	},
 	{
 		id: 'home',
+		section: 'core',
 		label: 'Home',
 		title: 'Your organisation, your role, what happened last',
 		body: [
@@ -124,6 +134,7 @@ const stops: Stop[] = [
 	},
 	{
 		id: 'people',
+		section: 'core',
 		label: 'People',
 		title: 'Invite someone, pick a role, change it later',
 		body: [
@@ -141,6 +152,7 @@ const stops: Stop[] = [
 	},
 	{
 		id: 'groups',
+		section: 'core',
 		label: 'Groups',
 		title: 'Departments, regions, clients — and what each can see',
 		body: [
@@ -163,6 +175,7 @@ const stops: Stop[] = [
 	},
 	{
 		id: 'ai-settings',
+		section: 'core',
 		label: 'AI settings',
 		title: 'AI works on day one, with no key',
 		body: [
@@ -185,6 +198,7 @@ const stops: Stop[] = [
 	},
 	{
 		id: 'chat',
+		section: 'core',
 		label: 'Chat',
 		title: 'Ask a question, watch the answer stream in',
 		body: [
@@ -202,6 +216,7 @@ const stops: Stop[] = [
 	},
 	{
 		id: 'agents',
+		section: 'core',
 		label: 'Agents',
 		title: 'An agent is a run you can watch',
 		body: [
@@ -219,6 +234,7 @@ const stops: Stop[] = [
 	},
 	{
 		id: 'approval',
+		section: 'core',
 		label: 'Approval',
 		title: 'An agent that stops and asks you first',
 		body: [
@@ -241,6 +257,7 @@ const stops: Stop[] = [
 	},
 	{
 		id: 'knowledge',
+		section: 'core',
 		label: 'Knowledge',
 		title: 'Drop in a PDF and watch it go Indexing → Indexed',
 		body: [
@@ -263,6 +280,7 @@ const stops: Stop[] = [
 	},
 	{
 		id: 'search',
+		section: 'core',
 		label: 'Search',
 		title: 'Search by meaning and by words, ranked',
 		body: [
@@ -280,6 +298,7 @@ const stops: Stop[] = [
 	},
 	{
 		id: 'research',
+		section: 'core',
 		label: 'Research',
 		title: 'An agent that reads your documents and cites them',
 		body: [
@@ -297,6 +316,7 @@ const stops: Stop[] = [
 	},
 	{
 		id: 'analytics',
+		section: 'core',
 		label: 'Analytics',
 		title: 'A dashboard every organisation gets on its first visit',
 		body: [
@@ -326,6 +346,7 @@ const stops: Stop[] = [
 	},
 	{
 		id: 'usage',
+		section: 'core',
 		label: 'Usage',
 		title: 'Every AI call, priced',
 		body: [
@@ -343,6 +364,7 @@ const stops: Stop[] = [
 	},
 	{
 		id: 'admin',
+		section: 'core',
 		label: 'Admin',
 		title: 'Every organisation from one place',
 		body: [
@@ -365,6 +387,7 @@ const stops: Stop[] = [
 	},
 	{
 		id: 'feature-flags',
+		section: 'core',
 		label: 'Feature flags',
 		title: 'Ship it dark, then turn it on one customer at a time',
 		body: [
@@ -387,6 +410,7 @@ const stops: Stop[] = [
 	},
 	{
 		id: 'cli',
+		section: 'core',
 		label: 'CLI',
 		title: 'The same app from a terminal',
 		body: [
@@ -395,9 +419,52 @@ const stops: Stop[] = [
 		],
 		concepts: ['cli'],
 	},
+	{
+		id: 'plugins',
+		section: 'plugin',
+		plugin: 'example-feature',
+		label: 'Plugins',
+		title: 'Add a capability by copying a repository in',
+		body: [
+			'Everything above ships in every copy. A plugin is the other way to get a capability: a git repository copied into your app — never an npm package — that lands as ordinary source, renamed into your own vocabulary on the way in.',
+			'It reaches the app through five lines and nothing else, so installing one writes them and deleting the folder removes it. The command prints the plan and stops; nothing is written until you have read it and re-run with <code>--apply</code>.',
+		],
+		concepts: ['plugins'],
+		callout: {
+			tone: 'yellow',
+			title: 'One plugin ships today, and it exists to be deleted',
+			body: 'The kit ships <code>example-feature</code> — a table, a gated route, a job, an agent tool, a page and a command — so schema and tenant isolation are proved on something removable. Chat, agents, knowledge and analytics are the next candidates to move out, and analytics goes first.',
+		},
+	},
 ]
 
 const total = stops.length
+
+/**
+ * The tour is presented in two groups. Core is what every copy of the kit has;
+ * Plugins is what an app installs on top. The array order already puts the
+ * plugin stops last, so the `/tour/#<id>` anchors and the stop numbers are
+ * unchanged by the split — the headings are the only new thing.
+ */
+const SECTIONS = [
+	{
+		key: 'core' as const,
+		title: 'Core: what every copy has',
+		lede: 'Nothing on this list is optional or installed — it is in the repository the moment you clone it.',
+	},
+	{
+		key: 'plugin' as const,
+		title: 'Plugins: what the default set installs',
+		lede: 'A capability copied in from its own repository. Today one plugin ships; the rest of the tour is still core.',
+	},
+]
+
+/** Each group with its stops, keeping every stop's position in the whole tour. */
+const groups = SECTIONS.map((g) => ({
+	...g,
+	stops: stops.map((s, i) => ({ s, i })).filter(({ s }) => s.section === g.key),
+})).filter((g) => g.stops.length > 0)
+
 const conceptLinks = (slugs: string[]) =>
 	slugs.map((slug) => {
 		const c = conceptBySlug(slug)
@@ -425,19 +492,31 @@ const pad = (n: number) => String(n).padStart(2, '0')
 		<aside class="side">
 			<p class="side-head">{total} stops</p>
 			<nav aria-label="Tour stops">
-				{stops.map((s, i) => (
-					<a href={`#${s.id}`} class="side-link" data-stop={s.id}>
-						<span class="side-num">{pad(i + 1)}</span> {s.label}
-					</a>
+				{groups.map((g) => (
+					<Fragment>
+						<p class="side-group">{g.key === 'core' ? 'Core' : 'Plugins'}</p>
+						{g.stops.map(({ s, i }) => (
+							<a href={`#${s.id}`} class="side-link" data-stop={s.id}>
+								<span class="side-num">{pad(i + 1)}</span> {s.label}
+							</a>
+						))}
+					</Fragment>
 				))}
 			</nav>
 		</aside>
 
 		<article class="stops">
-			{stops.map((s, i) => {
+			{groups.map((g) => (
+			<Fragment>
+			<section class="group-head reveal" aria-labelledby={`group-${g.key}-title`}>
+				<span class="eyebrow">{g.key === 'core' ? 'In every copy' : 'Installed'}</span>
+				<h2 id={`group-${g.key}-title`}>{g.title}</h2>
+				<p>{g.lede}</p>
+			</section>
+			{g.stops.map(({ s, i }) => {
 				const links = conceptLinks(s.concepts)
 				return (
-					<section id={s.id} class:list={['stop', 'reveal', !s.shot && 'no-media']} aria-labelledby={`${s.id}-title`}>
+					<section id={s.id} class:list={['stop', 'reveal', !s.shot && 'no-media', i === 0 && 'first', i % 2 === 1 && 'alt']} aria-labelledby={`${s.id}-title`}>
 						{s.shot && (
 							<div class="media">
 								<Screenshot light={s.shot.light} dark={s.shot.dark} alt={s.shot.alt} url={s.shot.url} caption={s.shot.caption} priority={i === 0} />
@@ -452,6 +531,41 @@ const pad = (n: number) => String(n).padStart(2, '0')
 							<span class="eyebrow">Stop {i + 1} of {total}</span>
 							<h2 id={`${s.id}-title`}>{s.title}</h2>
 							{s.body.map((p) => <p set:html={p} />)}
+							{s.id === 'plugins' && (
+								<Terminal
+									title="zsh — myapp"
+									lines={[
+										{ cmd: 'pnpm plugin add ../rocketflare-plugin-example-feature' },
+										{ out: 'Plugin      example-feature@0.1.0 — Example feature' },
+										{ out: 'Source      https://github.com/rocketflare-dev/rocketflare.git' },
+										{ out: 'Host        myapp at kit 0.5.0 — records into .rocketflare.json' },
+										{ out: "Names       translated into myapp's vocabulary on the way in" },
+										{ out: ' ' },
+										{ out: 'Requirements' },
+										{ out: '  \u2714 kit 0.5.0 satisfies >=0.5.0 <1.0.0', muted: true },
+										{ out: '  \u2714 surfaces: none required', muted: true },
+										{ out: '  \u2714 plugins:  none required', muted: true },
+										{ out: ' ' },
+										{ out: 'Files (20)' },
+										{ out: '  apps/web/src/plugins/example-feature/       18', muted: true },
+										{ out: '  packages/shared/src/plugins/example-feature/1', muted: true },
+										{ out: '  apps/cli/src/plugins/example-feature/       1', muted: true },
+										{ out: ' ' },
+										{ out: 'Barrel lines' },
+										{ out: "  packages/shared/src/plugins/index.ts        import { exampleFeatureShared } from './example-feature/index'  +  SHARED_PLUGINS entry: exampleFeatureShared", muted: true },
+										{ out: "  apps/web/src/plugins/server.ts              import { exampleFeatureServer } from './example-feature'  +  SERVER_PLUGINS entry: exampleFeatureServer", muted: true },
+										{ out: "  apps/web/src/plugins/ui.ts                  import { exampleFeatureUi } from './example-feature/ui'  +  UI_PLUGINS entry: exampleFeatureUi", muted: true },
+										{ out: "  apps/web/src/plugins/schema.ts              export * from './example-feature/db/schema'", muted: true },
+										{ out: "  apps/cli/src/plugins/index.ts               import { exampleFeatureCli } from './example-feature'  +  CLI_PLUGINS entry: exampleFeatureCli", muted: true },
+										{ out: ' ' },
+										{ out: 'Then, by hand — nothing below is done for you' },
+										{ out: '  1. pnpm db:generate --name plugin-example-feature-0.1.0   \u2192 CREATE TABLE example_notes', muted: true },
+										{ out: '  2. pnpm lint && pnpm typecheck && pnpm test && pnpm build', muted: true },
+										{ out: ' ' },
+										{ out: 'Nothing written. Read the plan, then re-run with --apply to install.' },
+									]}
+								/>
+							)}
 							{s.id === 'cli' && (
 								<Terminal
 									title="zsh — myapp"
@@ -487,6 +601,8 @@ const pad = (n: number) => String(n).padStart(2, '0')
 					</section>
 				)
 			})}
+			</Fragment>
+			))}
 
 			<section class="phones reveal" aria-labelledby="phones-title">
 				<div class="phones-text">
@@ -564,8 +680,26 @@ const pad = (n: number) => String(n).padStart(2, '0')
 	.side-num { flex: none; font-family: var(--mono); font-size: 0.76rem; padding-top: 0.15em; }
 	.side-link.current { color: var(--orange-ink); font-weight: 600; border-left-color: var(--orange); }
 
+	.side-group {
+		margin: 1.1rem 0 0.35rem;
+		padding: 0 0.9rem;
+		font-size: 0.72rem;
+		font-weight: 700;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--text-muted);
+	}
+	.side-group:first-child { margin-top: 0; }
+
 	/* ------------------------------------------------------------ stops -- */
 	.stops { min-width: 0; }
+	.group-head {
+		padding: 3rem 0 0.5rem;
+		scroll-margin-top: 5rem;
+	}
+	.group-head:first-of-type { padding-top: 0; }
+	.group-head h2 { margin: 0.35rem 0 0.5rem; font-size: var(--step-3); }
+	.group-head p { margin: 0; max-width: 62ch; color: var(--text-muted); }
 	.stop {
 		display: grid;
 		grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
@@ -575,11 +709,14 @@ const pad = (n: number) => String(n).padStart(2, '0')
 		border-top: 1px solid var(--border);
 		scroll-margin-top: 5rem;
 	}
-	.stop:first-of-type { border-top: 0; padding-top: 0; }
+	/* `first` and `alt` are set from the stop's index in the whole tour rather
+	   than :nth-of-type, because the group headings are sections too and would
+	   otherwise flip the alternation. */
+	.stop.first { border-top: 0; }
 	/* Alternate: the image walks from the left column to the right one, and
 	   the wider column follows it. */
-	.stop:nth-of-type(even) { grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); }
-	.stop:nth-of-type(even) .media { order: 2; }
+	.stop.alt { grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); }
+	.stop.alt .media { order: 2; }
 	.stop.no-media { grid-template-columns: minmax(0, 1fr); }
 	.media { min-width: 0; }
 	.media :global(.shot) { margin: 0; }
@@ -670,9 +807,12 @@ const pad = (n: number) => String(n).padStart(2, '0')
 		.side-link { border-left: 0; margin-left: 0; padding: 0.3rem 0.6rem; border-radius: 999px; }
 		.side-link.current { border-left: 0; background: var(--tint-orange); }
 		.stop,
-		.stop:nth-of-type(even),
+		.stop.alt,
 		.phones { grid-template-columns: minmax(0, 1fr); gap: 1.4rem; padding: 2.2rem 0; }
-		.stop:nth-of-type(even) .media { order: 0; }
+		.stop.alt .media { order: 0; }
+		.group-head { padding: 2.2rem 0 0.25rem; }
+		/* In the scrolling strip the group label becomes a chip in the row. */
+		.side-group { margin: 0; padding: 0.3rem 0.2rem 0.3rem 0; align-self: center; white-space: nowrap; }
 		.phones-grid { gap: 1rem; }
 	}
 </style>

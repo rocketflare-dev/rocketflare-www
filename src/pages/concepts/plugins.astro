@@ -1,0 +1,228 @@
+---
+import ConceptLayout from '../../layouts/ConceptLayout.astro'
+import DiagramSequence from '../../components/DiagramSequence.astro'
+
+/** How a capability travels from its own repository into one app (scripts/plugin.mjs). */
+const installMessages = [
+	{ from: 0, to: 1, label: 'contracts to build on' },
+	{ from: 2, to: 1, label: 'plugin add <repo>' },
+	{ from: 1, to: 2, label: 'manifest, then a plan' },
+	{ from: 2, to: 2, label: 'read it, then --apply' },
+	{ from: 1, to: 2, label: 'source, renamed on the way in' },
+	{ from: 2, to: 2, label: 'generate the migration' },
+	{ from: 0, to: 2, label: 'later kit releases skip it' },
+]
+---
+<ConceptLayout
+	slug="plugins"
+	source={[
+		'apps/web/src/plugins/CLAUDE.md',
+		'apps/web/src/plugins/types.ts',
+		'apps/web/src/plugins/example-feature/',
+		'packages/shared/src/plugins/index.ts',
+		'scripts/plugin.mjs',
+	]}
+>
+	<h2>A repository copied in, never a package installed</h2>
+	<p>
+		A plugin here is a git repository whose files are <em>copied into your application</em> —
+		exactly the way you got the kit itself. It is not an npm dependency, and that is the whole
+		premise rather than an implementation detail.
+	</p>
+	<p>
+		A published package would mean a compiled surface, somebody else's build, and a version of this
+		kit's internals frozen inside it. Copying means the plugin's code arrives as ordinary source in
+		your repository: readable, debuggable, editable, and translated into <em>your</em> vocabulary on
+		the way in — if you renamed the kit to your own name, the plugin arrives already wearing it. The
+		price is that pulling in a later version is a patch rather than a version bump, and the kit
+		already owns that machine: it is the same one that ports later releases of the kit into a copy.
+	</p>
+	<figure class="figure">
+		<DiagramSequence
+			actors={['The kit', 'Plugin repo', 'Your app']}
+			messages={installMessages}
+			describedBy="plugin-install-steps"
+			title="Installing a plugin: the tool reads the plugin's repository, prints a plan, and only copies files into your app once you agree"
+		/>
+		<figcaption>
+			Nothing is written until you have read the plan and re-run the command with
+			<code>--apply</code>. The migration is generated afterwards, by your app, from your schema.
+		</figcaption>
+	</figure>
+	<ol id="plugin-install-steps">
+		<li>The plugin is written against the kit's own contracts, in the kit's vocabulary, in its own repository.</li>
+		<li>In your app you run <code>pnpm plugin add &lt;repo&gt;</code> — or a local path, which is how you author one.</li>
+		<li>The tool reads that repository's manifest and prints a plan: what it is, the requirements it checks, the files, the five lines each barrel gains, the dependencies, and the steps left to you. Then it stops.</li>
+		<li>You read it. Installing a plugin gives it full access to your Worker and your database, so this is a decision, not a download. On <code>--apply</code> it proceeds.</li>
+		<li>The source is copied in, renamed into your app's vocabulary, and recorded.</li>
+		<li>You generate the migration for its tables yourself, read the SQL, and run it.</li>
+		<li>From then on a later kit release never touches a file the plugin owns — it has its own repository and its own release chain.</li>
+	</ol>
+	<div class="why">
+		<p>
+			<strong>Why first-party only, for now.</strong> A plugin runs inside your Worker with your
+			database connection. There is no sandbox that would make that otherwise, so installing one is
+			as trusting as merging a pull request — and the honest answer is to say so, print the plan
+			every time, and keep the set to code the kit's own authors wrote, rather than to pretend a
+			review process exists.
+		</p>
+	</div>
+
+	<h2>Five lines are the whole seam</h2>
+	<p>
+		A plugin reaches the application through five barrel files and nothing else. Installing one
+		writes those lines; removing one deletes them. Nothing else in the kit ever names a plugin,
+		which is exactly what makes both directions reversible and reviewable.
+	</p>
+	<table>
+		<thead><tr><th>The barrel</th><th>What it carries</th></tr></thead>
+		<tbody>
+			<tr><td>Shared contracts</td><td>the plugin's schemas, job types, agent and prompt keys, permission subjects and feature flags — read by the composers that build each of those registries</td></tr>
+			<tr><td>Server</td><td>its routes, job handlers, agents, agent tools, scheduled tasks, permission grants and post-sign-up hooks</td></tr>
+			<tr><td>Database schema</td><td>one line re-exporting its tables, so the migration tool and the isolation tests see them exactly as they see the kit's own</td></tr>
+			<tr><td>UI</td><td>its pages, navigation entries, settings tabs and query keys</td></tr>
+			<tr><td>CLI</td><td>its commands, added after the kit's own</td></tr>
+		</tbody>
+	</table>
+	<p>
+		Every closed list in the kit opens the same way: what was a literal becomes the core list, and
+		the public name becomes the core list plus whatever the plugins contribute. Nothing that
+		<em>reads</em> a registry moves — what moves is where you add to it.
+	</p>
+	<div class="note">
+		<p>
+			The types do more than describe the shape. A plugin that declares three job types and writes
+			two handlers does not compile — the handler table is checked for completeness against the
+			keys that same plugin declared. A missing handler is an error in the plugin rather than a
+			dispatch failure in the application that installed it.
+		</p>
+	</div>
+
+	<h2>Four published entries, and an id that is a namespace</h2>
+	<p>
+		A plugin has exactly four entry files — one for the server half, one for the browser half, one
+		for the shared contracts and one for the command line. Everything else inside it is private.
+		That is what lets its version number promise something: if the kit could reach into a plugin's
+		internals, or one plugin into another's, the number would cover a surface nobody could
+		enumerate. A deep import across that boundary is a failing test, not a code-review preference.
+	</p>
+	<p>
+		The other half of living together is namespacing, and the plugin's id does all of it: its
+		tables, its job types, its API prefix, its command, its feature and prompt and agent keys, its
+		query keys and its own streaming events all carry the id. Two plugins in one application
+		therefore cannot collide by construction rather than by luck.
+	</p>
+
+	<h2>What the tool will not do for you</h2>
+	<p>
+		Three refusals, and each of them is a bug it is declining to cause:
+	</p>
+	<ul>
+		<li>
+			<strong>It never ships a migration.</strong> Your application generates it, once the schema
+			line exists, and you read the SQL before it runs. A migration snapshot describes a whole
+			cumulative schema, so importing a foreign one would teach the migration tool a current state
+			that has never heard of your own tables — and its next suggestion would be to drop them.
+		</li>
+		<li>
+			<strong>It never edits your deployment files or writes a resource id.</strong> A storage
+			bucket, a queue or a scheduled task the plugin declares becomes a numbered step in the plan:
+			one provisioning command per environment, which creates the resource and writes the block
+			into both files. A binding of a kind the kit cannot provision is refused at install time,
+			naming it — rather than surfacing as an error after a deploy that quietly skipped it.
+		</li>
+		<li>
+			<strong>It never renames anything across releases.</strong> Add a column, migrate, drop the
+			old one — because the migration tool's rename prompt has no non-interactive answer, and an
+			unattended install would stop dead on it.
+		</li>
+	</ul>
+	<p>
+		Uninstalling is the mirror image: the directories go, the five lines go, and generating the next
+		migration emits the <code>DROP TABLE</code>s. Tables left behind by a plugin that is no longer
+		there are not a stable state, so dropping is the default and archiving them into a separate
+		schema is the flag you ask for.
+	</p>
+
+	<h2>A plugin tests its behaviour; the app tests that it is a well-formed plugin</h2>
+	<p>
+		A plugin's own tests live inside it and run in your test suite. What the application adds is the
+		set of checks no plugin author could make for themselves, because they are about the
+		<em>combination</em> that one application happens to have installed: that every id really is a
+		namespace, that nothing reaches past the four published entries, that a plugin's tables carry
+		the same tenant isolation policy the kit's own tables do, and that the file loaded for every
+		reader — including the ones who never open the plugin — imports nothing heavy and reaches every
+		page lazily.
+	</p>
+	<p>
+		Compatibility is proved from both ends. A plugin declares the range of kit versions it supports;
+		the kit's own pipeline runs its whole test gate a second time with the default plugins installed,
+		and a plugin repository can call a workflow the kit ships to run itself against the oldest and
+		the newest kit in its declared range — both ends rather than a midpoint, because those are the two
+		that matter: the floor somebody is still on, and the ceiling the kit has just reached.
+	</p>
+
+	<h2>Two constraints that were measured, not assumed</h2>
+	<div class="note">
+		<p>
+			<strong>A plugin's shared contracts must not import the registries that read them.</strong>
+			Those registries read the plugin barrel, so importing one back closes a cycle — and two
+			schema modules in a cycle do not fail to compile. They crash when the module is evaluated,
+			with one side holding nothing. A type-only import is fine, because it is erased; a value
+			import is not, and a test checks all three ways of spelling it.
+		</p>
+	</div>
+	<div class="note">
+		<p>
+			<strong>A plugin declares database relations for its own tables only.</strong> Adding a
+			second set of relations for one of the kit's tables merges at runtime but not in the type
+			system: the two are intersected, and the result is that the table quietly loses the ability
+			to load its related rows, everywhere in the application. The plugin's own side of the foreign
+			key expresses the relationship completely; only the reverse direction is unavailable.
+		</p>
+	</div>
+
+	<h2>The commands</h2>
+	<table>
+		<thead><tr><th>Command</th><th>What it does</th></tr></thead>
+		<tbody>
+			<tr><td><code>pnpm plugin add</code></td><td>Install one, from a repository or a local path. Prints the plan and stops until <code>--apply</code></td></tr>
+			<tr><td><code>pnpm plugin upgrade</code></td><td>Port the plugin's own later releases in, reading its release notes, exactly as a kit upgrade does</td></tr>
+			<tr><td><code>pnpm plugin remove</code></td><td>Delete its directories, its five lines and its record; <code>--archive</code> keeps its data first</td></tr>
+			<tr><td><code>pnpm plugin list</code></td><td>What is installed: id, version, where it came from, when</td></tr>
+			<tr><td><code>pnpm plugin check</code></td><td>Audit the installed set — one line per problem, and a non-zero exit if there is one</td></tr>
+			<tr><td><code>pnpm plugin export</code></td><td>Write a plugin back out as a repository, which is how you start authoring one</td></tr>
+		</tbody>
+	</table>
+	<p>
+		What is installed is recorded in the same file that records where your copy of the kit came
+		from, as one more replaceable surface — so an upgrade of the kit already knows never to touch a
+		file a plugin owns, and an upgrade that would leave a plugin outside its supported range stops
+		and says which one. A plugin installed into the kit itself, or with <code>--local</code>, is
+		recorded in a git-ignored file instead: that is an authoring convenience, and committing it
+		would push wiring for files a copy does not have into every copy made afterwards.
+	</p>
+
+	<h2>What exists today, and what moves next</h2>
+	<p>
+		The seam and the tooling land in the kit's 0.5.0 release, together with one plugin:
+		<code>example-feature</code>, which exists to be deleted. It was the kit's demonstration feature
+		flag and is now a plugin, grown until it exercises every slot — a tenant-scoped table, a
+		gated set of routes, a background job, a permission subject, an agent tool, both post-sign-up
+		hooks, a page with a navigation entry, and a command-line command — with its own tests pinning
+		that one organisation cannot see another's rows in it. Proving schema and isolation on something
+		removable comes before moving anything bigger.
+	</p>
+	<p>
+		Nothing else has moved out yet. Chat, agents, knowledge and analytics are the candidates, and
+		analytics goes first: it is the most self-contained, it brings the largest dependency in the
+		whole application with it, and plenty of apps built on this kit will never want it. Until then
+		they are all core, and every copy has them.
+	</p>
+	<div class="note">
+		<p>
+			There is no third-party trust model — no sandbox, no review, no signature. "First-party only"
+			is the whole of it, and it is the honest description of what a plugin can do once installed.
+		</p>
+	</div>
+</ConceptLayout>
