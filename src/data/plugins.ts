@@ -57,7 +57,7 @@ export const PLUGINS: Plugin[] = [
 		repoLabel: 'rocketflare-dev/rocketflare-plugins',
 		subdir: 'plugins/analytics',
 		requiresKit: '>=0.7.0 <1.0.0',
-		version: '2.0.0',
+		version: '2.0.1',
 		shipsAs: 'installed',
 		summary:
 			'Dashboards, cubes, fact tables and the drizzle-cube query API — everything that used to be part of the kit, now a repository of its own.',
