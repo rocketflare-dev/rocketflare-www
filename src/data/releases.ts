@@ -87,6 +87,15 @@ export const RELEASES: Release[] = [
 		migrations: false,
 		areas: ['config', 'scripts', 'ci'],
 	},
+	{
+		version: '0.7.0',
+		date: '2026-09-18',
+		summary:
+			'Writing a plugin is now writing against a contract rather than against the kit: it receives the database, the organisation, permissions and the rest as injected context, imports only from a handful of declared entries, and that surface has a version number and a generated reference of its own. Deleting an organisation now also removes what lives outside the database, which the cascade could never reach.',
+		breaking: true,
+		migrations: false,
+		areas: ['api', 'ui', 'shared', 'db', 'cli', 'config'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
