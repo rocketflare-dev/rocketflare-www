@@ -105,6 +105,15 @@ export const RELEASES: Release[] = [
 		migrations: false,
 		areas: ['config', 'docs', 'shared'],
 	},
+	{
+		version: '0.8.1',
+		date: '2026-09-18',
+		summary:
+			'A coding agent working in a copy of the kit now starts lighter. The layer rules load only when it touches that layer, and the reference docs are named rather than pulled in whole, which leaves roughly 100k more tokens of context for your own work in every session.',
+		breaking: false,
+		migrations: false,
+		areas: [],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
