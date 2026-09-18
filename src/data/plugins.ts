@@ -20,6 +20,12 @@ export interface Plugin {
 	repo: string
 	/** Human form of the repo, for a link's text. */
 	repoLabel: string
+	/**
+	 * Where the plugin sits inside its repository, when it is not the root of one. A repository may
+	 * hold several plugins released in lockstep, so the install command needs the directory as well
+	 * as the tag.
+	 */
+	subdir?: string
 	/** The manifest's `requires.kit` range, verbatim. */
 	requiresKit: string
 	/** The plugin's own latest release. */
@@ -40,7 +46,7 @@ export interface Plugin {
 	docsUrl?: string
 }
 
-const ANALYTICS_REPO = 'https://github.com/rocketflare-dev/rocketflare-plugin-analytics'
+const ANALYTICS_REPO = 'https://github.com/rocketflare-dev/rocketflare-plugins'
 const KIT_REPO = 'https://github.com/rocketflare-dev/rocketflare'
 
 export const PLUGINS: Plugin[] = [
@@ -48,9 +54,10 @@ export const PLUGINS: Plugin[] = [
 		id: 'analytics',
 		label: 'Analytics',
 		repo: ANALYTICS_REPO,
-		repoLabel: 'rocketflare-dev/rocketflare-plugin-analytics',
-		requiresKit: '>=0.6.1 <1.0.0',
-		version: '1.0.2',
+		repoLabel: 'rocketflare-dev/rocketflare-plugins',
+		subdir: 'plugins/analytics',
+		requiresKit: '>=0.7.0 <1.0.0',
+		version: '2.0.0',
 		shipsAs: 'installed',
 		summary:
 			'Dashboards, cubes, fact tables and the drizzle-cube query API — everything that used to be part of the kit, now a repository of its own.',
@@ -63,7 +70,7 @@ export const PLUGINS: Plugin[] = [
 			'<strong>Commands</strong> — <code>rocketflare analytics pages list</code>, <code>check-facts</code> (exit 1 when a table is stale) and <code>refresh-facts</code>.',
 		],
 		changelogUrl: `${ANALYTICS_REPO}/blob/main/CHANGELOG.md`,
-		docsUrl: `${ANALYTICS_REPO}#what-it-adds`,
+		docsUrl: `${ANALYTICS_REPO}/tree/main/plugins/analytics`,
 	},
 	{
 		id: 'example-feature',
@@ -98,7 +105,9 @@ export const pluginById = (id: string) => {
  * plugin has none: it is already in the tree.
  */
 export const installCommand = (p: Plugin) =>
-	p.shipsAs === 'vendored' ? null : `pnpm plugin add ${p.repo}.git@${p.version}`
+	p.shipsAs === 'vendored'
+		? null
+		: `pnpm plugin add ${p.repo}.git@${p.version}${p.subdir ? ` --subdir ${p.subdir}` : ''}`
 
 /** How many first-party plugins there are — use this, never a literal, in copy. */
 export const PLUGIN_COUNT = PLUGINS.length
