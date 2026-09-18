@@ -114,6 +114,15 @@ export const RELEASES: Release[] = [
 		migrations: false,
 		areas: [],
 	},
+	{
+		version: '0.9.0',
+		date: '2026-09-18',
+		summary:
+			'A plugin can now offer a tool only to the organisations that turned it on, and keep each organisation’s own API key encrypted with the kit’s encryption rather than its own — the two things the new web-knowledge plugin needed to give agents web search.',
+		breaking: false,
+		migrations: false,
+		areas: [],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
