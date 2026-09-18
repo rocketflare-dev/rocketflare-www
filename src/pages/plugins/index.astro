@@ -46,7 +46,11 @@ const cards = PLUGINS.map((p) => ({ p, install: installCommand(p) }))
 					<div class="pcard-head">
 						<div>
 							<span class="eyebrow">
-								{p.shipsAs === 'installed' ? 'Installed by default' : 'Ships in the kit'}
+								{p.shipsAs === 'installed'
+									? 'Installed by default'
+									: p.shipsAs === 'vendored'
+										? 'Ships in the kit'
+										: 'Add it when you need it'}
 							</span>
 							<h2 id={`${p.id}-title`}>{p.label}</h2>
 							<p class="summary">{p.summary}</p>
@@ -54,7 +58,7 @@ const cards = PLUGINS.map((p) => ({ p, install: installCommand(p) }))
 						<dl class="facts">
 							<div><dt>Plugin id</dt><dd><code>{p.id}</code></dd></div>
 							<div><dt>Version</dt><dd><code>{p.version}</code></dd></div>
-							<div><dt>Needs kit</dt><dd><code>{p.requiresKit}</code></dd></div>
+							<div><dt>Needs kit</dt><dd><code>{p.minKit}</code> or later</dd></div>
 						</dl>
 					</div>
 

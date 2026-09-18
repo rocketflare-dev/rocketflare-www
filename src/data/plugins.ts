@@ -5,7 +5,7 @@
  *
  * A Rocketflare plugin is a git repository *copied into* an app, never an npm
  * package (see /concepts/plugins/). So the version here is the plugin's own
- * release, `requiresKit` is the kit range its manifest declares, and the
+ * release, `minKit` is the oldest kit release its manifest accepts, and the
  * install command is the repository URL at a tag.
  *
  * Every field is transcribed from the plugin's own `rocketflare-plugin.json`
@@ -26,16 +26,17 @@ export interface Plugin {
 	 * as the tag.
 	 */
 	subdir?: string
-	/** The manifest's `requires.kit` range, verbatim. */
-	requiresKit: string
+	/** The manifest's `minKit`: the oldest kit release it installs into. */
+	minKit: string
 	/** The plugin's own latest release. */
 	version: string
 	/**
-	 * Whether a fresh clone already has it. Two ways that can be true: it is in
-	 * the kit's `.rocketflare.json` `defaultPlugins` and the bootstrap installs
-	 * it (`installed`), or it is vendored in the kit's own tree (`vendored`).
+	 * Whether a fresh clone already has it: in the kit's `.rocketflare.json`
+	 * `defaultPlugins`, so the bootstrap installs it (`installed`); vendored in
+	 * the kit's own tree (`vendored`); or not at all — you add it when you want
+	 * it (`optional`).
 	 */
-	shipsAs: 'installed' | 'vendored'
+	shipsAs: 'installed' | 'vendored' | 'optional'
 	/** One sentence: what it is for. */
 	summary: string
 	/** What installing it adds, each `<strong>Label</strong> — one sentence`. */
@@ -46,18 +47,18 @@ export interface Plugin {
 	docsUrl?: string
 }
 
-const ANALYTICS_REPO = 'https://github.com/rocketflare-dev/rocketflare-plugins'
+const PLUGINS_REPO = 'https://github.com/rocketflare-dev/rocketflare-plugins'
 const KIT_REPO = 'https://github.com/rocketflare-dev/rocketflare'
 
 export const PLUGINS: Plugin[] = [
 	{
 		id: 'analytics',
 		label: 'Analytics',
-		repo: ANALYTICS_REPO,
+		repo: PLUGINS_REPO,
 		repoLabel: 'rocketflare-dev/rocketflare-plugins',
 		subdir: 'plugins/analytics',
-		requiresKit: '>=0.7.0 <1.0.0',
-		version: '2.0.1',
+		minKit: '0.8.0',
+		version: '3.1.0',
 		shipsAs: 'installed',
 		summary:
 			'Dashboards, cubes, fact tables and the drizzle-cube query API — everything that used to be part of the kit, now a repository of its own.',
@@ -69,15 +70,37 @@ export const PLUGINS: Plugin[] = [
 			'<strong>Permissions</strong> — a dashboard subject (admin and above manage, members read) and an analytics subject (every role reads; the query API is read-only by nature).',
 			'<strong>Commands</strong> — <code>rocketflare analytics pages list</code>, <code>check-facts</code> (exit 1 when a table is stale) and <code>refresh-facts</code>.',
 		],
-		changelogUrl: `${ANALYTICS_REPO}/blob/main/CHANGELOG.md`,
-		docsUrl: `${ANALYTICS_REPO}/tree/main/plugins/analytics`,
+		changelogUrl: `${PLUGINS_REPO}/blob/main/CHANGELOG.md`,
+		docsUrl: `${PLUGINS_REPO}/tree/main/plugins/analytics`,
+	},
+	{
+		id: 'web-knowledge',
+		label: 'Web knowledge',
+		repo: PLUGINS_REPO,
+		repoLabel: 'rocketflare-dev/rocketflare-plugins',
+		subdir: 'plugins/web-knowledge',
+		minKit: '0.9.0',
+		version: '3.1.0',
+		shipsAs: 'optional',
+		summary:
+			'Lets agents and chat search the public web and read pages, on each organisation’s own search key — and only for the organisations that turn it on.',
+		adds: [
+			'<strong>Five providers</strong> — Tavily, Brave Search, Exa, Serper and Firecrawl. Each organisation picks one and brings its own key, so the provider bills the customer rather than you.',
+			'<strong>Two agent tools</strong> — <code>web_search</code> for ranked results with URLs, and <code>fetch_page</code> to read one page as text, a window at a time. An organisation without search turned on is never offered either, so a model is never shown a tool that could only fail.',
+			'<strong>A settings tab</strong> — Settings → Web search: choose the provider, paste the key, test it live, and the first key turns search on. Members see it read-only.',
+			'<strong>A sealed key</strong> — <code>web_search_settings</code>, one row per organisation with the same row-level-security policy as everything else. The key is encrypted at rest and never sent back to the browser.',
+			'<strong>Guard rails</strong> — <code>fetch_page</code> refuses localhost, IP addresses and private hostnames and checks every redirect again, and page text reaches the model marked as untrusted.',
+			'<strong>A command</strong> — <code>rocketflare web-knowledge status</code>, read-only, because a key does not belong in shell history.',
+		],
+		changelogUrl: `${PLUGINS_REPO}/blob/main/CHANGELOG.md`,
+		docsUrl: `${PLUGINS_REPO}/tree/main/plugins/web-knowledge`,
 	},
 	{
 		id: 'example-feature',
 		label: 'Example feature',
 		repo: KIT_REPO,
 		repoLabel: 'rocketflare-dev/rocketflare',
-		requiresKit: '>=0.5.0 <1.0.0',
+		minKit: '0.8.0',
 		version: '0.1.0',
 		shipsAs: 'vendored',
 		summary:
