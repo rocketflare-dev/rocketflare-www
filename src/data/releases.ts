@@ -96,6 +96,15 @@ export const RELEASES: Release[] = [
 		migrations: false,
 		areas: ['api', 'ui', 'shared', 'db', 'cli', 'config'],
 	},
+	{
+		version: '0.8.0',
+		date: '2026-09-18',
+		summary:
+			'Writing a plugin no longer means guessing which kit releases it will work with. The kit publishes the surface it provides, a plugin records what it actually uses, and installing one compares the two — so an incompatibility is a named missing symbol with its replacement, found before a single file is copied, instead of a version range somebody has to keep true by hand.',
+		breaking: true,
+		migrations: false,
+		areas: ['config', 'docs', 'shared'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
