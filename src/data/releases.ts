@@ -123,6 +123,15 @@ export const RELEASES: Release[] = [
 		migrations: false,
 		areas: [],
 	},
+	{
+		version: '0.10.0',
+		date: '2026-09-25',
+		summary:
+			'See why a run went wrong: every chat turn, agent run and AI job is now a span tree you can read from the terminal with one CLI command, and export as OpenTelemetry to Langfuse, Phoenix or any backend — your existing Langfuse keys keep working.',
+		breaking: false,
+		migrations: true,
+		areas: ['api', 'shared', 'db', 'cli', 'config', 'docs'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
