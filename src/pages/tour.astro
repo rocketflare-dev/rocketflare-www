@@ -334,6 +334,22 @@ const stops: Stop[] = [
 		},
 	},
 	{
+		id: 'traces',
+		section: 'core',
+		label: 'Traces',
+		title: 'Every run, traced — and readable from a terminal',
+		body: [
+			'Every chat turn, agent run and AI job is recorded as a tree of spans: each model call with its tokens and latency, each tool call with its arguments and result, each retrieval and embedding beneath the tool that asked for it. It lands in Postgres with zero configuration, so <code>rocketflare traces show &lt;run id&gt;</code> works on a laptop with no account anywhere.',
+			'The same spans are exported as vendor-neutral OpenTelemetry, using the GenAI conventions, to Langfuse, Arize Phoenix or any OTLP backend. Existing Langfuse keys keep working with no new secret. A single switch strips prompts and completions from both the export and the local store.',
+		],
+		concepts: ['ai'],
+		callout: {
+			tone: 'blue',
+			title: 'Written for the agent debugging it',
+			body: 'The trace store exists so Claude Code can read a failed run the way you would: find the red span, read what the tool was asked and what it answered, spot the turn that burned the tokens. The kit ships an <code>/rf-traces</code> skill that does exactly that, and walks you through picking a backend.',
+		},
+	},
+	{
 		id: 'admin',
 		section: 'core',
 		label: 'Admin',
@@ -570,6 +586,25 @@ const pad = (n: number) => String(n).padStart(2, '0')
 										{ out: '  2. pnpm lint && pnpm typecheck && pnpm test && pnpm build', muted: true },
 										{ out: ' ' },
 										{ out: 'Nothing written. Read the plan, then re-run with --apply to install.' },
+									]}
+								/>
+							)}
+							{s.id === 'traces' && (
+								<Terminal
+									title="zsh — myapp"
+									lines={[
+										{ cmd: 'pnpm cli traces list --status error' },
+										{ out: 'Started           Trace                             Name                         Status  Took  Spans' },
+										{ out: '2026-09-25 10:02  3f9c2b1e8d4a4c6b9e2f1a2b3c4d5e6f  invoke_agent research-topic  error   14.2s 9', muted: true },
+										{ cmd: 'pnpm cli traces show 3f9c2b1e-8d4a-4c6b-9e2f-1a2b3c4d5e6f' },
+										{ out: 'invoke_agent research-topic  14.2s  ERROR The agent asked for input too many times' },
+										{ out: '  \u2514 execute#0  13.9s' },
+										{ out: '    \u2514 chat claude-sonnet-5  1840\u2192212 tok  2.1s' },
+										{ out: '    \u2514 execute_tool search_knowledge  0.4s' },
+										{ out: '        in:  {"query":"volcano monitoring"}', muted: true },
+										{ out: '      \u2514 retrieval search_chunks  0.3s' },
+										{ out: '        \u2514 embeddings @cf/baai/bge-m3  0.1s' },
+										{ out: '    \u2514 chat claude-sonnet-5  4210\u219296 tok  3.4s' },
 									]}
 								/>
 							)}

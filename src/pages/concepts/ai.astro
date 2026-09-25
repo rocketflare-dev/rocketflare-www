@@ -24,6 +24,7 @@ const embeddingTiers = [
 		'apps/web/src/api/services/ai/kit.ts',
 		'apps/web/src/api/services/agents/',
 		'apps/web/src/api/workflows/agent-run.ts',
+		'apps/web/src/api/observability/',
 		'packages/shared/src/ai/',
 	]}
 >
@@ -289,4 +290,35 @@ const embeddingTiers = [
 		recorded as unpriced rather than guessed at, and the summary counts those calls separately so a
 		partial total says that it is one.
 	</p>
+
+	<h2>Tracing: a span tree for every run, in Postgres and in any OTLP backend</h2>
+	<p>
+		Every chat turn, agent run and AI job is recorded as a tree of spans. The root is the agent or
+		the chat turn; beneath it sit each model call with its tokens, latency and finish reason, each
+		tool call with its arguments and result, and — under the tool that asked for them — the
+		retrieval and the embeddings request. Nothing is instrumented by hand: tools are traced by the
+		one function that runs them, and retrieval and embeddings nest under whatever span is active.
+	</p>
+	<p>
+		An agent run executes as several separate Workflow steps, so its trace id is derived from the run
+		id rather than carried between them. Every step computes the same id and lands in one trace, and
+		each attempt is a child of a root that is written once the run has settled.
+	</p>
+	<p>
+		Spans always land in a tenant-scoped table, pruned nightly after fourteen days, so
+		<code>rocketflare traces show</code> works with no account anywhere. The same spans are exported
+		as OpenTelemetry using the GenAI semantic conventions, over plain <code>fetch</code> with no SDK,
+		to Langfuse, Arize Phoenix or any OTLP endpoint. A preset fills in authentication, so existing
+		Langfuse keys keep working with no new secret, and Phoenix gets the protobuf encoding it
+		requires.
+	</p>
+	<div class="why">
+		<p>
+			<strong>Why a copy in Postgres.</strong> So an agent can debug a run from a terminal
+			without a vendor API or its credentials — read the failing span, the tool's arguments and its
+			answer — and so traces work on a laptop before anyone has picked a backend. Content capture is
+			one switch: turn it off and prompts, completions and tool input and output leave both the
+			export and the table, while the shape, the timings and the token counts stay.
+		</p>
+	</div>
 </ConceptLayout>

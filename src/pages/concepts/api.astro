@@ -12,7 +12,7 @@ const middleware = [
 	{ label: 'CORS', note: 'before CSRF, so preflights are answered' },
 	{ label: 'CSRF', note: 'cookie-only, no database — cheap to reject' },
 	{ label: 'database', note: 'one client per request, closed in waitUntil' },
-	{ label: 'tracer', note: 'Langfuse batcher or a no-op, flushed after the handler' },
+	{ label: 'tracer', note: 'span recorder: OTLP export plus the local trace store, flushed after the handler' },
 	{ label: 'route mounts', note: 'auth per mount, never global' },
 ]
 ---
