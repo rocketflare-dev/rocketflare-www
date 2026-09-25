@@ -132,6 +132,15 @@ export const RELEASES: Release[] = [
 		migrations: true,
 		areas: ['api', 'shared', 'db', 'cli', 'config', 'docs'],
 	},
+	{
+		version: '0.10.1',
+		date: '2026-09-25',
+		summary:
+			'Your copy now tells you when the kit has moved on: open Claude Code and it mentions a newer release once per session, with what changed and where to start the upgrade.',
+		breaking: false,
+		migrations: false,
+		areas: ['config', 'docs'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */

@@ -63,6 +63,13 @@ const dateLabel = (iso: string) =>
 				migrations, your Cloudflare configuration and your version number are yours and are left
 				alone — it tells you what it left rather than guessing.
 			</p>
+			<p class="measure">
+				You do not have to remember to look. From 0.10.1 on, opening Claude Code in your app checks
+				for a newer release once a day. When there is one, your agent mentions it once per
+				session, with a line on what changed and a pointer to <code>{SKILLS.upgrade}</code>. It
+				never starts an upgrade on its own, stays silent when you are offline, and
+				<code>ROCKETFLARE_UPDATE_CHECK=0</code> turns it off.
+			</p>
 			<Callout tone="blue" title="Keep the manifest file">
 				<ConceptIcon slot="icon" name="link" />
 				<p>
