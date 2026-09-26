@@ -572,7 +572,7 @@ const siteLd = { '@context': 'https://schema.org', '@graph': graph }
 		cursor: pointer;
 		padding: 0;
 	}
-	.icon-btn:hover { color: var(--blue); border-color: var(--blue); }
+	.icon-btn:hover, .icon-btn[aria-current='page'] { color: var(--blue); border-color: var(--blue); }
 	.theme-icon-sun { display: none; }
 	html[data-theme='night'] .theme-icon-sun { display: block; }
 	html[data-theme='night'] .theme-icon-moon { display: none; }
