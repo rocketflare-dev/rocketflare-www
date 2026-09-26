@@ -350,6 +350,23 @@ const stops: Stop[] = [
 		},
 	},
 	{
+		id: 'evals',
+		section: 'core',
+		label: 'Evals',
+		title: 'Know whether a prompt change made the answers worse',
+		body: [
+			'Changing a prompt or switching models should not be a matter of trying three questions and hoping. <code>pnpm eval</code> runs suites of cases against the real chat route and the real agent runtime, in-process, each case in an organisation of its own with only the documents it brought. It prints a score, the tokens, the cost and the time for every case.',
+			'Cheap checks go first: did it search, did it search in the right order, did the answer mention the refund window, does the output match its schema, did it stay under budget. What a string cannot check goes to a model judge: a rubric in plain words, whether every claim is backed by what retrieval actually returned, and whether it agrees with a reference answer. The judge goes through the kit’s own model resolver, so its calls are priced in the ledger like everything else.',
+			'Agree that a run is good and commit it as the baseline. From then on, <code>pnpm eval --compare</code> lists every case and judge that dropped, and exits 1. Thumbs on chat replies and agent output record what real users disliked, and <code>rocketflare evals promote</code> turns one of those answers into a draft case.',
+		],
+		concepts: ['ai'],
+		callout: {
+			tone: 'green',
+			title: 'Your agent writes and runs them',
+			body: 'The kit ships an <code>/rf-evals</code> skill. Ask Claude Code whether a prompt change is better and it runs the suites, reads the judges’ reasons for each failure, compares models on score, cost and speed, and turns thumbs-down answers into new cases. It stops for your sign-off before it rewrites an expected answer or refreshes a baseline.',
+		},
+	},
+	{
 		id: 'admin',
 		section: 'core',
 		label: 'Admin',
@@ -605,6 +622,24 @@ const pad = (n: number) => String(n).padStart(2, '0')
 										{ out: '      \u2514 retrieval search_chunks  0.3s' },
 										{ out: '        \u2514 embeddings @cf/baai/bge-m3  0.1s' },
 										{ out: '    \u2514 chat claude-sonnet-5  4210\u219296 tok  3.4s' },
+									]}
+								/>
+							)}
+							{s.id === 'evals' && (
+								<Terminal
+									title="zsh — myapp"
+									lines={[
+										{ cmd: 'pnpm eval knowledge --compare' },
+										{ out: 'suite             case                avg   Trajectory  Contains  Faithfulness  Rubric  tokens  cost     ms' },
+										{ out: 'chat · knowledge  refund-window       1.00  1.00        1.00      1.00          1.00    3120    $0.0142  4210', muted: true },
+										{ out: 'chat · knowledge  greeting-no-search  1.00  1.00        —         —             1.00    410     $0.0019  980', muted: true },
+										{ out: 'chat · knowledge  not-covered ✗       0.33  0.00        —         0.00          1.00    620     $0.0031  1640', muted: true },
+										{ out: 'chat · knowledge  oncall-followup     0.95  1.00        1.00      0.90          0.90    3870    $0.0170  5020', muted: true },
+										{ out: '4/5 passed · mean score 0.84 · 10640 tokens · $0.0481 · 16.9s of target time' },
+										{ out: 'compared with baseline:' },
+										{ out: 'REGRESSIONS (drop > 0.1):' },
+										{ out: 'chat · knowledge  not-covered  Trajectory    1.00 → 0.00  expected search_knowledge, got no tool call' },
+										{ out: 'chat · knowledge  not-covered  Faithfulness  1.00 → 0.00  claims a 60-day window no passage supports' },
 									]}
 								/>
 							)}

@@ -141,6 +141,15 @@ export const RELEASES: Release[] = [
 		migrations: false,
 		areas: ['config', 'docs'],
 	},
+	{
+		version: '0.11.0',
+		date: '2026-09-26',
+		summary:
+			'Know whether a prompt or model change made the answers worse: eval suites run against the real chat and agents, score them with checks and model judges, and flag every regression against a baseline — and a thumbs-down from a real user becomes a new case in one command.',
+		breaking: false,
+		migrations: true,
+		areas: ['api', 'shared', 'ui', 'db', 'cli', 'docs'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */

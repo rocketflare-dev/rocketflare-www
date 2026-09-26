@@ -146,7 +146,7 @@ export const CONCEPTS: Concept[] = [
 		slug: 'ai',
 		num: '10',
 		title: 'The AI layer',
-		blurb: 'Chat, agents and search behind one resolver that picks the model — and it works on a fresh clone with no key at all.',
+		blurb: 'Chat, agents and search behind one resolver that picks the model, traced and evaluated — and it works on a fresh clone with no key at all.',
 		tone: 'red',
 		icon: 'sparkles',
 		anchor: '9-ai-layer',
