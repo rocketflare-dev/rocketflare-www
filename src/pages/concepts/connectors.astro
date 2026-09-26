@@ -1,0 +1,117 @@
+---
+import ConceptLayout from '../../layouts/ConceptLayout.astro'
+import Terminal from '../../components/Terminal.astro'
+import { pluginById, installCommand } from '../../data/plugins'
+import { GITHUB_URL } from '../../data/site'
+
+const connectors = pluginById('connectors')
+const m365 = pluginById('m365')
+const installConnectors = installCommand(connectors)
+const installM365 = installCommand(m365)
+if (!installConnectors || !installM365) throw new Error('Both connector plugins should have an install command')
+
+const DESIGN_URL = `${GITHUB_URL}/blob/0.12.0/docs/CONNECTORS.md`
+---
+<ConceptLayout
+	slug="connectors"
+	sourceRepo={connectors.repo}
+	source={[
+		'plugins/connectors/apps/web/src/plugins/connectors/providers.ts',
+		'plugins/connectors/apps/web/src/plugins/connectors/services/',
+		'plugins/connectors/apps/web/src/plugins/connectors/api/hooks.ts',
+		'plugins/m365/apps/web/src/plugins/m365/provider.ts',
+	]}
+	reference={{ href: DESIGN_URL, label: 'The design on GitHub' }}
+>
+	<h2>Logging in is not connecting</h2>
+	<p>
+		The kit already signs people in with Google and Microsoft. That asks one person who they are and
+		keeps nothing else. A <strong>connection</strong> is a different grant with a different subject:
+		an organisation's administrator lets your app read the organisation's directory and calendars,
+		and your app keeps doing so on a schedule, whether or not anybody is signed in.
+	</p>
+	<table>
+		<thead><tr><th>Question</th><th>Sign-in</th><th>A connection</th></tr></thead>
+		<tbody>
+			<tr><td>Who grants it</td><td>the person signing in</td><td>the organisation's admin, once</td></tr>
+			<tr><td>What it reaches</td><td>that person's own profile</td><td>the directory, and the calendars of your app's members</td></tr>
+			<tr><td>The token</td><td>none kept in use</td><td>an app-only token per organisation, cached encrypted</td></tr>
+			<tr><td>The app behind it</td><td>the kit's sign-in client</td><td>a separate Entra app, with its own permissions and review</td></tr>
+		</tbody>
+	</table>
+
+	<h2>Two plugins: one owns the rows, one talks to the vendor</h2>
+	<p>
+		Connections are not part of the kit. They are two optional <a href="/plugins/#connectors">plugins</a>:
+		<strong>connectors</strong> owns every table, route, cursor and schedule, and a provider plugin
+		does the vendor's side of the conversation. Today there is one provider,
+		<a href="/plugins/#m365">m365</a>, and it requires connectors — so connectors goes in first.
+	</p>
+	<Terminal
+		title="zsh — your app"
+		lines={[
+			{ cmd: `${installConnectors} --apply` },
+			{ cmd: 'pnpm db:generate --name plugin-connectors-3.2.0 && pnpm db:migrate' },
+			{ cmd: `${installM365} --apply` },
+			{ cmd: 'rocketflare connectors status' },
+			{ out: 'm365: active' },
+			{ out: '  people 48 (12 members) · groups 9 · calendars 12 · events 311' },
+			{ out: 'Resource  Cursors  Last synced       Backfilling  Failing' },
+			{ out: 'users     1        2026-09-26 10:15  0            0' },
+			{ out: 'groups    1        2026-09-26 10:15  0            0' },
+			{ out: 'calendar  12       2026-09-26 10:15  0            0' },
+		]}
+	/>
+
+	<h2>One consent, then app-only delta sync</h2>
+	<p>
+		You register one multi-tenant app in Microsoft Entra for your whole deployment and set its two
+		secrets. A customer's admin opens Settings → Connections, clicks Connect, consents on Microsoft's
+		own screen, and is sent back. The callback is the one route in the plugin with no session behind
+		it, so it trusts nothing but a signed, expiring token your app minted a moment earlier — that
+		token is what says which organisation the consent belongs to.
+	</p>
+	<p>
+		From then on nobody has to be signed in. Every 15 minutes a scheduled task queues a sync for each
+		connected organisation, and each resource — users, groups with their memberships, each member's
+		calendar from 30 days back to 90 ahead — resumes from Microsoft's own change token rather than
+		reading everything again. A claim row stops two runs syncing the same thing at once, a throttled
+		call waits exactly as long as Microsoft asks, and an expired change token starts a full pass.
+	</p>
+	<div class="why">
+		<p>
+			<strong>Why the admin, not each person.</strong> One consent brings in the whole directory, so
+			every member of an organisation arrives connected on day one instead of one at a time. It is
+			also what Microsoft's default policy now demands: ordinary users can no longer consent to an
+			app reading their mail, calendars or files, so a per-person flow would stop at an admin anyway.
+		</p>
+	</div>
+
+	<h2>Inside one organisation, people still see only their own</h2>
+	<p>
+		Every synced row carries the organisation, like everything else in the kit. That is not enough on
+		its own: an organisation-wide sync pulls in <em>everyone's</em> calendar, and keeping tenants
+		apart does nothing to stop one colleague reading another's. So each event is matched to the
+		member it belongs to by email, a member's list only ever shows their own, and admins see
+		everyone's. People in the directory who are not members of your app are listed there, but their
+		calendars are never read.
+	</p>
+
+	<h2>What exists today, and what is designed next</h2>
+	<p>
+		Phase one is Microsoft 365's directory and calendars, polled. The design for the rest is written
+		down: Google Workspace as a second provider on the same interface, webhooks that only ever trigger
+		a sync with polling kept as the backstop, mail and files into the knowledge base with each item
+		visible to its owner, and a person connecting their own account once an admin has allowed it. None
+		of those is built yet.
+	</p>
+	<div class="note">
+		<p>
+			The kit's part is four general-purpose seams any plugin can use: public routes under
+			<code>/api/hooks/&lt;plugin id&gt;</code>, signed round-trip state, feature-flag checks from
+			background work, and knowledge ingested by its upstream id so a re-sync updates a document
+			rather than duplicating it. <a href={DESIGN_URL} target="_blank" rel="noopener">The design</a>
+			has the operator's and the customer admin's setup, step by step.
+		</p>
+	</div>
+</ConceptLayout>

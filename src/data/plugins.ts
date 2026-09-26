@@ -41,6 +41,10 @@ export interface Plugin {
 	summary: string
 	/** What installing it adds, each `<strong>Label</strong> — one sentence`. */
 	adds: string[]
+	/** Plugin ids that must be installed first (the manifest's `requires.plugins`). */
+	requires?: string[]
+	/** The concept page that explains it, when it has one. */
+	concept?: string
 	/** The plugin's own changelog. */
 	changelogUrl: string
 	/** Its README or docs, when that is a different page from the repo root. */
@@ -58,7 +62,7 @@ export const PLUGINS: Plugin[] = [
 		repoLabel: 'rocketflare-dev/rocketflare-plugins',
 		subdir: 'plugins/analytics',
 		minKit: '0.8.0',
-		version: '3.1.0',
+		version: '3.2.0',
 		shipsAs: 'installed',
 		summary:
 			'Dashboards, cubes, fact tables and the drizzle-cube query API — everything that used to be part of the kit, now a repository of its own.',
@@ -70,6 +74,7 @@ export const PLUGINS: Plugin[] = [
 			'<strong>Permissions</strong> — a dashboard subject (admin and above manage, members read) and an analytics subject (every role reads; the query API is read-only by nature).',
 			'<strong>Commands</strong> — <code>rocketflare analytics pages list</code>, <code>check-facts</code> (exit 1 when a table is stale) and <code>refresh-facts</code>.',
 		],
+		concept: 'analytics',
 		changelogUrl: `${PLUGINS_REPO}/blob/main/CHANGELOG.md`,
 		docsUrl: `${PLUGINS_REPO}/tree/main/plugins/analytics`,
 	},
@@ -80,7 +85,7 @@ export const PLUGINS: Plugin[] = [
 		repoLabel: 'rocketflare-dev/rocketflare-plugins',
 		subdir: 'plugins/web-knowledge',
 		minKit: '0.9.0',
-		version: '3.1.0',
+		version: '3.2.0',
 		shipsAs: 'optional',
 		summary:
 			'Lets agents and chat search the public web and read pages, on each organisation’s own search key — and only for the organisations that turn it on.',
@@ -94,6 +99,50 @@ export const PLUGINS: Plugin[] = [
 		],
 		changelogUrl: `${PLUGINS_REPO}/blob/main/CHANGELOG.md`,
 		docsUrl: `${PLUGINS_REPO}/tree/main/plugins/web-knowledge`,
+	},
+	{
+		id: 'connectors',
+		label: 'Connectors',
+		repo: PLUGINS_REPO,
+		repoLabel: 'rocketflare-dev/rocketflare-plugins',
+		subdir: 'plugins/connectors',
+		minKit: '0.12.0',
+		version: '3.2.0',
+		shipsAs: 'optional',
+		summary:
+			'Connects an organisation’s own Microsoft 365 to your app: an admin grants consent once, and its directory and calendars sync in. It holds the rows, routes and schedules; a provider plugin (today, m365) does the talking.',
+		adds: [
+			'<strong>A connection per organisation</strong> — Settings → Connections: pick a provider, send the organisation’s admin through consent, and watch the sync. Disconnecting deletes everything that was synced.',
+			'<strong>The directory and calendars</strong> — people, groups and memberships, plus the calendars of people who are members of your app, matched to them by email. Members see only their own events; admins see everyone’s.',
+			'<strong>Delta sync on a schedule</strong> — every 15 minutes, each resource resumes from where the provider’s own change feed left off, with a claim row so two runs never sync the same thing at once.',
+			'<strong>Seven tables</strong> — installations, connections, sync cursors, users, groups, memberships and events, each with the same row-level-security policy as everything else. Secrets are encrypted at rest and never sent back.',
+			'<strong>Commands</strong> — <code>rocketflare connectors status</code> for counts and sync progress, and <code>rocketflare connectors sync</code> to run one now.',
+		],
+		concept: 'connectors',
+		changelogUrl: `${PLUGINS_REPO}/blob/main/CHANGELOG.md`,
+		docsUrl: `${KIT_REPO}/blob/0.12.0/docs/CONNECTORS.md`,
+	},
+	{
+		id: 'm365',
+		label: 'Microsoft 365',
+		repo: PLUGINS_REPO,
+		repoLabel: 'rocketflare-dev/rocketflare-plugins',
+		subdir: 'plugins/m365',
+		minKit: '0.12.0',
+		version: '3.2.0',
+		shipsAs: 'optional',
+		summary:
+			'Microsoft 365 as a provider for the connectors plugin, which it requires — install connectors first. One multi-tenant Entra app for your whole deployment; each customer’s admin consents to it once.',
+		adds: [
+			'<strong>Admin consent, once</strong> — a customer’s admin clicks Connect, consents in Microsoft’s own screen, and is sent back. No app registration on their side, no secret to paste.',
+			'<strong>App-only access</strong> — a client-credentials token per organisation, cached encrypted, with read-only permissions for users, groups and calendars.',
+			'<strong>Graph delta queries</strong> — users, groups with their memberships, and each member’s calendar over a rolling window from 30 days back to 90 ahead. A throttled call waits as long as Microsoft asks; an expired change token starts a full pass.',
+			'<strong>Two secrets</strong> — <code>M365_CLIENT_ID</code> and <code>M365_CLIENT_SECRET</code>, your Entra app. An organisation can bring its own app instead.',
+		],
+		requires: ['connectors'],
+		concept: 'connectors',
+		changelogUrl: `${PLUGINS_REPO}/blob/main/CHANGELOG.md`,
+		docsUrl: `${PLUGINS_REPO}/tree/main/plugins/m365`,
 	},
 	{
 		id: 'example-feature',

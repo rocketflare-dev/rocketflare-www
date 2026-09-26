@@ -112,6 +112,7 @@ const also = [
 	{ slug: 'database', icon: 'database', title: 'Tests that guard isolation', line: 'The suite fails if one organisation could ever see another’s rows.' },
 	{ slug: 'deployment', icon: 'cloud', title: 'One-command deploys', line: 'Staging from a tag, production from a release, secrets never in a file.' },
 	{ slug: 'plugins', icon: 'puzzle', title: 'Plugins', line: 'Add a capability by copying a repository in, not by installing a package.' },
+	{ slug: 'connectors', icon: 'plug', title: 'Microsoft 365 connections', line: 'A customer’s admin connects once; their directory and calendars sync in on a schedule.' },
 ].map((a) => {
 	const c = conceptBySlug(a.slug)
 	if (!c) throw new Error(`Unknown concept: ${a.slug}`)

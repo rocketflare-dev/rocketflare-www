@@ -59,6 +59,12 @@ const cards = PLUGINS.map((p) => ({ p, install: installCommand(p) }))
 							<div><dt>Plugin id</dt><dd><code>{p.id}</code></dd></div>
 							<div><dt>Version</dt><dd><code>{p.version}</code></dd></div>
 							<div><dt>Needs kit</dt><dd><code>{p.minKit}</code> or later</dd></div>
+							{p.requires && (
+								<div>
+									<dt>Needs plugin</dt>
+									<dd>{p.requires.map((id) => <a href={`#${id}`}><code>{id}</code></a>)}</dd>
+								</div>
+							)}
 						</dl>
 					</div>
 
@@ -100,10 +106,10 @@ const cards = PLUGINS.map((p) => ({ p, install: installCommand(p) }))
 										<a href={p.docsUrl} target="_blank" rel="noopener">Docs</a>
 									</Fragment>
 								)}
-								{p.id === 'analytics' && (
+								{p.concept && (
 									<Fragment>
 										<span aria-hidden="true">·</span>
-										<a href="/concepts/analytics/">How it works</a>
+										<a href={`/concepts/${p.concept}/`}>How it works</a>
 									</Fragment>
 								)}
 							</p>
