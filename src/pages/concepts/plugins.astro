@@ -98,6 +98,16 @@ const installMessages = [
 		</p>
 	</div>
 
+	<p>
+		A plugin that talks to the outside world gets four more things from the kit, and none of them is
+		specific to anyone: a public route under <code>/api/hooks/&lt;plugin id&gt;</code> for a callback or
+		a webhook, with no session behind it and a test that refuses one anywhere else; a signed,
+		expiring token for a round trip through somebody else's site; a check of feature flags from a
+		job or a schedule; and knowledge ingested by its upstream id, so syncing the same item again
+		updates it instead of adding a copy. The <a href="/concepts/connectors/">connectors</a> plugin is
+		the first to use all four.
+	</p>
+
 	<h2>Four published entries, and an id that is a namespace</h2>
 	<p>
 		A plugin has exactly four entry files — one for the server half, one for the browser half, one

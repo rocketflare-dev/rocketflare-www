@@ -44,7 +44,7 @@ export const CONCEPT_GROUPS: ConceptGroup[] = [
 	{
 		key: 'product',
 		title: 'Product',
-		lede: 'What you build the product on — the AI layer and analytics.',
+		lede: 'What you build the product on — the AI layer, analytics, and connections to the tools your customers already use.',
 	},
 ]
 
@@ -201,6 +201,16 @@ export const CONCEPTS: Concept[] = [
 		icon: 'puzzle',
 		anchor: '16-plugins',
 		group: 'foundation',
+	},
+	{
+		slug: 'connectors',
+		num: '16',
+		title: 'Connectors',
+		blurb: 'An organisation’s admin connects its Microsoft 365 once, and its directory and calendars sync in on a schedule — a connection for the organisation, not a login for one person.',
+		tone: 'green',
+		icon: 'plug',
+		anchor: '17-connectors',
+		group: 'product',
 	},
 ]
 

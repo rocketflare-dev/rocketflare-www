@@ -150,6 +150,15 @@ export const RELEASES: Release[] = [
 		migrations: true,
 		areas: ['api', 'shared', 'ui', 'db', 'cli', 'docs'],
 	},
+	{
+		version: '0.12.0',
+		date: '2026-09-26',
+		summary:
+			'Plugins can now connect an organisation to outside systems: a callback route a third party can reach, a signed round trip for an admin’s consent, background checks of feature flags, and documents ingested by their upstream id so a re-sync updates rather than duplicates. The first plugins to use it connect Microsoft 365.',
+		breaking: false,
+		migrations: true,
+		areas: ['api', 'db', 'docs'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
