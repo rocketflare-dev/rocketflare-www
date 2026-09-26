@@ -25,6 +25,7 @@ const embeddingTiers = [
 		'apps/web/src/api/services/agents/',
 		'apps/web/src/api/workflows/agent-run.ts',
 		'apps/web/src/api/observability/',
+		'apps/evals/',
 		'packages/shared/src/ai/',
 	]}
 >
@@ -319,6 +320,51 @@ const embeddingTiers = [
 			answer — and so traces work on a laptop before anyone has picked a backend. Content capture is
 			one switch: turn it off and prompts, completions and tool input and output leave both the
 			export and the table, while the shape, the timings and the token counts stay.
+		</p>
+	</div>
+
+	<h2>Evals: cases, judges and a baseline, run against the real code</h2>
+	<p>
+		<code>pnpm eval</code> runs suites of cases against the chat route and the agent runtime
+		themselves, in-process, rather than against a copy of the prompt in a notebook. A chat case
+		drives the real route; an agent case runs the same enqueue, claim, execute and finish steps the
+		workflow does, inline. Each case gets an organisation of its own with its documents ingested
+		first, so retrieval can only find what the case put there. The suites live in their own
+		workspace package on vitest-evals, and never run in the gate: a model having a bad afternoon must
+		not block a merge.
+	</p>
+	<p>
+		A case is one line of JSON that carries its own expectations — the tools it should call and in
+		what order, words the answer must contain, a rubric in plain language, a reference answer — and a
+		judge only scores the cases that declare something for it. The deterministic judges (trajectory,
+		contains, schema, budget) are free and never flaky. The model judges score a rubric, check every
+		claim against the passages retrieval actually returned, and compare with a reference. The judge
+		resolves through the same resolver as everything else, so it can be pinned per organisation or
+		overridden on the command line, and its calls are priced in the usage ledger.
+	</p>
+	<p>
+		Every run is a JSON file stamped with the commit, the models and a hash of each prompt. A good run
+		becomes a committed baseline, and <code>pnpm eval --compare</code> lists every case and judge
+		that dropped and exits 1, which is what an optional CI workflow runs on a labelled pull request. A
+		local report UI walks the transcripts and each judge’s reasoning. <code>--provider</code> and
+		<code>--model</code> put the same suite on another model, so comparing two is a run on each and
+		a diff of score, cost and latency.
+	</p>
+	<p>
+		Real traffic feeds it. Thumbs on a chat reply or an agent’s output are stored per organisation and
+		written into that answer’s trace. An admin lists the thumbs-down from the CLI, and
+		<code>rocketflare evals promote</code> drafts a case from one — the question, the earlier turns,
+		the passages retrieved, the tools called and the answer somebody disliked — after warning that
+		it is about to copy tenant data into the repository.
+	</p>
+	<div class="why">
+		<p>
+			<strong>Why in the kit, and why a skill.</strong> Evals are only useful if they run against
+			the code that ships, so they have to know how the kit resolves models, scopes tenants and runs
+			agents. The <code>/rf-evals</code> skill lets a coding agent do the whole loop — scaffold a
+			suite, run it, explain a failure from the judges’ reasons, try a prompt change and prove it
+			helped — and it stops for a person before it rewrites an expected answer or refreshes a
+			baseline, because a baseline is a claim about quality.
 		</p>
 	</div>
 </ConceptLayout>
