@@ -123,6 +123,19 @@ const installMessages = [
 		therefore cannot collide by construction rather than by luck.
 	</p>
 
+	<h2>Skills travel with the plugin</h2>
+	<p>
+		A plugin can also bring agent skills — instructions your coding agent follows to set up, run
+		and repair what the plugin adds. It declares them in its manifest and keeps each in a
+		<code>skills/</code> directory; installing copies each one to
+		<code>.claude/skills/&lt;name&gt;/</code>, upgrading replaces it, and uninstalling removes it.
+		Skill names are namespaced by the plugin's id like everything else, a name that collides with
+		the kit's own skills or another plugin's is refused, and the check fails a declared skill that
+		is missing, misnamed or has no description. The
+		<a href="/concepts/connectors/">connectors</a> and <a href="/concepts/analytics/">analytics</a>
+		plugins ship the first ones.
+	</p>
+
 	<h2>What the tool will not do for you</h2>
 	<p>
 		Three refusals, and each of them is a bug it is declining to cause:
@@ -224,10 +237,12 @@ const installMessages = [
 		removable comes before moving anything bigger.
 	</p>
 	<p>
-		Nothing else has moved out yet. Chat, agents, knowledge and analytics are the candidates, and
-		analytics goes first: it is the most self-contained, it brings the largest dependency in the
-		whole application with it, and plenty of apps built on this kit will never want it. Until then
-		they are all core, and every copy has them.
+		Since then the kit has got smaller and the set has grown. Analytics moved out first, in 0.6.0 —
+		the most self-contained subsystem, carrying the largest dependency in the application, and one
+		plenty of apps never want — and it is still installed by default, so a fresh copy has it. Web
+		knowledge, connectors and the Microsoft 365 provider were written as plugins from the start and
+		are added only when you want them. Chat, agents and knowledge remain core, and every copy has
+		them.
 	</p>
 	<div class="note">
 		<p>
