@@ -7,6 +7,7 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		'apps/web/src/api/middleware/auth.ts',
 		'apps/web/src/api/auth/sessions.ts',
 		'apps/web/src/api/auth/providers/',
+		'apps/web/src/api/auth/providers/oidc.ts',
 		'apps/web/src/api/auth/oauth-encryption.ts',
 		'apps/web/src/api/routes/auth/cli.ts',
 	]}
@@ -14,7 +15,7 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 	<h2>Sessions are database rows, not tokens</h2>
 	<p>
 		A signed-in browser holds one cookie, <code>__Host-session</code>, whose value points at a row in
-		<code>user_sessions</code>. The row has a seven-day sliding lifetime; the cookie is
+		<code>user_sessions</code>. The row has a thirty-day sliding lifetime; the cookie is
 		<code>HttpOnly</code>, <code>SameSite=Lax</code>, carries no <code>Domain</code>, and is
 		<code>Secure</code> everywhere except local development. The <code>__Host-</code> prefix is what
 		makes the browser refuse a cookie that tries to widen its own scope.
@@ -61,16 +62,16 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		address in the URL does nothing.
 	</p>
 
-	<h2>OAuth: Google and Microsoft from one provider registry</h2>
+	<h2>OAuth: Google, Microsoft and any OIDC issuer from one provider registry</h2>
 	<p>
 		Rather than a file per provider, there is one generic pair of routes —
 		<code>/auth/:provider</code> and <code>/auth/:provider/callback</code> — over a list of provider
 		definitions. The OAuth client underneath is
 		<a href="https://arcticjs.dev" rel="noopener">arctic</a>, which already speaks to more than fifty
 		providers — GitHub, GitLab, Slack, Apple, Okta, Auth0, Discord, LinkedIn, Keycloak and the rest —
-		so the kit is not limited to the two it ships with. Google and Microsoft are wired; adding
-		another is one definition file with its arctic client, scopes and profile mapping, and no new
-		routing.
+		so the kit is not limited to the ones it ships with. Google, Microsoft and a generic OpenID
+		Connect provider are wired; adding another is one definition file with its arctic client,
+		scopes and profile mapping, and no new routing.
 	</p>
 	<p>
 		Redirect URIs are derived from <code>APP_URL</code>, so there is no
@@ -83,6 +84,38 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		<code>email_verified: false</code> is refused outright. A pair of provider and provider-user-id is
 		unique, so the same external account cannot be attached to two people.
 	</p>
+
+	<h2>Single sign-on with your own identity provider</h2>
+	<p>
+		Set <code>OIDC_ISSUER</code> and <code>OIDC_CLIENT_ID</code> — plus
+		<code>OIDC_CLIENT_SECRET</code> unless the client is public — and an <code>oidc</code> provider
+		appears on the login page, labelled with <code>OIDC_LABEL</code>. It works with any OpenID
+		Connect issuer: Okta, a single-tenant Entra ID, Keycloak, Auth0. The endpoints come from the
+		issuer's discovery document, which is refused unless its <code>issuer</code> matches exactly;
+		the flow is the authorization code with PKCE and a <code>nonce</code>; and the
+		<code>id_token</code> is verified against the issuer's published keys, fetching the set again
+		when an unknown key id appears, so key rotation needs nothing from you. Unset, nothing changes.
+	</p>
+	<p>
+		An identity is keyed by issuer and subject, so it needs no migration. The issuer must say the
+		email is verified: an <code>email_verified</code> of <code>false</code> is always refused, and
+		a missing one is treated as unverified unless <code>OIDC_TRUST_EMAIL=true</code> opts in an
+		issuer that controls the claim — a single-tenant Entra directory, which omits it.
+	</p>
+	<p>
+		<code>AUTH_OIDC_ONLY=true</code> makes the issuer the only way in: the login page sends people
+		straight to it and the Google and Microsoft routes refuse. Magic links are hidden rather than
+		switched off, because invitations still use them. When the issuer publishes an end-session
+		endpoint, signing out signs out there too and comes back to the login page, which does not
+		bounce you straight back in.
+	</p>
+	<div class="note">
+		<p>
+			One issuer per deployment. The <code>groups</code> claim is read but not yet mapped to the
+			kit's groups or roles, there is no back-channel logout, and trusting the email claim trusts
+			every address the issuer sends — there is no per-domain rule.
+		</p>
+	</div>
 
 	<h2>What protects each kind of credential</h2>
 	<table>

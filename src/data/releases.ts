@@ -168,6 +168,15 @@ export const RELEASES: Release[] = [
 		migrations: false,
 		areas: ['config', 'docs'],
 	},
+	{
+		version: '0.14.0',
+		date: '2026-09-27',
+		summary:
+			'Sign in with your company identity provider: any OIDC issuer (Okta, Entra ID, Keycloak, Auth0) can be added beside or instead of the built-in sign-in. CI can deploy through an external deployer and hold no Cloudflare token or database credential. Bootstrap can use an existing Postgres such as a Neon branch with no Docker, dev ports are configurable, and migrations now run as Neon’s owner role. All of it is opt-in.',
+		breaking: false,
+		migrations: false,
+		areas: ['api', 'ui', 'shared', 'db', 'config', 'docs'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
