@@ -9,7 +9,8 @@ import { AXE, launch, open } from './lib.mjs'
 
 const pages = process.argv.slice(2).length
 	? process.argv.slice(2)
-	: ['/', '/tour/', '/get-started/', '/who-is-it-for/', '/changelog/', '/plugins/', '/concepts/',
+	: ['/', '/tour/', '/get-started/', '/who-is-it-for/', '/changelog/', '/plugins/', '/plugins/analytics/', '/plugins/connectors/',
+		'/plugins/example-feature/', '/concepts/',
 		'/concepts/auth/', '/concepts/feature-flags/', '/concepts/plugins/',
 		'/use-cases/internal-tool/', '/use-cases/customer-portal/', '/use-cases/analytics-product/', '/costs/', '/compare/']
 const browser = await launch()

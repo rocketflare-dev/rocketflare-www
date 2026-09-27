@@ -49,6 +49,14 @@ export interface Plugin {
 	changelogUrl: string
 	/** Its README or docs, when that is a different page from the repo root. */
 	docsUrl?: string
+	/**
+	 * The plugin's README, repository-relative. `npm run sync:plugins` copies it into
+	 * `src/content/plugins/<id>.md`, and /plugins/<id>/ renders it below the facts. Absent for a
+	 * plugin with no README (the vendored one); the build fails when it is set and not synced.
+	 */
+	readme?: string
+	/** The agent skills it installs into `.claude/skills/` (the manifest's `skills`). */
+	skills?: string[]
 }
 
 const PLUGINS_REPO = 'https://github.com/rocketflare-dev/rocketflare-plugins'
@@ -78,6 +86,8 @@ export const PLUGINS: Plugin[] = [
 		concept: 'analytics',
 		changelogUrl: `${PLUGINS_REPO}/blob/main/CHANGELOG.md`,
 		docsUrl: `${PLUGINS_REPO}/tree/main/plugins/analytics`,
+		readme: 'plugins/analytics/README.md',
+		skills: ['analytics', 'analytics-cubes', 'analytics-queries', 'analytics-dashboards'],
 	},
 	{
 		id: 'web-knowledge',
@@ -100,6 +110,7 @@ export const PLUGINS: Plugin[] = [
 		],
 		changelogUrl: `${PLUGINS_REPO}/blob/main/CHANGELOG.md`,
 		docsUrl: `${PLUGINS_REPO}/tree/main/plugins/web-knowledge`,
+		readme: 'plugins/web-knowledge/README.md',
 	},
 	{
 		id: 'connectors',
@@ -123,6 +134,8 @@ export const PLUGINS: Plugin[] = [
 		concept: 'connectors',
 		changelogUrl: `${PLUGINS_REPO}/blob/main/CHANGELOG.md`,
 		docsUrl: `${KIT_REPO}/blob/0.12.0/docs/CONNECTORS.md`,
+		readme: 'plugins/connectors/README.md',
+		skills: ['connectors'],
 	},
 	{
 		id: 'm365',
@@ -145,6 +158,7 @@ export const PLUGINS: Plugin[] = [
 		concept: 'connectors',
 		changelogUrl: `${PLUGINS_REPO}/blob/main/CHANGELOG.md`,
 		docsUrl: `${PLUGINS_REPO}/tree/main/plugins/m365`,
+		readme: 'plugins/m365/README.md',
 	},
 	{
 		id: 'example-feature',
@@ -166,6 +180,7 @@ export const PLUGINS: Plugin[] = [
 		],
 		changelogUrl: `${KIT_REPO}/blob/main/CHANGELOG.md`,
 		docsUrl: `${KIT_REPO}/blob/main/apps/web/src/plugins/example-feature/CLAUDE.md`,
+		skills: ['example-feature'],
 	},
 ]
 
@@ -183,6 +198,9 @@ export const installCommand = (p: Plugin) =>
 	p.shipsAs === 'vendored'
 		? null
 		: `pnpm plugin add ${p.repo}.git@${p.version}${p.subdir ? ` --subdir ${p.subdir}` : ''}`
+
+/** The plugin's page on this site. */
+export const pluginPath = (p: Plugin | string) => `/plugins/${typeof p === 'string' ? p : p.id}/`
 
 /** How many first-party plugins there are — use this, never a literal, in copy. */
 export const PLUGIN_COUNT = PLUGINS.length

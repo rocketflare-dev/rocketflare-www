@@ -8,6 +8,9 @@ import { lastmodFor } from './src/data/lastmod'
 // BaseLayout — change it in one place here.
 export default defineConfig({
 	output: 'static',
+	// Markdown is only the synced plugin READMEs (src/content/plugins/). No Shiki: its themes carry
+	// their own colours, and every colour here is a token that works in both themes.
+	markdown: { syntaxHighlight: false },
 	site: 'https://rocketflare.dev',
 	integrations: [
 		sitemap({

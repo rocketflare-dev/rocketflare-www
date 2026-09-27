@@ -9,6 +9,8 @@ npm run dev       # http://localhost:4321 — Astro only; the /api route is not 
 npm run build     # astro check && tsc (worker) && astro build → dist/
 npm run deploy    # build, then wrangler deploy
 npm run types     # regenerate worker-configuration.d.ts after editing wrangler.jsonc
+npm run sync:plugins   # refresh src/content/plugins/<id>.md from each plugin's README on GitHub
+npm run check:plugins  # fail when a synced README is stale
 npx wrangler dev  # the real Worker: static assets AND /api/github-stars
 ```
 
@@ -20,6 +22,8 @@ npx wrangler dev  # the real Worker: static assets AND /api/github-stars
 | `src/pages/tour.astro` | the tour — thirteen stops, one `stops` array drives the index and the sections |
 | `src/pages/who-is-it-for.astro` | three "what would I build" sketches, the not-for list, the two doors out |
 | `src/pages/get-started.astro` | three ways in (agent · one command · by hand), what the bootstrap did, deploying with `/provision`; every kit literal from `src/data/get-started.ts` |
+| `src/pages/plugins/index.astro` · `[id].astro` | the plugin catalogue (search + a grid of small cards) and one page per plugin: facts from `src/data/plugins.ts`, then the plugin's README |
+| `src/content/plugins/<id>.md` | each plugin's README, synced by `npm run sync:plugins` — edit the README in rocketflare-plugins, not these |
 | `src/pages/og.astro` | the 1200×630 card `public/og-image.png` is screenshotted from (`CLAUDE.md`, "The OG image") |
 | `src/pages/concepts/*` | one page per subsystem, plus the index |
 | `src/pages/llms.txt.ts` | the llms.txt map, generated from the page and concept lists |
@@ -46,7 +50,7 @@ npx wrangler dev  # the real Worker: static assets AND /api/github-stars
   The one exception is `components/LogoMark.astro`, whose brand fills are fixed.
 - Every animation is disabled under `prefers-reduced-motion`.
 - No UI framework and no client bundles: a handful of small inline `<script>`s (nav toggle, theme
-  toggle, scroll reveals, the copy button, tabs), each progressive — everything works without them.
+  toggle, scroll reveals, the copy button, tabs, the plugin search), each progressive — everything works without them.
 - Fonts are self-hosted at build time by Astro's Fonts API (`astro.config.mjs`); nothing is fetched
   from Google at runtime.
 - Top-level pages are listed in `src/data/pages.ts`; nav, footer and `llms.txt` are generated from it.
