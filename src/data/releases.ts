@@ -159,6 +159,15 @@ export const RELEASES: Release[] = [
 		migrations: true,
 		areas: ['api', 'db', 'docs'],
 	},
+	{
+		version: '0.13.0',
+		date: '2026-09-27',
+		summary:
+			'Plugins can now ship agent skills. A plugin declares them in its manifest and they install into .claude/skills, so your coding agent can set up and run what the plugin adds. The connectors and analytics plugins are the first to use it.',
+		breaking: false,
+		migrations: false,
+		areas: ['config', 'docs'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */

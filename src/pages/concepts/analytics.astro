@@ -11,14 +11,15 @@ if (!install) throw new Error('The analytics plugin should have an install comma
 	slug="analytics"
 	sourceRepo={analytics.repo}
 	source={[
-		'apps/web/src/plugins/analytics/cubes/',
-		'apps/web/src/plugins/analytics/api/routes/cube-api.ts',
-		'apps/web/src/plugins/analytics/services/fact-tables/',
-		'apps/web/src/plugins/analytics/dashboards/',
-		'apps/web/src/plugins/analytics/tests/api/cube-isolation.test.ts',
+		'plugins/analytics/apps/web/src/plugins/analytics/cubes/',
+		'plugins/analytics/apps/web/src/plugins/analytics/api/routes/cube-api.ts',
+		'plugins/analytics/apps/web/src/plugins/analytics/services/fact-tables/',
+		'plugins/analytics/apps/web/src/plugins/analytics/dashboards/',
+		'plugins/analytics/apps/web/src/plugins/analytics/tests/api/cube-isolation.test.ts',
+		'plugins/analytics/skills/',
 	]}
 	reference={{
-		href: `${analytics.repo}/blob/main/README.md`,
+		href: `${analytics.repo}/tree/main/plugins/analytics`,
 		label: 'The plugin on GitHub',
 	}}
 >
@@ -203,5 +204,22 @@ if (!install) throw new Error('The analytics plugin should have an install comma
 		The query API is read-only by nature, and access to it is membership plus one read permission
 		rather than a role check — no cube consults the caller's role. Filtering is by tenant, and only
 		by tenant.
+	</p>
+
+	<h2>Skills for your coding agent</h2>
+	<p>
+		The plugin brings four agent skills with it, installed into <code>.claude/skills/</code> alongside
+		the kit's own. <code>analytics</code> checks the plugin is installed and healthy and sends you to
+		the right one of the other three. <code>analytics-cubes</code> adds a measure, models a new table
+		as a cube, adds a fact table or contributes a cube from another plugin — and writes the isolation
+		test that has to come with it. <code>analytics-queries</code> answers a data question through the
+		cubes, calls the query API from a terminal, and connects Claude Code or Claude Desktop to the
+		<code>/mcp</code> endpoint with an API key. <code>analytics-dashboards</code> builds, shares,
+		resets and templates dashboards.
+	</p>
+	<p>
+		They are adapted from drizzle-cube's own Claude Code plugin and pinned to the drizzle-cube release
+		this plugin ships, so an example that compiles in the skill compiles in your app. drizzle-cube's
+		plugin still works alongside them if you want its extra tools.
 	</p>
 </ConceptLayout>

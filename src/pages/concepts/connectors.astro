@@ -20,6 +20,7 @@ const DESIGN_URL = `${GITHUB_URL}/blob/0.12.0/docs/CONNECTORS.md`
 		'plugins/connectors/apps/web/src/plugins/connectors/services/',
 		'plugins/connectors/apps/web/src/plugins/connectors/api/hooks.ts',
 		'plugins/m365/apps/web/src/plugins/m365/provider.ts',
+		'plugins/connectors/skills/connectors/',
 	]}
 	reference={{ href: DESIGN_URL, label: 'The design on GitHub' }}
 >
@@ -86,6 +87,27 @@ const DESIGN_URL = `${GITHUB_URL}/blob/0.12.0/docs/CONNECTORS.md`
 			app reading their mail, calendars or files, so a per-person flow would stop at an admin anyway.
 		</p>
 	</div>
+
+	<h2>Setup your coding agent drives</h2>
+	<p>
+		Registering an Entra app is about ten portal screens, so the connectors plugin ships a skill that
+		does it for you. Ask your coding agent to run <code>connectors</code>: it checks what is already
+		configured, then drives the Azure CLI to register the multi-tenant app, add its redirect address
+		and its three read-only permissions, and create a client secret — which goes straight into your
+		local settings or your deployment's secrets without ever being printed. You sign in to Azure
+		yourself, and the agent stops for your go-ahead before it changes anything. Publisher
+		verification, which Microsoft asks for before you sell to other organisations, needs a partner
+		account the agent cannot create; the skill explains the steps instead.
+	</p>
+	<p>
+		The same skill covers the rest of the road: an organisation that registers its own app instead
+		of using yours, the consent step and how to check the first sync with
+		<code>rocketflare connectors status</code>, and a table that turns each Microsoft sign-in error
+		code into its fix. Settings → Connections follows the same split: your platform's own admins see
+		the deployment setup, a customer's admin sees only the consent step — or, when the deployment's
+		app is not set up yet, a note to ask the operator and the option to use their own app — and
+		members see the status and nothing to press.
+	</p>
 
 	<h2>Inside one organisation, people still see only their own</h2>
 	<p>
