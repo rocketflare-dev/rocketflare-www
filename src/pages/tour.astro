@@ -107,12 +107,12 @@ const stops: Stop[] = [
 			dark: loginDark,
 			alt: 'The sign-in page: an email field for a magic link, and four dev quick-login buttons for the demo owner, admin, member and global admin',
 			url: `${HOST}/login`,
-			caption: 'Magic link, or a demo account while developing. Google and Microsoft appear once their keys are set.',
+			caption: 'Magic link, or a demo account while developing. Google, Microsoft and your own identity provider appear once their keys are set.',
 		},
 		callout: {
 			tone: 'blue',
-			title: 'Google and Microsoft too',
-			body: 'Add a client id and secret and the button appears; a provider whose email is not verified is refused. The demo-account buttons do not exist in production.',
+			title: 'Google, Microsoft or your own single sign-on',
+			body: 'Add a client id and secret and the button appears; a provider whose email is not verified is refused. Point it at any OIDC issuer — Okta, Entra ID, Keycloak, Auth0 — and you can make that the only way in. The demo-account buttons do not exist in production.',
 		},
 	},
 	{

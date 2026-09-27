@@ -76,7 +76,7 @@ export const CONCEPTS: Concept[] = [
 		slug: 'auth',
 		num: '03',
 		title: 'Authentication',
-		blurb: 'Sign in with nothing configured: magic links, Google or Microsoft, and API keys, all over sessions stored as database rows.',
+		blurb: 'Sign in with nothing configured: magic links, Google or Microsoft, your own OIDC identity provider, and API keys, all over sessions stored as database rows.',
 		tone: 'purple',
 		icon: 'key',
 		anchor: '2-auth',

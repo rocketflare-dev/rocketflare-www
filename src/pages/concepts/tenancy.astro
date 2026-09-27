@@ -128,7 +128,8 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		<p>
 			A membership change is a nudge to the people it moved, so somebody who loses a group watches
 			the content disappear rather than clicking into a 404. There is no directory sync yet: SCIM
-			groups and SAML group claims are the obvious next step, and the kit speaks neither protocol.
+			groups and identity-provider group claims are the obvious next step. The kit speaks neither
+			SCIM nor SAML, and its OIDC sign-in reads a <code>groups</code> claim without mapping it.
 		</p>
 	</div>
 

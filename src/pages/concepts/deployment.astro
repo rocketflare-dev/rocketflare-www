@@ -29,6 +29,8 @@ const differ = [
 		'apps/web/wrangler.staging.toml',
 		'apps/web/tests/config/wrangler-parity.test.ts',
 		'.github/workflows/deploy.yml',
+		'scripts/deployer.mjs',
+		'docs/DEPLOYER.md',
 		'apps/web/scripts/migrate.ts',
 	]}
 >
@@ -166,7 +168,7 @@ const differ = [
 		<tbody>
 			<tr><td>Non-secret configuration</td><td><code>[vars]</code> in each toml, committed</td></tr>
 			<tr><td>Worker secrets</td><td><code>wrangler secret put</code> per environment; <code>.dev.vars</code> locally, git-ignored</td></tr>
-			<tr><td>Continuous-integration secrets</td><td>GitHub environments, one set per environment</td></tr>
+			<tr><td>Continuous-integration secrets</td><td>GitHub environments, one set per environment — or none at all with an external deployer</td></tr>
 			<tr><td>Resource ids</td><td>the tomls — Hyperdrive and KV ids are not secrets</td></tr>
 		</tbody>
 	</table>
@@ -183,6 +185,34 @@ const differ = [
 		</p>
 	</div>
 
+	<h2>Deploying without a Cloudflare token in CI</h2>
+	<p>
+		A Cloudflare token that can deploy a Worker can also bind any resource in the account into it —
+		another app's bucket, queue or database. A CI job that holds one can therefore reach far more
+		than the app it is shipping. Setting the repository variable <code>DEPLOYER_URL</code> takes
+		the token out of CI altogether: the deploy job holds no Cloudflare token and no database
+		credential, proves who it is with a short-lived GitHub OIDC token, and hands its build to an
+		external deployer.
+	</p>
+	<pre><code>start     -> a ticket opens; the deployer may wait for a person to approve it
+upload    -> the dry-run build is checked against the app's allowed bindings, stored undeployed
+migrate   -> only now: short-lived migration credentials, pnpm db:migrate:ci
+activate  -> the stored version goes live
+finish    -> always runs; credentials revoked, ticket closed</code></pre>
+	<div class="why">
+		<p>
+			<strong>Why the build is checked before any credential exists.</strong> A refused build must
+			not have touched the database. So the deployer inspects the bindings first and issues
+			migration credentials only after it has accepted the build; a rejected or never-approved
+			ticket gets nothing.
+		</p>
+	</div>
+	<p>
+		The kit ships the client, <code>scripts/deployer.mjs</code>, and the contract any deployer
+		implements — a versioned protocol in <code>docs/DEPLOYER.md</code>. It does not ship a deployer.
+		With the variable unset, the job deploys with its own token exactly as described above.
+	</p>
+
 	<h2>Migrations run against the direct database host</h2>
 	<p>
 		Hyperdrive is itself a connection pooler, so it points at the database's direct host rather than
@@ -194,5 +224,11 @@ const differ = [
 		The reason is specific: a pooled backend can carry a stale read-only transaction setting that
 		blocks schema changes. Migrations then fail in a way that looks like a permissions problem and
 		is not. Rewriting the host in one place means nobody has to remember.
+	</p>
+	<p>
+		The migration also runs fine as Neon's owner role, which is not a superuser. Postgres lets only
+		a superuser even mention the <code>SUPERUSER</code>, <code>BYPASSRLS</code> or
+		<code>REPLICATION</code> attributes, so the step that locks down the app's role sets those three
+		only when it is running as one, and otherwise relies on a new role having them off already.
 	</p>
 </ConceptLayout>
