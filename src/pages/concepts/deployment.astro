@@ -16,7 +16,7 @@ const shared = [
 const differ = [
 	{ key: 'name', left: 'rocketflare', right: 'rocketflare-staging' },
 	{ key: 'APP_URL', left: 'https://app host', right: 'https://staging host' },
-	{ key: 'hyperdrive, kv ids', left: 'production', right: 'staging' },
+	{ key: 'kv (and hyperdrive) ids', left: 'production', right: 'staging' },
 	{ key: 'queue', left: 'rocketflare-jobs', right: 'rocketflare-jobs-staging' },
 	{ key: 'workflow', left: 'rocketflare-agent-run', right: '…-agent-run-staging' },
 	{ key: 'bucket', left: 'rocketflare-files', right: 'rocketflare-files-staging' },
@@ -215,9 +215,10 @@ finish    -> always runs; credentials revoked, ticket closed</code></pre>
 
 	<h2>Migrations run against the direct database host</h2>
 	<p>
-		Hyperdrive is itself a connection pooler, so it points at the database's direct host rather than
-		its pooled one — stacking a pooler on a pooler adds a hop and a second transaction-mode layer
-		for nothing. The migration script goes further and rewrites a pooled host to the direct host
+		An app on the <code>neon</code> driver holds Neon's pooled connection string as a Worker secret. An
+		app on <code>postgres</code> goes through Hyperdrive, which is itself a connection pooler, so it
+		points at the database's direct host rather than its pooled one — stacking a pooler on a pooler
+		adds a hop and a second transaction-mode layer for nothing. The migration script goes further and rewrites a pooled host to the direct host
 		itself, whichever form the connection string arrives in.
 	</p>
 	<p>

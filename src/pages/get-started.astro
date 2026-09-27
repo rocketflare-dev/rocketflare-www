@@ -322,7 +322,8 @@ const provisionTurns = [
 		<p class="after">
 			Without an agent, the same thing is <code>{PROVISION_CMD}</code> (add
 			<code>{PROVISION_SKIP_EMAIL_FLAG}</code> when there is no Resend account). It creates the
-			Neon project and its staging branch; Hyperdrive, KV, the queue and the R2 bucket; writes the
+			Neon project and its staging branch; KV, the queue and the R2 bucket (plus Hyperdrive if you
+			choose the postgres driver); writes the
 			ids into both wrangler files; runs the migrations; sets the GitHub environment secrets;
 			deploys staging; sets the Worker secrets over stdin; and creates and verifies the Resend
 			domain with its DNS records on Cloudflare. The step-by-step manual path is
@@ -352,7 +353,7 @@ const provisionTurns = [
 			</Callout>
 			<Callout tone="yellow" title="Deploying needs Workers Paid">
 				<ConceptIcon slot="icon" name="rocket" />
-				<p>Running it on your laptop costs nothing. Deploying needs the paid Workers plan, because the database connection pool (Hyperdrive) and the workflows the agents run on are paid features.</p>
+				<p>Running it on your laptop costs nothing. Deploying needs the paid Workers plan, because the workflows the agents run on are a paid feature (and so is Hyperdrive, for an app that uses it).</p>
 			</Callout>
 		</div>
 	</section>

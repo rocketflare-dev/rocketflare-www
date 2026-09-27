@@ -11,45 +11,49 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		'apps/web/scripts/migrate.ts',
 	]}
 >
-	<h2>One driver: postgres.js and Drizzle, one client per request</h2>
+	<h2>Two drivers, one client per request</h2>
 	<p>
-		The kit talks to Postgres through <code>postgres.js</code> and Drizzle, and nothing else. There is
-		no second driver for edge cases, no serverless HTTP client alongside the TCP one, and no adapter
-		layer papering over the difference — which means there is exactly one place where connection
-		semantics, transactions and error shapes are decided.
+		Each deployment picks its driver with one setting, <code>DATABASE_DRIVER</code>. <code>neon</code>
+		uses Neon's serverless driver: every query is one HTTPS round trip, and a transaction opens a
+		WebSocket for its own duration. <code>postgres</code> uses <code>postgres.js</code> through
+		Hyperdrive and reaches any Postgres. A fresh copy of the kit deploys on <code>neon</code>. A copy
+		that never set the variable stays on <code>postgres</code>, so upgrading changes nothing.
 	</p>
 	<p>
-		<code>createDatabase(url)</code> returns a client and a matching <code>close</code>. A client is
-		built by the database middleware for an HTTP request, or at the top of a queue consumer, a
-		workflow step or a cron task, and is closed in <code>waitUntil</code> or a <code>finally</code>.
-		Nothing is shared at module scope, because an isolate may be discarded between any two requests
-		and a connection held across that boundary is a leak you cannot see.
+		Application code never sees which one it is on. <code>openDatabase(env)</code> returns a client and
+		a matching <code>close</code>, typed as the base both drivers share. It is built by the database
+		middleware for an HTTP request, or at the top of a queue consumer, a workflow step or a cron
+		task, and is closed in <code>waitUntil</code> or a <code>finally</code>. Nothing is shared at module
+		scope, because an isolate may be discarded between any two requests and a connection held across
+		that boundary is a leak you cannot see.
 	</p>
 
 	<div class="why">
 		<p>
-			<strong>Why <code>postgres.js</code>.</strong> Transactions. Invite acceptance and organisation
-			creation both write several tables and must not half-happen, and the row-level-security path
-			needs a session setting scoped to a transaction. The HTTP-based drivers popular in serverless
-			cannot do either. Hyperdrive already provides the pooling that the HTTP drivers were invented
-			to avoid needing, so the trade goes the other way here.
+			<strong>Why two, and why these two.</strong> Hyperdrive allows 25 configurations per account,
+			so a platform running dozens of apps cannot give each one its own; Neon's HTTP path needs none,
+			measured at about 105 ms a query against 95 ms through Hyperdrive, and it works from coding
+			sandboxes that allow no outbound TCP. But a starter for business software cannot require one
+			vendor's database, and a single app gets Hyperdrive's read cache for free. So both stay, and
+			the difference between them is kept to one file.
 		</p>
 	</div>
 
-	<h2>How the connection string is resolved</h2>
+	<h2>Where the two drivers differ, and how that is contained</h2>
 	<p>
-		The URL is resolved by a single expression: a preview override if one is set, otherwise
-		Hyperdrive's connection string, otherwise <code>DATABASE_URL</code>. Production goes through
-		Hyperdrive to Neon; local development uses Hyperdrive's local connection string against Docker;
-		tests point at a throwaway Postgres on another port. Same code path, three environments — the
-		configuration differs, the resolution logic does not.
+		Almost all data access goes through Drizzle's query builder, which returns the same thing on
+		both. The one real difference is a raw <code>execute()</code>: <code>postgres.js</code> returns the
+		rows as an array, Neon returns an object with a <code>rows</code> field. Code reads a raw result
+		through two helpers, <code>rows()</code> and <code>affected()</code>, and a check in the test gate
+		fails any code that indexes or casts a raw result instead. Raw SQL that returns a list uses
+		<code>json_agg</code>, because only one of the drivers parses a Postgres array.
 	</p>
 	<p>
-		Hyperdrive is the pool, so each client's own maximum is small. It is a transaction-mode pooler,
-		which means <code>LISTEN</code> and <code>NOTIFY</code>, advisory locks and prepared statements are
-		unavailable — none of which appear on the request path. Realtime goes through the Durable Object
-		hub instead of <code>NOTIFY</code>, and single-flight locking goes through KV instead of advisory
-		locks.
+		Local development and the test gate run <code>postgres</code> against Docker: one command, no
+		extra container. A second CI job runs the whole API suite on <code>neon</code> through a local
+		Neon proxy, so the path a fresh copy deploys on is tested on every change. Either way, neither
+		pooler allows <code>LISTEN</code>/<code>NOTIFY</code>, advisory locks or prepared statements on the
+		request path: realtime goes through the Durable Object hub and single-flight locking through KV.
 	</p>
 
 	<h2>Schema conventions: tenant keys, timestamps, enums</h2>
@@ -131,8 +135,8 @@ db-roles --phase=grants # grant DML, revoke the auth-infrastructure tables</code
 		</p>
 	</div>
 	<p>
-		It is off by default because the well-known RLS pattern assumes session-mode pooling, and
-		Hyperdrive resets connections between uses. The setting therefore has to be applied inside a
+		It is off by default because the well-known RLS pattern assumes session-mode pooling, and both
+		poolers the kit deploys through (Hyperdrive, Neon's) reset connections between uses. The setting therefore has to be applied inside a
 		transaction on every request, and the effect on latency and on the pooler's query cache is
 		something to measure on real infrastructure before turning on — not to assume.
 	</p>
