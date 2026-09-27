@@ -1,0 +1,231 @@
+---
+/**
+ * One page per plugin: the facts from src/data/plugins.ts (version, minKit, what it needs, the
+ * install commands, its skills) and, below them, the plugin's own README — synced into
+ * src/content/plugins/<id>.md by `npm run sync:plugins`, so the prose is written once, in the
+ * plugin's repository, and kept in step from there.
+ *
+ * A plugin that declares a `readme` and has no synced copy FAILS the build rather than shipping a
+ * page with a hole in it; the vendored plugin declares none and gets the facts alone.
+ */
+import type { MarkdownInstance } from 'astro'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import CloudDivider from '../../components/CloudDivider.astro'
+import Terminal from '../../components/Terminal.astro'
+import { PLUGINS, installCommand, pluginById, pluginPath, type Plugin } from '../../data/plugins'
+
+const readmes = import.meta.glob<MarkdownInstance<Record<string, unknown>>>(
+	'../../content/plugins/*.md',
+	{ eager: true }
+)
+
+export function getStaticPaths() {
+	return PLUGINS.map((p) => ({ params: { id: p.id } }))
+}
+
+const { id } = Astro.params
+const p: Plugin = pluginById(id as string)
+const readme = p.readme ? readmes[`../../content/plugins/${p.id}.md`] : undefined
+if (p.readme && !readme) {
+	throw new Error(
+		`plugins: '${p.id}' declares readme '${p.readme}' but src/content/plugins/${p.id}.md is missing — run \`npm run sync:plugins\``
+	)
+}
+const install = installCommand(p)
+const requiredBy = PLUGINS.filter((x) => x.requires?.includes(p.id))
+const shipsAs =
+	p.shipsAs === 'installed'
+		? 'Installed by default'
+		: p.shipsAs === 'vendored'
+			? 'Ships in the kit'
+			: 'Add it when you need it'
+const title = `${p.label} plugin — Rocketflare`
+---
+<BaseLayout title={title} description={p.summary}>
+	<header class="plugin-hero page-hero">
+		<div class="wrap">
+			<nav class="crumbs" aria-label="Breadcrumb"><a href="/plugins/">Plugins</a> <span aria-hidden="true">/</span> <span>{p.label}</span></nav>
+			<div class="hero-copy">
+				<span class="eyebrow">{shipsAs}</span>
+				<h1>{p.label}</h1>
+				<p class="lede">{p.summary}</p>
+			</div>
+		</div>
+		<CloudDivider fill="var(--bg)" />
+	</header>
+
+	<section class="detail">
+		<div class="wrap detail-grid">
+			<aside class="facts-card tone-green" aria-labelledby="facts-title">
+				<h2 id="facts-title">At a glance</h2>
+				<dl class="facts">
+					<div><dt>Plugin id</dt><dd><code>{p.id}</code></dd></div>
+					<div><dt>Version</dt><dd><code>{p.version}</code></dd></div>
+					<div><dt>Needs kit</dt><dd><code>{p.minKit}</code> or later</dd></div>
+					{p.requires && (
+						<div>
+							<dt>Needs plugin</dt>
+							<dd>{p.requires.map((r) => <a href={pluginPath(r)}><code>{r}</code></a>)}</dd>
+						</div>
+					)}
+					{requiredBy.length > 0 && (
+						<div>
+							<dt>Needed by</dt>
+							<dd>{requiredBy.map((r) => <a href={pluginPath(r)}><code>{r.id}</code></a>)}</dd>
+						</div>
+					)}
+					{p.skills && (
+						<div>
+							<dt>Agent skills</dt>
+							<dd class="skills">{p.skills.map((s) => <code>{s}</code>)}</dd>
+						</div>
+					)}
+				</dl>
+				<p class="links">
+					<a href={p.docsUrl ?? p.repo} target="_blank" rel="noopener">Source</a>
+					<span aria-hidden="true">·</span>
+					<a href={p.changelogUrl} target="_blank" rel="noopener">Changelog</a>
+					{p.concept && (
+						<Fragment>
+							<span aria-hidden="true">·</span>
+							<a href={`/concepts/${p.concept}/`}>How it works</a>
+						</Fragment>
+					)}
+				</p>
+			</aside>
+
+			<div class="main-col">
+				<section aria-labelledby="install-title">
+					<h2 id="install-title">Installing it</h2>
+					{install ? (
+						<Fragment>
+							{p.requires && (
+								<p class="install-note first">
+									Install {p.requires.map((r) => <a href={pluginPath(r)}><code>{r}</code></a>)} first.
+								</p>
+							)}
+							<Terminal
+								title="zsh — your app"
+								lines={[{ cmd: install }, { cmd: `${install} --apply` }]}
+								expect="The first prints the plan and stops; the second writes it."
+							/>
+							<p class="install-note">
+								Then generate and run its migration —
+								<code>pnpm db:generate --name plugin-{p.id}-{p.version}</code> and
+								<code>pnpm db:migrate</code> — and do the handful of steps the plan lists that a
+								plugin may not do for you.
+							</p>
+						</Fragment>
+					) : (
+						<p class="install-note">
+							Nothing to install: it is already in the tree at
+							<code>apps/web/src/plugins/{p.id}/</code>. It exists to be read and then deleted —
+							<code>pnpm plugin remove {p.id} --apply</code>, then a migration.
+						</p>
+					)}
+				</section>
+
+				<section aria-labelledby="adds-title">
+					<h2 id="adds-title">What it adds</h2>
+					<ul class="adds">{p.adds.map((a) => <li set:html={a} />)}</ul>
+				</section>
+
+				{readme && (
+					<article class="readme" aria-labelledby="readme-title">
+						<h2 id="readme-title" class="readme-head">From the README</h2>
+						<p class="readme-source">
+							Synced from <a href={String(readme.frontmatter.source)} target="_blank" rel="noopener">the plugin's README</a>
+							— the plugin's own documentation, kept in step with its repository.
+						</p>
+						<readme.Content />
+					</article>
+				)}
+			</div>
+		</div>
+	</section>
+</BaseLayout>
+
+<style>
+	.plugin-hero {
+		position: relative;
+		padding-bottom: 7rem;
+		background: linear-gradient(180deg, var(--sky-top), var(--sky-mid) 60%, var(--bg));
+	}
+	.crumbs { font-size: 0.9rem; margin-bottom: 1rem; color: var(--text-muted); }
+
+	.detail { padding: 0 0 5rem; background: var(--bg); }
+	.detail-grid {
+		display: grid;
+		grid-template-columns: minmax(0, 17rem) minmax(0, 1fr);
+		gap: 2.4rem;
+		align-items: start;
+	}
+	.facts-card {
+		position: sticky;
+		top: 5.5rem;
+		background: var(--card);
+		border: 1px solid var(--border);
+		border-top: 4px solid var(--accent);
+		border-radius: 16px;
+		padding: 1.3rem 1.4rem;
+		box-shadow: var(--shadow-sm);
+	}
+	.facts-card h2 { font-size: 1rem; margin: 0 0 0.9rem; }
+	.facts { display: grid; gap: 0.7rem; margin: 0; }
+	.facts dt { color: var(--text-muted); font-size: 0.8rem; }
+	.facts dd { margin: 0.15rem 0 0; font-size: 0.9rem; display: flex; flex-wrap: wrap; gap: 0.35rem; }
+	.links { margin: 1.1rem 0 0; display: flex; flex-wrap: wrap; gap: 0.45rem; font-size: 0.9rem; }
+	.links span { color: var(--text-muted); }
+
+	.main-col { max-width: 78ch; min-width: 0; }
+	.main-col > section + section, .main-col > section + .readme { margin-top: 2.6rem; }
+	.main-col h2 { font-size: 1.5rem; margin: 0 0 0.8rem; }
+	.install-note { font-size: 0.92rem; color: var(--text-muted); margin: 0.9rem 0 0; }
+	.install-note.first { margin: 0 0 0.4rem; }
+	.adds { margin: 0; padding-left: 1.1rem; display: grid; gap: 0.65rem; }
+	.adds li { line-height: 1.55; }
+
+	.readme { border-top: 1px solid var(--border); padding-top: 2.2rem; }
+	.readme-source { font-size: 0.88rem; color: var(--text-muted); margin: -0.3rem 0 1.6rem; }
+	/* The synced README: its `##` sections sit under "From the README", so they read one step down. */
+	.readme :global(h2:not(.readme-head)) { font-size: 1.2rem; margin: 2.2rem 0 0.6rem; }
+	.readme :global(h3) { font-size: 1.05rem; margin: 1.6rem 0 0.5rem; }
+	.readme :global(p), .readme :global(li) { line-height: 1.6; }
+	/* Links sit inside running text here, so they are underlined rather than told apart by colour. */
+	.readme :global(a), .readme-source a, .install-note a { text-decoration: underline; text-underline-offset: 0.18em; }
+	.readme :global(ul), .readme :global(ol) { padding-left: 1.2rem; }
+	.readme :global(li + li) { margin-top: 0.35rem; }
+	.readme :global(pre) { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 0.85rem; }
+	.readme :global(code) { overflow-wrap: anywhere; }
+	.readme :global(blockquote) {
+		margin: 1rem 0;
+		padding: 0.2rem 1rem;
+		border-left: 4px solid var(--border-bright);
+		color: var(--text-muted);
+	}
+	.readme :global(table) {
+		width: 100%;
+		border-collapse: collapse;
+		margin: 1.2rem 0;
+		font-size: 0.9rem;
+	}
+	.readme :global(th) {
+		text-align: left;
+		font-size: 0.74rem;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--text-muted);
+		border-bottom: 2px solid var(--border);
+		padding: 0.5rem 0.6rem;
+	}
+	.readme :global(td) {
+		border-bottom: 1px solid var(--border);
+		padding: 0.55rem 0.6rem;
+		vertical-align: top;
+	}
+
+	@media (max-width: 900px) {
+		.detail-grid { grid-template-columns: minmax(0, 1fr); }
+		.facts-card { position: static; }
+	}
+</style>

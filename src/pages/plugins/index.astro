@@ -11,15 +11,20 @@
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import CloudDivider from '../../components/CloudDivider.astro'
 import Callout from '../../components/Callout.astro'
-import Terminal from '../../components/Terminal.astro'
 import { pageByPath } from '../../data/pages'
-import { PLUGINS, PLUGIN_COUNT, installCommand } from '../../data/plugins'
+import { PLUGINS, PLUGIN_COUNT, pluginPath } from '../../data/plugins'
 import { numberWord } from '../../data/concepts'
 
 const page = pageByPath('/plugins/')
 if (!page) throw new Error('Page not in the registry: /plugins/')
 
-const cards = PLUGINS.map((p) => ({ p, install: installCommand(p) }))
+/** What the search matches: name, id, summary, what it adds (tags stripped), skills and needs. */
+const searchText = (p: (typeof PLUGINS)[number]) =>
+	[p.id, p.label, p.summary, ...p.adds, ...(p.skills ?? []), ...(p.requires ?? [])]
+		.join(' ')
+		.replace(/<[^>]+>/g, ' ')
+		.toLowerCase()
+const cards = PLUGINS.map((p) => ({ p, text: searchText(p) }))
 ---
 <BaseLayout title={page.title} description={page.description} noindex={!page.ready}>
 	<header class="plugins-hero page-hero">
@@ -39,86 +44,65 @@ const cards = PLUGINS.map((p) => ({ p, install: installCommand(p) }))
 		<CloudDivider fill="var(--bg)" />
 	</header>
 
-	<section class="catalogue">
+	<section class="catalogue" aria-labelledby="catalogue-title">
 		<div class="wrap">
-			{cards.map(({ p, install }, i) => (
-				<article id={p.id} class:list={['pcard', 'reveal', i % 2 === 1 ? 'tone-cyan' : 'tone-green']} aria-labelledby={`${p.id}-title`}>
-					<div class="pcard-head">
-						<div>
-							<span class="eyebrow">
-								{p.shipsAs === 'installed'
-									? 'Installed by default'
-									: p.shipsAs === 'vendored'
-										? 'Ships in the kit'
-										: 'Add it when you need it'}
-							</span>
-							<h2 id={`${p.id}-title`}>{p.label}</h2>
-							<p class="summary">{p.summary}</p>
-						</div>
-						<dl class="facts">
-							<div><dt>Plugin id</dt><dd><code>{p.id}</code></dd></div>
-							<div><dt>Version</dt><dd><code>{p.version}</code></dd></div>
-							<div><dt>Needs kit</dt><dd><code>{p.minKit}</code> or later</dd></div>
-							{p.requires && (
-								<div>
-									<dt>Needs plugin</dt>
-									<dd>{p.requires.map((id) => <a href={`#${id}`}><code>{id}</code></a>)}</dd>
-								</div>
-							)}
-						</dl>
-					</div>
-
-					<div class="pcard-body">
-						<div class="adds">
-							<h3>What it adds</h3>
-							<ul>{p.adds.map((a) => <li set:html={a} />)}</ul>
-						</div>
-						<div class="install">
-							<h3>Installing it</h3>
-							{install ? (
-								<Fragment>
-									<Terminal
-										title={`zsh — your app`}
-										lines={[{ cmd: install }, { cmd: `${install} --apply` }]}
-										expect="The first prints the plan and stops; the second writes it."
-									/>
-									<p class="install-note">
-										Then generate and run its migration —
-										<code>pnpm db:generate --name plugin-{p.id}-{p.version}</code> and
-										<code>pnpm db:migrate</code> — and do the handful of steps the plan lists that a
-										plugin may not do for you.
-									</p>
-								</Fragment>
-							) : (
-								<p class="install-note vendored">
-									Nothing to install: it is already in the tree at
-									<code>apps/web/src/plugins/{p.id}/</code>. It exists to be read and then deleted —
-									<code>pnpm plugin remove {p.id} --apply</code>, then a migration.
-								</p>
-							)}
-							<p class="links">
-								<a href={p.repo} target="_blank" rel="noopener">{p.repoLabel}</a>
-								<span aria-hidden="true">·</span>
-								<a href={p.changelogUrl} target="_blank" rel="noopener">Changelog</a>
-								{p.docsUrl && (
-									<Fragment>
-										<span aria-hidden="true">·</span>
-										<a href={p.docsUrl} target="_blank" rel="noopener">Docs</a>
-									</Fragment>
-								)}
-								{p.concept && (
-									<Fragment>
-										<span aria-hidden="true">·</span>
-										<a href={`/concepts/${p.concept}/`}>How it works</a>
-									</Fragment>
-								)}
-							</p>
-						</div>
-					</div>
-				</article>
-			))}
+			<h2 id="catalogue-title" class="visually-hidden">The plugins</h2>
+			<div class="search">
+				<label for="plugin-search">Search plugins</label>
+				<input
+					id="plugin-search"
+					type="search"
+					placeholder="Name, feature or skill — e.g. calendar, cubes, search"
+					autocomplete="off"
+					spellcheck="false"
+				/>
+				<p class="search-count" aria-live="polite" id="plugin-search-count">{PLUGIN_COUNT} plugins</p>
+			</div>
+			<ul class="grid" role="list">
+				{cards.map(({ p, text }, i) => (
+					<li id={p.id} class:list={['pcard', 'reveal', i % 2 === 1 ? 'tone-cyan' : 'tone-green']} data-search={text}>
+						<span class="eyebrow">
+							{p.shipsAs === 'installed'
+								? 'Installed by default'
+								: p.shipsAs === 'vendored'
+									? 'Ships in the kit'
+									: 'Add it when you need it'}
+						</span>
+						<h3><a class="card-link" href={pluginPath(p)}>{p.label}</a></h3>
+						<p class="summary">{p.summary}</p>
+						<ul class="badges" role="list" aria-label={`${p.label} at a glance`}>
+							<li><code>{p.version}</code></li>
+							<li>kit ≥ <code>{p.minKit}</code></li>
+							{p.requires?.map((r) => <li class="needs">needs <code>{r}</code></li>)}
+							{p.skills && <li>{p.skills.length} {p.skills.length === 1 ? 'skill' : 'skills'}</li>}
+						</ul>
+					</li>
+				))}
+			</ul>
+			<p class="no-match" hidden>No plugin matches that. Try a broader word, or <a href="/concepts/plugins/">read how plugins work</a>.</p>
 		</div>
 	</section>
+
+	<script>
+		// Filters the cards as you type. Without JS the input is hidden and every card shows.
+		const input = document.querySelector<HTMLInputElement>('#plugin-search')
+		const count = document.querySelector('#plugin-search-count')
+		const cards = [...document.querySelectorAll<HTMLElement>('.grid > .pcard')]
+		const none = document.querySelector<HTMLElement>('.no-match')
+		const apply = () => {
+			const words = (input?.value ?? '').toLowerCase().split(/\s+/).filter(Boolean)
+			let shown = 0
+			for (const card of cards) {
+				const hit = words.every((w) => (card.dataset.search ?? '').includes(w))
+				card.hidden = !hit
+				if (hit) shown++
+			}
+			if (count) count.textContent = words.length ? `${shown} of ${cards.length} plugins` : `${cards.length} plugins`
+			if (none) none.hidden = shown > 0
+		}
+		input?.addEventListener('input', apply)
+		apply()
+	</script>
 
 	<section class="after">
 		<div class="wrap-narrow">
@@ -155,58 +139,80 @@ const cards = PLUGINS.map((p) => ({ p, install: installCommand(p) }))
 	}
 
 	.catalogue { padding: 0 0 4rem; background: var(--bg); }
+	.visually-hidden {
+		position: absolute; width: 1px; height: 1px; overflow: hidden;
+		clip: rect(0 0 0 0); white-space: nowrap;
+	}
+
+	.search { display: grid; gap: 0.45rem; max-width: 36rem; margin: 0 0 1.8rem; }
+	.search label { font-weight: 600; }
+	.search input {
+		font: inherit;
+		padding: 0.7rem 0.95rem;
+		border-radius: 12px;
+		border: 1px solid var(--border-bright);
+		background: var(--card);
+		color: var(--text);
+	}
+	.search input::placeholder { color: var(--text-muted); }
+	.search-count { margin: 0; font-size: 0.88rem; color: var(--text-muted); }
+	:global(html:not(.js)) .search { display: none; }
+
+	.grid {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(min(100%, 17.5rem), 1fr));
+		gap: 1.2rem;
+	}
 	.pcard {
+		position: relative;
+		display: flex;
+		flex-direction: column;
 		background: var(--card);
 		border: 1px solid var(--border);
 		border-top: 4px solid var(--accent);
-		border-radius: 18px;
-		padding: 2rem;
+		border-radius: 16px;
+		padding: 1.2rem 1.3rem 1.1rem;
 		box-shadow: var(--shadow-sm);
 		scroll-margin-top: 5rem;
+		transition: border-color 0.15s ease, transform 0.15s ease;
 	}
-	.pcard + .pcard { margin-top: 2rem; }
-
-	.pcard-head {
-		display: grid;
-		grid-template-columns: minmax(0, 1fr) auto;
-		gap: 1.6rem 2.4rem;
-		align-items: start;
-		padding-bottom: 1.4rem;
-		border-bottom: 1px solid var(--border);
+	.pcard[hidden] { display: none; }
+	.pcard:hover { border-color: var(--border-bright); transform: translateY(-2px); }
+	.pcard:focus-within { border-color: var(--accent); }
+	.pcard h3 { margin: 0.25rem 0 0.45rem; font-size: 1.2rem; }
+	/* The whole card is the link's target; the link itself stays the one focusable thing. */
+	.card-link { color: var(--text-bright); text-decoration: none; }
+	.card-link::after { content: ''; position: absolute; inset: 0; border-radius: 16px; }
+	.card-link:focus-visible { outline: none; }
+	.pcard:has(.card-link:focus-visible) { outline: 3px solid var(--orange); outline-offset: 3px; }
+	.summary {
+		margin: 0 0 0.9rem;
+		color: var(--text-muted);
+		font-size: 0.92rem;
+		line-height: 1.5;
+		display: -webkit-box;
+		-webkit-line-clamp: 4;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
 	}
-	.pcard-head h2 { margin: 0.2rem 0 0.5rem; font-size: 1.6rem; }
-	.summary { margin: 0; color: var(--text-muted); max-width: 52ch; }
-
-	.facts { display: grid; gap: 0.5rem; margin: 0; }
-	.facts div { display: flex; gap: 0.6rem; align-items: baseline; justify-content: flex-end; }
-	.facts dt { color: var(--text-muted); font-size: 0.85rem; }
-	.facts dd { margin: 0; font-size: 0.85rem; }
-
-	.pcard-body {
-		display: grid;
-		grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
-		gap: 2.4rem;
-		padding-top: 1.5rem;
+	.badges { list-style: none; margin: auto 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.35rem; }
+	.badges li {
+		font-size: 0.78rem;
+		padding: 0.15rem 0.55rem;
+		border-radius: 999px;
+		background: var(--card-alt);
+		border: 1px solid var(--border);
+		color: var(--text);
 	}
-	.pcard-body h3 { font-size: 1rem; margin: 0 0 0.8rem; }
-	.adds ul { margin: 0; padding-left: 1.1rem; display: grid; gap: 0.65rem; }
-	.adds li { font-size: 0.95rem; line-height: 1.55; }
-
-	.install-note { font-size: 0.9rem; color: var(--text-muted); margin: 0.9rem 0 0; }
-	.install-note code { font-size: 0.85rem; }
-	.vendored { margin-top: 0; }
-	.links { margin: 1rem 0 0; display: flex; flex-wrap: wrap; gap: 0.5rem; font-size: 0.9rem; }
-	.links span { color: var(--text-muted); }
+	.badges code { font-size: 0.76rem; background: none; padding: 0; }
+	.badges .needs { border-color: var(--accent); }
+	.no-match { color: var(--text-muted); }
 
 	.after { padding: 1rem 0 5rem; background: var(--bg); }
 	.after h2 { margin-top: 2.4rem; }
 	.after-links { display: flex; flex-wrap: wrap; gap: 0.8rem; margin-top: 1.6rem; }
 
-	@media (max-width: 900px) {
-		.pcard-head, .pcard-body { grid-template-columns: minmax(0, 1fr); }
-		.facts div { justify-content: flex-start; }
-	}
-	@media (max-width: 560px) {
-		.pcard { padding: 1.4rem; }
-	}
 </style>

@@ -19,12 +19,18 @@ import { execFileSync } from 'node:child_process'
 const EXTRA_SOURCES: Record<string, string[]> = {
 	'/changelog/': ['src/data/releases.ts'],
 	'/concepts/': ['src/data/concepts.ts'],
+	'/plugins/': ['src/data/plugins.ts'],
 }
 
 /** `/concepts/ai/` → the two places Astro would look for that route's source. */
 function candidateSources(pathname: string): string[] {
 	const slug = pathname.replace(/^\/|\/$/g, '')
 	if (slug === '') return ['src/pages/index.astro']
+	// A plugin's page is one dynamic route over the data file and its synced README.
+	const plugin = slug.match(/^plugins\/([a-z0-9-]+)$/)
+	if (plugin) {
+		return ['src/pages/plugins/[id].astro', 'src/data/plugins.ts', `src/content/plugins/${plugin[1]}.md`]
+	}
 	return [`src/pages/${slug}.astro`, `src/pages/${slug}/index.astro`]
 }
 

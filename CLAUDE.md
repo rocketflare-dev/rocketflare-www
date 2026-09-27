@@ -37,6 +37,7 @@ curl -sI http://127.0.0.1:4399/install.sh | grep -i content-type  # application/
 curl -s http://127.0.0.1:4399/install.sh | cmp - ../rocketflare/scripts/install.sh   # byte-identical
 curl -s http://127.0.0.1:4399/sitemap-0.xml | grep -c '/og/'     # 0
 npm run check:releases                                           # /changelog/ matches the kit's docs/upgrades/
+npm run check:plugins                                            # every synced plugin README matches GitHub main
 ```
 
 Then the three scripts in `scripts/verify/` (plain Node, no dependency in this repo: they borrow
@@ -77,6 +78,7 @@ scripts prove the mechanics, not the taste.
 | `src/pages/index.astro` | the landing page |
 | `src/pages/{tour,get-started,who-is-it-for}.astro` | the tour, Get started (literals from `src/data/get-started.ts`), who it's for |
 | `src/pages/changelog.astro` | the kit's releases + how one reaches an existing copy; entries from `src/data/releases.ts`, which mirrors the kit's `docs/upgrades/*.md` frontmatter — regenerate with `npm run sync:releases`, gate with `npm run check:releases` before a release. Porting instructions stay in the kit and are linked, never restated |
+| `src/pages/plugins/{index,[id]}.astro` | the plugin catalogue (a searchable grid of small cards) and one page per plugin. Facts — version, `minKit`, requires, skills, install — come from `src/data/plugins.ts`; the prose below them is the plugin's own README, synced into `src/content/plugins/<id>.md` by `npm run sync:plugins` (from GitHub `main` by default, `--ref <tag>` to pin — READMEs are docs and improve without a plugin release). `npm run check:plugins` fails when a synced copy is stale; the build fails when a plugin declares `readme` and has no copy. Edit the README in rocketflare-plugins, never the synced file |
 | `src/pages/og.astro` | the 1200×630 template `public/og-image.png` is captured from (noindex, not in the registry) |
 | `src/pages/concepts/*` | one page per subsystem, plus the index |
 | `src/pages/llms.txt.ts` | the llms.txt map, generated from `pages.ts` + `concepts.ts` |

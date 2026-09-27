@@ -15,7 +15,9 @@
 		"typecheck:worker": "tsc -p worker/tsconfig.json",
 		"types": "wrangler types",
 		"sync:releases": "node scripts/sync-releases.mjs",
-		"check:releases": "node scripts/sync-releases.mjs --check"
+		"check:releases": "node scripts/sync-releases.mjs --check",
+		"sync:plugins": "node scripts/sync-plugins.mjs",
+		"check:plugins": "node scripts/sync-plugins.mjs --check"
 	},
 	"dependencies": {
 		"@astrojs/sitemap": "^3.7.2",
