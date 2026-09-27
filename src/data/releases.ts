@@ -177,6 +177,15 @@ export const RELEASES: Release[] = [
 		migrations: false,
 		areas: ['api', 'ui', 'shared', 'db', 'config', 'docs'],
 	},
+	{
+		version: '0.15.0',
+		date: '2026-09-27',
+		summary:
+			'Choose your database driver per deployment. New apps deploy on Neon’s serverless driver with no Hyperdrive, which scales to fleets of apps and works from sandboxes with no TCP; existing apps keep postgres.js through Hyperdrive and can use any Postgres. Local development is unchanged, one command with no extra container, and CI now tests both drivers. Nothing to do on upgrade unless you want to switch.',
+		breaking: false,
+		migrations: false,
+		areas: ['api', 'db', 'config', 'docs'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */

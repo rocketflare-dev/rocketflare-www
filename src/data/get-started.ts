@@ -250,7 +250,7 @@ export const DEPLOY_ACCOUNTS: DeployAccount[] = [
 			{ label: 'Or add a domain you own', url: 'https://dash.cloudflare.com/?to=/:account/add-site' },
 		],
 		role: 'runs the app',
-		plan: 'Workers Paid — Hyperdrive and Workflows need it',
+		plan: 'Workers Paid — Workflows (and Hyperdrive, if you use it) need it',
 		token: 'an API token',
 		first:
 			'Create the account and put it on Workers Paid. Then add the domain you want the app on — register it there, or move its DNS there — because the app’s hostnames and the email DNS records are created in that zone. No domain yet? Staging gets a workers.dev address and email is skipped.',
@@ -300,7 +300,7 @@ export const PROVISION_PHASES: ProvisionPhase[] = [
 	{ name: 'preflight', plain: 'checks the tokens, the tools, the accounts, and that your domain is on Cloudflare' },
 	{ name: 'email create', plain: 'creates the sending domain on Resend and its DNS records on Cloudflare' },
 	{ name: 'neon', plain: 'creates the Neon project with a staging branch' },
-	{ name: 'cloudflare', plain: 'creates Hyperdrive, KV, the queue and the R2 bucket, and writes their ids into both wrangler files' },
+	{ name: 'cloudflare', plain: 'creates KV, the queue and the R2 bucket (and Hyperdrive, for the postgres driver), and writes their ids into both wrangler files' },
 	{ name: 'migrate', plain: 'runs the migrations on each branch' },
 	{ name: 'github', plain: 'sets the GitHub environment secrets' },
 	{ name: 'urls', plain: 'sets the app URL and routes in each wrangler file' },
