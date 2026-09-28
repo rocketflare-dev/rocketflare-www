@@ -213,6 +213,24 @@ export const RELEASES: Release[] = [
 		migrations: false,
 		areas: ['api', 'config', 'docs'],
 	},
+	{
+		version: '0.15.4',
+		date: '2026-09-28',
+		summary:
+			'TODO: one line, in the site’s voice — what this gives the reader.',
+		breaking: false,
+		migrations: false,
+		areas: ['config'],
+	},
+	{
+		version: '0.15.5',
+		date: '2026-09-28',
+		summary:
+			'TODO: one line, in the site’s voice — what this gives the reader.',
+		breaking: false,
+		migrations: false,
+		areas: ['db'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
