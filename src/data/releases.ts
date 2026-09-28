@@ -213,6 +213,24 @@ export const RELEASES: Release[] = [
 		migrations: false,
 		areas: ['api', 'config', 'docs'],
 	},
+	{
+		version: '0.15.4',
+		date: '2026-09-28',
+		summary:
+			'An app’s deploy no longer fails its parity check: the deploy job runs the parity test alone, not the whole config suite that needs git history its shallow checkout lacks.',
+		breaking: false,
+		migrations: false,
+		areas: ['config'],
+	},
+	{
+		version: '0.15.5',
+		date: '2026-09-28',
+		summary:
+			'Migrations run as a least-privilege database role: the role setup no longer tries to change attributes it cannot, so an app whose migration role lacks CREATEDB deploys cleanly.',
+		breaking: false,
+		migrations: false,
+		areas: ['db'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
