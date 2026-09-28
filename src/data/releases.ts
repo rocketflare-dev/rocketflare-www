@@ -204,6 +204,15 @@ export const RELEASES: Release[] = [
 		migrations: false,
 		areas: ['api', 'config', 'docs'],
 	},
+	{
+		version: '0.15.3',
+		date: '2026-09-28',
+		summary:
+			'Apps deploy with one gate per commit: the default-plugins gate now runs only in the kit, a commit already green in CI skips the gate on deploy, and the neon test run no longer times out.',
+		breaking: false,
+		migrations: false,
+		areas: ['api', 'config', 'docs'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
