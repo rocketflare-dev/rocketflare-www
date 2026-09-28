@@ -195,6 +195,15 @@ export const RELEASES: Release[] = [
 		migrations: false,
 		areas: ['config'],
 	},
+	{
+		version: '0.15.2',
+		date: '2026-09-28',
+		summary:
+			'Renaming the kit now works for any app name: hyphenated names get the right API-key prefix and a green gate, upstream references are kept, and CI proves a renamed copy on every pull request.',
+		breaking: false,
+		migrations: false,
+		areas: ['api', 'config', 'docs'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
