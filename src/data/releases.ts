@@ -186,6 +186,15 @@ export const RELEASES: Release[] = [
 		migrations: false,
 		areas: ['api', 'db', 'config', 'docs'],
 	},
+	{
+		version: '0.15.1',
+		date: '2026-09-28',
+		summary:
+			'A hyphenated app name no longer breaks the evals script after a rename, and a test now keeps the kit’s own name out of its code identifiers.',
+		breaking: false,
+		migrations: false,
+		areas: ['config'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
