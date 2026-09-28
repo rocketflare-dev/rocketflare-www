@@ -231,6 +231,15 @@ export const RELEASES: Release[] = [
 		migrations: false,
 		areas: ['db'],
 	},
+	{
+		version: '0.15.6',
+		date: '2026-09-28',
+		summary:
+			'Magic links survive corporate mail scanners: opening the link no longer uses it up, and signing in takes one press of a button, so Safe Links and Mimecast stop breaking every login.',
+		breaking: false,
+		migrations: false,
+		areas: ['api', 'ui', 'docs'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
