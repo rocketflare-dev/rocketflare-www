@@ -249,6 +249,15 @@ export const RELEASES: Release[] = [
 		migrations: false,
 		areas: ['config', 'db', 'docs'],
 	},
+	{
+		version: '0.15.8',
+		date: '2026-09-29',
+		summary:
+			'The kit keeps its own tests to itself: a copy never inherits the checks that only make sense in the kit, so your app can release on its own version numbers without its test suite objecting.',
+		breaking: false,
+		migrations: false,
+		areas: ['config', 'docs'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
