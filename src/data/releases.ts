@@ -240,6 +240,15 @@ export const RELEASES: Release[] = [
 		migrations: false,
 		areas: ['api', 'ui', 'docs'],
 	},
+	{
+		version: '0.15.7',
+		date: '2026-09-29',
+		summary:
+			'Run the whole test suite without Docker, against a throwaway Neon branch — so a coding agent in a container can prove its change before it ships — behind a safety check that refuses any database you didn’t explicitly name.',
+		breaking: false,
+		migrations: false,
+		areas: ['config', 'db', 'docs'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
