@@ -213,8 +213,8 @@ export const BY_HAND_STEPS: HandStep[] = [
 	},
 	{
 		title: 'Tests',
-		cmds: ['pnpm test:db:up && pnpm test'],
-		verify: 'Every project is green.',
+		cmds: ['pnpm gate'],
+		verify: 'Lint, typecheck, test and build all pass. The test step starts its own database and ends with the driver conformance pass under Neon.',
 	},
 ]
 

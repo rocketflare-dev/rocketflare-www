@@ -258,6 +258,15 @@ export const RELEASES: Release[] = [
 		migrations: false,
 		areas: ['config', 'docs'],
 	},
+	{
+		version: '0.16.0',
+		date: '2026-09-30',
+		summary:
+			'One command, pnpm gate, is now every check an app has: the same gate before a commit, as its only CI job and in a coding sandbox, with app code proved to behave the same on the local and the deployed database driver.',
+		breaking: true,
+		migrations: false,
+		areas: ['api', 'db', 'config', 'docs'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
