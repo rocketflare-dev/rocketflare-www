@@ -111,10 +111,12 @@ globs:
 		Instructions that nothing enforces decay within a month. So the conventions that matter most are
 		tests, and one command runs all of them:
 	</p>
-	<pre><code>pnpm lint && pnpm typecheck && pnpm test && pnpm build</code></pre>
+	<pre><code>pnpm gate</code></pre>
 	<p>
-		That gate runs before every commit and again in CI. Several of its checks exist specifically to
-		catch the mistakes an agent makes:
+		That gate runs lint, typecheck, test and build. It is the same command before every commit, as
+		the single CI job, and in a coding sandbox's ship gate, so nothing passes in one place and fails
+		in another. It starts its own test database. Several of its checks exist specifically to catch
+		the mistakes an agent makes:
 	</p>
 	<table>
 		<thead><tr><th>Check</th><th>What it refuses to let through</th></tr></thead>
@@ -125,6 +127,7 @@ globs:
 			<tr><td>Wrangler parity</td><td>a binding, cron or variable added to one environment and not the other</td></tr>
 			<tr><td>Dashboard templates</td><td>a renamed cube member that would silently break every saved dashboard</td></tr>
 			<tr><td>Bundle check</td><td>a Node-only dependency that type-checks but cannot run on the platform</td></tr>
+			<tr><td>Driver seam</td><td>raw SQL that works on the local driver and breaks on the deployed one — a hand-read error code, session state outside a transaction — and any skipped or driver-specific test in the conformance suite that proves both drivers agree</td></tr>
 		</tbody>
 	</table>
 	<p>
