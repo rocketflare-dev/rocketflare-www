@@ -276,6 +276,15 @@ export const RELEASES: Release[] = [
 		migrations: false,
 		areas: ['ui', 'shared', 'docs'],
 	},
+	{
+		version: '0.16.2',
+		date: '2026-10-04',
+		summary:
+			'Your app numbers its own releases from day one: the rename starts it at 0.1.0 with an empty changelog, and the kit version it came from stays recorded for upgrades.',
+		breaking: false,
+		migrations: false,
+		areas: ['config', 'docs'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
