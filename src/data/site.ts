@@ -30,3 +30,7 @@ export const RESEND_API_KEYS_URL = 'https://resend.com/api-keys'
 
 /** A section of docs/CONCEPTS.md, by its GitHub heading anchor. */
 export const concept = (anchor: string) => `${CONCEPTS_URL}#${anchor}`
+
+/** Rocketflare Launch — the company console the /launch/ overview describes. */
+export const LAUNCH_GITHUB_URL = 'https://github.com/rocketflare-dev/rocketflare-launch'
+export const LAUNCH_CONTACT_URL = 'mailto:clifton@guidemode.dev?subject=Rocketflare%20Launch'
