@@ -267,6 +267,15 @@ export const RELEASES: Release[] = [
 		migrations: false,
 		areas: ['api', 'db', 'config', 'docs'],
 	},
+	{
+		version: '0.16.1',
+		date: '2026-10-04',
+		summary:
+			'Single sign-on only mode no longer signs people in on its own: the login page shows one Continue with button for your issuer, so signing in is always a click.',
+		breaking: false,
+		migrations: false,
+		areas: ['ui', 'shared', 'docs'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */

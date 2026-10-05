@@ -103,11 +103,11 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		issuer that controls the claim — a single-tenant Entra directory, which omits it.
 	</p>
 	<p>
-		<code>AUTH_OIDC_ONLY=true</code> makes the issuer the only way in: the login page sends people
-		straight to it and the Google and Microsoft routes refuse. Magic links are hidden rather than
-		switched off, because invitations still use them. When the issuer publishes an end-session
-		endpoint, signing out signs out there too and comes back to the login page, which does not
-		bounce you straight back in.
+		<code>AUTH_OIDC_ONLY=true</code> makes the issuer the only way in: the login page shows a single
+		button for it and the Google and Microsoft routes refuse. The page never redirects on its own,
+		so signing in is always a click, even when the issuer still has you signed in. Magic links are
+		hidden rather than switched off, because invitations still use them. When the issuer publishes
+		an end-session endpoint, signing out signs out there too and comes back to the login page.
 	</p>
 	<div class="note">
 		<p>
