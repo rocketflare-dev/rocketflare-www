@@ -294,6 +294,15 @@ export const RELEASES: Release[] = [
 		migrations: false,
 		areas: ['config'],
 	},
+	{
+		version: '0.17.0',
+		date: '2026-10-05',
+		summary:
+			'Ship without waiting on the same checks twice: once an app’s code has passed, CI skips re-testing it, a version bump deploys on its parent’s green run, and production gets the exact build staging ran.',
+		breaking: false,
+		migrations: false,
+		areas: ['config', 'docs'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
