@@ -103,7 +103,6 @@ const roadmap = [
 		<!-- 1 · Cover -->
 		<section class="slide slide-cover bg-sky" id="cover">
 			<div class="wrap">
-				<span class="mark"><LogoMark size={64} /></span>
 				<span class="eyebrow">Rocketflare Launch</span>
 				<h1>Unlock your builders, <span class="flare">safely.</span></h1>
 				<p class="lede">
@@ -117,6 +116,7 @@ const roadmap = [
 				</ul>
 				<p class="hint">Scroll, or use the arrow keys</p>
 			</div>
+			<a class="next" href="#problem">Next: The problem <span aria-hidden="true">↓</span></a>
 		</section>
 
 		<!-- 2 · The problem -->
@@ -142,6 +142,7 @@ const roadmap = [
 				</div>
 				<p class="kicker measure">Agents can now write production code. What is scarce is the safe path from a good idea to a governed, running app.</p>
 			</div>
+			<a class="next" href="#idea">Next: The idea <span aria-hidden="true">↓</span></a>
 		</section>
 
 		<!-- 3 · The idea -->
@@ -161,6 +162,7 @@ const roadmap = [
 					</dl>
 				</div>
 			</div>
+			<a class="next" href="#how">Next: How it works <span aria-hidden="true">↓</span></a>
 		</section>
 
 		<!-- 4 · How it works -->
@@ -187,6 +189,7 @@ const roadmap = [
 					<li><strong>Production.</strong> Waits for an approval in Launch, then Launch deploys it.</li>
 				</ol>
 			</div>
+			<a class="next" href="#create">Next: Create an app <span aria-hidden="true">↓</span></a>
 		</section>
 
 		<!-- 5 · Create -->
@@ -205,6 +208,7 @@ const roadmap = [
 				</div>
 				<Screenshot light={createLight} dark={createDark} alt="Launch's Create an app dialog: name Expense approvals, the slug expense-approvals with its staging and production hosts, owner team Finance, a description, and Deploy staging now switched on" url="launch.your-company.com/apps" priority />
 			</div>
+			<a class="next" href="#build">Next: Build by chatting <span aria-hidden="true">↓</span></a>
 		</section>
 
 		<!-- 6 · Build -->
@@ -223,6 +227,7 @@ const roadmap = [
 				</div>
 				<Screenshot light={sessionLight} dark={sessionDark} alt="A Launch coding session: the conversation with Claude Code on the left, the Ship panel with lint, typecheck and tests passed on a Neon gate branch at top right, and the app's live preview below it" url="launch.your-company.com/apps/hola-world/sessions" />
 			</div>
+			<a class="next" href="#ship">Next: Ship through the gate <span aria-hidden="true">↓</span></a>
 		</section>
 
 		<!-- 7 · Ship -->
@@ -240,6 +245,7 @@ const roadmap = [
 				</div>
 				<Screenshot light={approvalLight} dark={approvalDark} alt="A production deploy approval in Launch: why it was asked, what would go to production, who decides (the app's owners or the organisation's admins, 1 of 1, self-approval not allowed) and the decision" url="launch.your-company.com/approvals" />
 			</div>
+			<a class="next" href="#production">Next: Production-grade <span aria-hidden="true">↓</span></a>
 		</section>
 
 		<!-- 8 · Production-grade -->
@@ -255,6 +261,7 @@ const roadmap = [
 					))}
 				</ul>
 			</div>
+			<a class="next" href="#control">Next: IT stays in control <span aria-hidden="true">↓</span></a>
 		</section>
 
 		<!-- 9 · Control -->
@@ -271,6 +278,7 @@ const roadmap = [
 				</div>
 				<Screenshot light={auditLight} dark={auditDark} alt="Launch's audit log: an integrity panel with Verify, CSV and JSON Lines, above a table of events such as session.created, app.upgrade.started and setting.changed with actor, target and summary" url="launch.your-company.com/audit" />
 			</div>
+			<a class="next" href="#yours">Next: Yours, not ours <span aria-hidden="true">↓</span></a>
 		</section>
 
 		<!-- 10 · Yours -->
@@ -306,6 +314,7 @@ const roadmap = [
 					</div>
 				</div>
 			</div>
+			<a class="next" href="#fleet">Next: The fleet <span aria-hidden="true">↓</span></a>
 		</section>
 
 		<!-- 11 · Fleet -->
@@ -322,6 +331,7 @@ const roadmap = [
 				</div>
 				<Screenshot light={appLight} dark={appDark} alt="An app's page in Launch: staging on v0.15.8 and live on v0.15.7, both up, a Ship v0.15.8 live button, and a Kit section saying it requires an upgrade to 0.17.0 with a link to the upgrade session" url="launch.your-company.com/apps/hola-world" crop="top" />
 			</div>
+			<a class="next" href="#contrast">Next: Versus the alternatives <span aria-hidden="true">↓</span></a>
 		</section>
 
 		<!-- 12 · Contrast -->
@@ -346,6 +356,7 @@ const roadmap = [
 				</div>
 				<p class="fine">Our read of each category, not a scorecard of any one vendor.</p>
 			</div>
+			<a class="next" href="#proof">Next: Where it stands <span aria-hidden="true">↓</span></a>
 		</section>
 
 		<!-- 13 · Proof -->
@@ -362,6 +373,7 @@ const roadmap = [
 					<p>Launch has run only in its builders’ own accounts; there is no customer yet. Shared-credential grants are tested against fakes, not live Workers. Upgrading the whole fleet at once is designed, not built. Pricing is not set.</p>
 				</Callout>
 			</div>
+			<a class="next" href="#model">Next: How it makes money <span aria-hidden="true">↓</span></a>
 		</section>
 
 		<!-- 14 · Model -->
@@ -386,6 +398,7 @@ const roadmap = [
 					</article>
 				</div>
 			</div>
+			<a class="next" href="#roadmap">Next: What comes next <span aria-hidden="true">↓</span></a>
 		</section>
 
 		<!-- 15 · Roadmap -->
@@ -401,6 +414,7 @@ const roadmap = [
 					))}
 				</ul>
 			</div>
+			<a class="next" href="#contact">Next: Next step <span aria-hidden="true">↓</span></a>
 		</section>
 
 		<!-- 16 · Contact -->
@@ -420,14 +434,20 @@ const roadmap = [
 </BaseLayout>
 
 <style>
-	/* Proximity, not mandatory: a slide taller than the screen must still scroll. */
-	:global(html:has(.deck)) { scroll-snap-type: y proximity; scroll-padding-top: 0; }
+	/* Snap only where a slide fits the screen (a laptop or larger). On a phone a slide is taller
+	   than the screen, and snapping made the scroll jerky: there it is plain scrolling, with the
+	   Next link at the foot of each slide. Proximity, not mandatory, even on a desktop. */
+	:global(html:has(.deck)) { scroll-padding-top: 0; }
+	@media (min-width: 1000px) and (min-height: 700px) {
+		:global(html:has(.deck)) { scroll-snap-type: y proximity; }
+	}
 
-	/* No masthead: the deck is the page. The logo alone, top left, goes home. `body >` outranks
+	/* No masthead: the deck is the page. The logo alone, at the top of the page (it scrolls away
+	   with the cover), goes home. `body >` outranks
 	   BaseLayout's own nav rule (the same trick og.astro uses). */
 	:global(body:has(.deck) > nav.site-nav) { display: none; }
 	.home {
-		position: fixed;
+		position: absolute;
 		top: 1rem;
 		left: 1.1rem;
 		z-index: 40;
@@ -436,8 +456,7 @@ const roadmap = [
 		width: 52px;
 		height: 52px;
 		border-radius: 999px;
-		background: color-mix(in srgb, var(--card) 82%, transparent);
-		backdrop-filter: blur(10px);
+		background: var(--card);
 		border: 1px solid var(--border);
 		box-shadow: var(--shadow-sm);
 		transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -447,12 +466,37 @@ const roadmap = [
 	.slide {
 		min-height: 100dvh;
 		display: flex;
-		align-items: center;
+		flex-direction: column;
+		justify-content: center;
 		padding: 4.5rem 0;
 		scroll-snap-align: start;
 		border-bottom: 1px solid var(--border);
 	}
 	.slide > .wrap { width: 100%; min-width: 0; }
+	@media (max-width: 999px) {
+		.slide { min-height: 0; padding: 4rem 0 2.5rem; }
+		#cover { min-height: 100svh; }
+	}
+
+	/* The way on: a plain anchor to the next slide, at the foot of each one. */
+	.next {
+		align-self: center;
+		margin-top: 2.5rem;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4rem;
+		min-height: 44px;
+		padding: 0.5rem 1.1rem;
+		border-radius: 999px;
+		border: 1px solid var(--border-bright);
+		background: var(--card);
+		color: var(--text-bright);
+		font-weight: 600;
+		font-size: 0.9rem;
+	}
+	.next:hover { text-decoration: none; border-color: var(--blue); color: var(--blue); }
+	.bg-band .next { background: transparent; border-color: var(--band-muted); color: var(--band-ink); }
+	.bg-band .next:hover { border-color: var(--cyan); color: var(--cyan); }
 	.slide :global(.section-head) { margin-bottom: 2rem; }
 	.slide :global(.section-head h2) { max-width: 24ch; text-wrap: balance; }
 	.slide p { text-wrap: pretty; }
@@ -487,7 +531,6 @@ const roadmap = [
 	/* ----------------------------------------------------------- cover -- */
 	.slide-cover { text-align: center; }
 	.slide-cover .wrap { display: flex; flex-direction: column; align-items: center; }
-	.mark { display: block; margin-bottom: 1.2rem; filter: drop-shadow(0 10px 18px var(--shadow-ink)); }
 	.slide-cover h1, .slide-cover h2 { max-width: 16ch; text-wrap: balance; }
 	.slide-cover h2 { font-size: var(--step-4); font-weight: 800; }
 	.flare {
@@ -510,6 +553,7 @@ const roadmap = [
 	}
 	.hint { margin-top: 2.6rem; font-size: 0.85rem; color: var(--text-muted); }
 	:global(html:not(.js)) .hint { display: none; }
+	@media (hover: none) { .hint { display: none; } }
 	.cta { display: flex; flex-wrap: wrap; gap: 0.8rem; justify-content: center; margin: 1.6rem 0 1.4rem; }
 	.fine { font-size: 0.85rem; color: var(--text-muted); }
 	.bg-band .fine { color: var(--band-muted); }
@@ -640,7 +684,7 @@ const roadmap = [
 	/* ------------------------------------------------------------ print -- */
 	@media print {
 		:global(html:has(.deck)) { scroll-snap-type: none; }
-		:global(body > nav.site-nav), :global(body > footer), :global(body > .skip-link), .deck-dots, .hint, .home { display: none; }
+		:global(body > nav.site-nav), :global(body > footer), :global(body > .skip-link), .deck-dots, .hint, .home, .next { display: none; }
 		.slide {
 			min-height: 100vh;
 			padding: 1.5rem 0;
