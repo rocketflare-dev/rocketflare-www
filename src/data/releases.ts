@@ -285,6 +285,15 @@ export const RELEASES: Release[] = [
 		migrations: false,
 		areas: ['config', 'docs'],
 	},
+	{
+		version: '0.16.3',
+		date: '2026-10-05',
+		summary:
+			'Upgrades leave nothing for you to tidy: the kit writes its provenance file the way the linter wants it, so an upgraded app passes its own checks first time.',
+		breaking: false,
+		migrations: false,
+		areas: ['config'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
