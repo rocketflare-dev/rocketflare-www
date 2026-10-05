@@ -90,6 +90,8 @@ const roadmap = [
 	noindex
 >
 	<div class="deck">
+		<a class="home" href="/" aria-label="Rocketflare home"><LogoMark size={40} /></a>
+
 		<nav class="deck-dots" aria-label="Slides">
 			<ol>
 				{slides.map((s) => (
@@ -419,10 +421,31 @@ const roadmap = [
 
 <style>
 	/* Proximity, not mandatory: a slide taller than the screen must still scroll. */
-	:global(html:has(.deck)) { scroll-snap-type: y proximity; }
+	:global(html:has(.deck)) { scroll-snap-type: y proximity; scroll-padding-top: 0; }
+
+	/* No masthead: the deck is the page. The logo alone, top left, goes home. `body >` outranks
+	   BaseLayout's own nav rule (the same trick og.astro uses). */
+	:global(body:has(.deck) > nav.site-nav) { display: none; }
+	.home {
+		position: fixed;
+		top: 1rem;
+		left: 1.1rem;
+		z-index: 40;
+		display: grid;
+		place-items: center;
+		width: 52px;
+		height: 52px;
+		border-radius: 999px;
+		background: color-mix(in srgb, var(--card) 82%, transparent);
+		backdrop-filter: blur(10px);
+		border: 1px solid var(--border);
+		box-shadow: var(--shadow-sm);
+		transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+	}
+	.home:hover { transform: translateY(-2px) rotate(-8deg); }
 
 	.slide {
-		min-height: calc(100dvh - 3.8rem);
+		min-height: 100dvh;
 		display: flex;
 		align-items: center;
 		padding: 4.5rem 0;
@@ -617,7 +640,7 @@ const roadmap = [
 	/* ------------------------------------------------------------ print -- */
 	@media print {
 		:global(html:has(.deck)) { scroll-snap-type: none; }
-		:global(body > nav.site-nav), :global(body > footer), :global(body > .skip-link), .deck-dots, .hint { display: none; }
+		:global(body > nav.site-nav), :global(body > footer), :global(body > .skip-link), .deck-dots, .hint, .home { display: none; }
 		.slide {
 			min-height: 100vh;
 			padding: 1.5rem 0;
