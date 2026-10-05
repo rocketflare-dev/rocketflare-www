@@ -303,6 +303,15 @@ export const RELEASES: Release[] = [
 		migrations: false,
 		areas: ['config', 'docs'],
 	},
+	{
+		version: '0.17.1',
+		date: '2026-10-05',
+		summary:
+			'Plugins keep their dependencies in step: installing or upgrading one adds, updates or removes the packages it needs, and a new upstream release no longer breaks your checks. Upgrades also point straight at their release notes.',
+		breaking: false,
+		migrations: false,
+		areas: ['config'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
