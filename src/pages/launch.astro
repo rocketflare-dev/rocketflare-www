@@ -1,0 +1,669 @@
+---
+/**
+ * Rocketflare Launch — an overview for prospective users and investors.
+ *
+ * A deck that is also a page: full-height slides that scroll (snap is
+ * `proximity`, so a slide taller than a phone still scrolls), dots on the right
+ * that are plain anchors, and a small script for the arrow keys. Prints one
+ * slide per page, so it doubles as a PDF.
+ *
+ * Shared by link only: `noindex`, not in the page registry (no nav, footer or
+ * llms.txt entry) and listed in SITEMAP_EXCLUDED_PATHS (src/data/pages.ts).
+ *
+ * Every product claim here must be true of Launch as built — check
+ * rocketflare-launch's docs/plans/README.md and CHANGELOG.md before editing.
+ * What is not built says so.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro'
+import LogoMark from '../components/LogoMark.astro'
+import SectionHead from '../components/SectionHead.astro'
+import Screenshot from '../components/Screenshot.astro'
+import Callout from '../components/Callout.astro'
+import DiagramSteps from '../components/DiagramSteps.astro'
+import DiagramSequence from '../components/DiagramSequence.astro'
+import { LAUNCH_CONTACT_URL, LAUNCH_GITHUB_URL } from '../data/site'
+
+import createLight from '../assets/screens/launch-create.light.png'
+import createDark from '../assets/screens/launch-create.dark.png'
+import sessionLight from '../assets/screens/launch-session.light.png'
+import sessionDark from '../assets/screens/launch-session.dark.png'
+import approvalLight from '../assets/screens/launch-approval.light.png'
+import approvalDark from '../assets/screens/launch-approval.dark.png'
+import auditLight from '../assets/screens/launch-audit.light.png'
+import auditDark from '../assets/screens/launch-audit.dark.png'
+import appLight from '../assets/screens/launch-app.light.png'
+import appDark from '../assets/screens/launch-app.dark.png'
+
+const slides = [
+	{ id: 'cover', label: 'Rocketflare Launch' },
+	{ id: 'problem', label: 'The problem' },
+	{ id: 'idea', label: 'The idea' },
+	{ id: 'how', label: 'How it works' },
+	{ id: 'create', label: 'Create an app' },
+	{ id: 'build', label: 'Build by chatting' },
+	{ id: 'ship', label: 'Ship through the gate' },
+	{ id: 'production', label: 'Production-grade' },
+	{ id: 'control', label: 'IT stays in control' },
+	{ id: 'yours', label: 'Yours, not ours' },
+	{ id: 'fleet', label: 'The fleet' },
+	{ id: 'contrast', label: 'Versus the alternatives' },
+	{ id: 'proof', label: 'Where it stands' },
+	{ id: 'model', label: 'How it makes money' },
+	{ id: 'roadmap', label: 'What comes next' },
+	{ id: 'contact', label: 'Next step' },
+]
+
+const pipeline = ['Create', 'Session', 'Gate', 'Pull request', 'Staging', 'Production']
+
+const inherited = [
+	{ title: 'Organisations and roles', body: 'Tenancy enforced in Postgres row-level security, not in each query.', href: '/concepts/tenancy/' },
+	{ title: 'Sign-in', body: 'Magic links, Google, Microsoft and OIDC, with the company login on top.', href: '/concepts/auth/' },
+	{ title: 'A real database', body: 'Postgres with migrations, its own per environment.', href: '/concepts/database/' },
+	{ title: 'Background work', body: 'Queues, workflows, cron and realtime from day one.', href: '/concepts/background-work/' },
+	{ title: 'AI that is measured', body: 'Chat, agents, retrieval over documents, evals and tracing.', href: '/concepts/ai/' },
+	{ title: 'Analytics', body: 'Dashboards over the app’s own data, readable by agents too.', href: '/concepts/analytics/' },
+	{ title: 'A command line', body: 'Every feature scriptable, for people and for agents.', href: '/concepts/cli/' },
+	{ title: 'Plugins', body: 'Extra capability copied in as code, never a runtime dependency.', href: '/concepts/plugins/' },
+]
+
+type Mark = 'y' | 'p' | 'n'
+const criteria = ['Anyone can build', 'Real code in your GitHub', 'Runs in your own cloud', 'Company sign-in on every app', 'Approvals and audit', 'Production stack per app']
+const rivals: { name: string; marks: Mark[]; us?: boolean }[] = [
+	{ name: 'Hosted AI app builders', marks: ['y', 'p', 'n', 'p', 'n', 'p'] },
+	{ name: 'Low-code platforms', marks: ['y', 'n', 'p', 'y', 'y', 'p'] },
+	{ name: 'An internal platform team', marks: ['n', 'y', 'y', 'p', 'p', 'p'] },
+	{ name: 'Rocketflare Launch', marks: ['y', 'y', 'y', 'y', 'y', 'y'], us: true },
+]
+const MARK = { y: { glyph: '●', text: 'Yes' }, p: { glyph: '◐', text: 'Partly' }, n: { glyph: '○', text: 'No' } }
+
+const roadmap = [
+	{ title: 'Upgrade every app at once', body: 'One kit release rolled across the fleet, each app through its own gate and PR. One app at a time is built.', lead: true },
+	{ title: 'Grants proven on live Workers', body: 'Shared credentials pushed, rotated and revoked on real apps. Built and tested against fakes today.' },
+	{ title: 'Session policy', body: 'How many sessions an app may run at once, and who pays for them, set by policy rather than by hand.' },
+	{ title: 'Teardown at scale', body: 'Archiving and removing apps, with their databases and hosts, as routine rather than a careful afternoon.' },
+	{ title: 'A pilot company', body: 'Launch deployed in a company’s own accounts, with its own builders, beyond the people who wrote it.' },
+]
+---
+<BaseLayout
+	title="Rocketflare Launch — unlock your builders, safely"
+	description="Anyone in the company goes from an idea to a secure, production app in the browser, while IT keeps control of credentials, sign-in, approvals and audit. Self-hosted on your own Cloudflare."
+	noindex
+>
+	<div class="deck">
+		<nav class="deck-dots" aria-label="Slides">
+			<ol>
+				{slides.map((s) => (
+					<li><a href={`#${s.id}`} data-slide={s.id} aria-label={s.label} title={s.label}></a></li>
+				))}
+			</ol>
+		</nav>
+
+		<!-- 1 · Cover -->
+		<section class="slide slide-cover bg-sky" id="cover">
+			<div class="wrap">
+				<span class="mark"><LogoMark size={64} /></span>
+				<span class="eyebrow">Rocketflare Launch</span>
+				<h1>Unlock your builders, <span class="flare">safely.</span></h1>
+				<p class="lede">
+					Anyone can go from an idea to a secure, production app in the browser, while IT keeps
+					control of credentials, sign-in, approvals and audit.
+				</p>
+				<ul class="pills" aria-label="In short">
+					<li>Self-hosted on your Cloudflare</li>
+					<li>Every app a real repo</li>
+					<li>Claude Code or Codex</li>
+				</ul>
+				<p class="hint">Scroll, or use the arrow keys</p>
+			</div>
+		</section>
+
+		<!-- 2 · The problem -->
+		<section class="slide" id="problem">
+			<div class="wrap">
+				<SectionHead eyebrow="The problem" title="Every company has more app ideas than engineers." align="left" />
+				<div class="cards three">
+					<article class="card">
+						<span class="tag">The queue</span>
+						<h3>Builders wait</h3>
+						<p>The person who knows the process best files a ticket and waits a quarter for a tool that should take a week.</p>
+					</article>
+					<article class="card">
+						<span class="tag">The workaround</span>
+						<h3>Shadow apps</h3>
+						<p>So they use a hosted AI builder. The app works, but it lives outside company sign-in, holds pasted keys, and nobody in IT knows it exists.</p>
+					</article>
+					<article class="card">
+						<span class="tag">The tax</span>
+						<h3>Everything around the app</h3>
+						<p>The apps that do get built properly each redo accounts, databases, DNS, secrets, sign-in, deploys, approvals and upgrades.</p>
+					</article>
+				</div>
+				<p class="kicker measure">Agents can now write production code. What is scarce is the safe path from a good idea to a governed, running app.</p>
+			</div>
+		</section>
+
+		<!-- 3 · The idea -->
+		<section class="slide" id="idea">
+			<div class="wrap">
+				<SectionHead eyebrow="The idea" title="The Lovable loop, on your own repo, CI and approvals." align="left" lede="Describe what you want, watch it appear in a live preview, ship it. The loop people already love, with every part of it landing somewhere the company owns." />
+				<div class="loop">
+					<div class="loop-row loop-head" aria-hidden="true">
+						<span></span><span>A hosted AI builder</span><span class="us">Launch</span>
+					</div>
+					<dl>
+						<div class="loop-row"><dt>Where it runs</dt><dd>The vendor’s cloud</dd><dd class="us">Your Cloudflare account</dd></div>
+						<div class="loop-row"><dt>Where the code lives</dt><dd>The vendor’s project, optionally synced out</dd><dd class="us">A normal repo in your GitHub</dd></div>
+						<div class="loop-row"><dt>Who can sign in</dt><dd>Whoever the builder set up</dd><dd class="us">Your company login, per app</dd></div>
+						<div class="loop-row"><dt>How it reaches production</dt><dd>A publish button</dd><dd class="us">Gate, pull request, approval</dd></div>
+						<div class="loop-row"><dt>What it is built on</dt><dd>A fresh prototype each time</dd><dd class="us">A production kit, the same for every app</dd></div>
+					</dl>
+				</div>
+			</div>
+		</section>
+
+		<!-- 4 · How it works -->
+		<section class="slide" id="how">
+			<div class="wrap">
+				<SectionHead eyebrow="How it works" title="From a form to production, without a terminal." align="left" />
+				<div class="diagram-wrap">
+					<DiagramSteps
+						steps={pipeline}
+						retryFrom={2}
+						retryTo={1}
+						retryLabel="fix turn"
+						note="Staging is automatic; production waits for a person."
+						describedBy="how-steps"
+						title="An app's path through Launch, from creation to production"
+					/>
+				</div>
+				<ol class="steps-list" id="how-steps">
+					<li><strong>Create.</strong> A name and a team. Launch makes the repo, database, Workers, email identity and hosts.</li>
+					<li><strong>Session.</strong> Chat with a coding agent in a sandbox, against the app’s real code, with a live preview.</li>
+					<li><strong>Gate.</strong> Launch runs the app’s own checks on a throwaway database; a red check gets one focused fix turn.</li>
+					<li><strong>Pull request.</strong> Launch opens it, waits for CI and an optional review, then merges.</li>
+					<li><strong>Staging.</strong> A release is cut and followed until it is live.</li>
+					<li><strong>Production.</strong> Waits for an approval in Launch, then Launch deploys it.</li>
+				</ol>
+			</div>
+		</section>
+
+		<!-- 5 · Create -->
+		<section class="slide" id="create">
+			<div class="wrap split">
+				<div class="copy">
+					<SectionHead eyebrow="Create an app" title="Minutes from a form to a staging URL." align="left" />
+					<p>Nobody opened a terminal. One durable workflow sets up everything an app needs, and you can follow each step on the app’s page.</p>
+					<ul class="points">
+						<li>A private GitHub repository from a pinned kit release</li>
+						<li>A Neon Postgres database, staging and production</li>
+						<li>Cloudflare Workers, storage, queues and secrets</li>
+						<li><code>expense-approvals.your-apps.com</code>, with a certificate</li>
+						<li>Company sign-in configured from the first deploy</li>
+					</ul>
+				</div>
+				<Screenshot light={createLight} dark={createDark} alt="Launch's Create an app dialog: name Expense approvals, the slug expense-approvals with its staging and production hosts, owner team Finance, a description, and Deploy staging now switched on" url="launch.your-company.com/apps" priority />
+			</div>
+		</section>
+
+		<!-- 6 · Build -->
+		<section class="slide" id="build">
+			<div class="wrap split reverse">
+				<div class="copy">
+					<SectionHead eyebrow="Build by chatting" title="A coding agent, the app’s real code, a live preview." align="left" />
+					<p>Each session is a sandbox with its own copy of the repo and its own database branch. The agent reads the kit’s rules and skills, so it builds the way the codebase expects.</p>
+					<ul class="points">
+						<li>24 seconds from nothing to a live preview, measured on Cloudflare</li>
+						<li>Claude Code or Codex, model chosen per message</li>
+						<li>Billed to the company key, or to the builder’s own subscription</li>
+						<li>Screenshot the preview into the chat; queue or interrupt a turn</li>
+						<li>A budget per session, metered outside the sandbox</li>
+					</ul>
+				</div>
+				<Screenshot light={sessionLight} dark={sessionDark} alt="A Launch coding session: the conversation with Claude Code on the left, the Ship panel with lint, typecheck and tests passed on a Neon gate branch at top right, and the app's live preview below it" url="launch.your-company.com/apps/hola-world/sessions" />
+			</div>
+		</section>
+
+		<!-- 7 · Ship -->
+		<section class="slide" id="ship">
+			<div class="wrap split">
+				<div class="copy">
+					<SectionHead eyebrow="Ship through the gate" title="Shipping is a button. Production is a decision." align="left" />
+					<p>Launch runs the gate itself, opens the pull request, waits for CI and follows the release to staging. Production waits for someone allowed to say yes.</p>
+					<ul class="points">
+						<li>No model call decides whether a check passed</li>
+						<li>Approvers, how many, and whether you may approve your own work, set by policy</li>
+						<li>Production can ship the exact build staging ran, not a rebuild</li>
+						<li>Works on any GitHub plan; no Enterprise needed</li>
+					</ul>
+				</div>
+				<Screenshot light={approvalLight} dark={approvalDark} alt="A production deploy approval in Launch: why it was asked, what would go to production, who decides (the app's owners or the organisation's admins, 1 of 1, self-approval not allowed) and the decision" url="launch.your-company.com/approvals" />
+			</div>
+		</section>
+
+		<!-- 8 · Production-grade -->
+		<section class="slide" id="production">
+			<div class="wrap">
+				<SectionHead eyebrow="Production-grade from day one" title="Every app starts where most apps hope to end up." align="left" lede="Launch only makes Rocketflare apps, and Rocketflare is an open-source kit with the hard parts already written. So the app a builder starts on Monday has what a platform team would ask for." />
+				<ul class="cards four">
+					{inherited.map((f) => (
+						<li class="card">
+							<h3><a href={f.href}>{f.title}</a></h3>
+							<p>{f.body}</p>
+						</li>
+					))}
+				</ul>
+			</div>
+		</section>
+
+		<!-- 9 · Control -->
+		<section class="slide bg-band" id="control">
+			<div class="wrap split">
+				<div class="copy">
+					<SectionHead eyebrow="IT stays in control" title="One place to say who, what and whether." align="left" />
+					<ul class="points">
+						<li><strong>One sign-in.</strong> Launch is the identity provider for every app, with access per app and a request-access flow when someone is turned away.</li>
+						<li><strong>One approvals engine.</strong> Eight kinds of request, from creating an app to merging a session to promoting to production.</li>
+						<li><strong>One audit log.</strong> Append-only in the database, sealed into a hash chain, verifiable and exportable.</li>
+						<li><strong>One place for credentials.</strong> The account tokens stay in Launch. Apps get only their runtime secrets.</li>
+					</ul>
+				</div>
+				<Screenshot light={auditLight} dark={auditDark} alt="Launch's audit log: an integrity panel with Verify, CSV and JSON Lines, above a table of events such as session.created, app.upgrade.started and setting.changed with actor, target and summary" url="launch.your-company.com/audit" />
+			</div>
+		</section>
+
+		<!-- 10 · Yours -->
+		<section class="slide" id="yours">
+			<div class="wrap">
+				<SectionHead eyebrow="Yours, not ours" title="If Launch disappeared, every app would keep running." align="left" lede="Launch runs in the company’s own Cloudflare account, one copy per company. The apps are normal repos and Workers that can still be deployed by hand." />
+				<div class="two">
+					<ul class="estate" aria-label="Where everything lives">
+						<li class="tone-orange"><span class="owner">Your Cloudflare · Launch account</span><strong>Launch</strong><span>Console, sign-in, approvals, audit, coding sessions</span></li>
+						<li class="tone-blue"><span class="owner">Your Cloudflare · apps account</span><strong>Every app</strong><span>A Worker per environment, its storage, queues and hosts</span></li>
+						<li class="tone-purple"><span class="owner">Your GitHub organisation</span><strong>Every repo</strong><span>The code, its CI and its releases, under any licence you choose</span></li>
+						<li class="tone-green"><span class="owner">Your Neon organisation</span><strong>Every database</strong><span>A project per app; a branch per session and per gate run</span></li>
+					</ul>
+					<div class="seq">
+						<DiagramSequence
+							actors={['Agent sandbox', 'Launch', 'Model provider']}
+							messages={[
+								{ from: 0, to: 1, label: 'placeholder key' },
+								{ from: 1, to: 1, label: 'allow-list, meter' },
+								{ from: 1, to: 2, label: 'real key added' },
+								{ from: 2, to: 1, label: 'response' },
+								{ from: 1, to: 0, label: 'response' },
+							]}
+							describedBy="key-steps"
+							title="How a coding agent reaches the model without ever holding the key"
+						/>
+						<ol class="steps-list small" id="key-steps">
+							<li>The agent calls the model with a placeholder; the sandbox holds no real credential.</li>
+							<li>Launch checks the host against the session’s allow-list and meters the call.</li>
+							<li>Launch swaps the real key or subscription token in on the way out.</li>
+							<li>The response comes back the same way. CI, likewise, holds no Cloudflare token.</li>
+						</ol>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- 11 · Fleet -->
+		<section class="slide" id="fleet">
+			<div class="wrap split reverse">
+				<div class="copy">
+					<SectionHead eyebrow="The fleet stays current" title="Fifty apps, not fifty snowflakes." align="left" />
+					<p>Apps made by hand drift years behind their template. Launch knows which kit release every app is on, and an upgrade is a session like any other: an agent applies the porting notes, Launch gates it and opens the pull request.</p>
+					<ul class="points">
+						<li>Kit releases flagged per app, with the release notes a click away</li>
+						<li>Shared credentials, such as a Microsoft 365 connection, granted by their owner and pushed to the apps that hold them</li>
+						<li>One rotation updates every app with that grant</li>
+					</ul>
+				</div>
+				<Screenshot light={appLight} dark={appDark} alt="An app's page in Launch: staging on v0.15.8 and live on v0.15.7, both up, a Ship v0.15.8 live button, and a Kit section saying it requires an upgrade to 0.17.0 with a link to the upgrade session" url="launch.your-company.com/apps/hola-world" crop="top" />
+			</div>
+		</section>
+
+		<!-- 12 · Contrast -->
+		<section class="slide" id="contrast">
+			<div class="wrap">
+				<SectionHead eyebrow="Versus the alternatives" title="The only one that does all of it." align="left" />
+				<div class="table-wrap" tabindex="0" role="region" aria-labelledby="contrast-caption">
+					<table>
+						<caption id="contrast-caption">How each approach to internal apps compares</caption>
+						<thead>
+							<tr><th scope="col"><span class="sr-only">Approach</span></th>{criteria.map((c) => <th scope="col">{c}</th>)}</tr>
+						</thead>
+						<tbody>
+							{rivals.map((r) => (
+								<tr class:list={[r.us && 'us']}>
+									<th scope="row">{r.name}</th>
+									{r.marks.map((m) => <td class={m}><span aria-hidden="true">{MARK[m].glyph}</span> {MARK[m].text}</td>)}
+								</tr>
+							))}
+						</tbody>
+					</table>
+				</div>
+				<p class="fine">Our read of each category, not a scorecard of any one vendor.</p>
+			</div>
+		</section>
+
+		<!-- 13 · Proof -->
+		<section class="slide" id="proof">
+			<div class="wrap">
+				<SectionHead eyebrow="Where it stands" title="Built, and running real apps." align="left" lede="Creating apps, coding sessions, the gate, approvals and grants are built, and the people building Launch use it every day. Apps it created are live on staging and production, promoted through its own approval gate." />
+				<dl class="stats">
+					<div><dt>to a live preview</dt><dd>24 s</dd></div>
+					<div><dt>kinds of approval, one engine</dt><dd>8</dd></div>
+					<div><dt>automated tests in Launch</dt><dd>~3,100</dd></div>
+					<div><dt>apps live through the gate</dt><dd>2</dd></div>
+				</dl>
+				<Callout tone="yellow" title="What we don’t claim yet">
+					<p>Launch has run only in its builders’ own accounts; there is no customer yet. Shared-credential grants are tested against fakes, not live Workers. Upgrading the whole fleet at once is designed, not built. Pricing is not set.</p>
+				</Callout>
+			</div>
+		</section>
+
+		<!-- 14 · Model -->
+		<section class="slide" id="model">
+			<div class="wrap">
+				<SectionHead eyebrow="How it makes money" title="Open kit, licensed console." align="left" />
+				<div class="cards three">
+					<article class="card tone-green">
+						<span class="tag">Adoption</span>
+						<h3>The kit is MIT</h3>
+						<p>Free, open source and useful on its own. It is how engineers find Rocketflare, and every app Launch makes is a kit app, so the kit’s quality is Launch’s quality.</p>
+					</article>
+					<article class="card tone-orange">
+						<span class="tag">Revenue</span>
+						<h3>Launch is source-available</h3>
+						<p>Elastic License 2.0: a company may run it, read it and change it for itself, but not resell it as a service or get around its licence key. The licence key is the commercial line.</p>
+					</article>
+					<article class="card tone-blue">
+						<span class="tag">Open question</span>
+						<h3>Pricing isn’t set</h3>
+						<p>Per company, per builder or per app are all on the table. It runs on the customer’s own Cloudflare, Neon and model accounts, so infrastructure cost never sits in our margin.</p>
+					</article>
+				</div>
+			</div>
+		</section>
+
+		<!-- 15 · Roadmap -->
+		<section class="slide" id="roadmap">
+			<div class="wrap">
+				<SectionHead eyebrow="What comes next" title="From one company’s apps to a standing fleet." align="left" lede="On the roadmap, not built yet." />
+				<ul class="cards roadmap">
+					{roadmap.map((r) => (
+						<li class:list={['card', 'planned', r.lead && 'lead']}>
+							<h3>{r.title}</h3>
+							<p>{r.body}</p>
+						</li>
+					))}
+				</ul>
+			</div>
+		</section>
+
+		<!-- 16 · Contact -->
+		<section class="slide slide-cover bg-band" id="contact">
+			<div class="wrap">
+				<span class="eyebrow">Next step</span>
+				<h2>See it build an app for your team.</h2>
+				<p class="lede">Half an hour: we create an app for one of your real processes, change it in a session, and walk it through the gate to production.</p>
+				<p class="cta">
+					<a class="btn btn-primary" href={LAUNCH_CONTACT_URL}>Talk to us →</a>
+					<a class="btn btn-ghost" href={LAUNCH_GITHUB_URL}>Read the source</a>
+				</p>
+				<p class="fine">Built on <a href="/">Rocketflare</a>, the open-source kit. <a href="/tour/">Take the tour</a> to see what every app starts with.</p>
+			</div>
+		</section>
+	</div>
+</BaseLayout>
+
+<style>
+	/* Proximity, not mandatory: a slide taller than the screen must still scroll. */
+	:global(html:has(.deck)) { scroll-snap-type: y proximity; }
+
+	.slide {
+		min-height: calc(100dvh - 3.8rem);
+		display: flex;
+		align-items: center;
+		padding: 4.5rem 0;
+		scroll-snap-align: start;
+		border-bottom: 1px solid var(--border);
+	}
+	.slide > .wrap { width: 100%; min-width: 0; }
+	.slide :global(.section-head) { margin-bottom: 2rem; }
+	.slide :global(.section-head h2) { max-width: 24ch; text-wrap: balance; }
+	.slide p { text-wrap: pretty; }
+
+	/* ------------------------------------------------------------ dots -- */
+	.deck-dots {
+		position: fixed;
+		right: 1.1rem;
+		top: 50%;
+		transform: translateY(-50%);
+		z-index: 40;
+	}
+	.deck-dots ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.15rem; }
+	.deck-dots a {
+		display: grid;
+		place-items: center;
+		width: 24px;
+		height: 24px;
+	}
+	.deck-dots a::before {
+		content: '';
+		width: 8px;
+		height: 8px;
+		border-radius: 999px;
+		background: var(--border-bright);
+		transition: transform 0.2s ease, background 0.2s ease;
+	}
+	.deck-dots a:hover::before { background: var(--text-muted); }
+	.deck-dots a[aria-current='true']::before { background: var(--orange); transform: scale(1.5); }
+	@media (max-width: 760px) { .deck-dots { display: none; } }
+
+	/* ----------------------------------------------------------- cover -- */
+	.slide-cover { text-align: center; }
+	.slide-cover .wrap { display: flex; flex-direction: column; align-items: center; }
+	.mark { display: block; margin-bottom: 1.2rem; filter: drop-shadow(0 10px 18px var(--shadow-ink)); }
+	.slide-cover h1, .slide-cover h2 { max-width: 16ch; text-wrap: balance; }
+	.slide-cover h2 { font-size: var(--step-4); font-weight: 800; }
+	.flare {
+		background: linear-gradient(90deg, var(--orange), var(--red));
+		-webkit-background-clip: text;
+		background-clip: text;
+		color: transparent;
+	}
+	.lede { font-size: var(--step-1); color: var(--text-muted); max-width: 58ch; }
+	.bg-band .lede { color: var(--band-muted); }
+	.pills { list-style: none; display: flex; flex-wrap: wrap; justify-content: center; gap: 0.6rem; padding: 0; margin: 1.2rem 0 0; }
+	.pills li {
+		padding: 0.4rem 0.95rem;
+		border-radius: 999px;
+		background: var(--card);
+		border: 1px solid var(--border-bright);
+		color: var(--text-bright);
+		font-weight: 600;
+		font-size: 0.9rem;
+	}
+	.hint { margin-top: 2.6rem; font-size: 0.85rem; color: var(--text-muted); }
+	:global(html:not(.js)) .hint { display: none; }
+	.cta { display: flex; flex-wrap: wrap; gap: 0.8rem; justify-content: center; margin: 1.6rem 0 1.4rem; }
+	.fine { font-size: 0.85rem; color: var(--text-muted); }
+	.bg-band .fine { color: var(--band-muted); }
+
+	/* ------------------------------------------------------------ split -- */
+	.split { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2.5rem; align-items: center; }
+	/* The figure centres itself with auto margins, which turns off grid stretch and sizes it to its
+	   content: a long URL bar would then push it past the column. Pin it to the column. */
+	.split > :global(.shot) { width: 100%; margin: 0; }
+	@media (min-width: 1000px) {
+		.split { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); }
+		.wrap.split { max-width: 1320px; }
+		.split.reverse > .copy { order: 2; }
+	}
+	.copy > p { color: var(--text-muted); }
+	.bg-band .copy > p { color: var(--band-muted); }
+
+	.points { list-style: none; padding: 0; margin: 1rem 0 0; display: grid; gap: 0.55rem; }
+	.points li { position: relative; padding-left: 1.3rem; }
+	.points li::before {
+		content: '';
+		position: absolute;
+		left: 0;
+		top: 0.62em;
+		width: 7px;
+		height: 7px;
+		border-radius: 2px;
+		background: var(--orange);
+	}
+	.kicker { margin-top: 2rem; font-size: var(--step-1); color: var(--text-bright); font-weight: 500; }
+
+	/* ------------------------------------------------------------ cards -- */
+	.cards { list-style: none; padding: 0; margin: 0; display: grid; gap: 1.1rem; }
+	@media (min-width: 860px) {
+		.cards.three { grid-template-columns: repeat(3, 1fr); }
+		.cards.four { grid-template-columns: repeat(4, 1fr); }
+		.cards.roadmap { grid-template-columns: repeat(3, 1fr); }
+	}
+	@media (min-width: 560px) and (max-width: 859px) {
+		.cards.four, .cards.roadmap { grid-template-columns: repeat(2, 1fr); }
+	}
+	.card {
+		background: var(--card);
+		border: 1px solid var(--border);
+		border-radius: 16px;
+		padding: 1.4rem 1.4rem 1.2rem;
+		box-shadow: var(--shadow-sm);
+	}
+	.card h3 { margin-bottom: 0.4rem; }
+	.card p { margin: 0; color: var(--text-muted); font-size: 0.95rem; }
+	.card h3 a { color: var(--text-bright); }
+	.tag {
+		display: inline-block;
+		margin-bottom: 0.6rem;
+		font-size: 0.72rem;
+		font-weight: 700;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		color: var(--accent-ink, var(--orange-ink));
+	}
+	.card.planned { border-style: dashed; box-shadow: none; background: transparent; }
+	.card.planned.lead { border-style: solid; border-color: var(--orange); background: var(--tint-orange); }
+	.card.planned.lead p { color: var(--text); }
+
+	/* ------------------------------------------------- the loop compare -- */
+	.loop { border: 1px solid var(--border); border-radius: 16px; background: var(--card); overflow: hidden; }
+	.loop dl { margin: 0; }
+	.loop-row { display: grid; grid-template-columns: 1.1fr 1fr 1fr; gap: 1rem; padding: 0.85rem 1.4rem; border-top: 1px solid var(--border); }
+	.loop-head { border-top: 0; font-weight: 700; color: var(--text-bright); background: var(--card-alt); }
+	.loop dt { font-weight: 600; color: var(--text-bright); }
+	.loop dd { margin: 0; color: var(--text-muted); }
+	.loop .us { color: var(--text-bright); font-weight: 600; }
+	.loop-head .us { color: var(--orange-ink); }
+	@media (max-width: 640px) {
+		.loop-head { display: none; }
+		.loop-row { grid-template-columns: 1fr; gap: 0.15rem; }
+		.loop dd:not(.us)::before { content: 'Hosted: '; font-weight: 600; }
+		.loop dd.us::before { content: 'Launch: '; }
+	}
+
+	/* --------------------------------------------------------- diagrams -- */
+	.diagram-wrap { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 1.2rem; }
+	.steps-list { margin: 1.4rem 0 0; padding-left: 1.3rem; display: grid; gap: 0.35rem; color: var(--text-muted); }
+	.steps-list strong { color: var(--text-bright); }
+	@media (min-width: 860px) { #how-steps { grid-template-columns: 1fr 1fr; column-gap: 2.5rem; } }
+	.steps-list.small { font-size: 0.88rem; margin-top: 0.8rem; }
+
+	.two { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2rem; align-items: start; }
+	@media (min-width: 1000px) { .two { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+	.estate { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.75rem; }
+	.estate li {
+		display: grid;
+		gap: 0.1rem;
+		padding: 0.9rem 1.1rem;
+		border-radius: 14px;
+		border: 1px solid var(--border);
+		border-left: 5px solid var(--accent);
+		background: var(--card);
+	}
+	.estate .owner { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent-ink); }
+	.estate strong { color: var(--text-bright); }
+	.estate span:last-child { color: var(--text-muted); font-size: 0.92rem; }
+	.seq { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 1.1rem 1.2rem; }
+
+	/* ------------------------------------------------------------ table -- */
+	.table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 16px; background: var(--card); }
+	table { width: 100%; min-width: 760px; border-collapse: collapse; font-size: 0.92rem; }
+	caption { text-align: left; padding: 0.9rem 1.2rem 0; color: var(--text-muted); font-size: 0.85rem; }
+	th, td { padding: 0.8rem 1rem; text-align: left; border-top: 1px solid var(--border); vertical-align: top; }
+	thead th { border-top: 0; font-weight: 600; color: var(--text-bright); font-size: 0.85rem; }
+	tbody th { color: var(--text-bright); font-weight: 600; }
+	td.y { color: var(--text-bright); }
+	td.y span { color: var(--green); }
+	td.p span { color: var(--yellow); }
+	td.n { color: var(--text-muted); }
+	tr.us { background: var(--tint-orange); }
+	tr.us th { color: var(--orange-ink); }
+	.table-wrap + .fine { margin-top: 0.8rem; }
+	.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+	/* ------------------------------------------------------------ stats -- */
+	.stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin: 0 0 2rem; }
+	@media (min-width: 860px) { .stats { grid-template-columns: repeat(4, 1fr); } }
+	.stats div { display: flex; flex-direction: column-reverse; padding: 1.1rem 1.2rem; border-radius: 16px; background: var(--card); border: 1px solid var(--border); }
+	.stats dd { margin: 0; font-size: var(--step-3); font-weight: 800; color: var(--text-bright); font-variant-numeric: tabular-nums; line-height: 1.1; }
+	.stats dt { color: var(--text-muted); font-size: 0.9rem; }
+
+	/* ------------------------------------------------------------ print -- */
+	@media print {
+		:global(html:has(.deck)) { scroll-snap-type: none; }
+		:global(body > nav.site-nav), :global(body > footer), :global(body > .skip-link), .deck-dots, .hint { display: none; }
+		.slide {
+			min-height: 100vh;
+			padding: 1.5rem 0;
+			border: 0;
+			break-after: page;
+			-webkit-print-color-adjust: exact;
+			print-color-adjust: exact;
+		}
+		.card, .stats div { box-shadow: none; }
+	}
+</style>
+
+<script>
+	// Arrow keys, PageUp/PageDown, j/k, Home/End step between slides; the dots
+	// follow the slide under the middle of the screen. Keys inside a form field,
+	// a tab strip or the comparison table's scroller are left alone.
+	const slides = [...document.querySelectorAll<HTMLElement>('.slide')]
+	const dots = [...document.querySelectorAll<HTMLAnchorElement>('.deck-dots a')]
+	const NEXT = ['ArrowDown', 'ArrowRight', 'PageDown', 'j']
+	const PREV = ['ArrowUp', 'ArrowLeft', 'PageUp', 'k']
+
+	const current = () => {
+		const mid = window.innerHeight / 2
+		const i = slides.findIndex((s) => {
+			const r = s.getBoundingClientRect()
+			return r.top <= mid && r.bottom > mid
+		})
+		return Math.max(0, i)
+	}
+	const go = (i: number) => slides[Math.max(0, Math.min(slides.length - 1, i))]?.scrollIntoView({ block: 'start' })
+
+	document.addEventListener('keydown', (e) => {
+		if (e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return
+		if ((e.target as HTMLElement).closest('input, textarea, select, [contenteditable], [role="tablist"], .table-wrap')) return
+		const step = NEXT.includes(e.key) ? 1 : PREV.includes(e.key) ? -1 : 0
+		if (step) go(current() + step)
+		else if (e.key === 'Home') go(0)
+		else if (e.key === 'End') go(slides.length - 1)
+		else return
+		e.preventDefault()
+	})
+
+	const io = new IntersectionObserver((entries) => {
+		for (const en of entries) {
+			if (en.isIntersecting) dots.forEach((d) => d.setAttribute('aria-current', String(d.dataset.slide === en.target.id)))
+		}
+	}, { rootMargin: '-50% 0px -50% 0px' })
+	slides.forEach((s) => io.observe(s))
+</script>

@@ -93,3 +93,26 @@ Every stop with a frame now has one; the tour's CLI stop is text only by choice 
 16. `agents-approval`'s timeline renders the raw status string **`awaiting_input`** in its last row,
     where the badge above says "Awaiting input". Cosmetic, visible in a marketing frame, and a kit
     fix rather than a capture one.
+
+## Rocketflare Launch captures (`launch-*`, used by `/launch/`)
+
+Not the kit: these are frames of Rocketflare Launch (`rocketflare-dev/rocketflare-launch`), the company
+console the `/launch/` overview describes.
+
+- Launch commit: `ae81e3d` (`main`), captured 2026-10-05
+- Instance: the local dev Launch at `https://local.clewro.com` (`pnpm dev` + `pnpm dev:tunnel`), signed in
+  with the dev quick login **Owner** (Olivia Bennett, Acme Logistics)
+- Tool: the chrome-devtools MCP browser, `emulate --viewport 1440x900x2` → 2880×1800 PNG, viewport only
+- Theme: Launch's own toggle (`button[aria-label^="Switch to"]`, `data-theme` = `launch-light` /
+  `launch-dark`), then the `DEV` badge hidden (`visibility: hidden` on the header element whose text is `DEV`)
+- The page URL bar in the deck says `launch.your-company.com/…`; the frames themselves show `clewro.com` hosts
+
+| Stem | Route | State | Used by |
+|---|---|---|---|
+| `launch-create` | `/apps` → **Create app** | Dialog filled in, **not submitted**: Name "Expense approvals", slug `expense-approvals` with its staging/production hosts, owner team Finance (Department), description "Submit receipts, route them to a manager, export the month to Finance.", Deploy staging now on. The two real apps (Gate check, hola world) behind the overlay | `#create` |
+| `launch-session` | `/apps/hola-world/sessions/652579a8-…` | The "Upgrade kit 0.15.5 → 0.17.0" session, Ready: chat scrolled so the agent's porting-notes summary and the follow-up "make sure you look at all the other upgrade versions" are in view (the scroll container moved so that message sits ~470 px below the top of the pane — the bottom of the thread holds push errors), Ship panel with lint / typecheck / tests passed on Neon gate branch `gate-waq6tezmnnf7-1`, live preview of the app's sign-in page | `#build` |
+| `launch-approval` | `/approvals/72e15ad0-…` | Production deploy of Gate check, **Approved**: why they asked, what would go to production, Who decides (owners or admins, 1 of 1, self-approval not allowed), the decision by Marcus Adeyemi | `#ship` |
+| `launch-audit` | `/audit` | Integrity panel (Verify / CSV / JSON Lines, **before** pressing Verify — the result line reports unsealed events on a dev instance whose sealing cron is idle) and the event table: session, upgrade and setting events | `#control` |
+| `launch-app` | `/apps/hola-world` | Overview: Staging v0.15.8 up, "1 change not live" with **Ship v0.15.8 live**, Live v0.15.7 up, Kit "Requires upgrade → 0.17.0" with the upgrade session needing its owner, Active sessions | `#fleet` (`crop="top"`) |
+
+Not captured: **Secrets / grants** (the deck's fleet slide describes grants in text instead).

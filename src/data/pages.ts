@@ -186,9 +186,11 @@ export const pageByPath = (path: string) => PAGES.find((p) => p.path === path)
 /**
  * Paths left out of the sitemap: every not-yet-ready page, plus `/og/` — the
  * 1200×630 template `public/og-image.png` is screenshotted from (noindex, not
- * in this registry so it never reaches the nav; see CLAUDE.md "The OG image").
+ * in this registry so it never reaches the nav; see CLAUDE.md "The OG image") —
+ * and `/launch/`, the Rocketflare Launch overview, shared by link only.
  */
 export const SITEMAP_EXCLUDED_PATHS: string[] = [
 	'/og/',
+	'/launch/',
 	...PAGES.filter((p) => !p.ready).map((p) => p.path),
 ]
