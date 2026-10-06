@@ -366,6 +366,15 @@ export const RELEASES: Release[] = [
 		migrations: false,
 		areas: ['config'],
 	},
+	{
+		version: '0.17.8',
+		date: '2026-10-06',
+		summary:
+			'Wrangler moves up to 4.147, whose smaller CLI starts wrangler dev answering sooner and no longer calls GitHub when telemetry is off; your tomls don’t change.',
+		breaking: false,
+		migrations: false,
+		areas: ['config'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
