@@ -339,6 +339,15 @@ export const RELEASES: Release[] = [
 		migrations: false,
 		areas: ['config', 'docs', 'scripts'],
 	},
+	{
+		version: '0.17.5',
+		date: '2026-10-06',
+		summary:
+			'A dropped Neon connection no longer takes the whole process down — the query fails and you retry it — and setting up database roles now waits for a fresh database instead of failing on its first connection.',
+		breaking: false,
+		migrations: false,
+		areas: ['db', 'config'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
