@@ -303,6 +303,24 @@ export const RELEASES: Release[] = [
 		migrations: false,
 		areas: ['config', 'docs'],
 	},
+	{
+		version: '0.17.1',
+		date: '2026-10-05',
+		summary:
+			'Plugins bring their own packages: installing one adds the dependencies it declares, and upgrading it adds, re-ranges or removes them to match the new release.',
+		breaking: false,
+		migrations: false,
+		areas: ['config'],
+	},
+	{
+		version: '0.17.2',
+		date: '2026-10-06',
+		summary:
+			'CI waits on one runner, not two: the “already verified” check is now a step of the gate, a failed bundle upload no longer turns a live staging deploy red, and old release drafts are tidied away.',
+		breaking: false,
+		migrations: false,
+		areas: ['config', 'docs'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
