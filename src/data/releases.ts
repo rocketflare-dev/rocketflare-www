@@ -330,6 +330,15 @@ export const RELEASES: Release[] = [
 		migrations: false,
 		areas: ['config', 'docs'],
 	},
+	{
+		version: '0.17.4',
+		date: '2026-10-06',
+		summary:
+			'Setup gets lighter in a coding sandbox: the bootstrap can skip steps it doesn’t need, --offline stops asking wrangler anything, and installs no longer download cloudflared until the first tunnel needs it.',
+		breaking: false,
+		migrations: false,
+		areas: ['config', 'docs', 'scripts'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
