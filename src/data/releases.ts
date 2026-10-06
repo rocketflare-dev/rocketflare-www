@@ -357,6 +357,15 @@ export const RELEASES: Release[] = [
 		migrations: false,
 		areas: ['config'],
 	},
+	{
+		version: '0.17.7',
+		date: '2026-10-06',
+		summary:
+			'Installing a plugin works in a freshly renamed app again: it checks a plugin’s minimum kit version against the kit release your app came from, not your app’s own 0.1.0.',
+		breaking: false,
+		migrations: false,
+		areas: ['config'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
