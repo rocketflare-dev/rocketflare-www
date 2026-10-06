@@ -339,6 +339,24 @@ export const RELEASES: Release[] = [
 		migrations: false,
 		areas: ['config', 'docs', 'scripts'],
 	},
+	{
+		version: '0.17.5',
+		date: '2026-10-06',
+		summary:
+			'A dropped Neon connection no longer takes the whole process down — the query fails and you retry it — and setting up database roles now waits for a fresh database instead of failing on its first connection.',
+		breaking: false,
+		migrations: false,
+		areas: ['db', 'config'],
+	},
+	{
+		version: '0.17.6',
+		date: '2026-10-06',
+		summary:
+			'The test suite now passes inside a coding sandbox’s ship gate: the bootstrap tests run as root, and the Neon relay test helper speaks TLS, so it reaches a remote Neon branch as well as your local Postgres.',
+		breaking: false,
+		migrations: false,
+		areas: ['config'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
