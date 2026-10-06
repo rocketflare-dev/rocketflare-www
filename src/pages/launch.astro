@@ -45,6 +45,7 @@ const slides = [
 	{ id: 'production', label: 'Production-grade' },
 	{ id: 'control', label: 'IT stays in control' },
 	{ id: 'yours', label: 'Yours, not ours' },
+	{ id: 'stack', label: 'Why Cloudflare and Neon' },
 	{ id: 'fleet', label: 'The fleet' },
 	{ id: 'contrast', label: 'Versus the alternatives' },
 	{ id: 'proof', label: 'Where it stands' },
@@ -76,11 +77,21 @@ const rivals: { name: string; marks: Mark[]; us?: boolean }[] = [
 ]
 const MARK = { y: { glyph: '●', text: 'Yes' }, p: { glyph: '◐', text: 'Partly' }, n: { glyph: '○', text: 'No' } }
 
+const stackReasons = [
+	{ title: 'Apart from your core infrastructure', body: 'Apps and agents run in Cloudflare accounts of their own, outside the corporate network. A misbehaving app has nothing of yours to reach.' },
+	{ title: 'Nothing reaches in unless it is shared', body: 'Corporate APIs, data and SaaS connections reach an app only as an explicit grant: requested, approved by whoever owns them, pushed by Launch, rotated in one place.' },
+	{ title: 'Sandboxed agents, keys kept outside', body: 'Each coding session is its own container with its own copy of the repo. The model key and the GitHub token are added on the way out; the container never holds them.' },
+	{ title: 'A throwaway database for every agent', body: 'Neon branches are near-instant copies, so every session and every gate run gets a real Postgres of its own, deleted afterwards. No agent touches staging or production data.' },
+	{ title: 'A small blast radius per app', body: 'Its own Worker per environment, its own database and role, its own origin. One app cannot read another’s data or cookies, and CI never holds a deploy credential.' },
+	{ title: 'Serverless, so idle costs nothing', body: 'No servers, clusters or patching for IT; a new host is live in about 100 ms. Workers bill per request and Neon scales to zero, so fifty quiet apps cost close to nothing. <a href="/costs/">What it costs</a>.' },
+]
+
 const roadmap = [
 	{ title: 'Upgrade every app at once', body: 'One kit release rolled across the fleet, each app through its own gate and PR. One app at a time is built.', lead: true },
 	{ title: 'Grants proven on live Workers', body: 'Shared credentials pushed, rotated and revoked on real apps. Built and tested against fakes today.' },
 	{ title: 'Session policy', body: 'How many sessions an app may run at once, and who pays for them, set by policy rather than by hand.' },
 	{ title: 'Teardown at scale', body: 'Archiving and removing apps, with their databases and hosts, as routine rather than a careful afternoon.' },
+	{ title: 'A Kubernetes edition', body: 'The same Launch and the same apps in a cluster you run, for companies whose policy keeps everything inside their own estate.' },
 	{ title: 'A pilot company', body: 'Launch deployed in a company’s own accounts, with its own builders, beyond the people who wrote it.' },
 ]
 ---
@@ -314,6 +325,23 @@ const roadmap = [
 					</div>
 				</div>
 			</div>
+			<a class="next" href="#stack">Next: Why Cloudflare and Neon <span aria-hidden="true">↓</span></a>
+		</section>
+
+		<!-- 10b · Why the stack -->
+		<section class="slide" id="stack">
+			<div class="wrap">
+				<SectionHead eyebrow="So why Cloudflare and Neon?" title="A stack chosen so letting everyone build is safe." align="left" />
+				<ul class="cards three">
+					{stackReasons.map((r) => (
+						<li class="card">
+							<h3>{r.title}</h3>
+							<p set:html={r.body} />
+						</li>
+					))}
+				</ul>
+				<p class="kicker tight measure">Plain Postgres and ordinary code in your repo, so none of it is a lock-in. A Kubernetes edition is on the roadmap.</p>
+			</div>
 			<a class="next" href="#fleet">Next: The fleet <span aria-hidden="true">↓</span></a>
 		</section>
 
@@ -370,7 +398,7 @@ const roadmap = [
 					<div><dt>apps live through the gate</dt><dd>2</dd></div>
 				</dl>
 				<Callout tone="yellow" title="What we don’t claim yet">
-					<p>Launch has run only in its builders’ own accounts; there is no customer yet. Shared-credential grants are tested against fakes, not live Workers. Upgrading the whole fleet at once is designed, not built. Pricing is not set.</p>
+					<p>Launch has run only in its builders’ own accounts; there is no customer yet. Shared-credential grants are tested against fakes, not live Workers. The sandbox’s network allow-list is built but switched off while a Cloudflare bug is fixed, so a session can reach the internet today, though never with a key. Upgrading the whole fleet at once is designed, not built. Pricing is not set.</p>
 				</Callout>
 			</div>
 			<a class="next" href="#model">Next: How it makes money <span aria-hidden="true">↓</span></a>
@@ -584,6 +612,7 @@ const roadmap = [
 		background: var(--orange);
 	}
 	.kicker { margin-top: 2rem; font-size: var(--step-1); color: var(--text-bright); font-weight: 500; }
+	.kicker.tight { margin-top: 1.4rem; margin-bottom: 0; }
 
 	/* ------------------------------------------------------------ cards -- */
 	.cards { list-style: none; padding: 0; margin: 0; display: grid; gap: 1.1rem; }
