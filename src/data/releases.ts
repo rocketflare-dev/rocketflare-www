@@ -321,6 +321,15 @@ export const RELEASES: Release[] = [
 		migrations: false,
 		areas: ['config', 'docs'],
 	},
+	{
+		version: '0.17.3',
+		date: '2026-10-06',
+		summary:
+			'Tests stop timing out on slow machines: set TEST_LATENCY_FACTOR and every test, hook and teardown limit scales up — never down — so a coding sandbox running one test by hand gets the time it needs.',
+		breaking: false,
+		migrations: false,
+		areas: ['config', 'docs'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
