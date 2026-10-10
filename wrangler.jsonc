@@ -5,6 +5,9 @@
 	"assets": {
 		"directory": "./dist",
 		"binding": "ASSETS",
+		// A path with no asset gets dist/404.html (src/pages/404.astro) with a 404
+		// status, rather than an empty body.
+		"not_found_handling": "404-page",
 		// Static Assets answers before the Worker by default, so /, /tour/ and
 		// every other page URL never reached worker/index.ts: the canonical
 		// redirect only ever ran on /api/*, the one path with no asset behind
