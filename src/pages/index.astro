@@ -181,6 +181,10 @@ const FAQS: { q: string; a: string }[] = [
 		a: 'Three things. Multi-tenancy is the foundation rather than an add-on, so every row belongs to an organisation and the tests fail if one does not. The AI layer — chat, agents and search over your own documents — is built in and works on a fresh copy with no API key. And a copy keeps a link home: when the kit gains a release, one command ports it into your renamed app without recreating anything you deleted, so starting from a template does not mean falling behind it.',
 	},
 	{
+		q: 'Is it for one product, or for many?',
+		a: 'As many as you have ideas. Copy the kit once per product: each copy is renamed to its own app, deploys on its own, and keeps taking the kit’s releases and plugins, so the tenth product starts as current as the first. One kit and a coding agent, turning out SaaS products for as long as you keep having ideas: an infinite SaaS factory rather than a one-off template.',
+	},
+	{
 		q: 'What does “agent-first” mean?',
 		a: 'The kit is written to be worked on by a coding agent: a map at the root of the repository, rules that load with the files they apply to, a guide in every important folder, and one test gate that enforces them. Ask the agent to set up, rename or deploy the project and it follows the same steps a person would, showing each result as it goes.',
 	},
@@ -487,7 +491,7 @@ const faqLd = {
 		<div class="wrap cta-inner reveal">
 			<LogoMark size={48} class="cta-mark" />
 			<h2>Everything above is already written.</h2>
-			<p>Your first commit can be a feature.</p>
+			<p>Your first commit can be a feature — and your next product starts the same way.</p>
 			<div class="cta-actions">
 				<a href="/get-started/" class="btn btn-primary">Get started</a>
 				<a href={GITHUB_URL} class="btn btn-ghost" target="_blank" rel="noopener">
