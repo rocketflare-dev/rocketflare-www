@@ -375,6 +375,24 @@ export const RELEASES: Release[] = [
 		migrations: false,
 		areas: ['config'],
 	},
+	{
+		version: '0.18.0',
+		date: '2026-10-11',
+		summary:
+			'Launch reads your app straight from its own repo: a launch.kit.json at the root says how to scaffold, develop, test, ship and upgrade it, and a new kit-check script proves the kit and every renamed copy still match it.',
+		breaking: false,
+		migrations: false,
+		areas: ['config', 'docs'],
+	},
+	{
+		version: '0.18.1',
+		date: '2026-10-11',
+		summary:
+			'An app Launch made now passes its own Gate: kit-check accepts a copy Launch has provisioned, real KV ids and all, and no config test judges the checkout it happens to run in.',
+		breaking: false,
+		migrations: false,
+		areas: ['config', 'docs'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
