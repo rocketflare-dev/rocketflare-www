@@ -21,7 +21,7 @@ import Screenshot from '../components/Screenshot.astro'
 import Callout from '../components/Callout.astro'
 import DiagramSteps from '../components/DiagramSteps.astro'
 import DiagramSequence from '../components/DiagramSequence.astro'
-import { LAUNCH_CONTACT_URL, LAUNCH_GITHUB_URL } from '../data/site'
+import { LAUNCH_CONTACT_URL, LAUNCH_GITHUB_URL, LAUNCH_KIT_URL } from '../data/site'
 
 import createLight from '../assets/screens/launch-create.light.png'
 import createDark from '../assets/screens/launch-create.dark.png'
@@ -43,6 +43,7 @@ const slides = [
 	{ id: 'build', label: 'Build by chatting' },
 	{ id: 'ship', label: 'Ship through the gate' },
 	{ id: 'production', label: 'Production-grade' },
+	{ id: 'kits', label: 'Your kit, your rules' },
 	{ id: 'control', label: 'IT stays in control' },
 	{ id: 'yours', label: 'Yours, not ours' },
 	{ id: 'stack', label: 'Why Cloudflare and Neon' },
@@ -84,6 +85,12 @@ const stackReasons = [
 	{ title: 'A throwaway database for every agent', body: 'Neon branches are near-instant copies, so every session and every gate run gets a real Postgres of its own, deleted afterwards. No agent touches staging or production data.' },
 	{ title: 'A small blast radius per app', body: 'Its own Worker per environment, its own database and role, its own origin. One app cannot read another’s data or cookies, and CI never holds a deploy credential.' },
 	{ title: 'Serverless, so idle costs nothing', body: 'No servers, clusters or patching for IT; a new host is live in about 100 ms. Workers bill per request and Neon scales to zero, so fifty quiet apps cost close to nothing. <a href="/costs/">What it costs</a>.' },
+]
+
+const kitPoints = [
+	{ title: 'A catalogue, kept by IT', body: 'Register a kit by its GitHub repository, pinned to a tag or a commit or following its latest release. Private kit repos are read through Launch’s GitHub App. Builders are offered the default and the kits that pass their check.' },
+	{ title: 'One contract, checked', body: 'A kit declares in a root <code>launch.kit.json</code> how Launch drives it: how a copy is made, what its resources are called, its gate, its release and its sessions. Launch checks it, and can scaffold a throwaway repo to prove it.' },
+	{ title: 'Start from the meta-kit', body: `<a href="${LAUNCH_KIT_URL}">launch-kit</a> is the smallest app that conforms: one Worker, Neon Postgres, sign-in, a gate and a deploy workflow. Fork it, fill it in, register it.` },
 ]
 
 const roadmap = [
@@ -169,7 +176,7 @@ const roadmap = [
 						<div class="loop-row"><dt>Where the code lives</dt><dd>The vendor’s project, optionally synced out</dd><dd class="us">A normal repo in your GitHub</dd></div>
 						<div class="loop-row"><dt>Who can sign in</dt><dd>Whoever the builder set up</dd><dd class="us">Your company login, per app</dd></div>
 						<div class="loop-row"><dt>How it reaches production</dt><dd>A publish button</dd><dd class="us">Gate, pull request, approval</dd></div>
-						<div class="loop-row"><dt>What it is built on</dt><dd>A fresh prototype each time</dd><dd class="us">A production kit, the same for every app</dd></div>
+						<div class="loop-row"><dt>What it is built on</dt><dd>A fresh prototype each time</dd><dd class="us">A production kit the company chose</dd></div>
 					</dl>
 				</div>
 			</div>
@@ -262,7 +269,7 @@ const roadmap = [
 		<!-- 8 · Production-grade -->
 		<section class="slide" id="production">
 			<div class="wrap">
-				<SectionHead eyebrow="Production-grade from day one" title="Every app starts where most apps hope to end up." align="left" lede="Launch only makes Rocketflare apps, and Rocketflare is an open-source kit with the hard parts already written. So the app a builder starts on Monday has what a platform team would ask for." />
+				<SectionHead eyebrow="Production-grade from day one" title="Every app starts where most apps hope to end up." align="left" lede="New apps start from Rocketflare by default, an open-source kit with the hard parts already written. So the app a builder starts on Monday has what a platform team would ask for." />
 				<ul class="cards four">
 					{inherited.map((f) => (
 						<li class="card">
@@ -271,6 +278,24 @@ const roadmap = [
 						</li>
 					))}
 				</ul>
+			</div>
+			<a class="next" href="#kits">Next: Your kit, your rules <span aria-hidden="true">↓</span></a>
+		</section>
+
+		<!-- 8b · Kits -->
+		<section class="slide" id="kits">
+			<div class="wrap">
+				<SectionHead eyebrow="Your kit, your rules" title="The company decides what its people build on." align="left" lede="Rocketflare is the default kit, not the only one. A platform admin keeps a catalogue of kits, and a builder picks one when they create an app." />
+				<ul class="cards three">
+					{kitPoints.map((k) => (
+						<li class="card">
+							<h3>{k.title}</h3>
+							<p set:html={k.body} />
+						</li>
+					))}
+				</ul>
+				<p class="kicker tight measure">Each app keeps the kit it was made from. Its upgrades, coding sessions, deploys and sign-in follow that kit, and an upgrade moves it forward within its own kit only.</p>
+				<p class="fine kit-limits measure">Every kit runs on the same platform: one Cloudflare Worker per environment, Neon Postgres, and only the resource kinds Launch provisions. A session on a kit other than Rocketflare installs its packages from cold.</p>
 			</div>
 			<a class="next" href="#control">Next: IT stays in control <span aria-hidden="true">↓</span></a>
 		</section>
@@ -398,7 +423,7 @@ const roadmap = [
 					<div><dt>apps live through the gate</dt><dd>2</dd></div>
 				</dl>
 				<Callout tone="yellow" title="What we don’t claim yet">
-					<p>Launch has run only in its builders’ own accounts; there is no customer yet. Shared-credential grants are tested against fakes, not live Workers. The sandbox’s network allow-list is built but switched off while a Cloudflare bug is fixed, so a session can reach the internet today, though never with a key. Upgrading the whole fleet at once is designed, not built. Pricing is not set.</p>
+					<p>Launch has run only in its builders’ own accounts; there is no customer yet. Shared-credential grants are tested against fakes, not live Workers. The sandbox’s network allow-list is built but switched off while a Cloudflare bug is fixed, so a session can reach the internet today, though never with a key. Kits other than Rocketflare are new: their scaffold check has run against test doubles, not real GitHub. Upgrading the whole fleet at once is designed, not built. Pricing is not set.</p>
 				</Callout>
 			</div>
 			<a class="next" href="#model">Next: How it makes money <span aria-hidden="true">↓</span></a>
@@ -412,7 +437,7 @@ const roadmap = [
 					<article class="card tone-green">
 						<span class="tag">Adoption</span>
 						<h3>The kit is MIT</h3>
-						<p>Free, open source and useful on its own. It is how engineers find Rocketflare, and every app Launch makes is a kit app, so the kit’s quality is Launch’s quality.</p>
+						<p>Free, open source and useful on its own. It is how engineers find Rocketflare, and it is the kit Launch builds from by default, so the kit’s quality is Launch’s quality.</p>
 					</article>
 					<article class="card tone-orange">
 						<span class="tag">Revenue</span>
@@ -613,6 +638,7 @@ const roadmap = [
 	}
 	.kicker { margin-top: 2rem; font-size: var(--step-1); color: var(--text-bright); font-weight: 500; }
 	.kicker.tight { margin-top: 1.4rem; margin-bottom: 0; }
+	.kit-limits { margin: 0.8rem 0 0; }
 
 	/* ------------------------------------------------------------ cards -- */
 	.cards { list-style: none; padding: 0; margin: 0; display: grid; gap: 1.1rem; }
