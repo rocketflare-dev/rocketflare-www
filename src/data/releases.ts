@@ -375,6 +375,33 @@ export const RELEASES: Release[] = [
 		migrations: false,
 		areas: ['config'],
 	},
+	{
+		version: '0.18.0',
+		date: '2026-10-11',
+		summary:
+			'A launch.kit.json contract describes how Launch scaffolds, develops, gates, ships and upgrades an app from the kit, and a conformance check runs in the kit and in every renamed copy.',
+		breaking: false,
+		migrations: false,
+		areas: ['config', 'docs'],
+	},
+	{
+		version: '0.18.1',
+		date: '2026-10-11',
+		summary:
+			'The kit check now accepts a copy Launch has already provisioned with real KV ids, so a launched app passes its own gate without editing its tomls.',
+		breaking: false,
+		migrations: false,
+		areas: ['config', 'docs'],
+	},
+	{
+		version: '0.19.0',
+		date: '2026-10-12',
+		summary:
+			'Agents can ask typed questions with ctx.decide and branch in code on the answer and its confidence: TypeSafe Jev answers with calibrated probabilities as a new Decisions provider, every decision is recorded per run, and a triage-research example shows the pattern. Keyword search also stops tripping over the filler words in a question.',
+		breaking: false,
+		migrations: true,
+		areas: ['api', 'shared', 'ui', 'db', 'config', 'docs'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
