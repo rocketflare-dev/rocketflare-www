@@ -402,6 +402,15 @@ export const RELEASES: Release[] = [
 		migrations: true,
 		areas: ['api', 'shared', 'ui', 'db', 'config', 'docs'],
 	},
+	{
+		version: '0.20.0',
+		date: '2026-10-13',
+		summary:
+			'Claude 5.x and GPT-6 work out of the box: each request now follows the model’s own rules for thinking, sampling and forced tools, OpenAI runs on the Responses API so tool calls work on every GPT-6 model, the defaults move to Claude Haiku 5.5 and GPT-6 Luna, and the cost estimates are corrected (Opus 4.5 to 4.8 were showing three times their real price).',
+		breaking: true,
+		migrations: false,
+		areas: ['api', 'shared', 'ui', 'docs'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
