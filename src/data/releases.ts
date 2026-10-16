@@ -411,6 +411,15 @@ export const RELEASES: Release[] = [
 		migrations: false,
 		areas: ['api', 'shared', 'ui', 'docs'],
 	},
+	{
+		version: '0.21.0',
+		date: '2026-10-16',
+		summary:
+			'Agents can run at volume: many runs at once, batches of up to 100, fan-out inside a run, a usage row per model call with per-run budgets, and tool-loop policies that decide what happens when a run runs out. Plugin agents can ask people questions, and a replay script re-runs past runs against today’s code.',
+		breaking: true,
+		migrations: true,
+		areas: ['db', 'api', 'shared', 'cli', 'config', 'ui', 'docs'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
