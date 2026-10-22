@@ -57,6 +57,13 @@ export interface Plugin {
 	readme?: string
 	/** The agent skills it installs into `.claude/skills/` (the manifest's `skills`). */
 	skills?: string[]
+	/**
+	 * `false` when the manifest's `schema.tables` is empty: no migration to generate after install,
+	 * so the page must not say there is one. Absent means it has tables.
+	 */
+	tables?: false
+	/** Who built it, when that is not the Rocketflare team — credited on the card and the page. */
+	contributedBy?: { name: string; url: string }
 }
 
 const PLUGINS_REPO = 'https://github.com/rocketflare-dev/rocketflare-plugins'
@@ -70,7 +77,7 @@ export const PLUGINS: Plugin[] = [
 		repoLabel: 'rocketflare-dev/rocketflare-plugins',
 		subdir: 'plugins/analytics',
 		minKit: '0.13.0',
-		version: '3.4.2',
+		version: '3.5.0',
 		shipsAs: 'installed',
 		summary:
 			'Dashboards, cubes, fact tables and the drizzle-cube query API — everything that used to be part of the kit, now a repository of its own.',
@@ -96,7 +103,7 @@ export const PLUGINS: Plugin[] = [
 		repoLabel: 'rocketflare-dev/rocketflare-plugins',
 		subdir: 'plugins/web-knowledge',
 		minKit: '0.9.0',
-		version: '3.4.2',
+		version: '3.5.0',
 		shipsAs: 'optional',
 		summary:
 			'Lets agents and chat search the public web and read pages, on each organisation’s own search key — and only for the organisations that turn it on.',
@@ -119,7 +126,7 @@ export const PLUGINS: Plugin[] = [
 		repoLabel: 'rocketflare-dev/rocketflare-plugins',
 		subdir: 'plugins/connectors',
 		minKit: '0.13.0',
-		version: '3.4.2',
+		version: '3.5.0',
 		shipsAs: 'optional',
 		summary:
 			'Connects an organisation’s own Microsoft 365 to your app: an admin grants consent once, and its directory and calendars sync in. It holds the rows, routes and schedules; a provider plugin (today, m365) does the talking.',
@@ -144,7 +151,7 @@ export const PLUGINS: Plugin[] = [
 		repoLabel: 'rocketflare-dev/rocketflare-plugins',
 		subdir: 'plugins/m365',
 		minKit: '0.12.0',
-		version: '3.4.2',
+		version: '3.5.0',
 		shipsAs: 'optional',
 		summary:
 			'Microsoft 365 as a provider for the connectors plugin, which it requires — install connectors first. One multi-tenant Entra app for your whole deployment; each customer’s admin consents to it once.',
@@ -159,6 +166,32 @@ export const PLUGINS: Plugin[] = [
 		changelogUrl: `${PLUGINS_REPO}/blob/main/CHANGELOG.md`,
 		docsUrl: `${PLUGINS_REPO}/tree/main/plugins/m365`,
 		readme: 'plugins/m365/README.md',
+		tables: false,
+	},
+	{
+		id: 'issue-reports',
+		label: 'Issue reports',
+		repo: PLUGINS_REPO,
+		repoLabel: 'rocketflare-dev/rocketflare-plugins',
+		subdir: 'plugins/issue-reports',
+		minKit: '0.21.0',
+		version: '3.5.0',
+		shipsAs: 'optional',
+		summary:
+			'Ideas & issues: anyone on the team talks a bug or an idea through with an agent, which asks until it is clear and logs it on GitHub once they approve the draft.',
+		adds: [
+			'<strong>An Ideas & issues page</strong> — under Feedback in the sidebar: describe a problem or an idea in your own words, answer the agent’s questions one at a time, review the draft, and see the conversations you have shared.',
+			'<strong>An agent that asks before it files</strong> — <code>issue-reports</code> asks plain-language questions until it understands what the person needs, searches the repository for an existing issue, and files nothing until they pick Log it on GitHub. A confirmed duplicate becomes a comment on the existing issue.',
+			'<strong>No tables</strong> — each conversation is one agent run, parked on the person’s answers, so the run is the record and there is no migration. Many conversations can be in progress at once.',
+			'<strong>Safe to retry</strong> — every question and the filing are keyed by round, so a replayed or retried step never asks twice or opens the issue twice.',
+			'<strong>GitHub over plain fetch</strong> — four REST calls and no Octokit, on a fine-grained token with Issues access to one repository. The token never appears in an error, a log line, a response or a prompt.',
+			'<strong>A prompt you can override</strong> — <code>issue-reports</code>, per organisation in Settings → Prompts, with its model chosen in Settings → agent models. Its model calls land in the usage ledger.',
+		],
+		changelogUrl: `${PLUGINS_REPO}/blob/main/CHANGELOG.md`,
+		docsUrl: `${PLUGINS_REPO}/tree/main/plugins/issue-reports`,
+		readme: 'plugins/issue-reports/README.md',
+		tables: false,
+		contributedBy: { name: 'Mosaic Data', url: 'https://mosaicdata.ai/' },
 	},
 	{
 		id: 'example-feature',

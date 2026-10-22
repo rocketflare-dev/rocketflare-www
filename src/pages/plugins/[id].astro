@@ -62,6 +62,12 @@ const title = `${p.label} plugin — Rocketflare`
 					<div><dt>Plugin id</dt><dd><code>{p.id}</code></dd></div>
 					<div><dt>Version</dt><dd><code>{p.version}</code></dd></div>
 					<div><dt>Needs kit</dt><dd><code>{p.minKit}</code> or later</dd></div>
+					{p.contributedBy && (
+						<div>
+							<dt>Contributed by</dt>
+							<dd><a href={p.contributedBy.url} target="_blank" rel="noopener">{p.contributedBy.name}</a></dd>
+						</div>
+					)}
 					{p.requires && (
 						<div>
 							<dt>Needs plugin</dt>
@@ -109,12 +115,19 @@ const title = `${p.label} plugin — Rocketflare`
 								lines={[{ cmd: install }, { cmd: `${install} --apply` }]}
 								expect="The first prints the plan and stops; the second writes it."
 							/>
-							<p class="install-note">
-								Then generate and run its migration —
-								<code>pnpm db:generate --name plugin-{p.id}-{p.version}</code> and
-								<code>pnpm db:migrate</code> — and do the handful of steps the plan lists that a
-								plugin may not do for you.
-							</p>
+							{p.tables === false ? (
+								<p class="install-note">
+									It has no tables, so there is no migration. Then do the handful of steps the plan
+									lists that a plugin may not do for you.
+								</p>
+							) : (
+								<p class="install-note">
+									Then generate and run its migration —
+									<code>pnpm db:generate --name plugin-{p.id}-{p.version}</code> and
+									<code>pnpm db:migrate</code> — and do the handful of steps the plan lists that a
+									plugin may not do for you.
+								</p>
+							)}
 						</Fragment>
 					) : (
 						<p class="install-note">

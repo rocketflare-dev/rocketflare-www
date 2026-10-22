@@ -18,9 +18,9 @@ import { numberWord } from '../../data/concepts'
 const page = pageByPath('/plugins/')
 if (!page) throw new Error('Page not in the registry: /plugins/')
 
-/** What the search matches: name, id, summary, what it adds (tags stripped), skills and needs. */
+/** What the search matches: name, id, summary, what it adds (tags stripped), skills, needs and contributor. */
 const searchText = (p: (typeof PLUGINS)[number]) =>
-	[p.id, p.label, p.summary, ...p.adds, ...(p.skills ?? []), ...(p.requires ?? [])]
+	[p.id, p.label, p.summary, ...p.adds, ...(p.skills ?? []), ...(p.requires ?? []), p.contributedBy?.name ?? '']
 		.join(' ')
 		.replace(/<[^>]+>/g, ' ')
 		.toLowerCase()
@@ -75,6 +75,7 @@ const cards = PLUGINS.map((p) => ({ p, text: searchText(p) }))
 							<li>kit ≥ <code>{p.minKit}</code></li>
 							{p.requires?.map((r) => <li class="needs">needs <code>{r}</code></li>)}
 							{p.skills && <li>{p.skills.length} {p.skills.length === 1 ? 'skill' : 'skills'}</li>}
+							{p.contributedBy && <li>by {p.contributedBy.name}</li>}
 						</ul>
 					</li>
 				))}
