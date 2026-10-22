@@ -76,8 +76,8 @@ export const PLUGINS: Plugin[] = [
 		repo: PLUGINS_REPO,
 		repoLabel: 'rocketflare-dev/rocketflare-plugins',
 		subdir: 'plugins/analytics',
-		minKit: '0.13.0',
-		version: '3.5.0',
+		minKit: '0.17.1',
+		version: '3.5.1',
 		shipsAs: 'installed',
 		summary:
 			'Dashboards, cubes, fact tables and the drizzle-cube query API — everything that used to be part of the kit, now a repository of its own.',
@@ -103,7 +103,7 @@ export const PLUGINS: Plugin[] = [
 		repoLabel: 'rocketflare-dev/rocketflare-plugins',
 		subdir: 'plugins/web-knowledge',
 		minKit: '0.9.0',
-		version: '3.5.0',
+		version: '3.5.1',
 		shipsAs: 'optional',
 		summary:
 			'Lets agents and chat search the public web and read pages, on each organisation’s own search key — and only for the organisations that turn it on.',
@@ -126,7 +126,7 @@ export const PLUGINS: Plugin[] = [
 		repoLabel: 'rocketflare-dev/rocketflare-plugins',
 		subdir: 'plugins/connectors',
 		minKit: '0.13.0',
-		version: '3.5.0',
+		version: '3.5.1',
 		shipsAs: 'optional',
 		summary:
 			'Connects an organisation’s own Microsoft 365 to your app: an admin grants consent once, and its directory and calendars sync in. It holds the rows, routes and schedules; a provider plugin (today, m365) does the talking.',
@@ -151,7 +151,7 @@ export const PLUGINS: Plugin[] = [
 		repoLabel: 'rocketflare-dev/rocketflare-plugins',
 		subdir: 'plugins/m365',
 		minKit: '0.12.0',
-		version: '3.5.0',
+		version: '3.5.1',
 		shipsAs: 'optional',
 		summary:
 			'Microsoft 365 as a provider for the connectors plugin, which it requires — install connectors first. One multi-tenant Entra app for your whole deployment; each customer’s admin consents to it once.',
@@ -175,7 +175,7 @@ export const PLUGINS: Plugin[] = [
 		repoLabel: 'rocketflare-dev/rocketflare-plugins',
 		subdir: 'plugins/issue-reports',
 		minKit: '0.21.0',
-		version: '3.5.0',
+		version: '3.5.1',
 		shipsAs: 'optional',
 		summary:
 			'Ideas & issues: anyone on the team talks a bug or an idea through with an agent, which asks until it is clear and logs it on GitHub once they approve the draft.',
