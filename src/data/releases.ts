@@ -420,6 +420,33 @@ export const RELEASES: Release[] = [
 		migrations: true,
 		areas: ['db', 'api', 'shared', 'cli', 'config', 'ui', 'docs'],
 	},
+	{
+		version: '0.22.0',
+		date: '2026-10-24',
+		summary:
+			'Agents call their tools concurrently under a configurable cap, and plugins can receive inbound email: a new email handler slot routes messages sent to the app’s address to the plugin that claims them.',
+		breaking: false,
+		migrations: false,
+		areas: ['api', 'shared', 'plugins'],
+	},
+	{
+		version: '0.23.0',
+		date: '2026-10-24',
+		summary:
+			'Plugins can start agent runs from jobs, scheduled tasks and inbound email, safely retried with an idempotency key; agents and tools get file storage; and documents whose converted text carries stray NUL bytes now index instead of failing.',
+		breaking: false,
+		migrations: false,
+		areas: ['api', 'ui', 'docs'],
+	},
+	{
+		version: '0.24.0',
+		date: '2026-10-30',
+		summary:
+			'An app made from the kit starts clean: the rename removes the kit’s own release scripts, maintainer hooks, tests and pending notes, so an app’s gate only checks the app while upgrades keep working. Example agents can be deleted without touching a test, the example plugin goes fully dark with its flag off, and the source no longer carries the kit’s design history in its comments.',
+		breaking: false,
+		migrations: false,
+		areas: ['api', 'config', 'docs'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
