@@ -66,7 +66,7 @@ export interface BootstrapStep {
 
 /** In order; the script prints `✔ 1/10 toolchain` … `✔ 10/10 run`. */
 export const BOOTSTRAP_STEPS: BootstrapStep[] = [
-	{ name: 'toolchain', plain: 'Checked Node 24, pnpm and Docker, and installed what was missing' },
+	{ name: 'toolchain', plain: 'Checked Node 26, pnpm and Docker, and installed what was missing' },
 	{ name: 'install', plain: 'Installed the dependencies' },
 	{ name: 'secrets', plain: 'Wrote the local secrets file with a fresh encryption key' },
 	{ name: 'database', plain: 'Started Postgres in Docker' },

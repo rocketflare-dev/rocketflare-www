@@ -447,6 +447,15 @@ export const RELEASES: Release[] = [
 		migrations: false,
 		areas: ['api', 'config', 'docs'],
 	},
+	{
+		version: '0.25.0',
+		date: '2026-11-03',
+		summary:
+			'The kit moves to Node 26, React 19 and React Router 7, with zod 4, postgres.js 4, CASL 7 and the Anthropic API’s 2026-10-21 version, and every other dependency brought current. Its workflows pin each Action by commit and run with timeouts and read-only permissions, and the analytics plugin arrives at 3.8.1, where an organisation’s fact-table status shows only its own activity.',
+		breaking: true,
+		migrations: false,
+		areas: ['cli', 'ci', 'config', 'scripts', 'docs', 'ui', 'shared', 'api', 'db'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */

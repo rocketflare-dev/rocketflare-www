@@ -93,7 +93,7 @@ const setupTurns = [
 	{ who: 'you' as const, text: SKILLS.setup },
 	{
 		who: 'agent' as const,
-		text: 'Running the first-run script and explaining each line as it lands. It will fix anything missing — Docker, Node 24, pnpm — and ask whether to log in to Cloudflare or stay offline.',
+		text: 'Running the first-run script and explaining each line as it lands. It will fix anything missing — Docker, Node 26, pnpm — and ask whether to log in to Cloudflare or stay offline.',
 		checks: BOOTSTRAP_STEPS.map((s) => s.plain),
 	},
 	{
