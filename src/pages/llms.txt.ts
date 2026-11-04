@@ -33,8 +33,8 @@ works to start).
 Stack, for anyone who wants it: Cloudflare Workers (fetch + queue + scheduled, a
 Durable Object and a Workflow), Hono 4, zod contracts, CASL, Postgres 17 +
 pgvector (Drizzle over the Neon serverless driver, or postgres.js through
-Hyperdrive, chosen per deployment), React 18 + Vite,
-drizzle-cube for analytics, a commander CLI. Node 24, pnpm 10.
+Hyperdrive, chosen per deployment), React 19 + Vite,
+drizzle-cube for analytics, a commander CLI. Node 26, pnpm 10.
 
 Getting started: clone the repository and run "bash scripts/bootstrap.sh" (macOS
 or Linux, Docker running) — it checks the toolchain, starts Postgres, migrates,
