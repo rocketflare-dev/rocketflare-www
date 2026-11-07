@@ -456,6 +456,15 @@ export const RELEASES: Release[] = [
 		migrations: false,
 		areas: ['cli', 'ci', 'config', 'scripts', 'docs', 'ui', 'shared', 'api', 'db'],
 	},
+	{
+		version: '0.26.0',
+		date: '2026-11-07',
+		summary:
+			'Organisations and roles can come from your identity provider: sign-in through an OIDC issuer such as Cognito creates and updates them from the id_token, identity events keep them in step, and a session can be capped. Plugins get an identity seam of their own, so one can sign people in, provision them, add a login button and require SSO for the email domains it has verified, in both tenancy modes.',
+		breaking: false,
+		migrations: true,
+		areas: ['api', 'db', 'config', 'shared', 'ui', 'plugins', 'docs'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
