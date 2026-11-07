@@ -1,0 +1,441 @@
+---
+/**
+ * Rocketflare vs AI agent and workflow platforms: Dust, Microsoft Copilot
+ * Studio and Fabric, n8n, Mastra, LangGraph, CrewAI, Relevance AI. The lead
+ * comparison. Its argument: an agentic business app should be one unit you
+ * own and deploy (agents, durable workflows, knowledge, the app, its users and
+ * its record of what happened), not a hosted workspace or an assembly of
+ * separately licensed services.
+ *
+ * Facts about the other products come from their own pricing, docs and
+ * licence pages, checked in CHECKED_ON. The Microsoft list is assembled from
+ * Microsoft's own pages; the count is ours, and the copy says so.
+ */
+import CompareLayout from '../../components/CompareLayout.astro'
+import SectionHead from '../../components/SectionHead.astro'
+import Callout from '../../components/Callout.astro'
+import ConceptIcon from '../../components/ConceptIcon.astro'
+import DiagramSprawl from '../../components/DiagramSprawl.astro'
+
+const sprawlParts = [
+	{ label: 'Agent workspace', note: 'seats and credits' },
+	{ label: 'Workflow tool', note: 'billed per run' },
+	{ label: 'Vector store', note: 'a copy of your docs' },
+	{ label: 'Identity provider', note: 'its own admin' },
+	{ label: 'App front end', note: 'still to build' },
+	{ label: 'Tracing and evals', note: 'another vendor' },
+]
+const sprawlLayers = [
+	'Agents and durable workflows',
+	'Knowledge base and search',
+	'Chat and the app’s screens',
+	'Organisations, roles and SSO',
+	'Activity, traces, evals, costs',
+]
+
+const properties = [
+	{
+		title: 'The agents live inside the app',
+		body: 'They read the same tables, respect the same roles and write to the same activity log as the people using it. There is no second system to keep in step.',
+		icon: 'robot',
+	},
+	{
+		title: 'A person approves the steps that matter',
+		body: 'A run can stop and wait for an approval, a choice, a typed answer or a form, for up to a week by default, and carry on from where it stopped.',
+		icon: 'users',
+	},
+	{
+		title: 'It serves your customers, not only your staff',
+		body: 'Each customer is an organisation with its own members, roles, documents and AI spend, kept apart by tests.',
+		icon: 'building',
+	},
+	{
+		title: 'It ships as one unit',
+		body: 'One repository, one deploy, one database. You can hand it to a client, move it to another account, or roll it back with one command.',
+		icon: 'rocket',
+	},
+]
+
+const profiles = [
+	{
+		anchor: 'dust',
+		lead: 'If you are looking for a Dust alternative because the agents need to serve your customers, or because you want to own the software they run in, Rocketflare is the agentic app as code in your own repository.',
+		what: 'Dust is a hosted workspace where employees build and use AI agents connected to company tools such as Slack, Notion, GitHub and Google Drive. It is priced per seat with monthly credits, hosted in Dust’s cloud in the EU or the US, and its main code repository is no longer public.',
+		strong: 'For a company of twenty to a hundred people who want agents over their own tools this month, it is hard to beat: good connectors, several model providers, EU hosting, SOC 2, and nothing to operate.',
+		stops: 'Dust is an internal workspace. It has no concept of your customers as organisations with their own users, and the agents, connectors and data live in Dust’s service. Self-hosting is not offered; a single-tenant deployment is an Enterprise option.',
+		facts: [
+			{ k: 'Pricing', v: '€24 or €120 per seat a month (yearly), plus credits' },
+			{ k: 'Licence', v: 'Proprietary SaaS' },
+			{ k: 'Runs on', v: 'Dust’s cloud, EU or US' },
+			{ k: 'Serves your customers', v: 'No; reports can be shared by link' },
+		],
+	},
+	{
+		anchor: 'copilot-studio',
+		lead: 'Rocketflare is a Copilot Studio alternative for when the agent is the product: something your customers sign in to, that you can price, host where you like and take with you.',
+		what: 'Copilot Studio is Microsoft’s low-code builder for agents and agent flows. It is billed in Copilot Credits, $200 a month for a pack of 25,000 or pay-as-you-go through Azure, and knowledge from uploaded or SharePoint files is copied into Dataverse and indexed there. Agents publish to Teams, Microsoft 365 Copilot, a website chat widget or a custom client over Direct Line.',
+		strong: 'If your company already lives in Microsoft 365, nothing else reaches your people as easily: Graph grounding, Teams and Copilot distribution, Entra identity, Purview governance and procurement through an existing agreement. Use by staff with Microsoft 365 Copilot licences is zero-rated for several kinds of answer.',
+		stops: 'Cost is hard to forecast: a reasoning model adds 10 credits per 1,000 tokens, and Microsoft’s own example message costs between 141 and 461 credits. At 125% of prepaid capacity, agents are blocked mid-conversation unless overage is set up. Agents move between Microsoft environments as solutions, and Microsoft notes that knowledge sources might not be included; there is no export to run anywhere else.',
+		facts: [
+			{ k: 'Pricing', v: '$200 per 25,000 Copilot Credits a month, or pay-as-you-go' },
+			{ k: 'Licence', v: 'Proprietary' },
+			{ k: 'Runs on', v: 'Microsoft cloud: Power Platform, Dataverse, Azure' },
+			{ k: 'Serves your customers', v: 'A chat widget or Direct Line; no organisations or roles for them' },
+		],
+	},
+	{
+		anchor: 'fabric',
+		lead: 'For questions over business data, Rocketflare is a lighter Microsoft Fabric alternative: dashboards and a semantic layer per customer organisation, inside the same app as the agents.',
+		what: 'Microsoft Fabric is Microsoft’s analytics platform over OneLake. Fabric data agents answer questions in natural language by writing SQL, DAX or KQL against lakehouses, warehouses and semantic models, and can be called from Copilot Studio, Foundry, Teams and Microsoft 365 Copilot.',
+		strong: 'A governed question-and-answer layer over a company’s data estate, for organisations that already run their reporting on Fabric or Power BI Premium.',
+		stops: 'A data agent needs paid F2 or higher capacity (or Power BI Premium P1 or higher). It is read-only, cannot read unstructured documents such as PDFs, does not let you change the model, works in English only and caps answers at 25 rows by 25 columns. It is another capacity to license next to Copilot Studio, not an app.',
+		facts: [
+			{ k: 'Pricing', v: 'Fabric capacity, F2 and up' },
+			{ k: 'Licence', v: 'Proprietary' },
+			{ k: 'Runs on', v: 'Microsoft cloud, OneLake' },
+			{ k: 'Serves your customers', v: 'No' },
+		],
+	},
+	{
+		anchor: 'n8n',
+		lead: 'n8n is excellent for your own team’s automations. Rocketflare is the n8n alternative when the workflows have to run inside a product you sell, which n8n’s licence does not allow without a separate agreement.',
+		what: 'n8n is a visual workflow tool with AI agent nodes, MCP and hundreds of integrations, in n8n’s cloud or self-hosted. It is priced per workflow execution, with unlimited users and workflows on every plan, and is released under the Sustainable Use License.',
+		strong: 'The integration catalogue, fast visual iteration, a large community and template library, and cheap entry pricing (from €20 a month). Workflows can wait, and since 2026 a person can approve an AI agent’s tool call through Slack, Telegram or n8n’s chat.',
+		stops: 'The licence allows use “only for your own internal business purposes” or non-commercial use. Building n8n into your product for customers needs n8n Embed, a separate white-label agreement. Workflows are JSON that only runs on n8n, and the builder is for your team: there is no app, organisation model or roles for your customers. SSO and Git version control need a paid plan.',
+		facts: [
+			{ k: 'Pricing', v: 'From €20 a month for 2,500 executions' },
+			{ k: 'Licence', v: 'Sustainable Use License (fair-code, internal use)' },
+			{ k: 'Runs on', v: 'n8n cloud, or self-hosted with Postgres and Redis' },
+			{ k: 'Serves your customers', v: 'Only with an n8n Embed agreement' },
+		],
+	},
+	{
+		anchor: 'mastra',
+		lead: 'Mastra is the closest product here to Rocketflare in spirit: TypeScript, code you own, agents and workflows as files in your repository. As a Mastra alternative, Rocketflare is the application around the agents, already built.',
+		what: 'Mastra is a TypeScript framework for agents, workflows, retrieval, memory and evals, with an optional hosted platform for observability and deployment. It runs anywhere Node runs, including Cloudflare. Most of it is Apache-2.0; since 22 September 2026 code in its ee directories, including auth and role-based access, the agent builder and the editor, is source-available and needs a licence key in production.',
+		strong: 'A very good developer experience, a broad model router, workflows that suspend and resume for a person’s input, and active development. If you already have an app with sign-in, tenancy and a UI, and only need the agent layer, it is the right tool.',
+		stops: 'It is a framework, so the app is yours to build: front end (Mastra points to the AI SDK UI or CopilotKit), database, organisations and roles for your customers, admin, cost tracking and the deploy. Its own auth and RBAC need the enterprise licence in production.',
+		facts: [
+			{ k: 'Pricing', v: 'Framework free; platform from $0, Teams $250 a month' },
+			{ k: 'Licence', v: 'Apache-2.0, plus a source-available ee licence' },
+			{ k: 'Runs on', v: 'Anywhere: Node, Cloudflare, Vercel, Netlify' },
+			{ k: 'Serves your customers', v: 'Whatever you build' },
+		],
+	},
+	{
+		anchor: 'langgraph',
+		lead: 'LangGraph has the best pause-and-resume primitives of any framework here. Rocketflare is the LangGraph alternative for teams who want those primitives already wired into an app with users, roles and a knowledge base, in TypeScript.',
+		what: 'LangGraph is an MIT-licensed agent orchestration framework for Python and JavaScript. LangSmith is LangChain’s proprietary platform around it: tracing, evals, deployment (formerly LangGraph Platform) and a no-code builder called Fleet.',
+		strong: 'Durable execution with checkpointers, interrupts that wait indefinitely until resumed, time travel, and tracing and evals that lead the category. It is the right pick for bespoke agent logic where the observability matters most.',
+		stops: 'There is no app, tenancy or knowledge base; you assemble a vector store, auth, a UI and hosting yourself. Traces and datasets live in LangSmith’s cloud unless you self-host, which is an add-on to the Enterprise plan and runs on Kubernetes with Postgres, ClickHouse and Redis.',
+		facts: [
+			{ k: 'Pricing', v: 'LangSmith Plus $39 per seat a month, plus usage' },
+			{ k: 'Licence', v: 'LangGraph MIT; LangSmith proprietary' },
+			{ k: 'Runs on', v: 'LangSmith cloud, or your infrastructure on Enterprise' },
+			{ k: 'Serves your customers', v: 'Whatever you build' },
+		],
+	},
+	{
+		anchor: 'crewai',
+		lead: 'CrewAI is for Python teams that think in crews of agents with roles. Rocketflare is the CrewAI alternative when the crew has to live inside a multi-tenant product with sign-in, documents and an audit trail.',
+		what: 'CrewAI is an MIT-licensed framework for multi-agent crews and flows, plus CrewAI AMP, a proprietary platform for deployment, traces, a tool repository and a no-code studio. Flows can pause for human feedback and persist their state.',
+		strong: 'A simple model for multi-agent work, a large community, and an enterprise route to running in your own cloud.',
+		stops: 'As with any framework, the application is yours to build. The managed platform lists a free tier of 50 executions a month and then Enterprise; running it in your own VPC or infrastructure is an Enterprise option.',
+		facts: [
+			{ k: 'Pricing', v: 'Free tier of 50 executions, then Enterprise' },
+			{ k: 'Licence', v: 'Framework MIT; AMP proprietary' },
+			{ k: 'Runs on', v: 'CrewAI cloud, or your VPC on Enterprise' },
+			{ k: 'Serves your customers', v: 'Whatever you build' },
+		],
+	},
+	{
+		anchor: 'relevance-ai',
+		lead: 'Relevance AI builds an “AI workforce” for sales and operations teams. Rocketflare is the Relevance AI alternative when you want that workforce as software you own and can sell.',
+		what: 'Relevance AI is a hosted no-code platform for building teams of specialist agents, aimed at sales, customer success, marketing and operations. You choose US, EU (London) or Australian hosting at sign-up.',
+		strong: 'Non-technical teams can build useful agents without engineers, with a large integration list and regional hosting.',
+		stops: 'It is proprietary SaaS with no self-hosting mentioned, and we found no documented way to export agent definitions. Its pricing page now lists only Enterprise, while its documentation still shows self-serve plans metered in actions and vendor credits.',
+		facts: [
+			{ k: 'Pricing', v: 'Enterprise on the pricing page; self-serve plans in the docs' },
+			{ k: 'Licence', v: 'Proprietary SaaS' },
+			{ k: 'Runs on', v: 'Relevance AI’s cloud: US, EU or Australia' },
+			{ k: 'Serves your customers', v: 'No' },
+		],
+	},
+]
+
+const table = {
+	columns: ['Dust, Relevance AI', 'Microsoft stack', 'n8n', 'Mastra, LangGraph, CrewAI', 'Rocketflare'],
+	rows: [
+		{ row: 'What it is', cells: ['A hosted agent workspace', 'Several products and licences', 'A workflow automation tool', 'A framework, plus a hosted platform', 'A complete app you copy and own'] },
+		{ row: 'Who uses the agents', cells: ['Your staff', 'Mainly your staff', 'Your staff', 'Whoever your app serves', 'Your customers and your staff'] },
+		{ row: 'Organisations and roles for your customers', cells: ['No', 'No', 'No', 'Build it yourself', 'Built in, with groups and SSO'] },
+		{ row: 'Durable runs that wait for a person', cells: ['Not documented', 'Agent flows and approvals', 'Wait node; approval on tool calls', 'Yes', 'Yes: approval, choice, input or form, up to a week'] },
+		{ row: 'Knowledge base', cells: ['Connectors to your tools', 'Copied into Dataverse', 'Vector store nodes', 'Retrieval building blocks', 'Hybrid search over pgvector in your Postgres'] },
+		{ row: 'Where your data lives', cells: ['The vendor’s cloud', 'Dataverse, OneLake, Azure', 'n8n cloud or your server', 'Wherever you put it', 'Your Postgres and your R2 bucket'] },
+		{ row: 'The unit of billing', cells: ['Seats and credits', 'Credits, seats, capacity, meters', 'Executions', 'Seats, traces, compute', 'Your Cloudflare, database and model bills'] },
+		{ row: 'Can you sell it to your customers', cells: ['No', 'Not as your product', 'Only with Embed', 'Yes, once built', 'Yes, it is MIT licensed'] },
+		{ row: 'Leaving', cells: ['Rebuild the agents elsewhere', 'Solutions move only between Microsoft environments', 'Workflow JSON runs only on n8n', 'Your code; the platform parts stay', 'Nothing to leave: it is your repository'] },
+	],
+}
+
+const differences = [
+	{
+		title: 'One deploy, not six vendors',
+		body: 'The API, the screens, the job queue, scheduled tasks, realtime updates and the durable agent runtime are one Cloudflare Worker over one Postgres database. A release is a tag; a rollback is one command. There is no agent platform, vector database, workflow engine or backend service to keep in step.',
+		icon: 'layers',
+		tone: 'blue' as const,
+	},
+	{
+		title: 'Durable agents with a person in the loop',
+		body: 'Agent runs are Cloudflare Workflows: they checkpoint their transcript, resume after a failure without repeating side effects, and park on an approval, choice, input or form. Tools can require approval before they run. You can cap tokens and cost per run, and spend per organisation per day.',
+		icon: 'robot',
+		tone: 'purple' as const,
+	},
+	{
+		title: 'Your customers’ data stays in your database',
+		body: 'Documents, embeddings, conversations, agent runs and traces are ordinary rows in your Postgres, each belonging to one organisation. Search is hybrid, dense and lexical, over pgvector. There is no second copy in a vendor’s index.',
+		icon: 'database',
+		tone: 'green' as const,
+	},
+	{
+		title: 'You can see what it did and what it cost',
+		body: 'Every model call is written to a usage ledger with its cost. Traces export over OTLP to Langfuse, Phoenix or any backend, and are also kept locally. Eval suites with committed baselines fail when a prompt gets worse, and a bad answer can be turned into a new eval case from the command line.',
+		icon: 'gauge',
+		tone: 'orange' as const,
+	},
+	{
+		title: 'Any model, including none',
+		body: 'A fresh copy runs chat, agents and embeddings on Workers AI with no key. Point it at Anthropic, OpenAI or any OpenAI-compatible server, per organisation or per agent, with keys encrypted at rest.',
+		icon: 'sparkles',
+		tone: 'cyan' as const,
+	},
+	{
+		title: 'Code you own',
+		body: 'MIT licensed, in your GitHub, with agents written as TypeScript files next to the rest of the app. Hand it to a client, sell it, or run fifty copies. No licence key, no seat count, no execution quota.',
+		icon: 'key',
+		tone: 'yellow' as const,
+	},
+]
+
+const microsoft = [
+	'Copilot Studio capacity: $200 packs of 25,000 Copilot Credits, or pay-as-you-go through an Azure subscription with a billing policy in the Power Platform admin centre.',
+	'Microsoft 365 Copilot at $30 per user a month, if staff use the agents in Teams or Copilot and you want those answers zero-rated.',
+	'A Power Platform environment with Dataverse, which holds the knowledge index and counts against your Dataverse storage. Users reaching SharePoint-backed knowledge need at least a Power Apps or Dynamics 365 Basic User licence.',
+	'Power Automate for cloud flows, which Microsoft licenses separately from agent flows.',
+	'Fabric F2 or higher capacity, or Power BI Premium, for data agents.',
+	'An Azure subscription for Foundry Agent Service: models, hosted agent compute and search.',
+	'Your own web app, with your own organisations and roles, for anything beyond the chat widget.',
+]
+
+const pickThem = [
+	{ who: 'The agents are for your own staff, and you live in Microsoft 365.', when: 'Copilot Studio reaches people in Teams and Copilot with no new sign-in, under governance your IT team already runs. Building that yourself would be the wrong use of a quarter.' },
+	{ who: 'You want internal agents next week and have no developers.', when: 'Dust and Relevance AI are hosted and need no code. If the users are your employees and the tools are SaaS, start there.' },
+	{ who: 'An ops team is automating its own processes.', when: 'n8n’s integrations and visual editor are the quickest way to connect a hundred internal systems, and its licence is fine for internal use.' },
+	{ who: 'You already have the app.', when: 'If sign-in, tenancy, an admin area and a front end exist, add Mastra (TypeScript), LangGraph or CrewAI (Python) for the agent layer. Rocketflare would replace work you have already done.' },
+	{ who: 'You cannot run on Cloudflare.', when: 'Rocketflare deploys to Cloudflare Workers only. The frameworks run anywhere.' },
+]
+
+const faqs = [
+	{
+		q: 'What is an agentic business app?',
+		a: 'An application where AI agents carry out steps of a business process (reading documents, drafting, checking, deciding) inside the same app that holds the users, their permissions, the data and the record of what happened, with a person approving the steps that matter. Rocketflare treats it as one unit: one repository and one deploy, rather than an agent platform wired to a workflow tool, a vector store and a separate app.',
+	},
+	{
+		q: 'Is Rocketflare an alternative to Dust?',
+		a: 'Yes, when the agents need to serve your customers or you want to own the code. Dust is a hosted workspace for your employees, priced per seat with credits. Rocketflare is an MIT-licensed app you deploy to your own Cloudflare account, where each customer is an organisation with its own users, roles, documents and AI spend.',
+	},
+	{
+		q: 'Is Rocketflare an alternative to Microsoft Copilot Studio?',
+		a: 'Yes, for agentic apps you sell or run for customers. Copilot Studio is the better choice for employee-facing agents in a Microsoft 365 company. A production app on Microsoft’s stack typically combines Copilot Studio credits, Dataverse, Power Automate, Fabric capacity and Azure, plus your own web app; Rocketflare is one deployable application with agents, knowledge base, users and roles inside it.',
+	},
+	{
+		q: 'Is Rocketflare an alternative to n8n?',
+		a: 'Yes, when the workflows are part of a product for your customers. n8n’s Sustainable Use License limits it to internal business or non-commercial use, and embedding it in a product needs a separate n8n Embed agreement. Rocketflare is MIT licensed, and its agent runs are durable workflows that can wait for a person’s approval.',
+	},
+	{
+		q: 'Is Rocketflare an alternative to Mastra?',
+		a: 'It is the application around the agents rather than only the agent layer. Mastra is a TypeScript framework; you still build the front end, database, organisations, roles, admin and deploy. Rocketflare has those built and tested, with durable agents, approvals, a knowledge base, evals and cost tracking. If you already have an app and only need agents, Mastra is the better fit.',
+	},
+	{
+		q: 'Can I use my own AI models with Rocketflare?',
+		a: 'Yes. It supports Anthropic, OpenAI, any OpenAI-compatible server such as Ollama or vLLM, and Cloudflare Workers AI, which it uses by default with no key. Each organisation can bring its own provider and key, and each agent can be assigned its own model.',
+	},
+]
+
+const sources = [
+	{ label: 'Dust: pricing', url: 'https://dust.tt/home/pricing' },
+	{ label: 'Dust: security', url: 'https://dust.tt/home/security' },
+	{ label: 'Dust: frames', url: 'https://docs.dust.tt/docs/frames' },
+	{ label: 'Dust: repository announcement', url: 'https://community.dust.tt/x/announcements' },
+	{ label: 'Microsoft: Copilot Studio pricing', url: 'https://www.microsoft.com/en-us/microsoft-365-copilot/pricing/copilot-studio' },
+	{ label: 'Microsoft Learn: Copilot Studio billing and licensing', url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/billing-licensing' },
+	{ label: 'Microsoft Learn: Copilot Credits and capacity enforcement', url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management' },
+	{ label: 'Microsoft Learn: unstructured knowledge in Dataverse', url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/knowledge-unstructured-data' },
+	{ label: 'Microsoft Learn: publishing to a custom app', url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/publication-connect-bot-to-custom-application' },
+	{ label: 'Microsoft Learn: exporting agents as solutions', url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/authoring-solutions-import-export' },
+	{ label: 'Microsoft Learn: Fabric data agents', url: 'https://learn.microsoft.com/en-us/fabric/data-science/concept-data-agent' },
+	{ label: 'Microsoft Learn: Foundry Agent Service', url: 'https://learn.microsoft.com/en-us/azure/foundry/agents/overview' },
+	{ label: 'n8n: pricing', url: 'https://n8n.io/pricing/' },
+	{ label: 'n8n: Sustainable Use License', url: 'https://github.com/n8n-io/n8n/blob/master/LICENSE.md' },
+	{ label: 'n8n: community edition features', url: 'https://docs.n8n.io/hosting/community-edition-features/' },
+	{ label: 'n8n: human-in-the-loop for tools', url: 'https://docs.n8n.io/advanced-ai/human-in-the-loop-tools/' },
+	{ label: 'Mastra: repository and licences', url: 'https://github.com/mastra-ai/mastra' },
+	{ label: 'Mastra: pricing', url: 'https://mastra.ai/pricing' },
+	{ label: 'LangChain: pricing', url: 'https://www.langchain.com/pricing' },
+	{ label: 'LangGraph: durable execution', url: 'https://docs.langchain.com/oss/python/langgraph/durable-execution' },
+	{ label: 'LangSmith: self-hosting', url: 'https://docs.langchain.com/langsmith/self-hosted' },
+	{ label: 'CrewAI: pricing', url: 'https://www.crewai.com/pricing' },
+	{ label: 'CrewAI: human feedback in flows', url: 'https://docs.crewai.com/learn/human-feedback-in-flows' },
+	{ label: 'Relevance AI: pricing', url: 'https://relevanceai.com/pricing' },
+	{ label: 'Relevance AI: plans in the docs', url: 'https://relevanceai.com/docs/get-started/pricing' },
+	{ label: 'OpenAI: deprecations (Agent Builder)', url: 'https://developers.openai.com/api/docs/deprecations' },
+]
+---
+<CompareLayout
+	slug="agentic-workflow-platforms"
+	h1="Rocketflare vs Dust, Copilot Studio, n8n and Mastra"
+	lede="There are two common ways to put AI agents to work in a business. You can rent them in someone else’s workspace, or assemble them from a framework, a workflow tool, a vector store, an identity provider and a front end, each with its own bill. Rocketflare is a third way: the whole agentic business app, agents included, as one codebase you own and deploy as a single unit."
+	glance={[
+		{ label: 'Agent platforms give you', body: 'Agents for your staff, in the vendor’s cloud, priced per seat, credit or execution.' },
+		{ label: 'Frameworks give you', body: 'Excellent agent building blocks, and the rest of the application left to build.' },
+		{ label: 'Rocketflare gives you', body: 'Agents, durable workflows with approvals, a knowledge base, the app, its users and roles, and a record of what happened. One repository, one deploy, MIT licensed.' },
+	]}
+	shortAnswer="If the agents are for your own staff and you need them this month, Dust, Copilot Studio or n8n will serve you well. If the agents are part of something you sell, or you need to own where the data lives and what it costs, start from Rocketflare: a self-contained agentic business app with durable agents, human approval, a knowledge base, tenancy and cost tracking, deployed as one Cloudflare Worker over your own Postgres."
+	profiles={profiles}
+	table={table}
+	differences={differences}
+	pickThem={pickThem}
+	faqs={faqs}
+	sources={sources}
+>
+	<Fragment slot="intro">
+		<section class="define">
+			<div class="wrap">
+				<SectionHead
+					eyebrow="The term"
+					title="What we mean by an agentic business app"
+					lede="An application where AI agents carry out steps of a business process inside the same app that holds the users, their permissions, the data and the record of what happened. Four properties set it apart from an agent platform."
+				/>
+				<ul class="props">
+					{properties.map((p) => (
+						<li>
+							<span class="chip tone-purple"><ConceptIcon name={p.icon} /></span>
+							<h3>{p.title}</h3>
+							<p>{p.body}</p>
+						</li>
+					))}
+				</ul>
+			</div>
+		</section>
+
+		<section class="sprawl">
+			<div class="wrap sprawl-grid">
+				<div class="sprawl-copy">
+					<span class="eyebrow">Self-contained</span>
+					<h2>One unit you own, or a stack nobody does</h2>
+					<p>
+						The usual production agent setup is a set of services joined by API keys: an agent
+						platform, a workflow tool, a vector store holding a second copy of your documents, an
+						identity provider, a front end someone still has to build, and a tracing vendor. Each has
+						its own admin screen, its own bill and its own idea of who your users are. When something
+						goes wrong, the answer is spread across all of them.
+					</p>
+					<p>
+						A Rocketflare app holds the same parts in one repository. The agents read the same tables
+						as the screens, obey the same roles, write to the same activity log and are released
+						with the same tag. You can reason about it, test it, and hand it to someone else.
+					</p>
+				</div>
+				<figure class="sprawl-figure">
+					<DiagramSprawl parts={sprawlParts} layers={sprawlLayers} describedBy="sprawl-table" footer="one repo · one Worker · your Postgres" />
+					<div class="sprawl-lists" id="sprawl-table">
+						<div>
+							<p class="sprawl-label">Assembled from services</p>
+							<ul>{sprawlParts.map((p) => <li>{p.label}: {p.note}</li>)}</ul>
+						</div>
+						<div>
+							<p class="sprawl-label">Inside one Rocketflare app</p>
+							<ul>{sprawlLayers.map((l) => <li>{l}</li>)}</ul>
+						</div>
+					</div>
+				</figure>
+			</div>
+		</section>
+	</Fragment>
+
+	<section class="msft" slot="after">
+		<div class="wrap">
+			<SectionHead
+				align="left"
+				eyebrow="Counting the parts"
+				title="What a customer-facing agent app on Microsoft involves"
+				lede="Each line comes from Microsoft’s own pricing and documentation. The list is our reading of them, not a Microsoft statement: for an app with agents, approvals, knowledge over documents, analytics and users, you would typically license and wire together most of these, across three admin centres."
+			/>
+			<ol class="msft-list">
+				{microsoft.map((m) => <li>{m}</li>)}
+			</ol>
+			<Callout tone="yellow" title="Hosted builders can be retired">
+				<ConceptIcon slot="icon" name="inbox" />
+				<p>
+					OpenAI’s deprecations page lists Agent Builder as scheduled to shut down on 30 November 2026,
+					with its Evals dashboard and API going the same day. Agents defined in a vendor’s visual
+					builder move when the vendor says so. Agents written as code in your own repository move
+					when you say so.
+				</p>
+			</Callout>
+		</div>
+	</section>
+</CompareLayout>
+
+<style>
+	.define { padding: 4rem 0 2rem; }
+	.props {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+		gap: 1.5rem 2rem;
+	}
+	.props h3 { font-size: 1.05rem; margin-bottom: 0.35rem; }
+	.props p { margin: 0; color: var(--text-muted); font-size: 0.95rem; }
+	.chip {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 44px;
+		height: 44px;
+		border-radius: 13px;
+		background: var(--tint);
+		color: var(--accent);
+		margin-bottom: 0.9rem;
+	}
+
+	.sprawl { padding: 3rem 0 2rem; }
+	.sprawl-grid {
+		display: grid;
+		grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+		gap: 3rem;
+		align-items: center;
+	}
+	.sprawl-copy p { color: var(--text-muted); }
+	.sprawl-copy h2 { margin-bottom: 1rem; }
+	.sprawl-figure { margin: 0; }
+	.sprawl-lists { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1rem; font-size: 0.85rem; color: var(--text-muted); }
+	.sprawl-lists ul { margin: 0; padding-left: 1.1rem; }
+	.sprawl-label { margin: 0 0 0.3rem; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--orange-ink); }
+
+	.msft { padding: 1rem 0 4rem; }
+	.msft-list {
+		margin: 0 0 1rem;
+		padding-left: 1.4rem;
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+		gap: 0.7rem 3rem;
+		color: var(--text-muted);
+	}
+
+	@media (max-width: 900px) {
+		.sprawl-grid { grid-template-columns: minmax(0, 1fr); }
+	}
+</style>

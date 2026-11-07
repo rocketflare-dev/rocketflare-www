@@ -1,0 +1,210 @@
+---
+/**
+ * Rocketflare vs the hosted AI app builders (Lovable, Replit, Bolt, v0,
+ * Base44). Facts from each vendor's own pricing, docs and terms, checked in
+ * CHECKED_ON (src/data/comparisons.ts); research notes are kept outside the
+ * repo. Incidents are named only where a vendor or a named researcher
+ * published them, and only to make the point about tenant isolation.
+ */
+import CompareLayout from '../../components/CompareLayout.astro'
+import SectionHead from '../../components/SectionHead.astro'
+
+const profiles = [
+	{
+		anchor: 'lovable',
+		lead: 'If you want a Lovable alternative because the prototype worked and now real customers need their own accounts, roles and data that stays theirs, Rocketflare is the foundation to rebuild it on, with the same kind of AI doing the typing.',
+		what: 'Lovable is a chat-driven builder that writes and hosts full-stack web apps. New apps use TanStack Start over Postgres, and the backend is Lovable Cloud, which Lovable manages on Supabase’s open-source foundation. Building, hosting and in-app AI all draw on one pool of credits.',
+		strong: 'It is the quickest way we know from an idea to a good-looking app that is live on the internet, for someone who has never opened a terminal. The code syncs both ways with GitHub, you own what it generates, and apps can offer SAML sign-in per project.',
+		stops: 'Lovable does not document organisations with their own members and roles for the people using your app; access control is the Postgres row-level security policies it generates, and getting those right is left to you. CVE-2025-48757 was exactly that: missing policies in generated apps. Leaving Lovable Cloud for your own Supabase is a manual export and restore.',
+		facts: [
+			{ k: 'Pricing', v: 'Credits; Pro from $25 a month for 100' },
+			{ k: 'Code', v: 'Yours, with a perpetual licence to Lovable that can include training unless you opt out' },
+			{ k: 'Runs on', v: 'Lovable Cloud (Supabase-based), region fixed once chosen' },
+			{ k: 'Tenancy for your customers', v: 'Not documented' },
+		],
+	},
+	{
+		anchor: 'replit',
+		lead: 'As a Replit alternative, Rocketflare keeps the part people like, an agent that writes and runs the code, and moves the result into your own repository and your own Cloudflare account, with the dangerous operations behind a test suite and a release process.',
+		what: 'Replit is a cloud IDE and hosting platform whose Agent builds, tests and deploys web and mobile apps. Apps run on Replit deployments backed by Google Cloud, with a managed Postgres database and sign-in through Replit Auth or Clerk.',
+		strong: 'It is the most real development environment of the hosted builders: any language, a shell, Git, several deployment types and mobile apps through Expo. A developer can take over from the agent without leaving it.',
+		stops: 'The database, sign-in and hosting are Replit services, and cost is metered by agent effort, which is hard to predict: when Agent 3’s pricing landed in September 2025, The Register reported users whose bills rose several times over. In July 2025 the agent deleted a production database during a code freeze; Replit has since separated development and production databases by default.',
+		facts: [
+			{ k: 'Pricing', v: 'Core $20 a month, Pro $100, plus effort-based agent usage' },
+			{ k: 'Code', v: 'Yours; export by ZIP or Git' },
+			{ k: 'Runs on', v: 'Replit deployments on Google Cloud, US by default' },
+			{ k: 'Tenancy for your customers', v: 'Not documented' },
+		],
+	},
+	{
+		anchor: 'bolt',
+		lead: 'Rocketflare is a Bolt alternative for when the app needs more than email and Google sign-in: organisations, roles, single sign-on with a customer’s identity provider, and a database you can take with you.',
+		what: 'Bolt is StackBlitz’s in-browser agentic builder, with hosting and a database in Bolt Cloud. It builds JavaScript apps with a Node backend, and is metered in tokens.',
+		strong: 'It starts instantly in a browser tab, syncs both ways with GitHub, and suits front-end-heavy apps, landing pages and prototypes with light data. You can choose Supabase as the database on new paid projects.',
+		stops: 'Bolt documents email and Google sign-in, not organisations, roles or SSO for your users. Its own help pages say there is no supported way to move an existing Bolt database to Supabase, and when a site reaches its plan’s request limit it stops serving until the cycle resets.',
+		facts: [
+			{ k: 'Pricing', v: 'Tokens; Pro $25 a month, Teams $30 per member' },
+			{ k: 'Code', v: 'Assigned to you; used for training unless you opt out' },
+			{ k: 'Runs on', v: 'Bolt Cloud, or Netlify / your own hosting from GitHub' },
+			{ k: 'Tenancy for your customers', v: 'Not documented' },
+		],
+	},
+	{
+		anchor: 'v0',
+		lead: 'v0 is the builder closest to Rocketflare in spirit, because what it produces is ordinary code you can keep. As an alternative to v0, Rocketflare gives you the backend v0 leaves out.',
+		what: 'v0 is Vercel’s AI builder. It writes Next.js, React, TypeScript, Tailwind and shadcn/ui, and deploys to Vercel. Databases come from the Vercel Marketplace (Supabase, Neon and others), in your own account.',
+		strong: 'The interface it generates is very good, the stack is mainstream, and nothing about the output ties you to v0. If your team already runs on Vercel and Next.js, the code drops straight in.',
+		stops: 'It has no auth, organisations, jobs, agent runtime or admin area of its own. Those are assembled from Marketplace parts and prompted code, which is the platform work Rocketflare has already done and tested.',
+		facts: [
+			{ k: 'Pricing', v: 'Plus $30 per user a month, then metered by tokens' },
+			{ k: 'Code', v: 'Yours; Vercel claims no ownership' },
+			{ k: 'Runs on', v: 'Vercel, with a database from the Marketplace' },
+			{ k: 'Tenancy for your customers', v: 'Not provided' },
+		],
+	},
+	{
+		anchor: 'base44',
+		lead: 'Base44 is the hardest of these to leave, which makes Rocketflare the natural Base44 alternative for anyone who wants to be able to walk away with their app and its data.',
+		what: 'Base44, bought by Wix in 2025, builds apps that run on its own backend: database, sign-in, functions, integrations and in-app AI agents. Building and running the app are metered on two separate credit balances.',
+		strong: 'It is the most complete out of the box: row-level rules, SSO through Google, Microsoft, Okta or any OIDC provider on its higher plans, email, AI and agents, with no infrastructure decisions at all.',
+		stops: 'Base44’s own documentation says it does not support self-hosting: exported code still calls the Base44 SDK against your live data, so leaving means replacing the backend. Roles are essentially admin and user, and organisations for your customers are not documented.',
+		facts: [
+			{ k: 'Pricing', v: 'Message and integration credits; Starter $16 a month (annual)' },
+			{ k: 'Code', v: 'Yours, with a perpetual sub-licensable licence to Base44 including training' },
+			{ k: 'Runs on', v: 'Base44 only; no self-hosting' },
+			{ k: 'Tenancy for your customers', v: 'Not documented' },
+		],
+	},
+]
+
+const table = {
+	columns: ['Lovable', 'Replit', 'Bolt', 'v0', 'Base44', 'Rocketflare'],
+	rows: [
+		{ row: 'How you build', cells: ['Chat in the browser', 'Agent in a cloud IDE', 'Chat in the browser', 'Chat in the browser', 'Chat in the browser', 'Claude Code or Codex on your machine'] },
+		{ row: 'Where the app runs', cells: ['Lovable Cloud', 'Replit on Google Cloud', 'Bolt Cloud or Netlify', 'Vercel', 'Base44 only', 'Your Cloudflare account'] },
+		{ row: 'Database', cells: ['Managed Postgres', 'Managed Postgres', 'Bolt Database or Supabase', 'Your choice from the Marketplace', 'Base44’s own', 'Your Postgres (Neon or any, via Hyperdrive)'] },
+		{ row: 'Organisations and roles for your customers', cells: ['Not documented', 'Not documented', 'Not documented', 'Write it yourself', 'Admin or user', 'Owner, admin, member, support, plus groups'] },
+		{ row: 'Isolation between customers', cells: ['Generated RLS policies', 'Up to your code', 'Up to your code', 'Up to your code', 'Entity-level rules', 'Every query scoped, and a CI test fails when one is not'] },
+		{ row: 'Single sign-on for your users', cells: ['SAML, per project', 'Via Clerk', 'Not documented', 'Write it yourself', 'OIDC on Elite and above', 'Any OIDC issuer, Google, Microsoft, email link'] },
+		{ row: 'Agents that wait for a person', cells: ['No', 'No', 'No', 'No', 'In-app agents', 'Durable runs that park on approval, choice, input or form'] },
+		{ row: 'AI cost per customer', cells: ['From your credits', 'From your credits', 'Your own keys', 'Your own keys', 'From integration credits', 'A usage ledger per call, per organisation'] },
+		{ row: 'What you pay for', cells: ['Credits for building and running', 'Plan, effort and hosting', 'Tokens', 'Seats and tokens', 'Two credit balances', 'Cloudflare, Postgres and AI usage'] },
+	],
+}
+
+const differences = [
+	{
+		title: 'You still build with AI',
+		body: 'The repository is written for coding agents: rules, per-directory guides and skills such as /rf-setup, /rf-adapt and /rf-provision. You describe the feature to Claude Code or Codex. The difference is that it starts from a tested foundation instead of a blank page, so the agent spends its effort on your product.',
+		icon: 'sparkles',
+		tone: 'purple' as const,
+	},
+	{
+		title: 'Isolation is enforced, not generated',
+		body: 'Every row belongs to an organisation and every query names one. A configuration test fails the build if a function reads a tenant table without a tenant, and every analytics cube and plugin ships a two-organisation isolation test. A prompt cannot quietly remove that.',
+		icon: 'building',
+		tone: 'blue' as const,
+	},
+	{
+		title: 'Nothing to migrate off',
+		body: 'The code is MIT licensed in your GitHub, the database is plain Postgres with pgvector, and the app is one Cloudflare Worker in your account. There is no platform SDK in the middle and no credit balance that pays for your production traffic.',
+		icon: 'key',
+		tone: 'green' as const,
+	},
+]
+
+const pickThem = [
+	{ who: 'You are testing an idea this week.', when: 'If nobody is paying yet and you need something to show, Lovable, Bolt or v0 will get you there in an afternoon. Come back when it works.' },
+	{ who: 'You will never open a terminal.', when: 'Rocketflare is a codebase. A coding agent does most of the typing, but someone has to run it. Base44 and Lovable are built for people who will not.' },
+	{ who: 'You want the front end above all.', when: 'v0 writes better interfaces from a prompt than anything else here, and its code is easy to bring into a Rocketflare app afterwards.' },
+	{ who: 'You need a mobile app.', when: 'Replit and Bolt build mobile apps with Expo. Rocketflare has no native mobile client.' },
+]
+
+const faqs = [
+	{
+		q: 'Is Rocketflare an alternative to Lovable?',
+		a: 'Yes, for when a Lovable prototype has to become a product. Rocketflare gives you organisations, roles, SSO, durable AI agents and a knowledge base already built and tested, in your own repository and Cloudflare account. You keep building with AI, using Claude Code or Codex, but on a foundation where tenant isolation is checked by tests rather than left to generated database policies.',
+	},
+	{
+		q: 'Is Rocketflare an alternative to Replit?',
+		a: 'Yes, if what you want from Replit is an agent that writes and deploys a business app. With Rocketflare the code lives in your own GitHub, the app runs in your own Cloudflare account over your own Postgres, and you pay Cloudflare, your database and your AI provider directly instead of an effort-based agent bill.',
+	},
+	{
+		q: 'Is Rocketflare an alternative to Base44?',
+		a: 'Yes, and the main reason to switch is ownership. Base44 does not support self-hosting and its exported code still depends on the Base44 backend. A Rocketflare app is MIT-licensed code with a plain Postgres database, so you can move it, hand it to a client or run it anywhere Cloudflare Workers run.',
+	},
+	{
+		q: 'Can I move an app from Lovable, Bolt or v0 to Rocketflare?',
+		a: 'Not automatically. The usual path is to keep the screens you like, start a Rocketflare copy, and ask your coding agent to rebuild the features on top of its tenancy, roles and data model. v0 and Lovable output is React, which ports most easily.',
+	},
+	{
+		q: 'Do I need to be a developer to use Rocketflare?',
+		a: 'You need to be comfortable running commands in a terminal. You do not need to know Cloudflare or Postgres: open the folder in Claude Code and type /rf-setup, and the agent does the setup, the rename and the deploy, showing each step.',
+	},
+]
+
+const sources = [
+	{ label: 'Lovable: plans and credits', url: 'https://docs.lovable.dev/introduction/plans-and-credits' },
+	{ label: 'Lovable: Lovable Cloud', url: 'https://docs.lovable.dev/integrations/cloud' },
+	{ label: 'Lovable: SAML SSO for Cloud projects', url: 'https://docs.lovable.dev/features/cloud-saml-sso' },
+	{ label: 'Lovable: terms of service', url: 'https://lovable.dev/terms' },
+	{ label: 'CVE-2025-48757 (missing RLS in generated apps)', url: 'https://nvd.nist.gov/vuln/detail/CVE-2025-48757' },
+	{ label: 'Replit: pricing', url: 'https://replit.com/pricing' },
+	{ label: 'Replit: AI billing', url: 'https://docs.replit.com/billing/ai-billing' },
+	{ label: 'Replit: deployments', url: 'https://docs.replit.com/cloud-services/deployments/about-deployments' },
+	{ label: 'Replit: auth and identity', url: 'https://docs.replit.com/features/auth-and-identity/overview' },
+	{ label: 'Fortune: Replit agent deletes a production database (July 2025)', url: 'https://fortune.com/2025/07/23/ai-coding-tool-replit-wiped-database-called-it-a-catastrophic-failure/' },
+	{ label: 'The Register: Agent 3 pricing (September 2025)', url: 'https://www.theregister.com/2025/09/18/replit_agent3_pricing/' },
+	{ label: 'Bolt: pricing', url: 'https://bolt.new/pricing' },
+	{ label: 'Bolt: database', url: 'https://support.bolt.new/bolt-cloud/database.md' },
+	{ label: 'Bolt: hosting limits', url: 'https://support.bolt.new/bolt-cloud/hosting.md' },
+	{ label: 'StackBlitz: terms of service', url: 'https://stackblitz.com/terms-of-service' },
+	{ label: 'v0: pricing', url: 'https://v0.app/pricing' },
+	{ label: 'v0: FAQ', url: 'https://v0.app/docs/faqs' },
+	{ label: 'v0: databases', url: 'https://v0.app/docs/databases' },
+	{ label: 'Base44: pricing', url: 'https://base44.com/pricing' },
+	{ label: 'Base44: developer tools and export', url: 'https://docs.base44.com/documentation/building-your-app/developer-tools' },
+	{ label: 'Base44: entity security', url: 'https://docs.base44.com/developers/app-code/overview/entities/security' },
+	{ label: 'Base44: SSO', url: 'https://docs.base44.com/Setting-up-your-app/Setting-up-SSO' },
+	{ label: 'Base44: terms of service', url: 'https://base44.com/terms-of-service' },
+]
+---
+<CompareLayout
+	slug="ai-app-builders"
+	h1="Rocketflare vs Lovable, Replit, Bolt, v0 and Base44"
+	lede="Hosted AI app builders turn a description into a working app in minutes, and for a demo nothing beats them. The trouble starts with the first paying customer: their colleagues need accounts and roles, their data must never appear in someone else’s screen, and you need to know you can leave. That is the part Rocketflare has already built."
+	glance={[
+		{ label: 'They are best at', body: 'Getting from a prompt to something live, with no setup, for people who will never open a terminal.' },
+		{ label: 'Rocketflare is best at', body: 'The app that comes after: organisations, roles, SSO, durable agents and a knowledge base, tested, in your own repository and cloud account.' },
+		{ label: 'You still build with AI', body: 'Claude Code or Codex does the typing in a Rocketflare copy. It starts from a foundation instead of a blank page.' },
+	]}
+	shortAnswer="Use Lovable, Bolt or v0 to find out whether an idea is worth building. Use Rocketflare when it is: you keep building with a coding agent, but on a tested multi-tenant foundation where each customer’s data is kept apart by tests, and the code, the database and the deploy are yours."
+	profiles={profiles}
+	table={table}
+	differences={differences}
+	pickThem={pickThem}
+	faqs={faqs}
+	sources={sources}
+>
+	<section class="gap" slot="intro">
+		<div class="wrap">
+			<SectionHead
+				align="left"
+				eyebrow="Read the pricing page carefully"
+				title="Whose SSO is it?"
+			/>
+			<p>
+				Most of these builders list SSO, role-based access and audit logs on their business plans. On
+				every one of them, those lines describe who on your team can open the builder. They say nothing
+				about the app you ship. None of the five documents organisations with their own members and
+				roles for your customers, an isolation test between those organisations, or AI cost per
+				customer. In a Rocketflare app those are the first things that exist.
+			</p>
+		</div>
+	</section>
+</CompareLayout>
+
+<style>
+	.gap { padding: 2.5rem 0 0; }
+	.gap p { color: var(--text-muted); font-size: 1.05rem; max-width: 80ch; }
+</style>

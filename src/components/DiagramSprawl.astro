@@ -1,0 +1,115 @@
+---
+/**
+ * Two ways to end up with the same agentic app: on the left, a set of
+ * separate services wired together (each with its own bill, admin and copy
+ * of the data); on the right, one application that contains all of it.
+ * Inline SVG, every fill a token, so it re-themes.
+ *
+ * Props
+ * - `parts`        { label, note? }[] — the services on the left, read row by row (2 per row)
+ * - `layers`       string[] — what sits inside the one app, top to bottom
+ * - `leftTitle?`   default "Assembled from services"
+ * - `rightTitle?`  default "One app you own"
+ * - `footer?`      the line under the right-hand app
+ * - `describedBy`  id of the table/list beneath that holds the same data (aria-describedby)
+ * - `title?`       the SVG <title>
+ */
+interface Part {
+	label: string
+	note?: string
+}
+interface Props {
+	parts: Part[]
+	layers: string[]
+	leftTitle?: string
+	rightTitle?: string
+	footer?: string
+	describedBy: string
+	title?: string
+}
+const {
+	parts,
+	layers,
+	leftTitle = 'Assembled from services',
+	rightTitle = 'One app you own',
+	footer = 'one repo · one deploy · your database',
+	describedBy,
+	title = 'A stack assembled from separate services, next to one application that contains the same parts',
+} = Astro.props
+const id = `${describedBy}-svg`
+
+const W = 640
+const PAD = 16
+const HEAD = 30
+const MID = 28
+const colW = (W - 2 * PAD - MID) / 2
+const leftX = PAD
+const rightX = PAD + colW + MID
+
+const BOX_GAP = 30
+const boxW = (colW - BOX_GAP) / 2
+const BOX_H = 50
+const rowsL = Math.ceil(parts.length / 2)
+const bodyTop = PAD + HEAD + 8
+const leftH = rowsL * BOX_H + (rowsL - 1) * BOX_GAP + 12
+/* A small stagger per box, so the left reads as assembled rather than designed. */
+const JITTER = [0, 10, 8, -2, 2, 12]
+const box = (i: number) => ({
+	x: leftX + (i % 2) * (boxW + BOX_GAP) + (i % 2 ? -4 : 0),
+	y: bodyTop + Math.floor(i / 2) * (BOX_H + BOX_GAP) + (JITTER[i % JITTER.length] ?? 0),
+})
+
+const LAYER_H = 34
+const LAYER_GAP = 6
+const innerPad = 12
+const rightInnerH = layers.length * LAYER_H + (layers.length - 1) * LAYER_GAP
+const rightH = innerPad * 2 + rightInnerH + 26
+const bodyH = Math.max(leftH, rightH)
+const H = bodyTop + bodyH + PAD
+
+/* Wires between every box and the next two: enough to read as a tangle. */
+const wires: [number, number][] = []
+for (let i = 0; i < parts.length; i++) {
+	for (const j of [i + 1, i + 2, i + 3]) if (j < parts.length) wires.push([i, j])
+}
+const centre = (i: number) => ({ x: box(i).x + boxW / 2, y: box(i).y + BOX_H / 2 })
+---
+<svg class="diagram" viewBox={`0 0 ${W} ${H}`} role="img" aria-labelledby={`${id}-title`} aria-describedby={describedBy}>
+	<title id={`${id}-title`}>{title}</title>
+
+	<text class="head" x={leftX} y={PAD + 18}>{leftTitle}</text>
+	<text class="head" x={rightX} y={PAD + 18}>{rightTitle}</text>
+
+	{wires.map(([a, b]) => (
+		<line x1={centre(a).x} y1={centre(a).y} x2={centre(b).x} y2={centre(b).y} stroke="var(--red)" stroke-width="1.6" stroke-dasharray="5 4" opacity="0.75" />
+	))}
+	{parts.map((p, i) => (
+		<g>
+			<rect x={box(i).x} y={box(i).y} width={boxW} height={BOX_H} rx="10" fill="var(--card)" stroke="var(--border-bright)" stroke-width="1.5" />
+			<text class="label" x={box(i).x + 12} y={box(i).y + (p.note ? 21 : 30)}>{p.label}</text>
+			{p.note && <text class="note" x={box(i).x + 12} y={box(i).y + 38}>{p.note}</text>}
+		</g>
+	))}
+
+	<rect x={rightX} y={bodyTop} width={colW} height={rightH} rx="14" fill="var(--tint-blue)" stroke="var(--blue-bright)" stroke-width="2" />
+	{layers.map((l, i) => {
+		const ly = bodyTop + innerPad + i * (LAYER_H + LAYER_GAP)
+		return (
+			<g>
+				<rect x={rightX + innerPad} y={ly} width={colW - innerPad * 2} height={LAYER_H} rx="8" fill="var(--card)" stroke="var(--border)" stroke-width="1" />
+				<rect x={rightX + innerPad} y={ly} width="4" height={LAYER_H} rx="2" fill="var(--cyan)" />
+				<text class="layer" x={rightX + innerPad + 14} y={ly + 22}>{l}</text>
+			</g>
+		)
+	})}
+	<text class="foot" x={rightX + colW / 2} y={bodyTop + rightH - 12} text-anchor="middle">{footer}</text>
+</svg>
+
+<style>
+	.diagram { display: block; width: 100%; height: auto; font-family: var(--sans); }
+	.head { fill: var(--text-muted); font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+	.label { fill: var(--text-bright); font-size: 13px; font-weight: 600; }
+	.note { fill: var(--text-muted); font-size: 11px; }
+	.layer { fill: var(--text-bright); font-size: 13px; font-weight: 600; }
+	.foot { fill: var(--blue-bright); font-size: 12px; font-weight: 700; }
+</style>

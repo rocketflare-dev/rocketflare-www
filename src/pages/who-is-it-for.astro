@@ -39,6 +39,8 @@ interface Sketch {
 	behind: string
 	/** The page that covers this shape at length, once there is one. */
 	more?: string
+	/** A comparison page for this kind of app, linked under the sketch. */
+	compare?: { href: string; label: string }
 }
 
 const HOST = 'localhost:3000'
@@ -49,6 +51,7 @@ const connectors = pluginById('connectors')
 const sketches: Sketch[] = [
 	{
 		id: 'agentic-workflow',
+		compare: { href: '/compare/agentic-workflow-platforms/', label: 'How this compares with Dust, Copilot Studio, n8n and Mastra' },
 		eyebrow: 'What would I build · 1',
 		title: 'An agentic workflow app',
 		lede: 'A tool built around how your business actually works, with AI doing the work in the middle. It reads what comes in, pulls what it needs from the software you already pay for, carries out the steps, and asks a person when the decision is theirs.',
@@ -81,6 +84,7 @@ const sketches: Sketch[] = [
 	{
 		id: 'internal-tool',
 		more: '/use-cases/internal-tool/',
+		compare: { href: '/compare/internal-tool-builders/', label: 'How this compares with Retool, Appsmith and Budibase' },
 		eyebrow: 'What would I build · 2',
 		title: 'An internal operations tool',
 		lede: 'The app your team opens every morning: a few tables, a few pages, and the boring parts — who can sign in, who can do what, what happened — already handled.',
@@ -216,6 +220,7 @@ const notFor = [
 								</div>
 							</div>
 							{s.more && <p class="more-link"><a href={s.more}>Read the longer version <span aria-hidden="true">→</span></a></p>}
+							{s.compare && <p class="more-link"><a href={s.compare.href}>{s.compare.label} <span aria-hidden="true">→</span></a></p>}
 						<p class="behind">(behind it: <a href={behind.href}>{behind.title}</a>)</p>
 						</div>
 					</article>

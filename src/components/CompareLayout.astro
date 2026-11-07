@@ -1,0 +1,470 @@
+---
+/**
+ * The shell every /compare/<slug>/ page shares, in the order a reader with a
+ * "should I use X or this" question wants it:
+ *
+ *   hero + at a glance → the short answer → (slot "intro") → one section per
+ *   competitor, headed "Rocketflare vs X", with an "alternative to X" lead →
+ *   side-by-side table → what is different here → (slot "after") → when to
+ *   pick them instead → questions → sources → the other comparisons.
+ *
+ * The competitor list comes from src/data/comparisons.ts, which the hub also
+ * reads; the page's `profiles` must cover exactly those anchors, in that
+ * order, or the build fails. The FAQ is rendered and emitted as FAQPage
+ * structured data from the same array, so the two cannot disagree.
+ *
+ * Claims about other products are facts with a source in `sources` and the
+ * check date in CHECKED_ON. If a fact cannot be sourced it does not go here.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro'
+import SectionHead from './SectionHead.astro'
+import ConceptIcon from './ConceptIcon.astro'
+import { pageByPath } from '../data/pages'
+import { CHECKED_ON, COMPARISONS, comparisonBySlug, type Tone } from '../data/comparisons'
+
+interface Profile {
+	anchor: string
+	/** The first sentence, which says plainly what kind of alternative this is. */
+	lead: string
+	/** What the product is, in its own terms. */
+	what: string
+	strong: string
+	stops: string
+	/** Short key facts: pricing, licence, where it runs, what you own. */
+	facts: { k: string; v: string }[]
+}
+
+interface Props {
+	slug: string
+	h1: string
+	lede: string
+	glance: { label: string; body: string }[]
+	shortAnswer: string
+	profiles: Profile[]
+	table: { columns: string[]; rows: { row: string; cells: string[] }[] }
+	differences: { title: string; body: string; icon: string; tone: Tone }[]
+	pickThem: { who: string; when: string }[]
+	faqs: { q: string; a: string }[]
+	sources: { label: string; url: string }[]
+}
+
+const { slug, h1, lede, glance, shortAnswer, profiles, table, differences, pickThem, faqs, sources } = Astro.props
+
+const path = `/compare/${slug}/`
+const page = pageByPath(path)
+if (!page) throw new Error(`Page not in the registry: ${path}`)
+const comparison = comparisonBySlug(slug)
+if (!comparison) throw new Error(`Comparison not in src/data/comparisons.ts: ${slug}`)
+
+const expected = comparison.competitors.map((c) => c.anchor).join(',')
+const got = profiles.map((p) => p.anchor).join(',')
+if (expected !== got) {
+	throw new Error(`${path}: profiles [${got}] do not match comparisons.ts [${expected}]`)
+}
+for (const r of table.rows) {
+	if (r.cells.length !== table.columns.length) {
+		throw new Error(`${path}: table row "${r.row}" has ${r.cells.length} cells for ${table.columns.length} columns`)
+	}
+}
+
+const nameOf = (anchor: string) => comparison.competitors.find((c) => c.anchor === anchor)!.name
+const others = COMPARISONS.filter((c) => c.slug !== slug)
+const site = Astro.site?.toString().replace(/\/$/, '') ?? 'https://rocketflare.dev'
+
+const jsonLd = {
+	'@context': 'https://schema.org',
+	'@graph': [
+		{
+			'@type': 'FAQPage',
+			mainEntity: faqs.map(({ q, a }) => ({
+				'@type': 'Question',
+				name: q,
+				acceptedAnswer: { '@type': 'Answer', text: a },
+			})),
+		},
+		{
+			'@type': 'BreadcrumbList',
+			itemListElement: [
+				{ '@type': 'ListItem', position: 1, name: 'Compare', item: `${site}/compare/` },
+				{ '@type': 'ListItem', position: 2, name: comparison.category, item: `${site}${path}` },
+			],
+		},
+	],
+}
+---
+<BaseLayout title={page.title} description={page.description} noindex={!page.ready} jsonLd={jsonLd}>
+	<header class={`hero page-hero bg-sky tone-${comparison.tone}`}>
+		<div class="wrap hero-grid">
+			<div class="hero-copy">
+				<nav class="crumb" aria-label="Breadcrumb">
+					<a href="/compare/">Compare</a>
+					<span aria-hidden="true">/</span>
+					<span>{comparison.category}</span>
+				</nav>
+				<h1>{h1}</h1>
+				<p class="lede">{lede}</p>
+			</div>
+			<aside class="glance" aria-label="At a glance">
+				{glance.map((g) => (
+					<div class="glance-block">
+						<p class="glance-label">{g.label}</p>
+						<p class="glance-body">{g.body}</p>
+					</div>
+				))}
+			</aside>
+		</div>
+	</header>
+
+	<section class="answer">
+		<div class="wrap">
+			<div class={`answer-box tone-${comparison.tone}`}>
+				<h2>The short answer</h2>
+				<p>{shortAnswer}</p>
+				<p class="answer-jump">
+					Jump to:
+					{comparison.competitors.map((c, i) => (
+						<>{i > 0 && ' · '}<a href={`#${c.anchor}`}>{c.name}</a></>
+					))}
+				</p>
+			</div>
+		</div>
+	</section>
+
+	<slot name="intro" />
+
+	<section class="profiles">
+		<div class="wrap">
+			<SectionHead
+				eyebrow="One by one"
+				title={`Rocketflare as an alternative to ${comparison.competitors.length > 2 ? comparison.competitors.slice(0, -1).map((c) => c.name).join(', ') + ' and ' + comparison.competitors.at(-1)!.name : comparison.competitors.map((c) => c.name).join(' and ')}`}
+				lede="What each one is, where it is strong, and where it stops. The facts are from each product’s own site."
+			/>
+			{profiles.map((p) => (
+				<article class="profile" aria-labelledby={p.anchor}>
+					<div class="profile-main">
+					<h3 id={p.anchor}>Rocketflare vs {nameOf(p.anchor)}</h3>
+					<p class="profile-lead">{p.lead}</p>
+					<p>{p.what}</p>
+					</div>
+					<div class="profile-side">
+					<div class="profile-split">
+						<div>
+							<p class="split-label">Where {nameOf(p.anchor)} is strong</p>
+							<p>{p.strong}</p>
+						</div>
+						<div>
+							<p class="split-label">Where it stops</p>
+							<p>{p.stops}</p>
+						</div>
+					</div>
+					<dl class="facts">
+						{p.facts.map((f) => (
+							<div>
+								<dt>{f.k}</dt>
+								<dd>{f.v}</dd>
+							</div>
+						))}
+					</dl>
+					</div>
+				</article>
+			))}
+		</div>
+	</section>
+
+	<section class="table-wrap">
+		<div class="wrap">
+			<h2>Side by side</h2>
+			<div class="table-scroll">
+				<table class="compare">
+					<thead>
+						<tr>
+							<th scope="col"><span class="sr-only">Topic</span></th>
+							{table.columns.map((c) => <th scope="col">{c}</th>)}
+						</tr>
+					</thead>
+					<tbody>
+						{table.rows.map((r) => (
+							<tr>
+								<th scope="row">{r.row}</th>
+								{r.cells.map((cell, i) => (
+									<td data-label={table.columns[i]} class:list={{ rf: table.columns[i] === 'Rocketflare' }}>{cell}</td>
+								))}
+							</tr>
+						))}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</section>
+
+	<section class="diffs">
+		<div class="wrap">
+			<SectionHead eyebrow="Why Rocketflare" title="What is different here" />
+			<div class="diff-grid reveal reveal-stagger">
+				{differences.map((d) => (
+					<article class={`diff tone-${d.tone}`}>
+						<span class="chip"><ConceptIcon name={d.icon} /></span>
+						<h3>{d.title}</h3>
+						<p>{d.body}</p>
+					</article>
+				))}
+			</div>
+		</div>
+	</section>
+
+	<slot name="after" />
+
+	<section class="pick bg-band">
+		<div class="wrap">
+			<span class="eyebrow">Be honest with yourself</span>
+			<h2>When to pick them instead</h2>
+			<ul class="pick-list">
+				{pickThem.map((p) => (
+					<li><strong>{p.who}</strong> {p.when}</li>
+				))}
+			</ul>
+		</div>
+	</section>
+
+	<section class="faq">
+		<div class="wrap">
+			<h2>Questions</h2>
+			<dl class="faq-list">
+				{faqs.map((f) => (
+					<div>
+						<dt>{f.q}</dt>
+						<dd>{f.a}</dd>
+					</div>
+				))}
+			</dl>
+		</div>
+	</section>
+
+	<section class="sources">
+		<div class="wrap">
+			<h2>Sources</h2>
+			<p class="text-muted">
+				Checked against each product’s own pages in {CHECKED_ON}. Prices and plans change; if one of
+				these is out of date, <a href="https://github.com/rocketflare-dev/rocketflare-www/issues">tell us</a> and
+				we will fix it.
+			</p>
+			<ul class="source-list">
+				{sources.map((s) => (
+					<li><a href={s.url} rel="nofollow noopener">{s.label}</a></li>
+				))}
+			</ul>
+			<div class="next-actions">
+				<a class="btn btn-primary" href="/get-started/">Try it for two minutes</a>
+				<a class="btn btn-ghost" href="/tour/">See every screen</a>
+			</div>
+		</div>
+	</section>
+
+	<nav class="others" aria-labelledby="others-title">
+		<div class="wrap">
+			<h2 id="others-title">Other comparisons</h2>
+			<ul class="others-grid">
+				{others.map((o) => (
+					<li class={`tone-${o.tone}`}>
+						<a href={`/compare/${o.slug}/`}>
+							<span class="chip"><ConceptIcon name={o.icon} /></span>
+							<strong>{o.category}</strong>
+							<span class="others-names">{o.competitors.map((c) => c.name).join(', ')}</span>
+						</a>
+					</li>
+				))}
+			</ul>
+		</div>
+	</nav>
+</BaseLayout>
+
+<style>
+	.sr-only {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip: rect(0 0 0 0);
+		white-space: nowrap;
+	}
+	.hero { border-bottom: 1px solid var(--border); }
+	.hero-grid {
+		display: grid;
+		grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+		gap: 3rem;
+		align-items: center;
+	}
+	.crumb {
+		display: flex;
+		gap: 0.45rem;
+		margin-bottom: 0.9rem;
+		font-size: 0.85rem;
+		font-weight: 600;
+		color: var(--accent-ink);
+	}
+	.crumb a { color: inherit; }
+	.glance {
+		border: 1px solid var(--border-bright);
+		border-radius: 20px;
+		background: var(--card);
+		box-shadow: var(--shadow);
+		padding: 0.4rem 1.8rem 1.2rem;
+	}
+	.glance-block { padding: 1.1rem 0 0; }
+	.glance-block + .glance-block { border-top: 1px solid var(--border); margin-top: 0.4rem; }
+	.glance-label {
+		margin: 0 0 0.25rem;
+		font-size: 0.72rem;
+		font-weight: 700;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: var(--orange-ink);
+	}
+	.glance-body { margin: 0; font-size: 0.92rem; color: var(--text-muted); }
+
+	.answer { padding: 3.5rem 0 1rem; }
+	.answer-box {
+		padding: 1.6rem 1.8rem;
+		border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--border));
+		border-left: 5px solid var(--accent);
+		border-radius: 16px;
+		background: var(--card);
+		box-shadow: var(--shadow-sm);
+	}
+	.answer-box h2 { font-size: var(--step-1); margin-bottom: 0.5rem; }
+	.answer-box p { margin: 0 0 0.8rem; font-size: 1.05rem; }
+	.answer-box .answer-jump { margin: 0; font-size: 0.9rem; color: var(--text-muted); }
+
+	.profiles { padding: 3.5rem 0 2rem; }
+	.profile {
+		display: grid;
+		grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+		gap: 1rem 3rem;
+		padding: 2.2rem 0;
+		border-top: 1px solid var(--border);
+	}
+	.profile h3 { font-size: var(--step-2); margin-bottom: 0.6rem; scroll-margin-top: 1.5rem; }
+	.profile p { color: var(--text-muted); }
+	.profile .profile-lead { color: var(--text-bright); font-weight: 600; font-size: 1.05rem; }
+	.profile-split { display: grid; gap: 1rem; margin: 0 0 1rem; }
+	.split-label, .facts dt {
+		margin: 0 0 0.2rem;
+		font-size: 0.72rem;
+		font-weight: 700;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		color: var(--orange-ink);
+	}
+	.profile-split p:not(.split-label) { margin: 0; }
+	.facts {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+		gap: 0.9rem 1.5rem;
+		margin: 0;
+		padding: 1rem 1.2rem;
+		border: 1px solid var(--border);
+		border-radius: 14px;
+		background: var(--card-alt);
+	}
+	.facts dd { margin: 0; font-size: 0.9rem; color: var(--text); }
+
+	.table-wrap { padding: 2rem 0 3rem; }
+	.table-scroll { overflow-x: auto; }
+	.compare { width: 100%; border-collapse: collapse; margin-top: 1.2rem; font-size: 0.92rem; }
+	.compare th, .compare td { text-align: left; padding: 0.8rem 0.9rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+	.compare thead th { font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); }
+	.compare tbody th { font-weight: 600; color: var(--text-bright); min-width: 9rem; }
+	.compare td { color: var(--text-muted); }
+	.compare td.rf { color: var(--text-bright); background: var(--tint-blue); min-width: 13rem; }
+
+	.diffs { padding: 3rem 0 3rem; }
+	.diff-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+	.diff {
+		padding: 1.6rem 1.7rem;
+		border: 1px solid var(--border);
+		border-radius: 18px;
+		background: var(--card);
+		box-shadow: var(--shadow-sm);
+	}
+	.chip {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 44px;
+		height: 44px;
+		border-radius: 13px;
+		background: var(--tint);
+		color: var(--accent);
+		margin-bottom: 0.9rem;
+	}
+	.diff h3 { font-size: 1.05rem; margin-bottom: 0.4rem; }
+	.diff p { color: var(--text-muted); margin: 0; }
+
+	.pick { padding: 4.5rem 0; }
+	.pick h2 { margin-bottom: 1.2rem; }
+	.pick-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); column-gap: 3rem; }
+	.pick-list li {
+		padding: 0.85rem 0;
+		border-top: 1px solid color-mix(in srgb, var(--band-ink) 14%, transparent);
+		color: var(--band-muted);
+	}
+	.pick-list li strong { color: var(--band-ink); }
+	
+
+	.faq { padding: 4rem 0 1rem; }
+	.faq-list { margin: 1.2rem 0 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); column-gap: 3rem; }
+	.faq-list > div { padding: 1.1rem 0; border-top: 1px solid var(--border); }
+	.faq-list dt { font-weight: 700; color: var(--text-bright); margin-bottom: 0.35rem; }
+	.faq-list dd { margin: 0; color: var(--text-muted); }
+
+	.sources { padding: 3rem 0 4rem; }
+	.source-list { margin: 0.8rem 0 2.2rem; padding-left: 1.2rem; font-size: 0.88rem; columns: 3 280px; column-gap: 2rem; }
+	.source-list li { margin-bottom: 0.3rem; break-inside: avoid; }
+	.next-actions { display: flex; flex-wrap: wrap; gap: 0.9rem; }
+
+	.others { padding: 3rem 0 5rem; border-top: 1px solid var(--border); }
+	.others h2 { font-size: var(--step-2); margin-bottom: 1.2rem; }
+	.others-grid {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+		gap: 1rem;
+	}
+	.others-grid a {
+		display: flex;
+		flex-direction: column;
+		gap: 0.2rem;
+		height: 100%;
+		padding: 1.1rem 1.2rem;
+		border: 1px solid var(--border);
+		border-radius: 14px;
+		background: var(--card);
+		color: var(--text);
+	}
+	.others-grid a:hover { text-decoration: none; border-color: var(--accent); }
+	.others-grid .chip { width: 36px; height: 36px; border-radius: 10px; margin-bottom: 0.4rem; }
+	.others-grid strong { color: var(--text-bright); }
+	.others-names { font-size: 0.85rem; color: var(--text-muted); }
+
+	@media (max-width: 900px) {
+		.hero-grid { grid-template-columns: minmax(0, 1fr); gap: 2rem; }
+		.profile { grid-template-columns: minmax(0, 1fr); }
+	}
+	@media (max-width: 760px) {
+		.compare thead { display: none; }
+		.compare tbody th, .compare td { display: block; border-bottom: 0; padding: 0.3rem 0.6rem; min-width: 0; }
+		.compare tbody tr { display: block; padding: 0.9rem 0; border-bottom: 1px solid var(--border); }
+		.compare td::before {
+			content: attr(data-label);
+			display: block;
+			font-size: 0.7rem;
+			font-weight: 700;
+			letter-spacing: 0.1em;
+			text-transform: uppercase;
+			color: var(--orange-ink);
+		}
+		.compare td.rf { border-radius: 8px; }
+	}
+</style>

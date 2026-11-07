@@ -1,0 +1,173 @@
+---
+/**
+ * Rocketflare vs internal tool builders: Retool, Appsmith, Budibase, ToolJet,
+ * Superblocks. Facts from each vendor's pricing, docs and licence, checked in
+ * CHECKED_ON. Retool's pricing page served pounds to our location, so its
+ * prices are described rather than quoted.
+ */
+import CompareLayout from '../../components/CompareLayout.astro'
+
+const profiles = [
+	{
+		anchor: 'retool',
+		lead: 'If you are looking for a Retool alternative because the tool has become something customers use, or because the per-user bill now grows faster than the team, Rocketflare is the same kind of app as your own code.',
+		what: 'Retool is a proprietary platform for building internal apps, workflows and AI agents over your databases and APIs. Builders and internal users are priced per seat, external users are an add-on on the Business plan, and agents are billed by the hour. Apps run on Retool Cloud or, on Enterprise, on your own Kubernetes cluster.',
+		strong: 'It is the most mature internal tool builder: a very wide set of connectors and components, agents with evals in the same product, and an Enterprise path to self-hosting, air-gapped installs and SSO. If ops needs a screen over Salesforce by Friday, use Retool.',
+		stops: 'Single sign-on, SCIM, Git source control and self-hosting are Enterprise features. External users are not available on the Free or Team plans. Retool’s pages describe no model for your customers as organisations with their own members and roles, and an app built in Retool runs on the Retool runtime.',
+		facts: [
+			{ k: 'Pricing', v: 'Per builder and per internal user; external users on Business' },
+			{ k: 'Licence', v: 'Proprietary' },
+			{ k: 'SSO', v: 'Enterprise only' },
+			{ k: 'Organisations for your customers', v: 'Not described' },
+		],
+	},
+	{
+		anchor: 'appsmith',
+		lead: 'As an Appsmith alternative, Rocketflare trades the drag-and-drop editor for an app written in code, with sign-in, tenancy and an AI layer that Appsmith leaves to your data sources.',
+		what: 'Appsmith is an Apache-2.0 low-code platform for admin panels, internal tools and dashboards over databases and APIs. It can be self-hosted with Docker or Kubernetes, or used in Appsmith’s cloud, which is priced per workspace member.',
+		strong: 'A permissively licensed platform you can run and fork yourself, with a large community, Git sync for apps and a flat Enterprise price.',
+		stops: 'SAML and OIDC sign-in, SCIM and private embedding with shared logins are Enterprise features. Appsmith’s AI data source stopped working on 30 September 2026, and AI now means calling a model provider as a data source. There is no organisation model for your customers.',
+		facts: [
+			{ k: 'Pricing', v: 'Free to 5 users; Business $15 per user a month; Enterprise $2,500 a month for 100 users' },
+			{ k: 'Licence', v: 'Apache-2.0 community edition' },
+			{ k: 'SSO', v: 'SAML and OIDC on Enterprise' },
+			{ k: 'Organisations for your customers', v: 'Not described' },
+		],
+	},
+	{
+		anchor: 'budibase',
+		lead: 'Budibase is the most generous self-hosted option here, and its agents already have approval policies. Rocketflare is the Budibase alternative when the app needs to serve customer organisations rather than one team.',
+		what: 'Budibase is a low-code platform for internal apps, automations and, since 2026, AI agents with tools over databases and REST APIs, knowledge from SharePoint and uploaded documents, and approval policies. The platform is GPLv3, apps it builds are MPL-2.0, and paid features are under the BSL.',
+		strong: 'The community edition is free to self-host for unlimited users and apps. Its agents can be deployed to Slack and Teams, and approval policies define who reviews which action and within what time.',
+		stops: 'The cloud plan starts at $299 a month and charges per creator and per end user beyond the included ones, with a hard monthly cap on actions. Audit logs and enterprise identity controls are Enterprise features. Its pages describe no organisations for your customers, and apps run on the Budibase runtime.',
+		facts: [
+			{ k: 'Pricing', v: 'Free self-hosted; cloud from $299 a month' },
+			{ k: 'Licence', v: 'GPLv3, with BSL paid features' },
+			{ k: 'SSO', v: 'OIDC in the free edition, per Budibase; SAML on Enterprise' },
+			{ k: 'Organisations for your customers', v: 'Not described' },
+		],
+	},
+	{
+		anchor: 'tooljet',
+		lead: 'Rocketflare is a ToolJet alternative for teams that would rather own an MIT codebase than run an AGPL platform, and that need more than 50 or 100 end users without an Enterprise contract.',
+		what: 'ToolJet is an open-source low-code and AI app builder for internal tools, workflows and agents, with a built-in database. It is AGPL-3.0, self-hostable with Docker or Kubernetes, and priced per builder in its cloud.',
+		strong: 'AI app generation and agents in one product, a large community, a visual workflow editor with schedules and webhooks, and sign-in through GitHub, Google, OIDC, LDAP and SAML.',
+		stops: 'End users are capped at 50 or 100 below Enterprise, and its pricing page is inconsistent about which tier includes SSO. The docs do not describe workflows that wait for a person’s approval, or organisations for your customers.',
+		facts: [
+			{ k: 'Pricing', v: 'Free for 2 builders; paid from $23 per builder a month' },
+			{ k: 'Licence', v: 'AGPL-3.0' },
+			{ k: 'SSO', v: 'Supported; tier unclear on the pricing page' },
+			{ k: 'Organisations for your customers', v: 'Not described' },
+		],
+	},
+	{
+		anchor: 'superblocks',
+		lead: 'Superblocks generates internal apps as React for large companies under central IT control. As a Superblocks alternative, Rocketflare gives the same ownership of code to a smaller team, with the backend included.',
+		what: 'Superblocks is a proprietary AI app builder whose agent, Clark, generates React and TypeScript internal apps under central governance. It says you own all generated code; source control and running the platform in your own cloud are Enterprise options.',
+		strong: 'Governed app generation for big organisations: central control of data, permissions and models, unlimited end users, and the option to run everything, including AI inference, in your own AWS, GCP or Azure account.',
+		stops: 'SSO and source control are Enterprise only, and the Teams plan includes one hosted app. Superblocks describes its apps as React projects you can export; how much of the backend, integrations and workflows comes with them is not documented.',
+		facts: [
+			{ k: 'Pricing', v: 'Teams $100 a month (annual) for 15 builders and one app' },
+			{ k: 'Licence', v: 'Proprietary' },
+			{ k: 'SSO', v: 'Enterprise only' },
+			{ k: 'Organisations for your customers', v: 'Not described' },
+		],
+	},
+]
+
+const table = {
+	columns: ['Retool', 'Appsmith', 'Budibase', 'ToolJet', 'Superblocks', 'Rocketflare'],
+	rows: [
+		{ row: 'How you build', cells: ['Visual editor, plus AI', 'Visual editor', 'Visual editor, plus agents', 'Visual editor, plus AI', 'AI generates React', 'Code, written with Claude Code or Codex'] },
+		{ row: 'Licence', cells: ['Proprietary', 'Apache-2.0', 'GPLv3 and BSL', 'AGPL-3.0', 'Proprietary', 'MIT'] },
+		{ row: 'Self-hosting', cells: ['Enterprise', 'Yes', 'Yes', 'Yes', 'Enterprise', 'It always runs in your account'] },
+		{ row: 'Pricing shape', cells: ['Per builder and user', 'Per user', 'Base plus per user', 'Per builder', 'Per plan and app', 'Cloudflare, Postgres and AI usage'] },
+		{ row: 'Enterprise SSO', cells: ['Enterprise', 'Enterprise', 'OIDC free, SAML Enterprise', 'Unclear by tier', 'Enterprise', 'Any OIDC issuer, included'] },
+		{ row: 'Customers as organisations', cells: ['Not described', 'Not described', 'Not described', 'Not described', 'Not described', 'Built in, with isolation tests'] },
+		{ row: 'Agents that wait for approval', cells: ['Humans in decisions', 'No', 'Approval policies', 'Not described', 'Not described', 'Durable runs: approval, choice, input or form'] },
+		{ row: 'Runs without the vendor', cells: ['No', 'On the open-source platform', 'On the open-source platform', 'On the open-source platform', 'React export; backend not documented', 'Yes: it is your code'] },
+	],
+}
+
+const differences = [
+	{
+		title: 'No per-user bill',
+		body: 'A Rocketflare app costs what it uses on Cloudflare, your Postgres and your AI provider. Adding the rest of the company, or a thousand customers, does not add a seat price. Single sign-on is included rather than an Enterprise feature.',
+		icon: 'users',
+		tone: 'green' as const,
+	},
+	{
+		title: 'Room to become a product',
+		body: 'Internal tools have a habit of being shown to customers. Here every row already belongs to an organisation, signup can be open, invite-only or by approval, and a support role lets your team step into a customer’s organisation with a visible membership.',
+		icon: 'building',
+		tone: 'blue' as const,
+	},
+	{
+		title: 'The screens your team asks for in month three',
+		body: 'Invitations, roles, an activity log of who did what, feature flags per organisation, background jobs, dashboards over your data, and agents that stop for a person. All already written and tested.',
+		icon: 'window',
+		tone: 'cyan' as const,
+	},
+]
+
+const pickThem = [
+	{ who: 'You need admin screens over existing systems this week.', when: 'Retool, Appsmith or ToolJet connect to the database and API you already have and give you tables, forms and buttons in an afternoon. Rocketflare starts with its own database.' },
+	{ who: 'The people building it will not write code.', when: 'Every builder here has a visual editor. Rocketflare is a codebase, even if a coding agent does most of the typing.' },
+	{ who: 'You want free self-hosting and approval-heavy agents for one team.', when: 'Budibase’s community edition is free for unlimited users, and its agents have approval policies.' },
+	{ who: 'A central IT team is governing hundreds of generated apps.', when: 'Superblocks and Retool Enterprise are built for that. Rocketflare is one app per repository.' },
+]
+
+const faqs = [
+	{
+		q: 'Is Rocketflare an alternative to Retool?',
+		a: 'Yes, for internal tools that need to become products or that many people use. Retool charges per builder and per user, and SSO, Git source control and self-hosting are Enterprise features. A Rocketflare app is MIT-licensed code in your own Cloudflare account with SSO included, no per-user price, and organisations and roles ready for customers. Retool is quicker for admin screens over systems you already have.',
+	},
+	{
+		q: 'Is Rocketflare an open-source alternative to Retool, like Appsmith or Budibase?',
+		a: 'It is open source (MIT), but it is a different kind of thing. Appsmith, Budibase and ToolJet are open-source platforms with a visual editor, and your app runs on their runtime. Rocketflare is the app itself, as TypeScript you own, built with a coding agent instead of an editor.',
+	},
+	{
+		q: 'Can a Rocketflare internal tool be opened to customers later?',
+		a: 'Yes. It is multi-tenant from the first row: switching from one organisation to many is a setting, not a migration. Customers get their own members, roles, documents and dashboards, and a test fails the build if a query forgets which organisation it is for.',
+	},
+	{
+		q: 'Does Rocketflare connect to our existing database?',
+		a: 'Rocketflare has its own Postgres database, and you write the integrations as code, often with a coding agent. If the job is a screen over an existing database with no new data model, an internal tool builder is the faster route.',
+	},
+]
+
+const sources = [
+	{ label: 'Retool: pricing', url: 'https://retool.com/pricing' },
+	{ label: 'Retool: self-hosted', url: 'https://docs.retool.com/self-hosted' },
+	{ label: 'Retool: agents', url: 'https://docs.retool.com/agents' },
+	{ label: 'Retool: source control', url: 'https://docs.retool.com/source-control' },
+	{ label: 'Appsmith: pricing', url: 'https://www.appsmith.com/pricing' },
+	{ label: 'Appsmith: AI datasource end of life', url: 'https://community.appsmith.com/content/blog/appsmith-23-released-important-note-appsmith-ai-datasource-eol' },
+	{ label: 'Appsmith: repository and licence', url: 'https://github.com/appsmithorg/appsmith' },
+	{ label: 'Budibase: pricing', url: 'https://budibase.com/pricing/' },
+	{ label: 'Budibase: agents', url: 'https://budibase.com/product/agents/' },
+	{ label: 'Budibase: licence', url: 'https://github.com/Budibase/budibase/blob/master/LICENSE' },
+	{ label: 'ToolJet: pricing', url: 'https://www.tooljet.com/pricing' },
+	{ label: 'ToolJet: SSO', url: 'https://docs.tooljet.com/docs/user-management/sso/overview' },
+	{ label: 'ToolJet: workflows', url: 'https://docs.tooljet.com/docs/workflows/overview' },
+	{ label: 'ToolJet: repository and licence', url: 'https://github.com/ToolJet/ToolJet' },
+	{ label: 'Superblocks: pricing', url: 'https://www.superblocks.com/pricing' },
+]
+---
+<CompareLayout
+	slug="internal-tool-builders"
+	h1="Rocketflare vs Retool, Appsmith, Budibase and ToolJet"
+	lede="Internal tool builders put a screen over a database faster than anyone can write one. The trade comes later: a bill per user, SSO on the top plan, an app that only runs on the vendor’s runtime, and no way to let customers in without rebuilding. Rocketflare is the internal tool as your own code, with the platform work already done."
+	glance={[
+		{ label: 'They are best at', body: 'Admin screens over databases and APIs you already have, built in a visual editor.' },
+		{ label: 'Rocketflare is best at', body: 'An internal tool that is a real application: its own data model, roles, SSO, jobs, agents and an activity log, ready to serve customers too.' },
+		{ label: 'The cost shape', body: 'Theirs grows per user. Rocketflare’s grows with use, on your own Cloudflare and database accounts.' },
+	]}
+	shortAnswer="For screens over systems you already have, used by your own staff, Retool, Appsmith or Budibase will be quicker. When the tool has its own data, many users, needs SSO without an Enterprise contract, or will one day face customers, start from Rocketflare: it is MIT-licensed code you own, multi-tenant from the first row, with no per-user price."
+	profiles={profiles}
+	table={table}
+	differences={differences}
+	pickThem={pickThem}
+	faqs={faqs}
+	sources={sources}
+/>

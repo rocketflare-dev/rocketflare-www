@@ -1,0 +1,241 @@
+---
+/**
+ * Build your own starter (a one-off, or an in-house kit every team starts
+ * from), or start from this. This was /compare/ before the comparison
+ * section existed; the work list, the "when to build it yourself" list and
+ * the three things you give up are carried over, inside CompareLayout.
+ */
+import CompareLayout from '../../components/CompareLayout.astro'
+import SectionHead from '../../components/SectionHead.astro'
+import { conceptBySlug } from '../../data/concepts'
+
+const conceptHref = (slug: string) => {
+	const c = conceptBySlug(slug)
+	if (!c) throw new Error(`Unknown concept slug: ${slug}`)
+	return `/concepts/${c.slug}/`
+}
+
+/** The platform work, and the part of it people underestimate. */
+const work = [
+	{
+		title: 'Organisations, members and roles',
+		trap: 'The schema is an afternoon. The part that takes the month is every query afterwards remembering to filter by organisation, and the day you find one that did not.',
+		slug: 'tenancy',
+	},
+	{
+		title: 'Sign-in',
+		trap: 'One provider is a morning. Then you want a second, and email links for people without either, and API keys for scripts, and sessions you can revoke.',
+		slug: 'auth',
+	},
+	{
+		title: 'Invitations and an admin area',
+		trap: 'Invite, accept, expire, resend, and what happens when someone accepts an invitation for an email that already has an account. Nobody plans for that one.',
+		slug: 'tenancy',
+	},
+	{
+		title: 'Background work',
+		trap: 'A queue is easy until a message is poison and retries forever, or a job runs twice because nothing claimed it.',
+		slug: 'background-work',
+	},
+	{
+		title: 'An AI layer that is not a demo',
+		trap: 'Streaming a reply is a day. Persisting it, keeping a thread inside a context window, letting an agent stop and ask a person, knowing what it all cost, and knowing whether this week’s prompt is worse than last week’s, is not.',
+		slug: 'ai',
+	},
+	{
+		title: 'Dashboards',
+		trap: 'The first chart is quick. The tenth is a reporting system, and by then the same measure is defined three times and disagrees with itself.',
+		slug: 'analytics',
+	},
+	{
+		title: 'Connecting a customer’s Microsoft 365',
+		trap: 'Admin consent is a redirect. Keeping a change token per calendar, backing off when Microsoft throttles you, starting over when a token expires, and making sure nobody reads a colleague’s calendar — that is the quarter.',
+		slug: 'connectors',
+	},
+]
+
+const profiles = [
+	{
+		anchor: 'in-house',
+		lead: 'If you are weighing Rocketflare against writing your own starter kit, for one product or as the template every team in the company starts from, the question is who keeps it up to date once the first app ships.',
+		what: 'An in-house starter is the platform work above, written once by your own engineers and copied into each new project. Done well, it encodes your conventions, your cloud and your security reviews, and every team gets a head start shaped exactly like your company.',
+		strong: 'It is yours in every detail. It runs on the stack your people already operate, passes the reviews your security team already wrote, and makes none of the trade-offs listed further down this page. If you have a platform team with time to spare, it can be the right answer.',
+		stops: 'Copies drift. The day after a team takes the template it starts to diverge, and a fix made to the template in month six reaches nobody unless someone ports it by hand into every copy. The AI layer moves fastest, so it is the part that goes stale first.',
+		facts: [
+			{ k: 'Up-front cost', v: 'Weeks of engineering before the first product feature' },
+			{ k: 'Licence', v: 'Yours' },
+			{ k: 'Keeping copies current', v: 'By hand, unless you build a porting tool too' },
+			{ k: 'Written down', v: 'As well as you document it' },
+		],
+	},
+]
+
+const table = {
+	columns: ['Writing it yourself', 'Rocketflare'],
+	rows: [
+		{ row: 'Time before your first real feature', cells: ['Weeks, and the boring weeks', 'About two minutes to a running app'] },
+		{ row: 'Multi-tenancy', cells: ['Yours to design, and to keep right in every query', 'Built in, with a test that fails when a query forgets'] },
+		{ row: 'AI over your own documents', cells: ['A project of its own', 'Built in, no key needed to try it'] },
+		{ row: 'Agents that wait for a person', cells: ['A workflow engine and a state machine of your own', 'Durable agent runs that park on an approval, a choice, an input or a form'] },
+		{ row: 'Knowing whether the AI got worse', cells: ['Try a few questions after each change and hope', 'Eval suites with baselines and a regression check'] },
+		{ row: 'Single sign-on with a company’s identity provider', cells: ['An OIDC client, token checks and account linking of your own', 'Any OIDC issuer — Okta, Entra ID, Keycloak, Auth0 — from a few settings'] },
+		{ row: 'Your customers’ Microsoft 365', cells: ['An app registration, a consent flow and a sync engine of your own', 'Two plugins: one admin consent, then directory and calendars sync by delta'] },
+		{ row: 'A fix in the template reaching existing copies', cells: ['By hand, copy by copy', 'One command ports each release into a renamed copy and skips what it deleted'] },
+		{ row: 'Billing and subscriptions', cells: ['Yours, whenever you want it', 'Not included. Add Stripe yourself'] },
+		{ row: 'Stack choice', cells: ['Anything you like', 'Cloudflare Workers, Hono, React, Postgres'] },
+		{ row: 'Who owns the decisions', cells: ['You, all of them', 'You inherit a few hundred, written down so you can reverse them'] },
+	],
+}
+
+const differences = [
+	{
+		title: 'Multi-tenancy is the foundation, not a feature',
+		body: 'Most starters add organisations on top of a single-user app. Here every row belongs to one, a single setting switches between one organisation and a thousand with no migration, and a test fails if a query forgets. The isolation is enforced rather than remembered.',
+		icon: 'building',
+		tone: 'blue' as const,
+	},
+	{
+		title: 'The AI layer is built in and works with no key',
+		body: 'Chat, agents that can stop and ask a person, and search over your own documents are part of the kit rather than a tutorial. On a fresh copy they run on Workers AI with nothing configured, and you can point them at your own provider later.',
+		icon: 'sparkles',
+		tone: 'purple' as const,
+	},
+	{
+		title: 'A copy keeps a link home',
+		body: 'You delete the kit’s history on the first day, so there is nothing to merge and no upstream to fight. What stays is a small file saying which version you came from. When the kit gains a release, one command ports it into your renamed app and skips anything you deleted. An in-house template rarely gets this far.',
+		icon: 'rocket',
+		tone: 'orange' as const,
+	},
+]
+
+const pickThem = [
+	{ who: 'Your product is not shaped like organisations with members.', when: 'A consumer app, a marketplace, a single-user tool: the model here will fight you.' },
+	{ who: 'You have a stack you are fast in.', when: 'If you have no appetite for Cloudflare Workers, Hono or Drizzle, being fast in your own tools beats any head start.' },
+	{ who: 'You need one or two of these parts, not all of them.', when: 'A starter kit is a poor way to get an auth page.' },
+	{ who: 'Your company has standardised on another cloud.', when: 'If every app must run on AWS, Azure or Kubernetes, this has no second deploy target, and your template should be built for the platform you have.' },
+	{ who: 'The platform work is the interesting bit for you.', when: 'That is a real reason and there is nothing wrong with it. If two of these are true, close this page and go and build.' },
+]
+
+const faqs = [
+	{
+		q: 'Should we build our own SaaS starter kit or use an open-source one?',
+		a: 'Build your own when your product is not multi-tenant, when you need a stack other than Cloudflare Workers and Postgres, or when you only need one or two parts. Start from Rocketflare when you want organisations, roles, sign-in with SSO, background jobs, dashboards and an AI layer with agents on day one, and would rather spend the first month on your product.',
+	},
+	{
+		q: 'Can Rocketflare be our company’s internal starter kit?',
+		a: 'Yes. It is MIT licensed, so you can take a copy, add your own conventions and plugins, and have every team start from it. Each copy records which kit version it came from, and one command ports later releases into a renamed copy, which is the part an in-house template usually lacks.',
+	},
+	{
+		q: 'What do we give up by not writing it ourselves?',
+		a: 'A few hundred decisions you did not make (each written down with its reasoning), a stack you may not have picked (one Cloudflare Worker over Postgres, with Hono and React), and the work of reading code you did not write.',
+	},
+]
+
+const sources = [
+	{ label: 'Rocketflare: how releases reach a renamed copy', url: 'https://rocketflare.dev/changelog/' },
+	{ label: 'Rocketflare: the subsystem reference (docs/CONCEPTS.md)', url: 'https://github.com/rocketflare-dev/rocketflare/blob/main/docs/CONCEPTS.md' },
+	{ label: 'Rocketflare: licence terms', url: 'https://rocketflare.dev/license/' },
+]
+---
+<CompareLayout
+	slug="build-your-own"
+	h1="Build your own starter kit, or start from this"
+	lede="The question is not whether you could write all of this. You could. The question is what the first month costs you, whether the thing you build in it is the thing anyone is paying you for, and, if it becomes the template for every team, who keeps the copies up to date."
+	glance={[
+		{ label: 'Already written', body: 'Organisations and roles, sign-in, invitations, an activity log, a job queue, durable agents, file storage, email, realtime, dashboards, an AI layer and a command line tool.' },
+		{ label: 'Not included', body: 'Billing. If you need plans and a checkout on day one, a kit built around Stripe will beat this one.' },
+		{ label: 'The trade', body: 'A few hundred decisions you did not make, each written down so you can reverse it on purpose.' },
+	]}
+	shortAnswer="Write your own when your product is not shaped like organisations with members, or your company runs everything on another cloud. Otherwise start from Rocketflare: the platform work is already written and tested, it is MIT licensed, and later releases port into your renamed copy, so a starter kit does not decay into a dozen diverging forks."
+	profiles={profiles}
+	table={table}
+	differences={differences}
+	pickThem={pickThem}
+	faqs={faqs}
+	sources={sources}
+>
+	<section class="work" slot="intro">
+		<div class="wrap">
+			<SectionHead
+				eyebrow="What you would write first"
+				title="The platform work, and the part people underestimate"
+				lede="None of this is hard. All of it is slow, and none of it is your product."
+			/>
+			<div class="work-grid reveal reveal-stagger">
+				{work.map((w) => (
+					<article class="work-item">
+						<h3>{w.title}</h3>
+						<p>{w.trap}</p>
+						<a href={conceptHref(w.slug)}>How it works here <span aria-hidden="true">→</span></a>
+					</article>
+				))}
+			</div>
+		</div>
+	</section>
+
+	<section class="giveup" slot="after">
+		<div class="wrap">
+			<SectionHead
+				align="left"
+				eyebrow="The trade"
+				title="What you give up"
+				lede="Three of them, stated plainly, because you will meet all three."
+			/>
+			<ol class="giveup-list">
+				<li>
+					<h3>Someone else's decisions</h3>
+					<p>
+						You inherit a few hundred choices you did not make. They are written down with the
+						reasoning, one page per part of the app, so you can disagree on purpose rather than by
+						accident. But they are there on day one.
+					</p>
+				</li>
+				<li>
+					<h3>A stack you may not have picked</h3>
+					<p>
+						One Cloudflare Worker over Postgres, with Hono and React. If you want to run this on a
+						Node server in a container, this is the wrong starting point and there is no second
+						target for it.
+					</p>
+				</li>
+				<li>
+					<h3>Reading code you did not write</h3>
+					<p>
+						A copy is yours from the first commit, which also means every bug in it is yours. The
+						tests and the written reasoning exist to make that survivable, and it is still real
+						work.
+					</p>
+				</li>
+			</ol>
+		</div>
+	</section>
+</CompareLayout>
+
+<style>
+	.work { padding: 3.5rem 0 2rem; }
+	.work-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem 2.2rem; }
+	.work-item h3 { font-size: 1.05rem; margin-bottom: 0.35rem; }
+	.work-item p { color: var(--text-muted); margin-bottom: 0.5rem; }
+	.work-item a { font-size: 0.88rem; font-weight: 600; }
+
+	.giveup { padding: 1rem 0 4rem; }
+	.giveup-list { list-style: none; margin: 0; padding: 0; counter-reset: g; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 0 2.5rem; }
+	.giveup-list li { position: relative; padding-left: 2.6rem; margin-bottom: 1.5rem; counter-increment: g; }
+	.giveup-list li::before {
+		content: counter(g);
+		position: absolute;
+		left: 0;
+		top: 0.1rem;
+		width: 1.8rem;
+		height: 1.8rem;
+		display: grid;
+		place-items: center;
+		border-radius: 999px;
+		background: var(--tint-blue);
+		color: var(--blue);
+		font-weight: 700;
+		font-size: 0.85rem;
+	}
+	.giveup-list h3 { font-size: 1.05rem; margin-bottom: 0.25rem; }
+	.giveup-list p { color: var(--text-muted); margin: 0; }
+</style>
