@@ -1,6 +1,6 @@
 ---
 /**
- * Who the kit is for: three things you would build on it, what is already
+ * Who the kit is for: four things you would build on it, what is already
  * done for each, what you add and where to start — then, just as plainly,
  * who should pick something else, and the two doors out (ship it / read it).
  *
@@ -15,6 +15,8 @@ import { pluginById } from '../data/plugins'
 
 import peopleLight from '../assets/screens/people.light.png'
 import peopleDark from '../assets/screens/people.dark.png'
+import approvalLight from '../assets/screens/agents-approval.light.png'
+import approvalDark from '../assets/screens/agents-approval.dark.png'
 import researchLight from '../assets/screens/agents-research.light.png'
 import researchDark from '../assets/screens/agents-research.dark.png'
 import analyticsLight from '../assets/screens/analytics.light.png'
@@ -28,26 +30,58 @@ interface Sketch {
 	eyebrow: string
 	title: string
 	lede: string
-	tone: 'blue' | 'red' | 'green'
+	tone: 'purple' | 'blue' | 'red' | 'green'
 	shot: { light: ImageMetadata; dark: ImageMetadata; alt: string; url: string }
 	done: string[]
 	add: string[]
 	start: string[]
 	/** The concept page that explains the mechanism. */
 	behind: string
-	/** The page that covers this shape at length. */
-	more: string
+	/** The page that covers this shape at length, once there is one. */
+	more?: string
 }
 
 const HOST = 'localhost:3000'
 
 const analytics = pluginById('analytics')
+const connectors = pluginById('connectors')
 
 const sketches: Sketch[] = [
 	{
+		id: 'agentic-workflow',
+		eyebrow: 'What would I build · 1',
+		title: 'An agentic workflow app',
+		lede: 'A tool built around how your business actually works, with AI doing the work in the middle. It reads what comes in, pulls what it needs from the software you already pay for, carries out the steps, and asks a person when the decision is theirs.',
+		tone: 'purple',
+		shot: {
+			light: approvalLight,
+			dark: approvalDark,
+			alt: 'An agent run waiting for a decision: “Index this summary?”, with Index it or Cancel the run',
+			url: `${HOST}/agents`,
+		},
+		done: [
+			'Agents that run as durable workflows, with every step and tool call recorded',
+			'A person in the loop: a run can stop and ask, and by default waits up to a week for the answer',
+			'A knowledge base of your own documents that agents search and cite',
+			`Connections to the tools your team already uses: Microsoft 365 today, through the <a href="/plugins/${connectors.id}/">${connectors.label.toLowerCase()} plugin</a>`,
+			'Jobs on a schedule, so work starts without anyone pressing a button',
+			'AI usage and cost per organisation',
+		],
+		add: [
+			'Your workflows: the steps, the tools each agent may call, and where a person signs off',
+			'Connections to the other software you use, as a provider plugin',
+			'Or write it as a plugin, if other apps will want it too',
+		],
+		start: [
+			'Run the <code>summarize-text</code> agent and answer its “Index this summary?” question',
+			'Then give an agent of your own one tool that calls a system you use',
+		],
+		behind: 'ai',
+	},
+	{
 		id: 'internal-tool',
 		more: '/use-cases/internal-tool/',
-		eyebrow: 'What would I build · 1',
+		eyebrow: 'What would I build · 2',
 		title: 'An internal operations tool',
 		lede: 'The app your team opens every morning: a few tables, a few pages, and the boring parts — who can sign in, who can do what, what happened — already handled.',
 		tone: 'blue',
@@ -73,7 +107,7 @@ const sketches: Sketch[] = [
 	{
 		id: 'customer-portal',
 		more: '/use-cases/customer-portal/',
-		eyebrow: 'What would I build · 2',
+		eyebrow: 'What would I build · 3',
 		title: 'A customer portal with AI over documents',
 		lede: 'Each customer uploads their own documents and asks questions about them — and never sees another customer’s.',
 		tone: 'red',
@@ -99,7 +133,7 @@ const sketches: Sketch[] = [
 	{
 		id: 'analytics-product',
 		more: '/use-cases/analytics-product/',
-		eyebrow: 'What would I build · 3',
+		eyebrow: 'What would I build · 4',
 		title: 'An analytics-heavy B2B product',
 		lede: 'Numbers are the product: each organisation gets dashboards over its own data, kept fresh on a schedule, with a query surface for questions you did not anticipate.',
 		tone: 'green',
@@ -146,8 +180,9 @@ const notFor = [
 				<h1>Who this is for — and who it isn't</h1>
 				<p class="lede">
 					Rocketflare is for a product where people belong to organisations and the organisation is the
-					boundary: a team's internal tool, a customer portal, a B2B product. Three sketches of what you
-					would build on it, then the honest list of what to pick something else for.
+					boundary: an AI workflow tool built for how your business runs, a team's internal tool, a
+					customer portal, a B2B product. Four sketches of what you would build on it, then the honest
+					list of what to pick something else for.
 				</p>
 			</div>
 		</div>
@@ -180,7 +215,7 @@ const notFor = [
 									<ul>{s.start.map((x) => <li set:html={x} />)}</ul>
 								</div>
 							</div>
-							<p class="more-link"><a href={s.more}>Read the longer version <span aria-hidden="true">→</span></a></p>
+							{s.more && <p class="more-link"><a href={s.more}>Read the longer version <span aria-hidden="true">→</span></a></p>}
 						<p class="behind">(behind it: <a href={behind.href}>{behind.title}</a>)</p>
 						</div>
 					</article>
