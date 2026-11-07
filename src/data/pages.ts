@@ -154,10 +154,11 @@ export const PAGES: SitePage[] = [
 		title: 'What it costs to run',
 		nav: 'Costs',
 		description:
-			'Running it on your laptop is free. Running it for real starts at about five dollars a month. Every line of that bill, with the price each vendor publishes and the date it was checked.',
+			'Free on your laptop. Deployed, it starts small on a paid Cloudflare account and grows with use. The four lines on the bill, what makes them grow, and how to have us run the app for you.',
 		audience: 'both',
 		order: 2,
 		ready: true,
+		inNav: false,
 	},
 	{
 		path: '/compare/',
@@ -168,6 +169,7 @@ export const PAGES: SitePage[] = [
 		audience: 'both',
 		order: 3,
 		ready: true,
+		inNav: false,
 	},
 	{
 		path: '/license/',
@@ -179,6 +181,16 @@ export const PAGES: SitePage[] = [
 		order: 12,
 		ready: true,
 		inNav: false,
+	},
+	{
+		path: '/partners/',
+		title: 'Partners — the companies that can build Rocketflare apps for you',
+		nav: 'Partners',
+		description:
+			'Companies that build and run Rocketflare apps for their clients, with commercial plugins and support from the people who build the kit. Who our partners are, and how to become one.',
+		audience: 'both',
+		order: 2,
+		ready: true,
 	},
 ]
 
