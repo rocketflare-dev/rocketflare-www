@@ -7,12 +7,17 @@
  *
  * A plugin that declares a `readme` and has no synced copy FAILS the build rather than shipping a
  * page with a hole in it; the vendored plugin declares none and gets the facts alone.
+ *
+ * A commercial plugin (`availability: 'partners'`) gets the facts and a "how to get it" section
+ * that points at /partners/: no source or changelog link and no install command, because its
+ * repository is private and the site never names it.
  */
 import type { MarkdownInstance } from 'astro'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import CloudDivider from '../../components/CloudDivider.astro'
 import Terminal from '../../components/Terminal.astro'
-import { PLUGINS, installCommand, pluginById, pluginPath, type Plugin } from '../../data/plugins'
+import { PLUGINS, installCommand, isPartnerOnly, pluginById, pluginPath, type Plugin } from '../../data/plugins'
+import { PARTNER_CONTACT_URL } from '../../data/site'
 
 const readmes = import.meta.glob<MarkdownInstance<Record<string, unknown>>>(
 	'../../content/plugins/*.md',
@@ -32,9 +37,11 @@ if (p.readme && !readme) {
 	)
 }
 const install = installCommand(p)
+const partnerOnly = isPartnerOnly(p)
 const requiredBy = PLUGINS.filter((x) => x.requires?.includes(p.id))
-const shipsAs =
-	p.shipsAs === 'installed'
+const shipsAs = partnerOnly
+	? 'Commercial plugin'
+	: p.shipsAs === 'installed'
 		? 'Installed by default'
 		: p.shipsAs === 'vendored'
 			? 'Ships in the kit'
@@ -48,6 +55,7 @@ const title = `${p.label} plugin — Rocketflare`
 			<div class="hero-copy">
 				<span class="eyebrow">{shipsAs}</span>
 				<h1>{p.label}</h1>
+				{partnerOnly && <p class="commercial-badge">Commercial · partners only</p>}
 				<p class="lede">{p.summary}</p>
 			</div>
 		</div>
@@ -62,6 +70,12 @@ const title = `${p.label} plugin — Rocketflare`
 					<div><dt>Plugin id</dt><dd><code>{p.id}</code></dd></div>
 					<div><dt>Version</dt><dd><code>{p.version}</code></dd></div>
 					<div><dt>Needs kit</dt><dd><code>{p.minKit}</code> or later</dd></div>
+					{partnerOnly && (
+						<div>
+							<dt>Licence</dt>
+							<dd>Commercial, for <a href="/partners/">Rocketflare partners</a></dd>
+						</div>
+					)}
 					{p.contributedBy && (
 						<div>
 							<dt>Contributed by</dt>
@@ -86,11 +100,23 @@ const title = `${p.label} plugin — Rocketflare`
 							<dd class="skills">{p.skills.map((s) => <code>{s}</code>)}</dd>
 						</div>
 					)}
+					{p.availability === 'partners' && p.dependencies && (
+						<div>
+							<dt>Adds packages</dt>
+							<dd class="skills">{p.dependencies.map((d) => <code>{d}</code>)}</dd>
+						</div>
+					)}
 				</dl>
 				<p class="links">
-					<a href={p.docsUrl ?? p.repo} target="_blank" rel="noopener">Source</a>
-					<span aria-hidden="true">·</span>
-					<a href={p.changelogUrl} target="_blank" rel="noopener">Changelog</a>
+					{p.availability === 'partners' ? (
+						<a href="/partners/">Become a partner</a>
+					) : (
+						<Fragment>
+							<a href={p.docsUrl ?? p.repo} target="_blank" rel="noopener">Source</a>
+							<span aria-hidden="true">·</span>
+							<a href={p.changelogUrl} target="_blank" rel="noopener">Changelog</a>
+						</Fragment>
+					)}
 					{p.concept && (
 						<Fragment>
 							<span aria-hidden="true">·</span>
@@ -102,8 +128,27 @@ const title = `${p.label} plugin — Rocketflare`
 
 			<div class="main-col">
 				<section aria-labelledby="install-title">
-					<h2 id="install-title">Installing it</h2>
-					{install ? (
+					<h2 id="install-title">{partnerOnly ? 'Getting it' : 'Installing it'}</h2>
+					{partnerOnly ? (
+						<div class="partner-note tone-orange">
+							<p>
+								This is a <strong>commercial plugin, available to Rocketflare partners</strong>. It is
+								not open source and is not in the public plugin repository, so there is no install
+								command here to copy. Partners are given access to it under their agreement with us,
+								and install it like any other plugin: <code>pnpm plugin add</code> prints the plan,
+								and <code>--apply</code> writes it.
+							</p>
+							<p>
+								It adds tables, so after installing, generate and run its migration —
+								<code>pnpm db:generate --name plugin-{p.id}-{p.version}</code> and
+								<code>pnpm db:migrate</code>.
+							</p>
+							<p class="partner-links">
+								<a class="btn btn-primary" href="/partners/">How to become a partner</a>
+								<a class="btn btn-secondary" href={PARTNER_CONTACT_URL}>Email partners@rocketflare.dev</a>
+							</p>
+						</div>
+					) : install ? (
 						<Fragment>
 							{p.requires && (
 								<p class="install-note first">
@@ -195,6 +240,27 @@ const title = `${p.label} plugin — Rocketflare`
 	.main-col h2 { font-size: 1.5rem; margin: 0 0 0.8rem; }
 	.install-note { font-size: 0.92rem; color: var(--text-muted); margin: 0.9rem 0 0; }
 	.install-note.first { margin: 0 0 0.4rem; }
+	.commercial-badge {
+		display: inline-block;
+		margin: 0.2rem 0 0.9rem;
+		padding: 0.25rem 0.75rem;
+		border-radius: 999px;
+		font-size: 0.74rem;
+		font-weight: 700;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		background: var(--tint-orange);
+		color: var(--orange-ink);
+	}
+	.partner-note {
+		padding: 1.2rem 1.4rem;
+		border: 1px solid var(--border);
+		border-left: 4px solid var(--accent);
+		border-radius: 16px;
+		background: var(--card);
+	}
+	.partner-note p { margin: 0 0 0.8rem; line-height: 1.55; }
+	.partner-note .partner-links { display: flex; flex-wrap: wrap; gap: 0.7rem; margin: 1rem 0 0; }
 	.adds { margin: 0; padding-left: 1.1rem; display: grid; gap: 0.65rem; }
 	.adds li { line-height: 1.55; }
 

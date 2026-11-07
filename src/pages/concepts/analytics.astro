@@ -1,9 +1,9 @@
 ---
 import ConceptLayout from '../../layouts/ConceptLayout.astro'
 import Terminal from '../../components/Terminal.astro'
-import { pluginById, installCommand } from '../../data/plugins'
+import { publicPluginById, installCommand } from '../../data/plugins'
 
-const analytics = pluginById('analytics')
+const analytics = publicPluginById('analytics')
 const install = installCommand(analytics)
 if (!install) throw new Error('The analytics plugin should have an install command')
 ---

@@ -21,6 +21,8 @@
  * `--check` fetches and compares, writes nothing, and exits 1 when a committed copy is stale or
  * missing. The plugin list is read from `src/data/plugins.ts` itself (Node ≥ 23.6 strips its
  * types), so there is no second list to keep in step.
+ * A commercial plugin (`availability: 'partners'`) is never fetched: its repository is private,
+ * and its page carries the facts from plugins.ts alone.
  * Exit 0 ok · 1 stale, missing or a fetch failed · 2 usage.
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
@@ -53,8 +55,11 @@ try {
 /** `https://github.com/o/r` → `o/r`. */
 const slugOf = (repo) => new URL(repo).pathname.replace(/^\/|\.git$/g, '')
 
+/** The public plugins: a partners-only one lives in a private repository this script must not touch. */
+const PUBLIC = PLUGINS.filter((p) => p.availability !== 'partners')
+
 /** `plugins/analytics` → the plugin whose subdir it is, for links between plugins. */
-const bySubdir = new Map(PLUGINS.filter((p) => p.subdir).map((p) => [p.subdir, p.id]))
+const bySubdir = new Map(PUBLIC.filter((p) => p.subdir).map((p) => [p.subdir, p.id]))
 
 /**
  * Rewrite one markdown link target. `base` is the README's directory, repository-relative.
@@ -87,7 +92,7 @@ export function transform(markdown, ctx) {
 		.trimEnd()
 }
 
-const withReadme = PLUGINS.filter((p) => p.readme)
+const withReadme = PUBLIC.filter((p) => p.readme)
 let failed = false
 for (const p of withReadme) {
 	const url = `https://raw.githubusercontent.com/${slugOf(p.repo)}/${ref}/${p.readme}`

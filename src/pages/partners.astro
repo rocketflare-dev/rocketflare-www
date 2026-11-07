@@ -10,6 +10,7 @@ import BaseLayout from '../layouts/BaseLayout.astro'
 import SectionHead from '../components/SectionHead.astro'
 import { pageByPath } from '../data/pages'
 import { PARTNER_CONTACT_URL } from '../data/site'
+import { pluginById, pluginPath } from '../data/plugins'
 import mosaicDay from '../assets/partners/mosaic.day.webp'
 import mosaicNight from '../assets/partners/mosaic.night.webp'
 
@@ -57,10 +58,13 @@ const runs = [
 	{ title: 'Customer support', body: 'We can optionally act as a branded first line of support for your clients’ users.' },
 ]
 
+const sso = pluginById('sso')
+
+/** `body` is HTML: the commercial plugins entry links the first of them. */
 const benefits = [
 	{
 		title: 'Commercial plugins',
-		body: 'Closed-source plugins that are not in the public catalogue, licensed for use in your own and your clients’ apps.',
+		body: `Closed-source plugins that are not in the public catalogue, licensed for use in your own and your clients’ apps — starting with <a href="${pluginPath(sso)}">single sign-on</a>: SAML sign-in, verified domains and SCIM provisioning for each of your clients’ organisations.`,
 	},
 	{
 		title: 'Help from the people who build the kit',
@@ -153,7 +157,7 @@ const benefits = [
 				{benefits.map((b) => (
 					<li>
 						<h3>{b.title}</h3>
-						<p>{b.body}</p>
+						<p set:html={b.body} />
 					</li>
 				))}
 			</ul>
@@ -257,6 +261,7 @@ const benefits = [
 	}
 	.benefits h3 { font-size: 1.05rem; margin-bottom: 0.35rem; }
 	.benefits p { color: var(--band-muted); margin: 0; }
+	.benefits :global(a) { color: var(--band-ink); text-decoration: underline; text-underline-offset: 0.18em; }
 
 	.join {
 		display: grid;

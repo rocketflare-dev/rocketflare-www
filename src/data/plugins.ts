@@ -10,22 +10,16 @@
  *
  * Every field is transcribed from the plugin's own `rocketflare-plugin.json`
  * and README — update them together.
+ *
+ * A commercial plugin (`availability: 'partners'`) lives in a private repository that partners
+ * are given access to. It has no repository, changelog or README fields at all, so nothing here
+ * can link to that repository, sync its README or print a public install command for it.
  */
-export interface Plugin {
+interface PluginBase {
 	/** The id in `rocketflare-plugin.json`, the folder name, and the `#anchor` on /plugins/. */
 	id: string
 	/** The manifest's `label`. */
 	label: string
-	/** The repository the plugin is copied from. */
-	repo: string
-	/** Human form of the repo, for a link's text. */
-	repoLabel: string
-	/**
-	 * Where the plugin sits inside its repository, when it is not the root of one. A repository may
-	 * hold several plugins released in lockstep, so the install command needs the directory as well
-	 * as the tag.
-	 */
-	subdir?: string
 	/** The manifest's `minKit`: the oldest kit release it installs into. */
 	minKit: string
 	/** The plugin's own latest release. */
@@ -45,16 +39,6 @@ export interface Plugin {
 	requires?: string[]
 	/** The concept page that explains it, when it has one. */
 	concept?: string
-	/** The plugin's own changelog. */
-	changelogUrl: string
-	/** Its README or docs, when that is a different page from the repo root. */
-	docsUrl?: string
-	/**
-	 * The plugin's README, repository-relative. `npm run sync:plugins` copies it into
-	 * `src/content/plugins/<id>.md`, and /plugins/<id>/ renders it below the facts. Absent for a
-	 * plugin with no README (the vendored one); the build fails when it is set and not synced.
-	 */
-	readme?: string
 	/** The agent skills it installs into `.claude/skills/` (the manifest's `skills`). */
 	skills?: string[]
 	/**
@@ -65,6 +49,50 @@ export interface Plugin {
 	/** Who built it, when that is not the Rocketflare team — credited on the card and the page. */
 	contributedBy?: { name: string; url: string }
 }
+
+/** A plugin anyone can install from a public repository, MIT licensed. */
+export interface PublicPlugin extends PluginBase {
+	availability?: 'public'
+	/** The repository the plugin is copied from. */
+	repo: string
+	/** Human form of the repo, for a link's text. */
+	repoLabel: string
+	/**
+	 * Where the plugin sits inside its repository, when it is not the root of one. A repository may
+	 * hold several plugins released in lockstep, so the install command needs the directory as well
+	 * as the tag.
+	 */
+	subdir?: string
+	/** The plugin's own changelog. */
+	changelogUrl: string
+	/** Its README or docs, when that is a different page from the repo root. */
+	docsUrl?: string
+	/**
+	 * The plugin's README, repository-relative. `npm run sync:plugins` copies it into
+	 * `src/content/plugins/<id>.md`, and /plugins/<id>/ renders it below the facts. Absent for a
+	 * plugin with no README (the vendored one); the build fails when it is set and not synced.
+	 */
+	readme?: string
+}
+
+/**
+ * A commercial plugin, available to Rocketflare partners only: proprietary, in a private
+ * repository. The site names no repository for it — not its URL, not an install command — and
+ * sends the reader to /partners/ instead.
+ */
+export interface PartnerPlugin extends PluginBase {
+	availability: 'partners'
+	/** The npm packages it adds to the app, `name version`. */
+	dependencies?: string[]
+	repo?: never
+	repoLabel?: never
+	subdir?: never
+	changelogUrl?: never
+	docsUrl?: never
+	readme?: never
+}
+
+export type Plugin = PublicPlugin | PartnerPlugin
 
 const PLUGINS_REPO = 'https://github.com/rocketflare-dev/rocketflare-plugins'
 const KIT_REPO = 'https://github.com/rocketflare-dev/rocketflare'
@@ -194,6 +222,27 @@ export const PLUGINS: Plugin[] = [
 		contributedBy: { name: 'Mosaic Data', url: 'https://mosaicdata.ai/' },
 	},
 	{
+		id: 'sso',
+		label: 'Single sign-on (SAML + SCIM)',
+		availability: 'partners',
+		minKit: '0.26.0',
+		version: '0.1.0',
+		shipsAs: 'optional',
+		summary:
+			'SAML sign-in and SCIM provisioning for each organisation, against its own identity provider: verify the email domain, require SSO for it, and let the directory add, change and remove the people.',
+		adds: [
+			'<strong>A SAML 2.0 service provider</strong> — native, with no broker in between. Sign-in starts from your app; an organisation imports its identity provider’s metadata as XML or from a URL. IdP-initiated sign-in is there too, off by default.',
+			'<strong>Hardened verification</strong> — the identity provider’s certificate is pinned when the connection is saved, and the one inside a response is never trusted. Signature wrapping is refused, every sign-in request is single-use, a replayed assertion is caught, and the audience, recipient and time window are all checked.',
+			'<strong>Verified email domains</strong> — an organisation proves it owns a domain with a DNS TXT record — <code>_rocketflare-sso.example.com</code> for <code>example.com</code> — checked over DNS-over-HTTPS. One domain belongs to one organisation.',
+			'<strong>SSO required</strong> — set per verified domain. Those addresses can then no longer sign in by magic link, Google, Microsoft, OIDC or dev login. Bootstrap admins stay exempt, so there is always a way back in.',
+			'<strong>SCIM 2.0 provisioning</strong> — in both the Okta and the Entra dialect: users created and updated, groups pushed and mapped to roles. Deactivating someone removes their membership and ends their sessions at once.',
+			'<strong>Sign in with SSO</strong> — on the login page: type an email, and its domain finds the organisation’s identity provider.',
+			'<strong>Eight tables</strong> — all prefixed <code>sso_</code>, with the migration generated by the host. It works in both tenancy modes, multi and single.',
+			'<strong>Tried against real providers</strong> — verified live against Okta, for SAML and SCIM, and against Mock SAML. Its README has setup guides for Okta, Microsoft Entra ID and Google Workspace.',
+		],
+		dependencies: ['xml-crypto 6.4.0', '@xmldom/xmldom 0.9.12'],
+	},
+	{
 		id: 'example-feature',
 		label: 'Example feature',
 		repo: KIT_REPO,
@@ -223,12 +272,26 @@ export const pluginById = (id: string) => {
 	return p
 }
 
+/** A commercial plugin: partners only, from a private repository the site never names. */
+export const isPartnerOnly = (p: Plugin): p is PartnerPlugin => p.availability === 'partners'
+
+/**
+ * A plugin that must be public — for a page that links its repository or prints its install
+ * command. Throws for a commercial one, so such a page fails the build instead of linking nowhere.
+ */
+export const publicPluginById = (id: string): PublicPlugin => {
+	const p = pluginById(id)
+	if (isPartnerOnly(p)) throw new Error(`Plugin '${id}' is partners-only and has no public repository`)
+	return p
+}
+
 /**
  * The command that installs a plugin — the repository at its tag. A vendored
- * plugin has none: it is already in the tree.
+ * plugin has none: it is already in the tree. Nor does a commercial one: its
+ * repository is private, and its page sends the reader to /partners/ instead.
  */
 export const installCommand = (p: Plugin) =>
-	p.shipsAs === 'vendored'
+	isPartnerOnly(p) || p.shipsAs === 'vendored'
 		? null
 		: `pnpm plugin add ${p.repo}.git@${p.version}${p.subdir ? ` --subdir ${p.subdir}` : ''}`
 

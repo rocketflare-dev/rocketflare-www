@@ -20,7 +20,7 @@ if (!page) throw new Error('Page not in the registry: /plugins/')
 
 /** What the search matches: name, id, summary, what it adds (tags stripped), skills, needs and contributor. */
 const searchText = (p: (typeof PLUGINS)[number]) =>
-	[p.id, p.label, p.summary, ...p.adds, ...(p.skills ?? []), ...(p.requires ?? []), p.contributedBy?.name ?? '']
+	[p.id, p.label, p.summary, ...p.adds, ...(p.skills ?? []), ...(p.requires ?? []), p.contributedBy?.name ?? '', p.availability === 'partners' ? 'commercial partners' : '']
 		.join(' ')
 		.replace(/<[^>]+>/g, ' ')
 		.toLowerCase()
@@ -36,7 +36,8 @@ const cards = PLUGINS.map((p) => ({ p, text: searchText(p) }))
 					A Rocketflare plugin is a git repository copied into your application — never an npm
 					package. Its code lands as ordinary source, renamed into your own vocabulary on the way
 					in, and deleting its folders takes it back out. Here is what is published today, what
-					each one adds, and the one command that installs it.
+					each one adds, and the one command that installs it — except
+					for the commercial ones, which are <a href="/partners/">available to partners</a>.
 					<a href="/concepts/plugins/">How the seam works →</a>
 				</p>
 			</div>
@@ -62,7 +63,9 @@ const cards = PLUGINS.map((p) => ({ p, text: searchText(p) }))
 				{cards.map(({ p, text }, i) => (
 					<li id={p.id} class:list={['pcard', 'reveal', i % 2 === 1 ? 'tone-cyan' : 'tone-green']} data-search={text}>
 						<span class="eyebrow">
-							{p.shipsAs === 'installed'
+							{p.availability === 'partners'
+								? 'For partners'
+								: p.shipsAs === 'installed'
 								? 'Installed by default'
 								: p.shipsAs === 'vendored'
 									? 'Ships in the kit'
@@ -76,6 +79,7 @@ const cards = PLUGINS.map((p) => ({ p, text: searchText(p) }))
 							{p.requires?.map((r) => <li class="needs">needs <code>{r}</code></li>)}
 							{p.skills && <li>{p.skills.length} {p.skills.length === 1 ? 'skill' : 'skills'}</li>}
 							{p.contributedBy && <li>by {p.contributedBy.name}</li>}
+							{p.availability === 'partners' && <li class="commercial">Commercial · partners</li>}
 						</ul>
 					</li>
 				))}
@@ -210,6 +214,7 @@ const cards = PLUGINS.map((p) => ({ p, text: searchText(p) }))
 	}
 	.badges code { font-size: 0.76rem; background: none; padding: 0; }
 	.badges .needs { border-color: var(--accent); }
+	.badges .commercial { background: var(--tint-orange); border-color: var(--orange); color: var(--orange-ink); font-weight: 600; }
 	.no-match { color: var(--text-muted); }
 
 	.after { padding: 1rem 0 5rem; background: var(--bg); }
