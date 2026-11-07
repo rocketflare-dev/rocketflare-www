@@ -1,4 +1,5 @@
 ---
+import { COMPARE_FOR_CONCEPT, compareLink } from '../data/comparisons'
 import BaseLayout from './BaseLayout.astro'
 import ConceptIcon from '../components/ConceptIcon.astro'
 import { CONCEPTS, CONCEPT_GROUPS, conceptBySlug, conceptsInGroup } from '../data/concepts'
@@ -21,6 +22,8 @@ interface Props {
 const { slug, source = [], sourceRepo = GITHUB_URL, reference: referenceOverride } = Astro.props
 const c = conceptBySlug(slug)
 if (!c) throw new Error(`Unknown concept slug: ${slug}`)
+const compareSlug = COMPARE_FOR_CONCEPT[slug]
+const compare = compareSlug ? compareLink(compareSlug) : undefined
 
 const i = CONCEPTS.findIndex((x) => x.slug === slug)
 const prev = CONCEPTS[i - 1]
@@ -126,6 +129,13 @@ const articleLd = {
 								<li><a href={`${sourceRepo}/blob/main/${p}`} target="_blank" rel="noopener"><code>{p}</code></a></li>
 							))}
 						</ul>
+					</div>
+				)}
+
+				{compare && (
+					<div class="compare-box">
+						<h3>How this compares</h3>
+						<p><a href={compare.href}>{compare.label}</a>, and <a href="/compare/">the other alternatives</a>.</p>
 					</div>
 				)}
 
@@ -330,7 +340,14 @@ const articleLd = {
 		border-radius: 16px;
 		padding: 1.3rem 1.5rem;
 	}
-	.source-box h3 { margin-top: 0; font-size: 0.95rem; }
+	.source-box h3, .compare-box h3 { margin-top: 0; font-size: 0.95rem; }
+	.compare-box {
+		margin-top: 1.2rem;
+		border: 1px dashed var(--border-bright);
+		border-radius: 16px;
+		padding: 1.1rem 1.5rem;
+	}
+	.compare-box p { margin: 0; }
 	.source-box ul { margin: 0; }
 	.source-box :global(code) { background: none; padding: 0; font-size: 0.86rem; }
 

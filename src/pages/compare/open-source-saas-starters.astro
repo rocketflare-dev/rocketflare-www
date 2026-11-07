@@ -1,0 +1,204 @@
+---
+/**
+ * Rocketflare vs the free, open-source SaaS starters: BoxyHQ SaaS Starter
+ * Kit, Open SaaS (Wasp), Vercel's Next.js SaaS Starter, Epic Stack, Bullet
+ * Train (MIT since its paid features were opened), Better-T-Stack and
+ * create-t3-app. Facts and repository activity from each project's own site,
+ * docs and GitHub, checked in CHECKED_ON.
+ */
+import CompareLayout from '../../components/CompareLayout.astro'
+
+const profiles = [
+	{
+		anchor: 'boxyhq',
+		lead: 'BoxyHQ’s kit was the open-source starter for enterprise sign-in. As a BoxyHQ SaaS Starter Kit alternative, Rocketflare is actively released and covers the AI, jobs and admin the kit never had.',
+		what: 'The BoxyHQ SaaS Starter Kit is an Apache-2.0 Next.js app with Postgres and Prisma, teams with roles, SAML single sign-on, SCIM directory sync, audit logs and webhooks. BoxyHQ was acquired by Ory in May 2025.',
+		strong: 'It is the only starter here that ships SAML and SCIM out of the box. If you need both on Next.js today, it shows how they fit together.',
+		stops: 'Its last release was v1.6.0 in December 2024, and its recent commits are dependency updates by a bot. Billing is listed as “coming soon”. There are no AI features, background jobs or admin area, and no way to take updates other than merging by hand.',
+		facts: [
+			{ k: 'Licence', v: 'Apache-2.0' },
+			{ k: 'Stack', v: 'Next.js, Prisma, Postgres' },
+			{ k: 'Organisations', v: 'Teams with roles' },
+			{ k: 'Activity', v: 'Last release December 2024' },
+		],
+	},
+	{
+		anchor: 'open-saas',
+		lead: 'Open SaaS is the most popular free full-stack template. Rocketflare is the Open SaaS alternative for products sold to companies, where teams, roles and SSO matter more than a checkout page.',
+		what: 'Open SaaS is an MIT template on the Wasp framework (React, Node, Prisma, Postgres) with sign-in, Stripe, Polar or Lemon Squeezy payments, an admin dashboard, background jobs and S3 uploads, deployed with one Wasp command to Fly.io or Railway.',
+		strong: 'Payments, an admin dashboard and jobs for free, very little code thanks to Wasp, an active project (over 16,000 stars and commits in November 2026), and a demo AI app.',
+		stops: 'There are no teams or organisations. Its own docs advise against pulling template updates into an existing app: merge recent commits by hand or start again. AI is a single function-calling demo rather than agents, retrieval or evals.',
+		facts: [
+			{ k: 'Licence', v: 'MIT' },
+			{ k: 'Stack', v: 'Wasp: React, Node, Prisma, Postgres' },
+			{ k: 'Organisations', v: 'None' },
+			{ k: 'Activity', v: 'Active, November 2026' },
+		],
+	},
+	{
+		anchor: 'nextjs-saas-starter',
+		lead: 'Vercel’s Next.js SaaS Starter is a small, readable reference. As an alternative to the Next.js SaaS Starter, Rocketflare is what that reference grows into once a real product needs it.',
+		what: 'The Next.js SaaS Starter is an MIT template with Postgres and Drizzle, Stripe Checkout and the customer portal, shadcn/ui, teams with owner and member roles, and an activity log.',
+		strong: 'Short enough to read in an evening, built on the same ORM as Rocketflare, and with Stripe wired in.',
+		stops: 'Sign-in is email and password only, with no OAuth or SSO. There are no AI features, jobs or admin area. It has no releases, and between June and December 2025 it had a single commit, a security update.',
+		facts: [
+			{ k: 'Licence', v: 'MIT' },
+			{ k: 'Stack', v: 'Next.js, Drizzle, Postgres, Stripe' },
+			{ k: 'Organisations', v: 'Teams with owner and member' },
+			{ k: 'Activity', v: 'Last commit December 2025' },
+		],
+	},
+	{
+		anchor: 'epic-stack',
+		lead: 'Epic Stack is a well-tested reference for web fundamentals. Rocketflare is the Epic Stack alternative when the app belongs to organisations rather than individual users.',
+		what: 'Epic Stack is Kent C. Dodds’ MIT starter on React Router 7, Prisma and SQLite with LiteFS, deployed in Docker on Fly.io, with email verification, passkeys, GitHub sign-in, two-factor auth and a thorough testing setup.',
+		strong: 'Strong defaults for testing and mocking, passkeys out of the box, and clear documentation of every decision.',
+		stops: 'Permissions are per user, with no teams or organisations. OIDC and SAML are documented as things you can add. There is no billing, AI or job queue, and its docs say updates are taken by making manual changes.',
+		facts: [
+			{ k: 'Licence', v: 'MIT' },
+			{ k: 'Stack', v: 'React Router, Prisma, SQLite on Fly.io' },
+			{ k: 'Organisations', v: 'None; user roles only' },
+			{ k: 'Activity', v: 'Active, October 2026' },
+		],
+	},
+	{
+		anchor: 'bullet-train',
+		lead: 'Bullet Train opened its paid features under MIT, which makes it the most complete free starter for Rails. As a Bullet Train alternative, Rocketflare is the equivalent for TypeScript, with an AI layer.',
+		what: 'Bullet Train is an MIT Rails framework with deep support for teams and roles, a generated REST API with OpenAPI, outgoing webhooks, audit logs, realtime through ActionCable, and Super Scaffolding to generate CRUD.',
+		strong: 'Teams and roles that have been refined for years, generated APIs and webhooks, and updates that arrive as an upgrade pull request from a GitHub Action.',
+		stops: 'We found no AI features. Stripe billing lives in separate gems whose repositories carry no licence file. It is a Rails app, so it is the wrong start for a TypeScript team.',
+		facts: [
+			{ k: 'Licence', v: 'MIT (billing gems unclear)' },
+			{ k: 'Stack', v: 'Rails 8' },
+			{ k: 'Organisations', v: 'Teams with roles' },
+			{ k: 'Activity', v: 'Active, November 2026' },
+		],
+	},
+	{
+		anchor: 'better-t-stack',
+		lead: 'Better-T-Stack can scaffold almost exactly Rocketflare’s stack: Hono on Cloudflare Workers, Drizzle and Postgres. As a Better-T-Stack alternative, Rocketflare is that stack with the SaaS already written on top.',
+		what: 'Better-T-Stack is an MIT command-line tool that generates type-safe TypeScript projects from a menu: front ends from React to Svelte, backends such as Hono or Express, runtimes including Cloudflare Workers, several databases and ORMs, and Better Auth or Clerk.',
+		strong: 'Actively released (October 2026), flexible, and a fine way to get a clean Cloudflare and Hono skeleton with your choice of every piece, including non-React and native targets.',
+		stops: 'It is a scaffold: no organisations, roles, billing, jobs, admin or AI layer, and nothing to take updates from once generated.',
+		facts: [
+			{ k: 'Licence', v: 'MIT' },
+			{ k: 'Stack', v: 'Your choice, including Hono on Workers' },
+			{ k: 'Organisations', v: 'None' },
+			{ k: 'Activity', v: 'Active, October 2026' },
+		],
+	},
+	{
+		anchor: 't3',
+		lead: 'create-t3-app made type-safe Next.js the default for a generation of projects. Rocketflare is the create-t3-app alternative for when you need a product, not a skeleton.',
+		what: 'create-t3-app is an MIT command-line tool that scaffolds a Next.js app with your choice of tRPC, Prisma or Drizzle, NextAuth or Better Auth, and Tailwind. It describes itself as not an all-inclusive template.',
+		strong: 'A clean, popular, type-safe starting point with a very large community.',
+		stops: 'There are no organisations, billing, AI, jobs or admin. Its last release was in November 2025.',
+		facts: [
+			{ k: 'Licence', v: 'MIT' },
+			{ k: 'Stack', v: 'Next.js with your choice of parts' },
+			{ k: 'Organisations', v: 'None' },
+			{ k: 'Activity', v: 'Last release November 2025' },
+		],
+	},
+]
+
+const table = {
+	columns: ['BoxyHQ', 'Open SaaS', 'Next.js SaaS Starter', 'Epic Stack', 'Bullet Train', 'Rocketflare'],
+	rows: [
+		{ row: 'Licence', cells: ['Apache-2.0', 'MIT', 'MIT', 'MIT', 'MIT', 'MIT'] },
+		{ row: 'Stack', cells: ['Next.js, Prisma', 'Wasp, Node', 'Next.js, Drizzle', 'React Router, SQLite', 'Rails', 'Workers, Hono, React, Drizzle'] },
+		{ row: 'Organisations and roles', cells: ['Teams', 'None', 'Owner and member', 'User roles only', 'Teams', 'Owner, admin, member, support, groups'] },
+		{ row: 'Enterprise SSO', cells: ['SAML and SCIM', 'No', 'No', 'Documented, not built', 'Not advertised', 'Any OIDC issuer'] },
+		{ row: 'Billing', cells: ['Coming soon', 'Three providers', 'Stripe', 'No', 'Stripe', 'No'] },
+		{ row: 'AI in the product', cells: ['No', 'A demo', 'No', 'No', 'Not found', 'Chat, durable agents, knowledge base, evals'] },
+		{ row: 'Background jobs', cells: ['No', 'Yes', 'No', 'No', 'Rails jobs', 'Queues and Workflows'] },
+		{ row: 'Taking updates', cells: ['None', 'Advised against', 'None', 'Manual', 'Upgrade PR', 'Ports releases into a renamed copy'] },
+		{ row: 'Last activity we saw', cells: ['Bot updates only', 'November 2026', 'December 2025', 'October 2026', 'November 2026', 'Release 0.25.0, November 2026'] },
+	],
+}
+
+const differences = [
+	{
+		title: 'A whole application, all of it tested',
+		body: 'Most free starters show you the shape of an app and stop. Rocketflare includes organisations, invitations, SSO, API keys, jobs, realtime, files, email, dashboards, an admin area and a command-line tool, with tests that run against a real Postgres.',
+		icon: 'layers',
+		tone: 'blue' as const,
+	},
+	{
+		title: 'Isolation checked by CI',
+		body: 'A configuration test fails the build if a function queries an organisation’s table without naming the organisation. Every analytics cube and every plugin ships a test that two organisations cannot see each other’s data.',
+		icon: 'building',
+		tone: 'green' as const,
+	},
+	{
+		title: 'Maintained, with a way to keep up',
+		body: 'Rocketflare is released regularly, and each release comes with porting notes. One command translates a release into your renamed copy and skips what you deleted, so starting from a template is not a one-way door.',
+		icon: 'rocket',
+		tone: 'orange' as const,
+	},
+	{
+		title: 'An AI layer, not a demo',
+		body: 'Durable agent runs that wait for approval, a knowledge base with hybrid search, evals with baselines, tracing and a cost ledger per call. It runs on Workers AI with no key on a fresh copy.',
+		icon: 'sparkles',
+		tone: 'purple' as const,
+	},
+]
+
+const pickThem = [
+	{ who: 'You need SAML and SCIM on Next.js today.', when: 'BoxyHQ’s kit shows how; for something maintained, use Ory Polis, which it became. Rocketflare supports OIDC, not SAML, in the public kit.' },
+	{ who: 'You are building for individuals and need payments.', when: 'Open SaaS gives you Stripe, Polar or Lemon Squeezy and an admin dashboard for free.' },
+	{ who: 'Your team writes Rails.', when: 'Bullet Train is mature, MIT and has the best teams model outside TypeScript.' },
+	{ who: 'You want the stack and none of the opinions.', when: 'Better-T-Stack will scaffold Hono on Cloudflare Workers with Drizzle and leave the rest to you.' },
+	{ who: 'You want something to read and learn from.', when: 'The Next.js SaaS Starter and Epic Stack are small and well explained. Rocketflare is a large codebase.' },
+]
+
+const faqs = [
+	{
+		q: 'What is the best open-source SaaS starter kit for B2B?',
+		a: 'For a B2B product in TypeScript with AI features, Rocketflare: MIT licensed, with organisations, roles, OIDC single sign-on, background jobs, dashboards, an admin area and an AI layer with durable agents and a knowledge base, actively released. For Rails, Bullet Train. For SAML and SCIM on Next.js, the BoxyHQ kit or Ory Polis.',
+	},
+	{
+		q: 'Is Rocketflare an alternative to Open SaaS?',
+		a: 'Yes, for products sold to companies. Open SaaS has payments and an admin dashboard but no teams or organisations. Rocketflare has organisations, roles, SSO and an AI layer, and no billing.',
+	},
+	{
+		q: 'Is Rocketflare an alternative to the BoxyHQ SaaS Starter Kit?',
+		a: 'Yes, as a maintained alternative with AI, jobs and an admin area. BoxyHQ’s kit last released in December 2024. It does ship SAML and SCIM, which the public Rocketflare kit does not; Rocketflare supports any OIDC issuer.',
+	},
+	{
+		q: 'Is Rocketflare an alternative to create-t3-app?',
+		a: 'It solves a different problem. create-t3-app scaffolds a type-safe Next.js skeleton; Rocketflare is a finished multi-tenant application on Cloudflare Workers that you rename and build on.',
+	},
+]
+
+const sources = [
+	{ label: 'BoxyHQ SaaS Starter Kit', url: 'https://github.com/boxyhq/saas-starter-kit' },
+	{ label: 'Ory: Ory Polis (formerly BoxyHQ Jackson)', url: 'https://www.ory.com/blog/introducing-ory-polis-for-enterprise-single-sign-on' },
+	{ label: 'Open SaaS', url: 'https://opensaas.sh/' },
+	{ label: 'Open SaaS: repository', url: 'https://github.com/wasp-lang/open-saas' },
+	{ label: 'Open SaaS: updating', url: 'https://docs.opensaas.sh/guides/updating-opensaas/' },
+	{ label: 'Next.js SaaS Starter', url: 'https://github.com/nextjs/saas-starter' },
+	{ label: 'Epic Stack', url: 'https://github.com/epicweb-dev/epic-stack' },
+	{ label: 'Bullet Train', url: 'https://bullettrain.co/' },
+	{ label: 'Bullet Train: upgrades', url: 'https://bullettrain.co/docs/upgrades' },
+	{ label: 'Better-T-Stack', url: 'https://github.com/AmanVarshney01/create-better-t-stack' },
+	{ label: 'create-t3-app', url: 'https://create.t3.gg/en/introduction' },
+]
+---
+<CompareLayout
+	slug="open-source-saas-starters"
+	h1="Rocketflare vs BoxyHQ, Open SaaS, Epic Stack and other open-source starters"
+	lede="The free starters are good teachers. Most show you the shape of an app, wire in sign-in and maybe Stripe, and leave organisations, jobs, an admin area and AI to you. Several have also gone quiet. Rocketflare is free under the same MIT terms, and is the whole multi-tenant application, actively released."
+	glance={[
+		{ label: 'They give you', body: 'A skeleton or a single-user app, sometimes with payments.' },
+		{ label: 'Rocketflare gives you', body: 'A complete multi-tenant app with SSO, jobs, dashboards, an admin area and an AI layer, all tested.' },
+		{ label: 'Also free', body: 'MIT, like most of them. The difference is how much is already there, and whether it is still maintained.' },
+	]}
+	shortAnswer="If you want a small reference to learn from, or a single-user app with payments, use Epic Stack, the Next.js SaaS Starter or Open SaaS. If you are building a B2B product in TypeScript with AI at its core, Rocketflare is the most complete free starting point we know of: organisations, roles, SSO, jobs, dashboards, durable agents and a knowledge base, MIT licensed and actively released."
+	profiles={profiles}
+	table={table}
+	differences={differences}
+	pickThem={pickThem}
+	faqs={faqs}
+	sources={sources}
+/>

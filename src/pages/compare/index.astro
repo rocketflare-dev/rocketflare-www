@@ -1,0 +1,252 @@
+---
+/**
+ * The comparison hub. One card per category, a "which page is yours" list,
+ * and an A–Z index of every product compared, each linking to its own
+ * section — so "<product> alternative" lands on a page that answers it. Every
+ * list here is generated from src/data/comparisons.ts.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import SectionHead from '../../components/SectionHead.astro'
+import ConceptIcon from '../../components/ConceptIcon.astro'
+import { pageByPath } from '../../data/pages'
+import { CHECKED_ON, COMPARISONS } from '../../data/comparisons'
+
+const page = pageByPath('/compare/')
+if (!page) throw new Error('Page not in the registry: /compare/')
+
+const index = COMPARISONS.filter((c) => c.slug !== 'build-your-own').flatMap((c) =>
+	c.competitors.map((x) => ({ name: x.name, href: `/compare/${c.slug}/#${x.anchor}`, category: c.category }))
+).sort((a, b) => a.name.localeCompare(b.name, 'en', { sensitivity: 'base' }))
+
+const criteria = [
+	{
+		title: 'Who owns it',
+		body: 'Whether the thing you build is code in your repository under the MIT licence, or configuration inside someone else’s product that stops working when the subscription does.',
+	},
+	{
+		title: 'Where it runs',
+		body: 'Your Cloudflare account and your Postgres database, or a vendor’s cloud. That decides where your customers’ data lives and who can switch it off.',
+	},
+	{
+		title: 'How many parts',
+		body: 'One application with one deploy, or several products wired together, each with its own bill, its own admin screen and its own copy of the data.',
+	},
+	{
+		title: 'Who it serves',
+		body: 'Whether it can hold many customer organisations with their own people, roles and documents, kept apart by tests, or only the team that bought it.',
+	},
+	{
+		title: 'How the bill grows',
+		body: 'Per seat, per message, per credit or per capacity unit, against the usage-based Cloudflare and database bill of an app you run yourself.',
+	},
+]
+
+const FAQS = [
+	{
+		q: 'What is Rocketflare an alternative to?',
+		a: 'Rocketflare is a free, open-source (MIT) application you copy and make your own. People compare it with AI agent platforms such as Dust, Microsoft Copilot Studio and n8n, with AI app builders such as Lovable and Replit, with SaaS starter kits such as ShipFast and Supastarter, with internal tool builders such as Retool, and with backend platforms such as Supabase and Firebase. Each comparison on this page says where Rocketflare is the better fit and where the other product is.',
+	},
+	{
+		q: 'What makes Rocketflare different from all of them?',
+		a: 'It is a whole application rather than a service you rent or a set of parts you assemble. Sign-in, organisations and roles, an AI layer with agents and durable workflows, a knowledge base with search, dashboards, background jobs and an admin area are already written and tested, in one repository you own. It deploys as one Cloudflare Worker over a normal Postgres database, in your own accounts.',
+	},
+	{
+		q: 'Is Rocketflare a no-code tool?',
+		a: 'No. It is a codebase. You need to be comfortable running commands in a terminal, and the repository is written to be driven by a coding agent such as Claude Code or Codex, which can do the setup, the rename and the deploy for you.',
+	},
+]
+
+const faqLd = {
+	'@context': 'https://schema.org',
+	'@type': 'FAQPage',
+	mainEntity: FAQS.map(({ q, a }) => ({
+		'@type': 'Question',
+		name: q,
+		acceptedAnswer: { '@type': 'Answer', text: a },
+	})),
+}
+---
+<BaseLayout title={page.title} description={page.description} noindex={!page.ready} jsonLd={faqLd}>
+	<header class="hero page-hero bg-sky">
+		<div class="wrap">
+			<div class="hero-copy">
+				<span class="eyebrow">Compare</span>
+				<h1>How Rocketflare compares</h1>
+				<p class="lede">
+					There are six other ways to end up with an AI-native business app. You can rent agents in
+					someone else’s workspace, prompt a hosted builder, buy a boilerplate, drag screens together
+					in an internal tool builder, start from a backend service, or write the platform yourself.
+					Each page below takes one of them, names the products, and says plainly where each one wins.
+				</p>
+			</div>
+		</div>
+	</header>
+
+	<section class="cards">
+		<div class="wrap">
+			<ul class="card-grid">
+				{COMPARISONS.map((c) => (
+					<li class={`card tone-${c.tone}`}>
+						<span class="chip"><ConceptIcon name={c.icon} /></span>
+						<h2><a href={`/compare/${c.slug}/`}>{c.category}</a></h2>
+						<p class="card-names">
+							{c.slug === 'build-your-own'
+								? 'Your own platform team'
+								: c.competitors.map((x) => x.name).join(', ')}
+						</p>
+						<p>{c.verdict}</p>
+					</li>
+				))}
+			</ul>
+		</div>
+	</section>
+
+	<section class="which bg-band">
+		<div class="wrap">
+			<span class="eyebrow">Start here</span>
+			<h2>Which page is yours</h2>
+			<ul class="which-list">
+				{COMPARISONS.map((c) => (
+					<li>
+						<span>You want {c.situation}.</span>
+						<a href={`/compare/${c.slug}/`}>{c.category} <span aria-hidden="true">→</span></a>
+					</li>
+				))}
+			</ul>
+		</div>
+	</section>
+
+	<section class="criteria">
+		<div class="wrap">
+			<SectionHead
+				eyebrow="The questions"
+				title="What every comparison asks"
+				lede="The same five questions on every page, because they are the ones that decide whether you still like the choice in two years."
+			/>
+			<ol class="criteria-grid">
+				{criteria.map((c) => (
+					<li>
+						<h3>{c.title}</h3>
+						<p>{c.body}</p>
+					</li>
+				))}
+			</ol>
+		</div>
+	</section>
+
+	<section class="az">
+		<div class="wrap">
+			<h2>Alternatives, A to Z</h2>
+			<p class="text-muted">
+				Every product compared, linking to its own section. Facts about them were checked against their
+				own sites in {CHECKED_ON}.
+			</p>
+			<ul class="az-list">
+				{index.map((i) => (
+					<li>
+						<a href={i.href}>Rocketflare vs {i.name}</a>
+						<span class="az-cat">{i.category}</span>
+					</li>
+				))}
+			</ul>
+		</div>
+	</section>
+
+	<section class="faq">
+		<div class="wrap">
+			<h2>Questions</h2>
+			<dl class="faq-list">
+				{FAQS.map((f) => (
+					<div>
+						<dt>{f.q}</dt>
+						<dd>{f.a}</dd>
+					</div>
+				))}
+			</dl>
+			<div class="next-actions">
+				<a class="btn btn-primary" href="/get-started/">Try it for two minutes</a>
+				<a class="btn btn-ghost" href="/who-is-it-for/">See who it’s for</a>
+			</div>
+		</div>
+	</section>
+</BaseLayout>
+
+<style>
+	.hero { border-bottom: 1px solid var(--border); }
+
+	.cards { padding: 3.5rem 0 4rem; }
+	.card-grid {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+		gap: 1.5rem;
+	}
+	.card {
+		position: relative;
+		padding: 1.6rem 1.7rem;
+		border: 1px solid var(--border);
+		border-radius: 18px;
+		background: var(--card);
+		box-shadow: var(--shadow-sm);
+	}
+	.card:hover { border-color: var(--accent); }
+	.chip {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 44px;
+		height: 44px;
+		border-radius: 13px;
+		background: var(--tint);
+		color: var(--accent);
+		margin-bottom: 0.9rem;
+	}
+	.card h2 { font-size: 1.2rem; margin-bottom: 0.3rem; }
+	.card h2 a { color: var(--text-bright); }
+	/* The whole card is the link's hit area; the heading stays the accessible name. */
+	.card h2 a::after { content: ''; position: absolute; inset: 0; border-radius: 18px; }
+	.card-names { margin: 0 0 0.7rem; font-size: 0.85rem; font-weight: 600; color: var(--accent-ink); }
+	.card p:last-child { margin: 0; color: var(--text-muted); }
+
+	.which { padding: 4.5rem 0; }
+	.which h2 { margin-bottom: 1.2rem; }
+	.which-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 460px), 1fr)); column-gap: 3rem; }
+	.which-list li {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-between;
+		gap: 0.3rem 1.5rem;
+		padding: 0.85rem 0;
+		border-top: 1px solid color-mix(in srgb, var(--band-ink) 14%, transparent);
+		color: var(--band-muted);
+	}
+	
+	.which-list a { font-weight: 600; white-space: nowrap; }
+
+	.criteria { padding: 4.5rem 0 3rem; }
+	.criteria-grid {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+		gap: 1.5rem 1.8rem;
+	}
+	.criteria-grid h3 { font-size: 1.05rem; margin-bottom: 0.35rem; }
+	.criteria-grid p { margin: 0; color: var(--text-muted); font-size: 0.95rem; }
+
+	.az { padding: 2rem 0 2rem; }
+	.az-list { list-style: none; margin: 1rem 0 0; padding: 0; columns: 3 260px; column-gap: 2.5rem; }
+	.az-list li { display: flex; flex-direction: column; padding: 0.45rem 0; break-inside: avoid; }
+	.az-list a { font-weight: 600; }
+	.az-cat { font-size: 0.8rem; color: var(--text-muted); }
+
+	.faq { padding: 3rem 0 5rem; }
+	.faq-list { margin: 1.2rem 0 2.2rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); column-gap: 2.5rem; }
+	.faq-list > div { padding: 1.1rem 0; border-top: 1px solid var(--border); }
+	.faq-list dt { font-weight: 700; color: var(--text-bright); margin-bottom: 0.35rem; }
+	.faq-list dd { margin: 0; color: var(--text-muted); }
+	.next-actions { display: flex; flex-wrap: wrap; gap: 0.9rem; }
+</style>

@@ -20,6 +20,7 @@ const EXTRA_SOURCES: Record<string, string[]> = {
 	'/changelog/': ['src/data/releases.ts'],
 	'/concepts/': ['src/data/concepts.ts'],
 	'/plugins/': ['src/data/plugins.ts'],
+	'/compare/': ['src/data/comparisons.ts'],
 }
 
 /** `/concepts/ai/` → the two places Astro would look for that route's source. */
