@@ -1,0 +1,256 @@
+---
+/**
+ * License terms: what is MIT, what is commercial, and the reasoning behind
+ * the split, in plain English. The LICENSE files in each repository are what
+ * count; this page explains them and must not contradict them.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro'
+import SectionHead from '../components/SectionHead.astro'
+import Callout from '../components/Callout.astro'
+import { pageByPath } from '../data/pages'
+import { GITHUB_URL, LAUNCH_GITHUB_URL, PARTNER_CONTACT_URL } from '../data/site'
+
+const page = pageByPath('/license/')
+if (!page) throw new Error('Page not in the registry: /license/')
+
+const PLUGINS_GITHUB_URL = 'https://github.com/rocketflare-dev/rocketflare-plugins'
+
+interface Answer {
+	q: string
+	a: 'Yes' | 'No' | 'Maybe'
+	why: string
+}
+
+const answers: Answer[] = [
+	{
+		q: 'Build a product on the kit and charge for it?',
+		a: 'Yes',
+		why: 'That is what it is for. You owe nothing.',
+	},
+	{
+		q: 'Keep my changes private?',
+		a: 'Yes',
+		why: 'MIT never asks you to publish anything.',
+	},
+	{
+		q: 'Build an app for a client and hand it over?',
+		a: 'Yes',
+		why: 'The client gets the code and can do the same things with it that you can.',
+	},
+	{
+		q: 'Use a public plugin in a commercial app?',
+		a: 'Yes',
+		why: 'The public plugins are MIT too.',
+	},
+	{
+		q: 'Remove the LICENSE file from my copy?',
+		a: 'No',
+		why: 'MIT’s one condition: keep the copyright notice with the kit’s code.',
+	},
+	{
+		q: 'Run Launch inside my own company?',
+		a: 'Yes',
+		why: 'You can read it, run it and change it for yourself.',
+	},
+	{
+		q: 'Offer Launch to other companies as a service?',
+		a: 'No',
+		why: 'Elastic License 2.0 rules that out. Talk to us instead.',
+	},
+	{
+		q: 'Publish or resell a commercial plugin’s source?',
+		a: 'Maybe',
+		why: 'Not by default, but we can agree terms for it as part of a partner agreement.',
+	},
+]
+---
+<BaseLayout title={page.title} description={page.description} noindex={!page.ready}>
+	<header class="hero page-hero bg-sky">
+		<div class="wrap">
+			<span class="eyebrow">License terms</span>
+			<h1>Free where it matters, paid where it pays for itself</h1>
+			<p class="lede">
+				The kit and the public plugins are MIT. Launch is source-available. A small set of
+				commercial plugins, and support, are available to partners.
+			</p>
+		</div>
+	</header>
+
+	<section class="block">
+		<div class="wrap">
+			<SectionHead align="left" eyebrow="Open" title="The kit and the public plugins: MIT" />
+			<div class="split">
+				<div class="main">
+					<p>
+						<a href={GITHUB_URL} target="_blank" rel="noopener">The kit</a> and every plugin in the
+						<a href={PLUGINS_GITHUB_URL} target="_blank" rel="noopener">public plugin repository</a>
+						are under the MIT licence. Use them for anything, commercial or not. Change them, keep
+						your changes to yourself, and sell what you build.
+					</p>
+					<p>
+						The only condition is that the kit’s copyright notice stays with the kit’s code, which
+						is the <code>LICENSE</code> file the rename leaves in place.
+					</p>
+				</div>
+				<aside class="why">
+					<h3>Why MIT</h3>
+					<p>
+						You don’t install Rocketflare. You copy it, and from then on it is your codebase. A
+						licence with conditions would follow every one of those copies around, and an app you
+						have to check with us about is not really yours. We would rather you take it and never
+						think about us again, than not take it at all.
+					</p>
+					<p>
+						It also keeps us honest. Every app built on Rocketflare starts from the kit, so the kit
+						has to be good enough to give away.
+					</p>
+				</aside>
+			</div>
+		</div>
+	</section>
+
+	<section class="block bg-band">
+		<div class="wrap">
+			<SectionHead align="left" eyebrow="Source-available" title="Launch: Elastic License 2.0" />
+			<div class="split">
+				<div class="main">
+					<p>
+						<a href="/launch/">Launch</a> is the console a company uses to make and run Rocketflare
+						apps for its own people. <a href={LAUNCH_GITHUB_URL} target="_blank" rel="noopener">Its
+						source is public</a> under the Elastic License 2.0.
+					</p>
+					<p>
+						A company can run it, read it and change it for its own use. What it can’t do is offer
+						Launch to other companies as a hosted service, or get around its licence key.
+					</p>
+				</div>
+				<aside class="why">
+					<h3>Why not MIT</h3>
+					<p>
+						Launch is a product rather than a starting point. Nobody copies it to make their own;
+						they run it. If it were MIT, anyone could take it and sell it as a service in
+						competition with us, without having built any of it. Elastic License 2.0 stops that one
+						thing and leaves everything else open.
+					</p>
+				</aside>
+			</div>
+		</div>
+	</section>
+
+	<section class="block">
+		<div class="wrap">
+			<SectionHead align="left" eyebrow="Commercial" title="Commercial plugins and partner support" />
+			<div class="split">
+				<div class="main">
+					<p>
+						Some plugins are not public. They are closed-source and licensed to partners: companies
+						that build and run Rocketflare apps for themselves or their clients, under an agreement
+						with us. They install the same way as any other plugin, so once one is in your app you
+						have its source and can change it. The agreement lets you use it in your own and your
+						clients’ apps. Publishing or reselling it is something we agree with each
+						partner separately.
+					</p>
+					<p>
+						Partners can also get support from the people who build the kit: help with design and
+						architecture, upgrades across a set of apps, and a direct line when something breaks in
+						production.
+					</p>
+					<div class="actions">
+						<a class="btn btn-primary" href={PARTNER_CONTACT_URL}>Talk to us about becoming a partner</a>
+						<a class="btn btn-ghost" href="/plugins/">See the public plugins</a>
+					</div>
+				</div>
+				<aside class="why">
+					<h3>Why some plugins are closed</h3>
+					<p>
+						Somebody has to pay for the kit to keep getting better. The open parts are what one team
+						needs to build one good app. The commercial parts are what a business needs once it is
+						building and running many of them. A team that has reached that point is usually glad
+						to pay for the work rather than repeat it, and that money is what keeps the MIT parts
+						free.
+					</p>
+				</aside>
+			</div>
+		</div>
+	</section>
+
+	<section class="block bg-band">
+		<div class="wrap">
+			<SectionHead align="left" eyebrow="In short" title="Can I…" />
+			<ul class="answers">
+				{answers.map((x) => (
+					<li>
+						<span class="q">{x.q}</span>
+						<span class:list={['a', x.a.toLowerCase()]}>{x.a}</span>
+						<span class="why-line">{x.why}</span>
+					</li>
+				))}
+			</ul>
+		</div>
+	</section>
+
+	<section class="block">
+		<div class="wrap">
+			<Callout tone="yellow" title="The licence files are what count">
+				<p>
+					This page explains the licences, and the <code>LICENSE</code> file in each repository is
+					the actual licence. If you need certainty about a particular use, read that file or ask
+					us. Rocketflare is made by GuideMode Ltd.
+				</p>
+			</Callout>
+		</div>
+	</section>
+</BaseLayout>
+
+<style>
+	.hero { border-bottom: 1px solid var(--border); }
+	.hero .lede { max-width: none; }
+	.block { padding: 3.5rem 0; }
+	.block p { color: var(--text-muted); }
+	.block.bg-band p { color: var(--band-muted); }
+
+	.split {
+		display: grid;
+		grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+		gap: 2.5rem;
+		align-items: start;
+	}
+	.main p:first-child { margin-top: 0; }
+	.why {
+		padding: 1.4rem 1.6rem;
+		border: 1px solid var(--border);
+		border-radius: 18px;
+		background: var(--card);
+		box-shadow: var(--shadow-sm);
+	}
+	.why h3 { margin: 0 0 0.5rem; font-size: 1.05rem; color: var(--text-bright); }
+	.why p { color: var(--text-muted); margin: 0 0 0.8rem; }
+	.why p:last-child { margin-bottom: 0; }
+	.block.bg-band .why p { color: var(--text-muted); }
+	.actions { display: flex; flex-wrap: wrap; gap: 0.9rem; margin-top: 1.6rem; }
+
+	.answers { list-style: none; margin: 1.2rem 0 0; padding: 0; }
+	.answers li {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) 3.5rem minmax(0, 1.2fr);
+		gap: 1.5rem;
+		align-items: baseline;
+		padding: 0.85rem 0;
+		border-top: 1px solid color-mix(in srgb, var(--band-ink) 14%, transparent);
+	}
+	.answers li:last-child { border-bottom: 1px solid color-mix(in srgb, var(--band-ink) 14%, transparent); }
+	.q { color: var(--band-ink); font-weight: 600; }
+	.a { font-weight: 800; }
+	.yes { color: var(--accent-ink); }
+	.no { color: var(--orange-ink); }
+	.maybe { color: var(--band-ink); }
+	.why-line { color: var(--band-muted); font-size: 0.93rem; }
+
+	@media (max-width: 900px) {
+		.split { grid-template-columns: minmax(0, 1fr); gap: 1.5rem; }
+	}
+	@media (max-width: 640px) {
+		.answers li { grid-template-columns: minmax(0, 1fr) auto; }
+		.why-line { grid-column: 1 / -1; }
+	}
+</style>

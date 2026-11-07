@@ -84,10 +84,10 @@ export const PAGES: SitePage[] = [
 	},
 	{
 		path: '/who-is-it-for/',
-		title: 'Who it’s for — internal tools, customer portals, B2B products',
+		title: 'Who it’s for — AI workflow apps, internal tools, customer portals, B2B products',
 		nav: "Who it's for",
 		description:
-			'Three products people build on it — an internal operations tool, a customer portal with AI over documents, an analytics-heavy B2B app — what is already done for each, what you add, and when to pick something else.',
+			'Four products people build on it — an agentic workflow app, an internal operations tool, a customer portal with AI over documents, an analytics-heavy B2B app — what is already done for each, what you add, and when to pick something else.',
 		audience: 'both',
 		order: 4,
 		ready: true,
@@ -168,6 +168,17 @@ export const PAGES: SitePage[] = [
 		audience: 'both',
 		order: 3,
 		ready: true,
+	},
+	{
+		path: '/license/',
+		title: 'License terms — what is free, what is commercial, and why',
+		nav: 'License terms',
+		description:
+			'The kit and the public plugins are MIT: copy them, build on them, sell what you make. Launch is source-available, and partners can license closed-source commercial plugins and support. What each licence lets you do, in plain English, and why it is split this way.',
+		audience: 'both',
+		order: 12,
+		ready: true,
+		inNav: false,
 	},
 ]
 

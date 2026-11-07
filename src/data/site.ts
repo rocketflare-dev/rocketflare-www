@@ -33,4 +33,6 @@ export const concept = (anchor: string) => `${CONCEPTS_URL}#${anchor}`
 
 /** Rocketflare Launch — the company console the /launch/ overview describes. */
 export const LAUNCH_GITHUB_URL = 'https://github.com/rocketflare-dev/rocketflare-launch'
+/** Commercial plugins and partner support. */
+export const PARTNER_CONTACT_URL = 'mailto:clifton@guidemode.dev?subject=Rocketflare%20partner'
 export const LAUNCH_CONTACT_URL = 'mailto:clifton@guidemode.dev?subject=Rocketflare%20Launch'
