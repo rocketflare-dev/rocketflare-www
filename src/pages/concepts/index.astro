@@ -1,4 +1,5 @@
 ---
+import { COMPARISONS } from '../../data/comparisons'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import ConceptIcon from '../../components/ConceptIcon.astro'
 import CloudDivider from '../../components/CloudDivider.astro'
@@ -48,9 +49,26 @@ const description =
 			))}
 		</div>
 	</section>
+	<section class="compare-strip">
+		<div class="wrap">
+			<h2>How these decisions compare</h2>
+			<p>Each comparison page sets these concepts against the products people usually weigh them against.</p>
+			<ul>
+				{COMPARISONS.map((c) => (
+					<li><a href={`/compare/${c.slug}/`}>{c.category}</a></li>
+				))}
+			</ul>
+		</div>
+	</section>
 </BaseLayout>
 
 <style>
+	.compare-strip { padding: 1rem 0 4.5rem; }
+	.compare-strip h2 { font-size: var(--step-2); margin-bottom: 0.4rem; }
+	.compare-strip p { color: var(--text-muted); }
+	.compare-strip ul { list-style: none; margin: 1rem 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.6rem 1.6rem; }
+	.compare-strip a { font-weight: 600; }
+
 	/* Width, h1 and lede come from the global .page-hero (BaseLayout); the
 	   extra bottom padding leaves room for the cloud divider. */
 	.index-hero {

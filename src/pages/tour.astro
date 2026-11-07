@@ -8,6 +8,7 @@
  * Screenshots are pairs in src/assets/screens/ (see MANIFEST.md there). The
  * admin stop has none yet — see the TODO by it.
  */
+import { compareLink } from '../data/comparisons'
 import type { ImageMetadata } from 'astro'
 import BaseLayout from '../layouts/BaseLayout.astro'
 import Screenshot from '../components/Screenshot.astro'
@@ -87,6 +88,8 @@ interface Stop {
 	/** A second, smaller frame under the first. */
 	extraShot?: Shot
 	callout?: { tone: 'blue' | 'orange' | 'yellow' | 'green'; title: string; body: string }
+	/** A comparison slug (src/data/comparisons.ts) for a "Compare →" link beside "Behind it". */
+	compare?: string
 }
 
 const HOST = 'localhost:3000'
@@ -94,6 +97,7 @@ const HOST = 'localhost:3000'
 const stops: Stop[] = [
 	{
 		id: 'sign-in',
+		compare: 'ai-app-builders',
 		section: 'core',
 		label: 'Sign in',
 		title: 'Sign in with a link printed in your terminal',
@@ -135,6 +139,7 @@ const stops: Stop[] = [
 	},
 	{
 		id: 'people',
+		compare: 'saas-starter-kits',
 		section: 'core',
 		label: 'People',
 		title: 'Invite someone, pick a role, change it later',
@@ -217,6 +222,7 @@ const stops: Stop[] = [
 	},
 	{
 		id: 'agents',
+		compare: 'agentic-workflow-platforms',
 		section: 'core',
 		label: 'Agents',
 		title: 'An agent is a run you can watch',
@@ -258,6 +264,7 @@ const stops: Stop[] = [
 	},
 	{
 		id: 'knowledge',
+		compare: 'backend-platforms',
 		section: 'core',
 		label: 'Knowledge',
 		title: 'Drop in a PDF and watch it go Indexing → Indexed',
@@ -368,6 +375,7 @@ const stops: Stop[] = [
 	},
 	{
 		id: 'admin',
+		compare: 'internal-tool-builders',
 		section: 'core',
 		label: 'Admin',
 		title: 'Every organisation from one place',
@@ -456,6 +464,7 @@ const stops: Stop[] = [
 	},
 	{
 		id: 'plugins',
+		compare: 'open-source-saas-starters',
 		section: 'plugin',
 		plugin: 'example-feature',
 		label: 'Plugins',
@@ -674,6 +683,13 @@ const pad = (n: number) => String(n).padStart(2, '0')
 							{links.map((l, j) => (
 								<Fragment>{j > 0 && <span class="sep" aria-hidden="true">·</span>}<a href={l.href}>{l.title}</a></Fragment>
 							))}
+							{s.compare && (
+								<Fragment>
+									<span class="sep" aria-hidden="true">·</span>
+									<span>Compare →</span>
+									<a href={compareLink(s.compare, 2).href}>{compareLink(s.compare, 2).label}</a>
+								</Fragment>
+							)}
 						</p>
 					</section>
 				)
@@ -699,6 +715,7 @@ const pad = (n: number) => String(n).padStart(2, '0')
 				<div class="actions">
 					<a class="btn btn-primary" href="/get-started/">Get started</a>
 					<a class="btn btn-ghost" href="/concepts/">Read the concepts</a>
+					<a class="btn btn-ghost" href="/compare/">How it compares</a>
 				</div>
 			</section>
 		</article>

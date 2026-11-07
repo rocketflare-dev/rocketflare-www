@@ -147,3 +147,43 @@ export const COMPARISONS: Comparison[] = [
 ]
 
 export const comparisonBySlug = (slug: string) => COMPARISONS.find((c) => c.slug === slug)
+
+const nameList = (names: string[]) =>
+	names.length > 1 ? `${names.slice(0, -1).join(', ')} and ${names.at(-1)}` : names[0]
+
+/**
+ * A link to one comparison, labelled with the products it names, for use on
+ * other pages ("Rocketflare vs Dust, Microsoft Copilot Studio and Microsoft
+ * Fabric"). `count` is how many product names go in the label.
+ */
+export function compareLink(slug: string, count = 3): { href: string; label: string } {
+	const c = comparisonBySlug(slug)
+	if (!c) throw new Error(`Unknown comparison: ${slug}`)
+	const href = `/compare/${c.slug}/`
+	if (c.slug === 'build-your-own') return { href, label: 'Building your own starter kit, or starting from this' }
+	return { href, label: `Rocketflare vs ${nameList(c.competitors.slice(0, count).map((x) => x.name))}` }
+}
+
+/**
+ * The footer's direct comparison links: the first two products of each
+ * category, each linking to its own section, so the best-known alternatives
+ * are one click from every page.
+ */
+export const FOOTER_COMPARISONS = COMPARISONS.filter((c) => c.slug !== 'build-your-own').flatMap((c) =>
+	c.competitors.slice(0, 2).map((x) => ({ name: x.name, href: `/compare/${c.slug}/#${x.anchor}` }))
+)
+
+/** Concept page → the comparison a reader of it is most likely weighing. */
+export const COMPARE_FOR_CONCEPT: Record<string, string> = {
+	ai: 'agentic-workflow-platforms',
+	connectors: 'agentic-workflow-platforms',
+	tenancy: 'saas-starter-kits',
+	auth: 'saas-starter-kits',
+	'background-work': 'agentic-workflow-platforms',
+	analytics: 'backend-platforms',
+	database: 'backend-platforms',
+	'agent-first': 'ai-app-builders',
+	ui: 'internal-tool-builders',
+	plugins: 'open-source-saas-starters',
+	deployment: 'build-your-own',
+}
