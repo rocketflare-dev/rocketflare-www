@@ -108,7 +108,7 @@ const table = {
 		{ row: 'Licence', cells: ['Apache-2.0', 'MIT', 'MIT', 'MIT', 'MIT', 'MIT'] },
 		{ row: 'Stack', cells: ['Next.js, Prisma', 'Wasp, Node', 'Next.js, Drizzle', 'React Router, SQLite', 'Rails', 'Workers, Hono, React, Drizzle'] },
 		{ row: 'Organisations and roles', cells: ['Teams', 'None', 'Owner and member', 'User roles only', 'Teams', 'Owner, admin, member, support, groups'] },
-		{ row: 'Enterprise SSO', cells: ['SAML and SCIM', 'No', 'No', 'Documented, not built', 'Not advertised', 'Any OIDC issuer'] },
+		{ row: 'Enterprise SSO', cells: ['SAML and SCIM', 'No', 'No', 'Documented, not built', 'Not advertised', 'Any OIDC issuer; SAML and SCIM in a plugin for partners'] },
 		{ row: 'Billing', cells: ['Coming soon', 'Three providers', 'Stripe', 'No', 'Stripe', 'No'] },
 		{ row: 'AI in the product', cells: ['No', 'A demo', 'No', 'No', 'Not found', 'Chat, durable agents, knowledge base, evals'] },
 		{ row: 'Background jobs', cells: ['No', 'Yes', 'No', 'No', 'Rails jobs', 'Queues and Workflows'] },
@@ -145,7 +145,7 @@ const differences = [
 ]
 
 const pickThem = [
-	{ who: 'You need SAML and SCIM on Next.js today.', when: 'BoxyHQ’s kit shows how; for something maintained, use Ory Polis, which it became. Rocketflare supports OIDC, not SAML, in the public kit.' },
+	{ who: 'You need SAML and SCIM on Next.js today.', when: 'BoxyHQ’s kit shows how; for something maintained, use Ory Polis, which it became. Rocketflare supports OIDC, not SAML, in the public kit; SAML and SCIM come with a commercial plugin available to partners.' },
 	{ who: 'You are building for individuals and need payments.', when: 'Open SaaS gives you Stripe, Polar or Lemon Squeezy and an admin dashboard for free.' },
 	{ who: 'Your team writes Rails.', when: 'Bullet Train is mature, MIT and has the best teams model outside TypeScript.' },
 	{ who: 'You want the stack and none of the opinions.', when: 'Better-T-Stack will scaffold Hono on Cloudflare Workers with Drizzle and leave the rest to you.' },
@@ -163,7 +163,7 @@ const faqs = [
 	},
 	{
 		q: 'Is Rocketflare an alternative to the BoxyHQ SaaS Starter Kit?',
-		a: 'Yes, as a maintained alternative with AI, jobs and an admin area. BoxyHQ’s kit last released in December 2024. It does ship SAML and SCIM, which the public Rocketflare kit does not; Rocketflare supports any OIDC issuer.',
+		a: 'Yes, as a maintained alternative with AI, jobs and an admin area. BoxyHQ’s kit last released in December 2024. It does ship SAML and SCIM, which the public Rocketflare kit does not: Rocketflare supports any OIDC issuer, and SAML and SCIM come with a commercial plugin available to partners.',
 	},
 	{
 		q: 'Is Rocketflare an alternative to create-t3-app?',
