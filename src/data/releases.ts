@@ -465,6 +465,15 @@ export const RELEASES: Release[] = [
 		migrations: true,
 		areas: ['api', 'db', 'config', 'shared', 'ui', 'plugins', 'docs'],
 	},
+	{
+		version: '0.27.0',
+		date: '2026-11-08',
+		summary:
+			'A new rf-agent-docs skill checks the instructions a coding agent reads — every CLAUDE.md, rule and skill — for paths and commands that no longer exist, files too long to load whole and rules that contradict each other, then fixes them. Its first run split the two largest files into shorter ones beside the code they describe, and added the colour-contrast check the docs had always promised, which lifted two theme colours to WCAG AA.',
+		breaking: false,
+		migrations: false,
+		areas: ['skills', 'ui'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
