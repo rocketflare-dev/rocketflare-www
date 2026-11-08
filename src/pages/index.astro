@@ -88,13 +88,13 @@ const panels = [
 		],
 	},
 	{
-		title: 'Dashboards',
+		title: 'Dashboards, one command away',
 		light: analyticsLight,
 		dark: analyticsDark,
 		alt: 'The Organisation Overview dashboard with live member and activity numbers',
 		url: 'localhost:3000/analytics',
 		points: [
-			'An organisation overview on day one, with live numbers.',
+			'Add the analytics plugin and every organisation gets an overview with live numbers.',
 			'Build your own pages from the same data, no SQL required.',
 			'Every AI call is recorded with what it cost, before Cloudflare sends the bill.',
 		],
@@ -131,7 +131,7 @@ const agentTurns = [
 	},
 	{
 		who: 'agent' as const,
-		text: `You're signed in as the demo owner. Try Chat, Agents, Knowledge or Analytics.`,
+		text: `You're signed in as the demo owner. Try Chat, Agents or Knowledge.`,
 	},
 ]
 
@@ -150,7 +150,7 @@ const terminalLines = [
 const FAQS: { q: string; a: string }[] = [
 	{
 		q: 'What is Rocketflare?',
-		a: 'A free, open-source web app you copy and make your own. Sign-in, organisations, teams and permissions, an AI assistant that answers from your own documents, dashboards, file uploads and background jobs are already built and tested. You add the product. It runs as one Cloudflare Worker over a normal Postgres database, under the MIT licence.',
+		a: 'A free, open-source web app you copy and make your own. Sign-in, organisations, teams and permissions, an AI assistant that answers from your own documents, file uploads and background jobs are already built and tested, and dashboards are one command away. You add the product. It runs as one Cloudflare Worker over a normal Postgres database, under the MIT licence.',
 	},
 	{
 		q: 'Do I need to be a developer to use it?',
@@ -174,7 +174,7 @@ const FAQS: { q: string; a: string }[] = [
 	},
 	{
 		q: 'What is not included?',
-		a: 'Billing and subscriptions are the big one — there is no Stripe integration, no plans and no metering of your customers. There is also no marketing site, no blog or CMS, and no mobile app. What is included is the platform underneath a product: tenancy, sign-in, roles, files, email, background jobs, realtime, dashboards, an AI layer and a command-line tool.',
+		a: 'Billing and subscriptions are the big one — there is no Stripe integration, no plans and no metering of your customers. There is also no marketing site, no blog or CMS, and no mobile app. What is included is the platform underneath a product: tenancy, sign-in, roles, files, email, background jobs, realtime, an AI layer and a command-line tool — with dashboards as a first-party plugin you add in one command.',
 	},
 	{
 		q: 'How is it different from other SaaS starter kits?',
@@ -210,9 +210,9 @@ const faqLd = {
 				<h1>Ship your product.<br /><span class="grad">Not the platform.</span></h1>
 				<p class="lede">
 					Rocketflare is a ready-made web app you copy and make your own. Out of the box it has
-					sign-in, teams and permissions, an AI assistant that can read your documents, dashboards,
+					sign-in, teams and permissions, an AI assistant that can read your documents,
 					a command-line tool, and a clean way to run background jobs — all on Cloudflare, over a normal Postgres
-					database. Run it on your laptop in a couple of minutes; deploy it when you're ready.
+					database — with dashboards one command away. Run it on your laptop in a couple of minutes; deploy it when you're ready.
 				</p>
 				<p class="engineer-line">One Cloudflare Worker · Hono · React · Postgres · MIT</p>
 				<div class="hero-actions">

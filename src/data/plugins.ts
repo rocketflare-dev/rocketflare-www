@@ -106,7 +106,7 @@ export const PLUGINS: Plugin[] = [
 		subdir: 'plugins/analytics',
 		minKit: '0.17.1',
 		version: '3.8.2',
-		shipsAs: 'installed',
+		shipsAs: 'optional',
 		summary:
 			'Dashboards, cubes, fact tables and the drizzle-cube query API — everything that used to be part of the kit, now a repository of its own.',
 		adds: [

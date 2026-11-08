@@ -136,7 +136,7 @@ export const CONCEPTS: Concept[] = [
 		slug: 'analytics',
 		num: '09',
 		title: 'Analytics and dashboards',
-		blurb: 'Dashboards over a semantic layer that scopes every query to the tenant, fact tables rebuilt hourly, templates kept as code — shipped as a plugin, installed by default.',
+		blurb: 'Dashboards over a semantic layer that scopes every query to the tenant, fact tables rebuilt hourly, templates kept as code — a first-party plugin you add in one command.',
 		tone: 'green',
 		icon: 'chart',
 		anchor: '8-analytics',
