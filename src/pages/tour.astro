@@ -71,7 +71,7 @@ interface Stop {
 	id: string
 	/**
 	 * Which group it belongs to. `core` is in every copy of the kit; `plugin` is
-	 * something an app installs — analytics is installed by default, so its screens
+	 * something an app installs — analytics is a one-command add, so its screens
 	 * are here but they are not core.
 	 */
 	section: 'core' | 'plugin'
@@ -438,7 +438,7 @@ const stops: Stop[] = [
 		label: 'Analytics',
 		title: 'A dashboard every organisation gets on its first visit',
 		body: [
-			'This is the <a href="/plugins/analytics/">analytics plugin</a>, and it is installed by default by the bootstrap’s plugins step — so a fresh clone has it without you asking, and <code>pnpm bootstrap --no-plugins</code> is how you find out what the kit looks like without it.',
+			'This is the <a href="/plugins/analytics/">analytics plugin</a>. A fresh clone does not have it: you add it in one command — <code>/rf-plugin add analytics</code> asks your agent to do it — then generate and run its migration.',
 			'The seeded Organisation Overview shows members, sign-ups over time, roles and daily activity — copied from a template the first time an organisation opens the page. Explore is for your own questions: pick a measure and a breakdown and get a chart. Every number is computed inside one organisation; no organisation can see another’s.',
 		],
 		concepts: ['analytics'],
@@ -491,7 +491,7 @@ const total = stops.length
 
 /**
  * The tour is presented in two groups. Core is what every copy of the kit has;
- * Plugins is what the default set installs on top. The plugin stops are kept
+ * Plugins is what you can add on top. The plugin stops are kept
  * last in the array so both groups number contiguously; every `/tour/#<id>`
  * anchor is the stop's id and is unaffected by where it sits.
  */
@@ -503,8 +503,8 @@ const SECTIONS = [
 	},
 	{
 		key: 'plugin' as const,
-		title: 'Plugins: what the default set installs',
-		lede: 'A capability copied in from its own repository, on top of everything above. Two ship today: analytics, which a fresh clone installs by default, and the reference plugin, which is in the kit already and exists to be deleted.',
+		title: 'Plugins: what you add on top',
+		lede: 'A capability copied in from its own repository, on top of everything above. Two are shown here: analytics, which you add in one command when you want dashboards, and the reference plugin, which is in the kit already and exists to be deleted.',
 	},
 ]
 
@@ -530,7 +530,8 @@ const pad = (n: number) => String(n).padStart(2, '0')
 				<h1>Take the tour</h1>
 				<p class="lede">
 					Every screenshot below is from a fresh <code>bash scripts/bootstrap.sh</code> with the demo
-					workspace seeded — nothing configured, no keys pasted. Light and dark follow this site's
+					workspace seeded — nothing configured, no keys pasted — and, for the analytics stop, the
+					analytics plugin added. Light and dark follow this site's
 					theme toggle; the app has both.
 				</p>
 			</div>

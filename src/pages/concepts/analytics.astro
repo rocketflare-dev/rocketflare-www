@@ -23,19 +23,19 @@ if (!install) throw new Error('The analytics plugin should have an install comma
 		label: 'The plugin on GitHub',
 	}}
 >
-	<h2>Shipped as the analytics plugin, installed by default</h2>
+	<h2>Shipped as the analytics plugin, added in one command</h2>
 	<p>
 		Analytics is not part of the kit. From kit 0.6.0 it is the <strong>analytics plugin</strong> —
 		a repository of its own, copied into your app like any other
-		<a href="/plugins/analytics/">plugin</a> — and it is the one entry in the kit's default set, so
-		a fresh clone still gets dashboards without anybody doing anything. The bootstrap's plugins step
-		installs it; <code>pnpm bootstrap --no-plugins</code> gives you a kit with no dashboards, no
-		query API and no chart library in either bundle.
+		<a href="/plugins/analytics/">plugin</a>. From kit 0.28.0 it is opt-in: a fresh clone installs
+		no plugin at all, so it starts with no dashboards, no query API and no chart library in either
+		bundle. When you want them, ask your agent for <code>/rf-plugin add analytics</code>, or run the
+		command yourself. An app that already has analytics keeps it.
 	</p>
 	<Terminal
 		title="zsh — your app"
 		lines={[{ cmd: install }, { cmd: `${install} --apply` }]}
-		expect="Then pnpm db:generate --name plugin-analytics-1.0.2 && pnpm db:migrate."
+		expect={`Then pnpm db:generate --name plugin-analytics-${analytics.version} && pnpm db:migrate.`}
 	/>
 	<p>
 		Nothing below changed when it moved: the code is the same code, at

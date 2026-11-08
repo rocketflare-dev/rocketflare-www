@@ -15,9 +15,9 @@ export const GET: APIRoute = ({ site }) => {
 
 > A free, open-source (MIT) SaaS starter kit. It is a complete, working web app
 > you copy and make your own: sign-in, organisations, teams and permissions, an
-> AI assistant that answers from your own documents, dashboards, file uploads,
-> background jobs and a command-line tool are already built and tested. You add
-> the product. It runs as one Cloudflare Worker over a normal Postgres database.
+> AI assistant that answers from your own documents, file uploads, background
+> jobs and a command-line tool are already built and tested, and dashboards are
+> a first-party plugin you add in one command. You add the product. It runs as one Cloudflare Worker over a normal Postgres database.
 
 Who it is for: founders, small product teams and solo builders who want to ship
 an internal tool, a customer portal or a B2B SaaS without spending the first

@@ -56,7 +56,7 @@ export const PAGES: SitePage[] = [
 		title: 'Tour — every screen you get on day one',
 		nav: 'Tour',
 		description:
-			'See what is already built before you commit a weekend to it: sign-in, people and roles, chat, AI agents, document search, dashboards, usage and the admin area — every screen, as it looks on the first run.',
+			'See what is already built before you commit a weekend to it: sign-in, people and roles, chat, AI agents, document search, usage and the admin area — every screen, as it looks on the first run — and the dashboards you add as a plugin.',
 		audience: 'builder',
 		order: 1,
 		ready: true,

@@ -179,7 +179,9 @@ const installMessages = [
 	</p>
 	<p>
 		Compatibility is proved from both ends. A plugin declares the range of kit versions it supports;
-		the kit's own pipeline runs its whole test gate a second time with the default plugins installed,
+		the kit's own pipeline runs its whole test gate a second time with analytics installed — the
+		plugin with the most tables, cubes and schedules, kept there as a canary although a fresh clone
+		does not install it —
 		and a plugin repository can call a workflow the kit ships to run itself against the oldest and
 		the newest kit in its declared range — both ends rather than a midpoint, because those are the two
 		that matter: the floor somebody is still on, and the ceiling the kit has just reached.
@@ -239,9 +241,10 @@ const installMessages = [
 	<p>
 		Since then the kit has got smaller and the set has grown. Analytics moved out first, in 0.6.0 —
 		the most self-contained subsystem, carrying the largest dependency in the application, and one
-		plenty of apps never want — and it is still installed by default, so a fresh copy has it. Web
-		knowledge, connectors and the Microsoft 365 provider were written as plugins from the start and
-		are added only when you want them. Chat, agents and knowledge remain core, and every copy has
+		plenty of apps never want. It was installed by default until kit 0.28.0; now a fresh copy
+		installs no plugin at all, and analytics is added in one command like the rest — an app that
+		already has it keeps it. Web knowledge, connectors and the Microsoft 365 provider were written
+		as plugins from the start and are added only when you want them. Chat, agents and knowledge remain core, and every copy has
 		them.
 	</p>
 	<div class="note">
