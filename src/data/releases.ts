@@ -474,6 +474,15 @@ export const RELEASES: Release[] = [
 		migrations: false,
 		areas: ['skills', 'ui'],
 	},
+	{
+		version: '0.28.0',
+		date: '2026-11-08',
+		summary:
+			'Analytics is now opt-in: a fresh copy of the kit starts with no plugins, and one command, /rf-plugin add analytics, adds the dashboards, the semantic layer and the fact tables when your app wants them. Apps that already have analytics keep it, and the kit’s own CI still installs it on every pull request, so it stays proven against each release.',
+		breaking: false,
+		migrations: false,
+		areas: ['plugins', 'scripts', 'ci', 'docs'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
