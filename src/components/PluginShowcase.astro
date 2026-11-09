@@ -1,0 +1,203 @@
+---
+/**
+ * The long-form page for a commercial plugin: a dark hero, a sticky sub-navigation of its key
+ * features, one section per feature with a screenshot, then what it works with and how to get it.
+ * Copy and images come from src/data/plugin-showcases.ts, the facts from src/data/plugins.ts.
+ * The sub-navigation is plain anchors; the script only marks the current one.
+ */
+import Screenshot from './Screenshot.astro'
+import type { PluginShowcase } from '../data/plugin-showcases'
+import type { PartnerPlugin } from '../data/plugins'
+import { PARTNER_CONTACT_URL } from '../data/site'
+
+interface Props {
+	plugin: PartnerPlugin
+	showcase: PluginShowcase
+}
+const { plugin: p, showcase } = Astro.props
+const nav = [...showcase.features.map((f) => ({ id: f.id, nav: f.nav })), { id: 'providers', nav: 'Providers' }, { id: 'get', nav: 'Get it' }]
+---
+<header class="hero bg-band">
+	<div class="wrap hero-grid">
+		<div>
+			<nav class="crumbs" aria-label="Breadcrumb"><a href="/plugins/">Plugins</a> <span aria-hidden="true">/</span> <span>{p.label}</span></nav>
+			<span class="eyebrow">Commercial plugin · for partners</span>
+			<h1>{p.label}</h1>
+			<p class="headline">{showcase.headline}</p>
+			<p class="lede">{p.summary}</p>
+			<p class="cta">
+				<a class="btn btn-primary" href="/partners/">Become a partner</a>
+				<a class="btn btn-secondary" href="#get">How to get it</a>
+			</p>
+		</div>
+		<Screenshot light={showcase.hero.light} dark={showcase.hero.dark} alt={showcase.hero.alt} url={showcase.hero.url} priority />
+	</div>
+</header>
+
+<nav class="subnav" aria-label={`${p.label}: key features`}>
+	<ul class="wrap" role="list">
+		{nav.map((n) => <li><a href={`#${n.id}`}>{n.nav}</a></li>)}
+	</ul>
+</nav>
+
+<div class="features">
+	{showcase.features.map((f, i) => (
+		<section id={f.id} class:list={['feature', i % 2 === 1 && 'flip', !f.shot && 'plain']} aria-labelledby={`${f.id}-title`}>
+			<div class="wrap feature-grid">
+				<div class="copy-col">
+					<h2 id={`${f.id}-title`}>{f.title}</h2>
+					<p class="feature-lede">{f.lede}</p>
+					<ul class="points">{f.points.map((point) => <li set:html={point} />)}</ul>
+				</div>
+				{f.shot && <Screenshot light={f.shot.light} dark={f.shot.dark} alt={f.shot.alt} url={f.shot.url} width={720} />}
+			</div>
+		</section>
+	))}
+
+	<section id="providers" class="feature plain" aria-labelledby="providers-title">
+		<div class="wrap provider-grid">
+			<div>
+				<h2 id="providers-title">What it has been tried against</h2>
+				<table>
+					<thead><tr><th scope="col">Provider</th><th scope="col">Status</th></tr></thead>
+					<tbody>{showcase.providers.map((row) => <tr><td>{row.name}</td><td>{row.status}</td></tr>)}</tbody>
+				</table>
+			</div>
+			<div>
+				<h2>Not in this release</h2>
+				<ul class="points">{showcase.limits.map((limit) => <li set:html={limit} />)}</ul>
+			</div>
+		</div>
+	</section>
+</div>
+
+<section id="get" class="get bg-band" aria-labelledby="get-title">
+	<div class="wrap provider-grid">
+		<div>
+			<span class="eyebrow">Getting it</span>
+			<h2 id="get-title">Available to Rocketflare partners</h2>
+			<p>
+				It is not open source and is not in the public plugin repository, so there is no install
+				command to copy here. Partners get access under their agreement with us and install it like
+				any other plugin: <code>pnpm plugin add</code> prints the plan, and <code>--apply</code>
+				writes it. Then generate and run its migration.
+			</p>
+			<p class="cta">
+				<a class="btn btn-primary" href="/partners/">How to become a partner</a>
+				<a class="btn btn-secondary" href={PARTNER_CONTACT_URL}>Email partners@rocketflare.dev</a>
+			</p>
+		</div>
+		<dl class="facts">
+			<div><dt>Plugin id</dt><dd><code>{p.id}</code></dd></div>
+			<div><dt>Version</dt><dd><code>{p.version}</code></dd></div>
+			<div><dt>Needs kit</dt><dd><code>{p.minKit}</code> or later</dd></div>
+			<div><dt>Licence</dt><dd>Commercial, for partners</dd></div>
+			{p.dependencies && <div><dt>Adds packages</dt><dd>{p.dependencies.map((d) => <code>{d}</code>)}</dd></div>}
+		</dl>
+	</div>
+</section>
+
+<script>
+	// Marks the section in view in the sub-navigation. Without JS the links still work.
+	const links = [...document.querySelectorAll<HTMLAnchorElement>('.subnav a')]
+	const observer = new IntersectionObserver(
+		(entries) => {
+			for (const entry of entries) {
+				if (!entry.isIntersecting) continue
+				for (const link of links) {
+					if (link.hash === `#${entry.target.id}`) link.setAttribute('aria-current', 'true')
+					else link.removeAttribute('aria-current')
+				}
+			}
+		},
+		{ rootMargin: '-30% 0px -60% 0px' }
+	)
+	for (const link of links) {
+		const target = document.querySelector(link.hash)
+		if (target) observer.observe(target)
+	}
+</script>
+
+<style>
+	.hero { padding: 3.2rem 0 4rem; }
+	.hero-grid {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+		gap: 3rem;
+		align-items: center;
+	}
+	/* Screenshot centres itself with auto margins, which would stop a grid item stretching. */
+	.hero-grid > :global(.shot), .feature-grid > :global(.shot) { width: 100%; margin-inline: 0; }
+	.hero h1 { font-size: clamp(2.2rem, 5vw, 3.2rem); margin: 0.2rem 0 0.5rem; }
+	.crumbs { font-size: 0.9rem; margin-bottom: 1rem; color: var(--band-muted); }
+	.headline { font-size: var(--step-2); font-weight: 600; margin: 0 0 0.8rem; }
+	.lede { color: var(--band-muted); margin: 0; max-width: 62ch; }
+	.cta { display: flex; flex-wrap: wrap; gap: 0.8rem; margin: 1.6rem 0 0; }
+
+	.subnav {
+		position: sticky;
+		top: 4.2rem; /* directly under the site's sticky nav */
+		z-index: 20;
+		background: var(--card);
+		border-bottom: 1px solid var(--border);
+		box-shadow: var(--shadow-sm);
+	}
+	.subnav ul { list-style: none; display: flex; gap: 0.3rem; overflow-x: auto; padding-block: 0.5rem; }
+	.subnav a {
+		display: block;
+		padding: 0.4rem 0.8rem;
+		border-radius: 999px;
+		color: var(--text);
+		font-size: 0.92rem;
+		font-weight: 500;
+		text-decoration: none;
+		white-space: nowrap;
+	}
+	.subnav a:hover { background: var(--card-alt); }
+	.subnav a[aria-current] { background: var(--tint-orange); color: var(--orange-ink); font-weight: 600; }
+
+	.features { background: var(--bg); }
+	.feature { padding: 4.5rem 0; scroll-margin-top: 3.5rem; }
+	.feature + .feature { border-top: 1px solid var(--border); }
+	.feature h2 { font-size: var(--step-3); margin: 0 0 0.6rem; }
+	.feature-grid {
+		display: grid;
+		grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+		gap: 3rem;
+		align-items: center;
+	}
+	.flip .copy-col { order: 2; }
+	.plain .feature-grid { grid-template-columns: minmax(0, 1fr); }
+	.plain .copy-col { max-width: 78ch; }
+	.feature-lede { color: var(--text-muted); font-size: var(--step-1); margin: 0 0 1.1rem; }
+	.points { margin: 0; padding-left: 1.1rem; display: grid; gap: 0.6rem; line-height: 1.55; }
+
+	.provider-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3rem; align-items: start; }
+	table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+	th {
+		text-align: left;
+		font-size: 0.74rem;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--text-muted);
+		border-bottom: 2px solid var(--border);
+		padding: 0.5rem 0.6rem;
+	}
+	td { border-bottom: 1px solid var(--border); padding: 0.55rem 0.6rem; }
+
+	.get { padding: 4.5rem 0; scroll-margin-top: 3.5rem; }
+	.get h2 { font-size: var(--step-3); margin: 0.2rem 0 0.7rem; }
+	.get code, .facts code { background: none; color: inherit; padding: 0; }
+	.facts { display: grid; gap: 0.8rem; margin: 0; }
+	.facts dt { color: var(--band-muted); font-size: 0.82rem; }
+	.facts dd { margin: 0.15rem 0 0; display: flex; flex-wrap: wrap; gap: 0.6rem; }
+
+	@media (max-width: 820px) {
+		.subnav { top: 3.7rem; } /* the site nav is shorter at its own mobile breakpoint */
+	}
+	@media (max-width: 960px) {
+		.hero-grid, .feature-grid, .provider-grid { grid-template-columns: minmax(0, 1fr); gap: 1.6rem; }
+		.flip .copy-col { order: 0; }
+		.feature { padding: 3.2rem 0; }
+	}
+</style>

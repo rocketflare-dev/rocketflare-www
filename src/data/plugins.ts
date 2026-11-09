@@ -222,6 +222,58 @@ export const PLUGINS: Plugin[] = [
 		contributedBy: { name: 'Mosaic Data', url: 'https://mosaicdata.ai/' },
 	},
 	{
+		id: 'freeagent',
+		label: 'FreeAgent',
+		repo: PLUGINS_REPO,
+		repoLabel: 'rocketflare-dev/rocketflare-plugins',
+		subdir: 'plugins/freeagent',
+		minKit: '0.21.0',
+		version: '3.8.2',
+		shipsAs: 'optional',
+		summary:
+			'Mirrors each organisation’s FreeAgent company (UK accounting) into your app, for pages, agents, analytics and the plugins you build on top. An admin approves it once, over OAuth.',
+		adds: [
+			'<strong>A connection per organisation</strong> — Settings → FreeAgent: one company each, approved once over OAuth, with its tokens stored sealed. A refused refresh token marks the connection as needing to be reconnected.',
+			'<strong>Incremental sync</strong> — every 30 minutes, after connecting and on Sync now: bank accounts, transactions, explanations, categories, contacts, bills and invoices. The first sync reaches back about 400 days.',
+			'<strong>A FreeAgent page</strong> — unexplained transactions and invoices, with an overdue filter. Every member can see it; owners and admins connect, disconnect and sync.',
+			'<strong>Agent tools</strong> — five that read the mirror, and two that write: <code>freeagent_explain_transaction</code> and <code>freeagent_create_bill</code>, offered only to admins and waiting for a person to approve each call.',
+			'<strong>A service API and an extension</strong> — other plugins explain transactions, attach receipts and create bills through exported functions, and hear about every sync through <code>freeagent:sync-listeners</code>.',
+			'<strong>Analytics cubes</strong> — when the analytics plugin is installed: spend and income by month and category, unexplained count and amount, outstanding and overdue. Inert without it.',
+			'<strong>Nine tables</strong> — a connection, a sync state and seven mirror tables, all with row-level security, and money stored as <code>numeric</code>.',
+			'<strong>Commands and a skill</strong> — <code>rocketflare freeagent status</code> and <code>sync</code>, and <code>/freeagent</code>, which walks through registering the app, secrets, connecting and troubleshooting.',
+		],
+		changelogUrl: `${PLUGINS_REPO}/blob/main/CHANGELOG.md`,
+		docsUrl: `${PLUGINS_REPO}/tree/main/plugins/freeagent`,
+		readme: 'plugins/freeagent/README.md',
+		skills: ['freeagent'],
+	},
+	{
+		id: 'inbox',
+		label: 'Inbox',
+		repo: PLUGINS_REPO,
+		repoLabel: 'rocketflare-dev/rocketflare-plugins',
+		subdir: 'plugins/inbox',
+		minKit: '0.22.0',
+		version: '3.8.2',
+		shipsAs: 'optional',
+		summary:
+			'Inbound email for your app: forward receipts, invoices and notices to an address on your domain, and they arrive parsed, with their attachments, ready for other plugins to act on.',
+		adds: [
+			'<strong>An address per organisation</strong> — mail reaches the Worker through Cloudflare Email Routing. Each organisation picks a local part, and <code>receipts+anything@</code> reaches it too.',
+			'<strong>Checked before it is accepted</strong> — against the organisation’s sender allow-list and the SPF, DKIM and DMARC verdicts Cloudflare recorded. Anything refused is bounced with a reason the forwarding mailbox shows.',
+			'<strong>An Inbox page</strong> — messages, sender and forwarder, authentication verdicts, text body and attachments, with reprocess and delete. Settings → Inbox holds the address, the allow-list and the on/off switch.',
+			'<strong>Forwards split apart</strong> — each email forwarded as an attachment becomes a message of its own, linked to the forward it came in. Gmail and Proton forwarding confirmations are let through, with their code and link shown.',
+			'<strong>Searchable from chat</strong> — each message and its PDF, Office, HTML and text attachments are indexed into the knowledge base, which it needs the kit’s knowledge surface for. Switchable in Settings.',
+			'<strong>Agent tools and an extension</strong> — <code>inbox_list_messages</code> and <code>inbox_get_message</code>, both read-only, and <code>inbox:consumers</code> so a plugin is called once per parsed message.',
+			'<strong>Three tables and R2</strong> — settings, messages and attachments, all with row-level security. The bytes live in R2 per organisation and are purged with it.',
+			'<strong>Commands and a skill</strong> — <code>rocketflare inbox list</code> and <code>status</code>, and <code>/inbox</code>, which covers Email Routing setup, forwarding, testing and troubleshooting.',
+		],
+		changelogUrl: `${PLUGINS_REPO}/blob/main/CHANGELOG.md`,
+		docsUrl: `${PLUGINS_REPO}/tree/main/plugins/inbox`,
+		readme: 'plugins/inbox/README.md',
+		skills: ['inbox'],
+	},
+	{
 		id: 'sso',
 		label: 'Single sign-on (SAML + SCIM)',
 		availability: 'partners',
@@ -300,3 +352,7 @@ export const pluginPath = (p: Plugin | string) => `/plugins/${typeof p === 'stri
 
 /** How many first-party plugins there are — use this, never a literal, in copy. */
 export const PLUGIN_COUNT = PLUGINS.length
+
+/** The catalogue's two groups: MIT and installable by anyone, or commercial and for partners. */
+export const OPEN_SOURCE_PLUGINS = PLUGINS.filter((p): p is PublicPlugin => !isPartnerOnly(p))
+export const COMMERCIAL_PLUGINS = PLUGINS.filter(isPartnerOnly)
