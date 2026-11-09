@@ -70,11 +70,10 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		Rather than a file per provider, there is one generic pair of routes —
 		<code>/auth/:provider</code> and <code>/auth/:provider/callback</code> — over a list of provider
 		definitions. The OAuth client underneath is
-		<a href="https://arcticjs.dev" rel="noopener">arctic</a>, which already speaks to more than fifty
-		providers — GitHub, GitLab, Slack, Apple, Okta, Auth0, Discord, LinkedIn, Keycloak and the rest —
-		so the kit is not limited to the ones it ships with. Google, Microsoft and a generic OpenID
-		Connect provider are wired; adding another is one definition file with its arctic client,
-		scopes and profile mapping, and no new routing.
+		<a href="https://github.com/panva/openid-client" rel="noopener">openid-client</a>, so the kit is
+		not limited to the ones it ships with. Google, Microsoft and a generic OpenID Connect provider
+		are wired; adding another is one definition file with its client configuration, scopes and
+		profile mapping, and no new routing.
 	</p>
 	<p>
 		Redirect URIs are derived from <code>APP_URL</code>, so there is no
@@ -108,8 +107,8 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 	<p>
 		<code>AUTH_OIDC_ONLY=true</code> makes the issuer the only way in: the login page shows a single
 		button for it and the Google and Microsoft routes refuse. The page never redirects on its own,
-		so signing in is always a click, even when the issuer still has you signed in. Magic links are
-		hidden rather than switched off, because invitations still use them. When the issuer publishes
+		so signing in is always a click, even when the issuer still has you signed in. Magic-link
+		sign-in is switched off on the server too; invitation emails still work. When the issuer publishes
 		an end-session endpoint, signing out signs out there too and comes back to the login page.
 	</p>
 	<div class="note">
