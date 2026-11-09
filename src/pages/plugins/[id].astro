@@ -15,7 +15,9 @@
 import type { MarkdownInstance } from 'astro'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import CloudDivider from '../../components/CloudDivider.astro'
+import PluginShowcase from '../../components/PluginShowcase.astro'
 import Terminal from '../../components/Terminal.astro'
+import { showcaseFor } from '../../data/plugin-showcases'
 import { PLUGINS, installCommand, isPartnerOnly, pluginById, pluginPath, type Plugin } from '../../data/plugins'
 import { PARTNER_CONTACT_URL } from '../../data/site'
 
@@ -47,8 +49,10 @@ const shipsAs = partnerOnly
 			? 'Ships in the kit'
 			: 'Add it when you need it'
 const title = `${p.label} plugin — Rocketflare`
+const showcase = isPartnerOnly(p) ? showcaseFor(p.id) : undefined
 ---
 <BaseLayout title={title} description={p.summary}>
+	{isPartnerOnly(p) && showcase ? <PluginShowcase plugin={p} showcase={showcase} /> : <Fragment>
 	<header class="plugin-hero page-hero">
 		<div class="wrap">
 			<nav class="crumbs" aria-label="Breadcrumb"><a href="/plugins/">Plugins</a> <span aria-hidden="true">/</span> <span>{p.label}</span></nav>
@@ -201,6 +205,7 @@ const title = `${p.label} plugin — Rocketflare`
 			</div>
 		</div>
 	</section>
+	</Fragment>}
 </BaseLayout>
 
 <style>

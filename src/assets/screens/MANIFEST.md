@@ -94,6 +94,22 @@ Every stop with a frame now has one; the tour's CLI stop is text only by choice 
     where the badge above says "Awaiting input". Cosmetic, visible in a marketing frame, and a kit
     fix rather than a capture one.
 
+## SSO plugin captures (`sso-*`, used by `/plugins/` and `/plugins/sso/`)
+
+The commercial `sso` plugin 0.1.0, installed in a kit checkout at `002b095`, captured 2026-11-09.
+
+- Settings frames: the dev stack through its tunnel (signing in on `localhost` fails while `APP_URL` is the tunnel), signed in as Marcus Adeyemi, admin of Acme Logistics, on a live test connection to an Okta Integrator org
+- `sso-login`: a separate non-dev Worker, built UI, `APP_ENV=staging` (`devLogin: false`, so no quick login and no Example SSO): `wrangler dev --name rf-sso-login-shot --port 3302 --inspector-port 9339 --persist-to <tmp> --var APP_ENV:staging --var APP_URL:http://localhost:3302`. The email field is filled in
+- Tool: the chrome-devtools MCP browser, `emulate --viewport 1440x900x2`, viewport only
+- **The settings frames are retouched in the DOM before capture, and nothing is saved.** These are a public site's images: replace the tunnel host with `app.acme-logistics.example`, the verified domain with `acme-logistics.example`, the connection id with `7f3a2c91`, the Okta org and app ids with `acme` placeholders, the group with `Logistics Admins`, the certificate body and fingerprint with placeholders, and the SCIM token prefix with bullets. Hide the second test connection and the `DEV` / `vdev` chrome
+
+| Stem | Route | State | Used by |
+|---|---|---|---|
+| `sso-login` | `/login` | Non-dev login: Sign in with SSO above the email link form | `/plugins/` card, `/plugins/sso/` hero and `#sign-in` |
+| `sso-connection` | `/settings?tab=sso` | Scrolled to the active Okta connection, step 1 | `#connect` |
+| `sso-domains` | `/settings?tab=sso` | Steps 2 and 3, one verified domain and one group → role mapping, the top of step 4 | `#domains` |
+| `sso-scim` | `/settings?tab=sso` | The end of step 3, step 4 with one token, step 5 with Require single sign-on **off** | `#scim` |
+
 ## Rocketflare Launch captures (`launch-*`, used by `/launch/`)
 
 Not the kit: these are frames of Rocketflare Launch (`rocketflare-dev/rocketflare-launch`), the company
