@@ -483,6 +483,15 @@ export const RELEASES: Release[] = [
 		migrations: false,
 		areas: ['plugins', 'scripts', 'ci', 'docs'],
 	},
+	{
+		version: '0.29.0',
+		date: '2026-11-09',
+		summary:
+			'A hardening round across roles, sign-in, API key scopes and agent budgets. Sign-in moves to openid-client, and traces no longer keep prompts unless you opt in.',
+		breaking: true,
+		migrations: true,
+		areas: ['api', 'ui', 'shared', 'db', 'cli', 'config', 'docs', 'scripts', 'plugins'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
