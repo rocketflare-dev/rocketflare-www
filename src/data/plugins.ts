@@ -346,7 +346,7 @@ export const PLUGINS: Plugin[] = [
 		id: 'sites',
 		label: 'Sites',
 		availability: 'partners',
-		minKit: '0.32.1',
+		minKit: '0.32.2',
 		version: '0.4.0',
 		shipsAs: 'optional',
 		summary:
