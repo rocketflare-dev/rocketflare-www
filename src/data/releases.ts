@@ -510,6 +510,24 @@ export const RELEASES: Release[] = [
 		migrations: true,
 		areas: ['api', 'ui', 'config', 'scripts', 'docs', 'db'],
 	},
+	{
+		version: '0.32.0',
+		date: '2026-11-10',
+		summary:
+			'Plugins can announce events, such as a note being created, and other plugins, your own code or an agent can react to each one, once per organisation and safely retried. An agent can be started by an event, or offered in a picker as something people can attach to it.',
+		breaking: false,
+		migrations: true,
+		areas: ['api', 'ui', 'config', 'scripts', 'docs', 'db'],
+	},
+	{
+		version: '0.32.1',
+		date: '2026-11-10',
+		summary:
+			'Two fixes for plugins. A guide page found by chat no longer shows as a document card that led to a page it could not open, and an app with two plugins that announce events typechecks again.',
+		breaking: false,
+		migrations: false,
+		areas: ['shared', 'ui', 'docs'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
