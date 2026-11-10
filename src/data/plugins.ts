@@ -278,7 +278,7 @@ export const PLUGINS: Plugin[] = [
 		label: 'Single sign-on (SAML + SCIM)',
 		availability: 'partners',
 		minKit: '0.29.0',
-		version: '0.2.0',
+		version: '0.3.0',
 		shipsAs: 'optional',
 		summary:
 			'SAML sign-in and SCIM provisioning for each organisation, against its own identity provider: verify the email domain, require SSO for it, and let the directory add, change and remove the people.',
