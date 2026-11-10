@@ -492,6 +492,15 @@ export const RELEASES: Release[] = [
 		migrations: true,
 		areas: ['api', 'ui', 'shared', 'db', 'cli', 'config', 'docs', 'scripts', 'plugins'],
 	},
+	{
+		version: '0.30.0',
+		date: '2026-11-10',
+		summary:
+			'Plugins can now serve whole public websites from your Worker on their own hosts, with a strict CSP per page, multi-host provisioning and a workspace layout for full-screen editors. Workers AI tool calls are more reliable, and apps without such a plugin see no change.',
+		breaking: false,
+		migrations: false,
+		areas: ['api', 'ui', 'config', 'scripts', 'docs'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
