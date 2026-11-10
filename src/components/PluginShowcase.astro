@@ -15,7 +15,8 @@ interface Props {
 	showcase: PluginShowcase
 }
 const { plugin: p, showcase } = Astro.props
-const nav = [...showcase.features.map((f) => ({ id: f.id, nav: f.nav })), { id: 'providers', nav: 'Providers' }, { id: 'get', nav: 'Get it' }]
+const tried = showcase.tried ?? { nav: 'Providers', title: 'What it has been tried against', column: 'Provider' }
+const nav = [...showcase.features.map((f) => ({ id: f.id, nav: f.nav })), { id: 'providers', nav: tried.nav }, { id: 'get', nav: 'Get it' }]
 ---
 <header class="hero bg-band">
 	<div class="wrap hero-grid">
@@ -46,7 +47,7 @@ const nav = [...showcase.features.map((f) => ({ id: f.id, nav: f.nav })), { id: 
 			<div class="wrap feature-grid">
 				<div class="copy-col">
 					<h2 id={`${f.id}-title`}>{f.title}</h2>
-					<p class="feature-lede">{f.lede}</p>
+					<p class="feature-lede" set:html={f.lede} />
 					<ul class="points">{f.points.map((point) => <li set:html={point} />)}</ul>
 				</div>
 				{f.shot && <Screenshot light={f.shot.light} dark={f.shot.dark} alt={f.shot.alt} url={f.shot.url} width={720} />}
@@ -57,10 +58,10 @@ const nav = [...showcase.features.map((f) => ({ id: f.id, nav: f.nav })), { id: 
 	<section id="providers" class="feature plain" aria-labelledby="providers-title">
 		<div class="wrap provider-grid">
 			<div>
-				<h2 id="providers-title">What it has been tried against</h2>
+				<h2 id="providers-title">{tried.title}</h2>
 				<table>
-					<thead><tr><th scope="col">Provider</th><th scope="col">Status</th></tr></thead>
-					<tbody>{showcase.providers.map((row) => <tr><td>{row.name}</td><td>{row.status}</td></tr>)}</tbody>
+					<thead><tr><th scope="col">{tried.column}</th><th scope="col">Status</th></tr></thead>
+					<tbody>{showcase.providers.map((row) => <tr><td set:html={row.name} /><td>{row.status}</td></tr>)}</tbody>
 				</table>
 			</div>
 			<div>
@@ -81,6 +82,7 @@ const nav = [...showcase.features.map((f) => ({ id: f.id, nav: f.nav })), { id: 
 				command to copy here. Partners get access under their agreement with us and install it like
 				any other plugin: <code>pnpm plugin add</code> prints the plan, and <code>--apply</code>
 				writes it. Then generate and run its migration.
+				{showcase.afterInstall && <Fragment set:html={` ${showcase.afterInstall}`} />}
 			</p>
 			<p class="cta">
 				<a class="btn btn-primary" href="/partners/">How to become a partner</a>
@@ -92,6 +94,7 @@ const nav = [...showcase.features.map((f) => ({ id: f.id, nav: f.nav })), { id: 
 			<div><dt>Version</dt><dd><code>{p.version}</code></dd></div>
 			<div><dt>Needs kit</dt><dd><code>{p.minKit}</code> or later</dd></div>
 			<div><dt>Licence</dt><dd>Commercial, for partners</dd></div>
+			{p.skills && <div><dt>Agent skills</dt><dd>{p.skills.map((s) => <code>{s}</code>)}</dd></div>}
 			{p.dependencies && <div><dt>Adds packages</dt><dd>{p.dependencies.map((d) => <code>{d}</code>)}</dd></div>}
 		</dl>
 	</div>
@@ -187,7 +190,7 @@ const nav = [...showcase.features.map((f) => ({ id: f.id, nav: f.nav })), { id: 
 
 	.get { padding: 4.5rem 0; scroll-margin-top: 3.5rem; }
 	.get h2 { font-size: var(--step-3); margin: 0.2rem 0 0.7rem; }
-	.get code, .facts code { background: none; color: inherit; padding: 0; }
+	.get :global(code), .facts code { background: none; color: inherit; padding: 0; }
 	.facts { display: grid; gap: 0.8rem; margin: 0; }
 	.facts dt { color: var(--band-muted); font-size: 0.82rem; }
 	.facts dd { margin: 0.15rem 0 0; display: flex; flex-wrap: wrap; gap: 0.6rem; }
