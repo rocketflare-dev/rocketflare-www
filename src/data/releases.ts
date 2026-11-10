@@ -528,6 +528,15 @@ export const RELEASES: Release[] = [
 		migrations: false,
 		areas: ['shared', 'ui', 'docs'],
 	},
+	{
+		version: '0.32.2',
+		date: '2026-11-10',
+		summary:
+			'A test fix only: one of the kit’s own UI tests no longer fails on slow CI runners, so plugin repositories that run the kit’s gate stay green.',
+		breaking: false,
+		migrations: false,
+		areas: ['ui'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
