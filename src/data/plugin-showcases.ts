@@ -59,8 +59,8 @@ export interface PluginShowcase {
 	/** Three or four short phrases for the card on /plugins/. */
 	highlights: string[]
 	features: ShowcaseFeature[]
-	/** Identity providers, and what backs the claim for each. */
-	providers: { name: string; status: string }[]
+	/** Identity providers, and what backs the claim for each. Absent, the table is left out. */
+	providers?: { name: string; status: string }[]
 	/**
 	 * The labels of that table, when it is not a list of identity providers: its sub-navigation
 	 * entry, its heading and its first column. Absent, it reads Providers / What it has been tried
@@ -195,7 +195,6 @@ const sites: PluginShowcase = {
 				'Rendered once on the server, then served from the edge cache. A cached page makes no database query, and a render never sees a visitor’s cookie.',
 				'A strict CSP per site: by default a page loads no script. Site CSS is a separate build, and the public CSP refuses the admin bundle.',
 				'Images stored in R2 and served through Cloudflare Images, as AVIF or WebP at fixed widths.',
-				'Forms behind Turnstile, which fails closed. With JavaScript they submit in place; without it they post and land on a page in the site’s own layout.',
 				'<code>robots.txt</code>, a sitemap, an HTML 404 and redirects on every host.',
 			],
 			shot: {
@@ -204,6 +203,18 @@ const sites: PluginShowcase = {
 				alt: 'A published home page for Pellorin, a fictional maker of harbour buoys: a header with Home, About and Pricing and an English and French switch, a dark hero with a See pricing button, and a section with an illustration.',
 				url: 'www.pellorin.example',
 			},
+		},
+		{
+			id: 'forms',
+			nav: 'Forms',
+			title: 'Forms that land in your app',
+			lede: 'Drop a Form block on any page. What visitors send arrives in the app beside the site, not in someone’s inbox.',
+			points: [
+				'With JavaScript, a small script under 5 KB sends the form in place and shows field errors next to the fields. Without it, the form posts normally and lands on a page in the site’s own layout.',
+				'Turnstile on every form, failing closed, and a limit of 10 submissions a minute.',
+				'The success message and the page to go to next come from the published block, never from what was submitted.',
+				'Submissions are listed per form in the site’s Forms tab for people who can publish, and deleted after 90 days.',
+			],
 		},
 		{
 			id: 'ai',
@@ -237,14 +248,6 @@ const sites: PluginShowcase = {
 				'<code>rocketflare sites export</code> and <code>import</code> move a whole site as drafts, and <code>audit</code> lists the blocks in use, exiting 1 on an unknown one so CI can run it before a block is deleted.',
 			],
 		},
-	],
-	tried: { nav: 'Status', title: 'Where it has been tried', column: 'Where' },
-	providers: [
-		{ name: 'Local <code>wrangler dev</code>', status: 'Built and tested' },
-		{ name: 'The editor in Chrome', status: 'Tested' },
-		{ name: 'The editor in Safari and Firefox', status: 'Not verified yet' },
-		{ name: 'A real Cloudflare account', status: 'Not deployed yet: DNS, provisioning, Images limits and the cron are unexercised' },
-		{ name: 'Security audit of the public pages', status: 'Not done yet' },
 	],
 	limits: [
 		'Collections: blog posts and similar content types are a later release.',

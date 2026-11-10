@@ -16,7 +16,8 @@ interface Props {
 }
 const { plugin: p, showcase } = Astro.props
 const tried = showcase.tried ?? { nav: 'Providers', title: 'What it has been tried against', column: 'Provider' }
-const nav = [...showcase.features.map((f) => ({ id: f.id, nav: f.nav })), { id: 'providers', nav: tried.nav }, { id: 'get', nav: 'Get it' }]
+const providers = showcase.providers ?? []
+const nav = [...showcase.features.map((f) => ({ id: f.id, nav: f.nav })), { id: 'providers', nav: providers.length ? tried.nav : 'Limits' }, { id: 'get', nav: 'Get it' }]
 ---
 <header class="hero bg-band">
 	<div class="wrap hero-grid">
@@ -56,16 +57,18 @@ const nav = [...showcase.features.map((f) => ({ id: f.id, nav: f.nav })), { id: 
 	))}
 
 	<section id="providers" class="feature plain" aria-labelledby="providers-title">
-		<div class="wrap provider-grid">
+		<div class:list={['wrap', providers.length > 0 && 'provider-grid']}>
+			{providers.length > 0 && (
+				<div>
+					<h2 id="providers-title">{tried.title}</h2>
+					<table>
+						<thead><tr><th scope="col">{tried.column}</th><th scope="col">Status</th></tr></thead>
+						<tbody>{providers.map((row) => <tr><td set:html={row.name} /><td>{row.status}</td></tr>)}</tbody>
+					</table>
+				</div>
+			)}
 			<div>
-				<h2 id="providers-title">{tried.title}</h2>
-				<table>
-					<thead><tr><th scope="col">{tried.column}</th><th scope="col">Status</th></tr></thead>
-					<tbody>{showcase.providers.map((row) => <tr><td set:html={row.name} /><td>{row.status}</td></tr>)}</tbody>
-				</table>
-			</div>
-			<div>
-				<h2>Not in this release</h2>
+				<h2 id={providers.length ? undefined : 'providers-title'}>Not in this release</h2>
 				<ul class="points">{showcase.limits.map((limit) => <li set:html={limit} />)}</ul>
 			</div>
 		</div>
