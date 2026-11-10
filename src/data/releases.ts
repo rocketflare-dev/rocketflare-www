@@ -510,6 +510,15 @@ export const RELEASES: Release[] = [
 		migrations: true,
 		areas: ['api', 'ui', 'config', 'scripts', 'docs', 'db'],
 	},
+	{
+		version: '0.32.0',
+		date: '2026-11-10',
+		summary:
+			'Plugins can now announce events, like a form being submitted, and anything in the app can react: another plugin, your own code, or an agent that starts automatically or that an editor picks. Each subscriber retries on its own.',
+		breaking: false,
+		migrations: true,
+		areas: ['api', 'ui', 'config', 'scripts', 'docs', 'db'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
