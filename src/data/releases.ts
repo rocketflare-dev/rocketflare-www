@@ -492,6 +492,24 @@ export const RELEASES: Release[] = [
 		migrations: true,
 		areas: ['api', 'ui', 'shared', 'db', 'cli', 'config', 'docs', 'scripts', 'plugins'],
 	},
+	{
+		version: '0.30.0',
+		date: '2026-11-10',
+		summary:
+			'A plugin can now serve whole public websites on their own domains from the same Worker as your app, each with a strict content security policy, forms, caching and multi-host provisioning. Plugins also get a full-screen workspace page tier, and the default Workers AI model stops dropping one forced tool call in eight. An app with no such plugin sees no routing change.',
+		breaking: false,
+		migrations: false,
+		areas: ['api', 'ui', 'config', 'scripts', 'docs'],
+	},
+	{
+		version: '0.31.0',
+		date: '2026-11-10',
+		summary:
+			'Plugins can ship knowledge about the app itself, stored once for every organisation and always searchable, stream a chat of their own, add buttons to the top bar and list every page a reader may open. They can also install Claude Code hooks and seed files the developer then owns, which is what the new guide and global-search plugins are built on.',
+		breaking: false,
+		migrations: true,
+		areas: ['api', 'ui', 'config', 'scripts', 'docs', 'db'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
