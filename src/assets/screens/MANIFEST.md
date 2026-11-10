@@ -151,5 +151,6 @@ console the `/launch/` overview describes.
 | `launch-approval` | `/approvals/72e15ad0-…` | Production deploy of Gate check, **Approved**: why they asked, what would go to production, Who decides (owners or admins, 1 of 1, self-approval not allowed), the decision by Marcus Adeyemi | `#ship` |
 | `launch-audit` | `/audit` | Integrity panel (Verify / CSV / JSON Lines, **before** pressing Verify — the result line reports unsealed events on a dev instance whose sealing cron is idle) and the event table: session, upgrade and setting events | `#control` |
 | `launch-app` | `/apps/hola-world` | Overview: Staging v0.15.8 up, "1 change not live" with **Ship v0.15.8 live**, Live v0.15.7 up, Kit "Requires upgrade → 0.17.0" with the upgrade session needing its owner, Active sessions | `#fleet` (`crop="top"`) |
+| `plugin-guide` | `/guide` on a demo app with the **guide** plugin (3.10.0, kit 0.31.0) installed | Getting started open; Ask the Guide pane asked "How do I invite a colleague?" and answered in numbered steps (no raw footnote marks — retake if the model leaves `[^n]` in the text). Captured 2026-11-10 by the CLI daemon, same viewport and sign-in as above | 1440×900 @2 | `/plugins/guide/` hero |
 
 Not captured: **Secrets / grants** (the deck's fleet slide describes grants in text instead).

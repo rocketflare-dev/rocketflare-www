@@ -16,8 +16,10 @@ import type { MarkdownInstance } from 'astro'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import CloudDivider from '../../components/CloudDivider.astro'
 import PluginShowcase from '../../components/PluginShowcase.astro'
+import Screenshot from '../../components/Screenshot.astro'
 import Terminal from '../../components/Terminal.astro'
 import { showcaseFor } from '../../data/plugin-showcases'
+import { shotFor } from '../../data/plugin-shots'
 import { PLUGINS, installCommand, isPartnerOnly, pluginById, pluginPath, type Plugin } from '../../data/plugins'
 import { PARTNER_CONTACT_URL } from '../../data/site'
 
@@ -50,6 +52,7 @@ const shipsAs = partnerOnly
 			: 'Add it when you need it'
 const title = `${p.label} plugin — Rocketflare`
 const showcase = isPartnerOnly(p) ? showcaseFor(p.id) : undefined
+const shot = isPartnerOnly(p) ? undefined : shotFor(p.id)
 ---
 <BaseLayout title={title} description={p.summary}>
 	{isPartnerOnly(p) && showcase ? <PluginShowcase plugin={p} showcase={showcase} /> : <Fragment>
@@ -65,6 +68,14 @@ const showcase = isPartnerOnly(p) ? showcaseFor(p.id) : undefined
 		</div>
 		<CloudDivider fill="var(--bg)" />
 	</header>
+
+	{shot && (
+		<section class="plugin-shot" aria-label={`${p.label} in an app`}>
+			<div class="wrap">
+				<Screenshot light={shot.light} dark={shot.dark} alt={shot.alt} url={shot.url} priority />
+			</div>
+		</section>
+	)}
 
 	<section class="detail">
 		<div class="wrap detail-grid">
@@ -216,6 +227,7 @@ const showcase = isPartnerOnly(p) ? showcaseFor(p.id) : undefined
 	}
 	.crumbs { font-size: 0.9rem; margin-bottom: 1rem; color: var(--text-muted); }
 
+	.plugin-shot { padding: 1rem 0 3.5rem; background: var(--bg); }
 	.detail { padding: 0 0 5rem; background: var(--bg); }
 	.detail-grid {
 		display: grid;
