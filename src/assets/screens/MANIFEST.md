@@ -110,6 +110,27 @@ The commercial `sso` plugin 0.1.0, installed in a kit checkout at `002b095`, cap
 | `sso-domains` | `/settings?tab=sso` | Steps 2 and 3, one verified domain and one group → role mapping, the top of step 4 | `#domains` |
 | `sso-scim` | `/settings?tab=sso` | The end of step 3, step 4 with one token, step 5 with Require single sign-on **off** | `#scim` |
 
+## Sites plugin captures (`sites-*`, used by `/plugins/` and `/plugins/sites/`)
+
+The commercial `sites` plugin as merged to the commercial plugins repository's `main` at `dcd584b` (manifest 0.2.0, unreleased; needs kit 0.30.0), installed in a demo app at `~/tmp/sites-demo-app` (commit `b570410`), captured 2026-11-10.
+
+- Stack: the demo's `wrangler dev` on `http://localhost:3421`, signed in with `/login?as=owner@example.test` (owner of the one workspace). Site hosts from `SITES_HOSTS`: `www.localhost:3421` and `docs.localhost:3421`. Content is the fictional company Pellorin
+- Tool: `playwright-core` driving the installed Google Chrome headless, 1440×900 at `deviceScaleFactor: 2` → 2880×1800, viewport only. The theme is set by writing `localStorage.theme` (`rocketflare-light` / `rocketflare-dark`) in an init script before load
+- **Read-only.** Nothing was typed into a saved field, published, built or translated: a block was selected from the Outline tab, a preview width was switched, the Publish menu and the Build with AI dialog were opened and closed, and the editor still read "No changes" afterwards. The Build with AI description was typed into the unsent dialog
+- Retouched in the DOM before capture, nothing saved: the `DEV` badge and the `vdev` release label hidden (`visibility: hidden`), and on `sites-elements` a scratch element named "Blah" hidden
+- `sites-public` is the public site, which has no dark theme: the page passes the same image as both `light` and `dark`. Its frame's URL bar says `www.pellorin.example`; the app frames say `app.pellorin.example`
+
+| Stem | Route | State | Used by |
+|---|---|---|---|
+| `sites-editor` | `/sites/www/pages/<about>/en` | Outline tab, the Hero block selected, its fields in the right panel | `/plugins/` card and the `/plugins/sites/` hero |
+| `sites-palette` | `/sites/docs/pages/<home>/en` | Tablet preview, the Hero block selected (from Outline), then the Blocks tab showing the palette | `#editor` |
+| `sites-pages` | `/sites/www?tab=pages` | Four pages with en/fr state badges | `#pages` |
+| `sites-publish` | `/sites/www/pages/<about>/en` | Publish menu open: Publish now, schedule, Unpublish | `#publishing` |
+| `sites-language` | `/sites/www/pages/<about>/fr` | The French About page, language switch on fr, Translate from en in the toolbar | `#languages` |
+| `sites-elements` | `/sites/www?tab=elements` | Site header and Site footer regions | `#blocks` |
+| `sites-public` | `http://www.localhost:3421/` | The published English home page, light only | `#public` |
+| `sites-build` | `/sites/www?tab=pages` → New page → Build with AI | Description filled in, Choose sources expanded, **not submitted** | `#ai` |
+
 ## Rocketflare Launch captures (`launch-*`, used by `/launch/`)
 
 Not the kit: these are frames of Rocketflare Launch (`rocketflare-dev/rocketflare-launch`), the company

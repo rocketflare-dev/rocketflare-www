@@ -59,12 +59,13 @@ const runs = [
 ]
 
 const sso = pluginById('sso')
+const sites = pluginById('sites')
 
-/** `body` is HTML: the commercial plugins entry links the first of them. */
+/** `body` is HTML: the commercial plugins entry links each of them. */
 const benefits = [
 	{
 		title: 'Commercial plugins',
-		body: `Closed-source plugins that are not in the public catalogue, licensed for use in your own and your clients’ apps — starting with <a href="${pluginPath(sso)}">single sign-on</a>: SAML sign-in, verified domains and SCIM provisioning for each of your clients’ organisations.`,
+		body: `Closed-source plugins that are not in the public catalogue, licensed for use in your own and your clients’ apps — <a href="${pluginPath(sso)}">single sign-on</a>, for SAML sign-in, verified domains and SCIM provisioning in each of your clients’ organisations, and <a href="${pluginPath(sites)}">sites</a>, for public websites in several languages, edited visually inside the app and served from it.`,
 	},
 	{
 		title: 'Help from the people who build the kit',
