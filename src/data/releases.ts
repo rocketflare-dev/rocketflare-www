@@ -555,6 +555,15 @@ export const RELEASES: Release[] = [
 		migrations: true,
 		areas: ['api', 'db', 'docs'],
 	},
+	{
+		version: '0.35.0',
+		date: '2026-11-11',
+		summary:
+			'Every copy can run the same security audit the kit is tested with: /rf-security, against a threat model you rewrite for your own app.',
+		breaking: false,
+		migrations: false,
+		areas: ['docs', 'config'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
