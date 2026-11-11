@@ -1,0 +1,27 @@
+---
+/** One release on /changelog/: version, date, the one-line summary, its tags and the porting note. */
+import type { RELEASES_NEWEST_FIRST } from '../data/releases'
+import { upgradeNote } from '../data/site'
+
+interface Props {
+	r: (typeof RELEASES_NEWEST_FIRST)[number]
+}
+const { r } = Astro.props
+const dateLabel = (iso: string) =>
+	new Date(`${iso}T00:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })
+---
+<li class="rel">
+	<div class="rel-head">
+		<h3 id={`v${r.version}`}>{r.version}</h3>
+		<time datetime={r.date}>{dateLabel(r.date)}</time>
+	</div>
+	<p class="rel-summary">{r.summary}</p>
+	<p class="rel-meta">
+		{r.breaking && <span class="tag tone-red">Needs a change from you</span>}
+		{r.migrations && <span class="tag tone-blue">Schema change</span>}
+		<span class="areas">{r.areas.join(' · ')}</span>
+	</p>
+	<p class="rel-link">
+		<a href={upgradeNote(r.version)} target="_blank" rel="noopener">Porting note for {r.version}</a>
+	</p>
+</li>

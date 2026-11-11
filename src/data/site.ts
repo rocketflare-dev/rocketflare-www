@@ -40,3 +40,5 @@ export const OPERATE_CONTACT_URL = 'mailto:clifton@guidemode.dev?subject=Operati
 /** Commercial plugins and partner support. */
 export const PARTNER_CONTACT_URL = 'mailto:partners@rocketflare.dev?subject=Becoming%20a%20Rocketflare%20partner'
 export const LAUNCH_CONTACT_URL = 'mailto:clifton@guidemode.dev?subject=Rocketflare%20Launch'
+/** A new GitHub issue in the plugins repository, opened on its plugin-request form. */
+export const PLUGIN_REQUEST_URL = 'https://github.com/rocketflare-dev/rocketflare-plugins/issues/new?template=plugin-request.yml'

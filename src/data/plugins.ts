@@ -15,6 +15,19 @@
  * are given access to. It has no repository, changelog or README fields at all, so nothing here
  * can link to that repository, sync its README or print a public install command for it.
  */
+/**
+ * What /plugins/ groups the open-source catalogue by: the capability a plugin gives an app, so a
+ * reader looking for "connect our accounting" finds FreeAgent beside Connectors, not by release
+ * order. Each group's tone colours its icon chips.
+ */
+export const PLUGIN_GROUPS = [
+	{ key: 'knowledge', title: 'Search and knowledge', lede: 'Help people and the assistant find things: across the app, on the web, and in a guide to the app itself.', tone: 'blue' },
+	{ key: 'connect', title: 'Connect your other systems', lede: 'Bring in what already lives elsewhere: a Microsoft 365 directory and calendars, your accounts, inbound email.', tone: 'cyan' },
+	{ key: 'insight', title: 'Insight and feedback', lede: 'See how the app is used and hear what people want from it next.', tone: 'orange' },
+	{ key: 'build', title: 'Write your own', lede: 'The reference plugin ships inside the kit: one small, complete example of every slot the seam has.', tone: 'green' },
+] as const
+export type PluginGroupKey = (typeof PLUGIN_GROUPS)[number]['key']
+
 interface PluginBase {
 	/** The id in `rocketflare-plugin.json`, the folder name, and the `#anchor` on /plugins/. */
 	id: string
@@ -46,6 +59,10 @@ interface PluginBase {
 	 * so the page must not say there is one. Absent means it has tables.
 	 */
 	tables?: false
+	/** The capability it is listed under on /plugins/ (a `PLUGIN_GROUPS` key). */
+	group: PluginGroupKey
+	/** Its glyph on the catalogue card: a name `ConceptIcon` draws. */
+	icon: string
 	/** Who built it, when that is not the Rocketflare team — credited on the card and the page. */
 	contributedBy?: { name: string; url: string }
 }
@@ -100,6 +117,8 @@ const KIT_REPO = 'https://github.com/rocketflare-dev/rocketflare'
 export const PLUGINS: Plugin[] = [
 	{
 		id: 'analytics',
+		group: 'insight',
+		icon: 'chart',
 		label: 'Analytics',
 		repo: PLUGINS_REPO,
 		repoLabel: 'rocketflare-dev/rocketflare-plugins',
@@ -126,6 +145,8 @@ export const PLUGINS: Plugin[] = [
 	},
 	{
 		id: 'web-knowledge',
+		group: 'knowledge',
+		icon: 'globe',
 		label: 'Web knowledge',
 		repo: PLUGINS_REPO,
 		repoLabel: 'rocketflare-dev/rocketflare-plugins',
@@ -149,6 +170,8 @@ export const PLUGINS: Plugin[] = [
 	},
 	{
 		id: 'connectors',
+		group: 'connect',
+		icon: 'link',
 		label: 'Connectors',
 		repo: PLUGINS_REPO,
 		repoLabel: 'rocketflare-dev/rocketflare-plugins',
@@ -174,6 +197,8 @@ export const PLUGINS: Plugin[] = [
 	},
 	{
 		id: 'm365',
+		group: 'connect',
+		icon: 'building',
 		label: 'Microsoft 365',
 		repo: PLUGINS_REPO,
 		repoLabel: 'rocketflare-dev/rocketflare-plugins',
@@ -198,6 +223,8 @@ export const PLUGINS: Plugin[] = [
 	},
 	{
 		id: 'issue-reports',
+		group: 'insight',
+		icon: 'message',
 		label: 'Issue reports',
 		repo: PLUGINS_REPO,
 		repoLabel: 'rocketflare-dev/rocketflare-plugins',
@@ -223,6 +250,8 @@ export const PLUGINS: Plugin[] = [
 	},
 	{
 		id: 'freeagent',
+		group: 'connect',
+		icon: 'receipt',
 		label: 'FreeAgent',
 		repo: PLUGINS_REPO,
 		repoLabel: 'rocketflare-dev/rocketflare-plugins',
@@ -249,6 +278,8 @@ export const PLUGINS: Plugin[] = [
 	},
 	{
 		id: 'inbox',
+		group: 'connect',
+		icon: 'inbox',
 		label: 'Inbox',
 		repo: PLUGINS_REPO,
 		repoLabel: 'rocketflare-dev/rocketflare-plugins',
@@ -275,6 +306,8 @@ export const PLUGINS: Plugin[] = [
 	},
 	{
 		id: 'guide',
+		group: 'knowledge',
+		icon: 'document',
 		label: 'User guide',
 		repo: PLUGINS_REPO,
 		repoLabel: 'rocketflare-dev/rocketflare-plugins',
@@ -300,6 +333,8 @@ export const PLUGINS: Plugin[] = [
 	},
 	{
 		id: 'global-search',
+		group: 'knowledge',
+		icon: 'search',
 		label: 'Global search',
 		repo: PLUGINS_REPO,
 		repoLabel: 'rocketflare-dev/rocketflare-plugins',
@@ -323,6 +358,8 @@ export const PLUGINS: Plugin[] = [
 	},
 	{
 		id: 'sso',
+		group: 'connect',
+		icon: 'key',
 		label: 'Single sign-on (SAML + SCIM)',
 		availability: 'partners',
 		minKit: '0.29.0',
@@ -344,6 +381,8 @@ export const PLUGINS: Plugin[] = [
 	},
 	{
 		id: 'sites',
+		group: 'build',
+		icon: 'window',
 		label: 'Sites',
 		availability: 'partners',
 		minKit: '0.32.2',
@@ -372,6 +411,8 @@ export const PLUGINS: Plugin[] = [
 	},
 	{
 		id: 'example-feature',
+		group: 'build',
+		icon: 'puzzle',
 		label: 'Example feature',
 		repo: KIT_REPO,
 		repoLabel: 'rocketflare-dev/rocketflare',

@@ -13,9 +13,12 @@ import CloudDivider from '../../components/CloudDivider.astro'
 import Callout from '../../components/Callout.astro'
 import { pageByPath } from '../../data/pages'
 import Screenshot from '../../components/Screenshot.astro'
-import { COMMERCIAL_PLUGINS, OPEN_SOURCE_PLUGINS, PLUGINS, PLUGIN_COUNT, pluginPath } from '../../data/plugins'
+import ConceptIcon from '../../components/ConceptIcon.astro'
+import Terminal from '../../components/Terminal.astro'
+import { COMMERCIAL_PLUGINS, OPEN_SOURCE_PLUGINS, PLUGINS, PLUGIN_COUNT, PLUGIN_GROUPS, installCommand, pluginPath } from '../../data/plugins'
 import { showcaseFor } from '../../data/plugin-showcases'
 import { numberWord } from '../../data/concepts'
+import { PLUGIN_REQUEST_URL } from '../../data/site'
 
 const page = pageByPath('/plugins/')
 if (!page) throw new Error('Page not in the registry: /plugins/')
@@ -26,77 +29,111 @@ const searchText = (p: (typeof PLUGINS)[number]) =>
 		.join(' ')
 		.replace(/<[^>]+>/g, ' ')
 		.toLowerCase()
-const cards = OPEN_SOURCE_PLUGINS.map((p) => ({ p, text: searchText(p) }))
+const groups = PLUGIN_GROUPS.map((g) => ({
+	...g,
+	cards: OPEN_SOURCE_PLUGINS.filter((p) => p.group === g.key).map((p) => ({ p, text: searchText(p) })),
+})).filter((g) => g.cards.length > 0)
+const ungrouped = OPEN_SOURCE_PLUGINS.filter((p) => !groups.some((g) => g.key === p.group))
+if (ungrouped.length) throw new Error(`Plugins with no catalogue group: ${ungrouped.map((p) => p.id).join(', ')}`)
+
+/** The hero's example: a real install command for a real plugin. */
+const example = OPEN_SOURCE_PLUGINS.find((p) => p.id === 'inbox') ?? OPEN_SOURCE_PLUGINS[0]
+const exampleCmd = installCommand(example)
 const commercial = COMMERCIAL_PLUGINS.map((p) => ({ p, text: searchText(p), showcase: showcaseFor(p.id) }))
 ---
 <BaseLayout title={page.title} description={page.description} noindex={!page.ready}>
 	<header class="plugins-hero page-hero">
-		<div class="wrap">
+		<div class="wrap hero-grid">
 			<div class="hero-copy">
 				<span class="eyebrow">Plugins · {numberWord(OPEN_SOURCE_PLUGINS.length)} open source, {numberWord(COMMERCIAL_PLUGINS.length)} commercial</span>
 				<h1>Capabilities you copy in</h1>
 				<p class="lede">
-					A Rocketflare plugin is a git repository copied into your application — never an npm
-					package. Its code lands as ordinary source, renamed into your own vocabulary on the way
-					in, and deleting its folders takes it back out. Here is what is published today, what
-					each one adds, and the one command that installs it — except
-					for the commercial ones, which are <a href="/partners/">available to partners</a>.
+					A Rocketflare plugin is a git repository copied into your application, never an npm
+					package. Its code lands as ordinary source, renamed into your own vocabulary, and
+					deleting its folders takes it back out.
+				</p>
+				<p class="hero-links">
 					<a href="/concepts/plugins/">How the seam works →</a>
+					<a href="#commercial-title">Commercial plugins, for partners →</a>
 				</p>
 			</div>
+			{exampleCmd && (
+				<div class="hero-term">
+					<Terminal
+						title="zsh — your app"
+						lines={[
+							{ cmd: 'pnpm plugin add \\' },
+							{ out: `    ${example.repo}.git@${example.version} \\` },
+							{ out: `    --subdir ${example.subdir} --apply` },
+						]}
+						copy={`${exampleCmd} --apply`}
+						expect={`Without --apply it prints the plan and changes nothing. Or ask your agent: /rf-plugin add ${example.id}`}
+					/>
+				</div>
+			)}
 		</div>
 		<CloudDivider fill="var(--bg)" />
 	</header>
 
 	<section class="catalogue" aria-labelledby="catalogue-title">
 		<div class="wrap">
-			<h2 id="catalogue-title" class="visually-hidden">Find a plugin</h2>
 			<div class="search">
-				<label for="plugin-search">Search plugins</label>
+				<h2 id="catalogue-title">Open source <span>MIT licensed, one command to install</span></h2>
+				<label class="visually-hidden" for="plugin-search">Search plugins</label>
 				<input
 					id="plugin-search"
 					type="search"
-					placeholder="Name, feature or skill — e.g. calendar, cubes, search"
+					placeholder="Search: calendar, cubes, email, search…"
 					autocomplete="off"
 					spellcheck="false"
 				/>
 				<p class="search-count" aria-live="polite" id="plugin-search-count">{PLUGIN_COUNT} plugins</p>
 			</div>
-			<div class="group" data-group>
-			<header class="group-head">
-				<h2>Open source</h2>
-				<p>MIT licensed. Anyone can install these with one command.</p>
-			</header>
-			<ul class="grid" role="list">
-				{cards.map(({ p, text }, i) => (
-					<li id={p.id} class:list={['pcard', 'reveal', i % 2 === 1 ? 'tone-cyan' : 'tone-green']} data-search={text}>
-						<span class="eyebrow">
-							{p.shipsAs === 'installed'
-								? 'Installed by default'
-								: p.shipsAs === 'vendored'
-									? 'Ships in the kit'
-									: 'Add it when you need it'}
-						</span>
-						<h3><a class="card-link" href={pluginPath(p)}>{p.label}</a></h3>
-						<p class="summary">{p.summary}</p>
-						<ul class="badges" role="list" aria-label={`${p.label} at a glance`}>
-							<li><code>{p.version}</code></li>
-							<li>kit ≥ <code>{p.minKit}</code></li>
-							{p.requires?.map((r) => <li class="needs">needs <code>{r}</code></li>)}
-							{p.skills && <li>{p.skills.length} {p.skills.length === 1 ? 'skill' : 'skills'}</li>}
-							{p.contributedBy && <li>by {p.contributedBy.name}</li>}
-						</ul>
-					</li>
-				))}
-			</ul>
-			</div>
+
+			{groups.map((g) => (
+				<section class:list={['group', `tone-${g.tone}`]} data-group aria-labelledby={`group-${g.key}`}>
+					<header class="group-head">
+						<h3 id={`group-${g.key}`}>{g.title}</h3>
+						<p>{g.lede}</p>
+					</header>
+					<ul class="grid" role="list">
+						{g.cards.map(({ p, text }) => (
+							<li id={p.id} class="pcard reveal" data-search={text}>
+								<span class="pcard-top">
+									<span class="chip"><ConceptIcon name={p.icon} /></span>
+									{p.shipsAs !== 'optional' && (
+										<span class="ships">{p.shipsAs === 'installed' ? 'Installed by default' : 'In the kit'}</span>
+									)}
+								</span>
+								<h4><a class="card-link" href={pluginPath(p)}>{p.label}</a></h4>
+								<p class="summary">{p.summary}</p>
+								<ul class="facts" role="list" aria-label={`${p.label} at a glance`}>
+									<li><code>{p.version}</code></li>
+									<li>kit ≥ <code>{p.minKit}</code></li>
+									{p.requires?.map((r) => <li>needs <code>{r}</code></li>)}
+									{p.skills && <li>{p.skills.length} {p.skills.length === 1 ? 'skill' : 'skills'}</li>}
+									{p.contributedBy && <li>by {p.contributedBy.name}</li>}
+								</ul>
+							</li>
+						))}
+					</ul>
+				</section>
+			))}
+			<aside class="request" aria-labelledby="request-title">
+				<span class="chip request-chip"><ConceptIcon name="puzzle" /></span>
+				<div>
+					<h3 id="request-title">Need a plugin that isn't here?</h3>
+					<p>Tell us the job and the system it touches. Requests shape what we build next, and you can offer to test it or build it with us.</p>
+				</div>
+				<a class="btn btn-primary" href={PLUGIN_REQUEST_URL} target="_blank" rel="noopener">Request a plugin</a>
+			</aside>
 			<p class="no-match" hidden>No plugin matches that. Try a broader word, or <a href="/concepts/plugins/">read how plugins work</a>.</p>
 		</div>
 	</section>
 
 	<section class="commercial bg-band" aria-labelledby="commercial-title" data-group>
 		<div class="wrap">
-			<header class="group-head">
+			<header class="commercial-head">
 				<span class="eyebrow">For Rocketflare partners</span>
 				<h2 id="commercial-title">Commercial</h2>
 				<p>Closed source, deeper, and aimed at what enterprise customers ask for. <a href="/partners/">How partnering works</a>.</p>
@@ -104,13 +141,13 @@ const commercial = COMMERCIAL_PLUGINS.map((p) => ({ p, text: searchText(p), show
 			<ul class="ccards" role="list">
 				{commercial.map(({ p, text, showcase }) => (
 					<li id={p.id} class="pcard ccard" data-search={text}>
+						{showcase && <Screenshot light={showcase.hero.light} dark={showcase.hero.dark} alt={showcase.hero.alt} url={showcase.hero.url} width={560} />}
 						<div class="ccard-copy">
 							<h3><a class="card-link" href={pluginPath(p)}>{p.label}</a></h3>
 							<p>{showcase?.headline ?? p.summary}</p>
 							{showcase && <ul class="highlights" role="list">{showcase.highlights.map((h) => <li>{h}</li>)}</ul>}
 							<p class="ccard-more" aria-hidden="true">See what it does →</p>
 						</div>
-						{showcase && <Screenshot light={showcase.hero.light} dark={showcase.hero.dark} alt={showcase.hero.alt} url={showcase.hero.url} width={560} />}
 					</li>
 				))}
 			</ul>
@@ -141,28 +178,30 @@ const commercial = COMMERCIAL_PLUGINS.map((p) => ({ p, text: searchText(p), show
 	</script>
 
 	<section class="after">
-		<div class="wrap-narrow">
+		<div class="wrap after-grid">
+			<div>
+				<h2>Writing one of your own</h2>
+				<p>
+					A plugin is a repository with a manifest, three directories and four entry files. The kit
+					ships the reference one in its own tree so you can read a small, complete example before
+					writing anything: a table, a gated route, a job, an agent tool, a page, two commands and its
+					own tests. Point <code>pnpm plugin add</code> at a local path and it installs from there,
+					which is the authoring loop.
+				</p>
+				<p class="after-links">
+					<a class="btn btn-primary" href="/concepts/plugins/">Read the concept</a>
+					<a class="btn btn-secondary" href="/get-started/">Get the kit running</a>
+				</p>
+			</div>
 			<Callout tone="yellow" title="First-party only, and that is a position rather than a stage">
 				<p>
 					A plugin runs inside your Worker with your database connection. There is no sandbox that
 					would make that otherwise, so installing one is as trusting as merging a pull request.
 					Every command prints its plan and stops until you re-run it with <code>--apply</code>, and
-					the published set stays code the kit's own authors wrote — instead of a directory that
+					the published set stays code the kit's own authors wrote, instead of a directory that
 					implies a review process nobody is running.
 				</p>
 			</Callout>
-			<h2>Writing one of your own</h2>
-			<p>
-				A plugin is a repository with a manifest, three directories and four entry files. The kit
-				ships the reference one in its own tree so you can read a small, complete example before
-				writing anything: a table, a gated route, a job, an agent tool, a page, two commands and its
-				own tests. Point <code>pnpm plugin add</code> at a local path and it installs from there,
-				which is the authoring loop.
-			</p>
-			<p class="after-links">
-				<a class="btn btn-primary" href="/concepts/plugins/">Read the concept</a>
-				<a class="btn btn-secondary" href="/get-started/">Get the kit running</a>
-			</p>
 		</div>
 	</section>
 </BaseLayout>
@@ -170,37 +209,78 @@ const commercial = COMMERCIAL_PLUGINS.map((p) => ({ p, text: searchText(p), show
 <style>
 	.plugins-hero {
 		position: relative;
-		padding-bottom: 7rem;
+		padding-block-end: 7rem;
 		background: linear-gradient(180deg, var(--sky-top), var(--sky-mid) 60%, var(--bg));
 	}
+	/* Copy and an install transcript side by side; they stack when the row has no room for both. */
+	.hero-grid {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 2rem 3rem;
+		align-items: center;
+	}
+	.hero-copy { flex: 1 1 22rem; }
+	.hero-term { flex: 1.6 1 30rem; min-inline-size: 0; }
+	.hero-copy h1 { text-wrap: balance; }
+	.hero-copy .lede { max-inline-size: 38rem; }
+	.hero-links { display: flex; flex-wrap: wrap; gap: 0.4rem 1.6rem; margin: 1.2rem 0 0; font-weight: 600; }
+	.hero-term :global(.terminal) { margin: 0; }
 
-	.catalogue { padding: 0 0 4rem; background: var(--bg); }
+	.catalogue { padding-block: 0 4.5rem; background: var(--bg); }
 	.visually-hidden {
-		position: absolute; width: 1px; height: 1px; overflow: hidden;
-		clip: rect(0 0 0 0); white-space: nowrap;
+		position: absolute; inline-size: 1px; block-size: 1px; overflow: clip;
+		clip-path: inset(50%); white-space: nowrap;
 	}
 
-	.search { display: grid; gap: 0.45rem; max-width: 36rem; margin: 0 0 1.8rem; }
-	.search label { font-weight: 600; }
+	/* Title, search and count on one row; they wrap onto lines of their own when narrow. */
+	.search {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.8rem 1.4rem;
+		padding-block-end: 1.4rem;
+		margin-block-end: 2.6rem;
+		border-block-end: 1px solid var(--border);
+	}
+	.search h2 { font-size: var(--step-3); margin: 0; flex: 1 1 18rem; }
+	.search h2 span { display: block; font-size: 0.95rem; font-weight: 500; color: var(--text-muted); margin-block-start: 0.2rem; }
 	.search input {
+		flex: 0 1 22rem;
+		min-inline-size: 0;
 		font: inherit;
-		padding: 0.7rem 0.95rem;
-		border-radius: 12px;
+		padding: 0.7rem 1rem;
+		border-radius: 999px;
 		border: 1px solid var(--border-bright);
 		background: var(--card);
 		color: var(--text);
 	}
 	.search input::placeholder { color: var(--text-muted); }
-	.search-count { margin: 0; font-size: 0.88rem; color: var(--text-muted); }
-	:global(html:not(.js)) .search { display: none; }
+	.search input:focus-visible { outline: 3px solid var(--orange); outline-offset: 2px; }
+	.search-count { margin: 0; font-size: 0.88rem; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+	:global(html:not(.js)) .search input,
+	:global(html:not(.js)) .search-count { display: none; }
+
+	/* A capability: its name and one line on the left, its plugins on the right. */
+	.group {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 1.2rem 2.5rem;
+		padding-block: 0 2.8rem;
+	}
+	.group[hidden] { display: none; }
+	/* The heading column keeps its width until the cards would drop under 36rem; then it goes on top. */
+	.group-head { flex: 1 1 14rem; max-inline-size: 20rem; }
+	.group > .grid { flex: 999 1 36rem; min-inline-size: 0; }
+	.group-head h3 { font-size: var(--step-1); margin: 0 0 0.4rem; color: var(--text-bright); }
+	.group-head p { margin: 0; color: var(--text-muted); font-size: 0.95rem; }
 
 	.grid {
 		list-style: none;
 		margin: 0;
 		padding: 0;
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(min(100%, 17.5rem), 1fr));
-		gap: 1.2rem;
+		grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
+		gap: 1rem;
 	}
 	.pcard {
 		position: relative;
@@ -208,80 +288,118 @@ const commercial = COMMERCIAL_PLUGINS.map((p) => ({ p, text: searchText(p), show
 		flex-direction: column;
 		background: var(--card);
 		border: 1px solid var(--border);
-		border-top: 4px solid var(--accent);
 		border-radius: 16px;
-		padding: 1.2rem 1.3rem 1.1rem;
-		box-shadow: var(--shadow-sm);
-		scroll-margin-top: 5rem;
-		transition: border-color 0.15s ease, transform 0.15s ease;
+		padding: 1.3rem 1.4rem 1.2rem;
+		scroll-margin-block-start: 5rem;
 	}
 	.pcard[hidden] { display: none; }
-	.pcard:hover { border-color: var(--border-bright); transform: translateY(-2px); }
-	.pcard:focus-within { border-color: var(--accent); }
-	.pcard h3 { margin: 0.25rem 0 0.45rem; font-size: 1.2rem; }
+	@media (prefers-reduced-motion: no-preference) {
+		.pcard { transition: border-color 0.2s ease, box-shadow 0.2s ease; }
+	}
+	@media (hover: hover) and (pointer: fine) {
+		.pcard:hover { border-color: var(--accent); box-shadow: var(--shadow-sm); }
+	}
+	.pcard:active { box-shadow: none; }
+	.pcard-top { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; margin-block-end: 0.9rem; }
+	.chip {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		inline-size: 40px;
+		block-size: 40px;
+		border-radius: 11px;
+		background: var(--tint);
+		color: var(--accent);
+	}
+	.chip :global(svg) { inline-size: 20px; block-size: 20px; }
+	.ships { font-size: 0.75rem; font-weight: 600; color: var(--text-muted); }
+	.pcard h4 { margin: 0 0 0.35rem; font-size: 1.08rem; }
 	/* The whole card is the link's target; the link itself stays the one focusable thing. */
 	.card-link { color: var(--text-bright); text-decoration: none; }
-	.card-link::after { content: ''; position: absolute; inset: 0; border-radius: 16px; }
-	.card-link:focus-visible { outline: none; }
+	.card-link::after { content: ''; position: absolute; inset: 0; border-radius: inherit; }
 	.pcard:has(.card-link:focus-visible) { outline: 3px solid var(--orange); outline-offset: 3px; }
+	.card-link:focus-visible { outline: 0 solid transparent; }
 	.summary {
-		margin: 0 0 0.9rem;
+		margin: 0 0 1rem;
 		color: var(--text-muted);
 		font-size: 0.92rem;
 		line-height: 1.5;
 		display: -webkit-box;
-		-webkit-line-clamp: 4;
+		-webkit-line-clamp: 3;
 		-webkit-box-orient: vertical;
-		overflow: hidden;
+		overflow: clip;
 	}
-	.badges { list-style: none; margin: auto 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.35rem; }
-	.badges li {
-		font-size: 0.78rem;
-		padding: 0.15rem 0.55rem;
-		border-radius: 999px;
-		background: var(--card-alt);
-		border: 1px solid var(--border);
-		color: var(--text);
+	.facts {
+		list-style: none;
+		margin: auto 0 0;
+		padding: 0;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.2rem 0.9rem;
+		font-size: 0.8rem;
+		color: var(--text-muted);
 	}
-	.badges code { font-size: 0.76rem; background: none; padding: 0; }
-	.badges .needs { border-color: var(--accent); }
+	.facts code { font-size: 0.78rem; background: none; padding: 0; color: var(--text); }
 	.no-match { color: var(--text-muted); }
 
-	.group[hidden], .commercial[hidden] { display: none; }
-	.group-head { margin: 0 0 1.4rem; }
-	.group-head h2 { font-size: var(--step-3); margin: 0 0 0.3rem; }
-	.group-head p { margin: 0; color: var(--text-muted); }
-
-	.commercial { padding: 4.5rem 0; }
-	.commercial .group-head p { color: var(--band-muted); }
-	.ccards { list-style: none; margin: 0; padding: 0; display: grid; gap: 1.4rem; }
-	.ccard {
-		display: grid;
-		grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
-		gap: 2.4rem;
+	/* The ask at the end of the catalogue: icon, a line, one button; the button wraps under when narrow. */
+	.request {
+		display: flex;
+		flex-wrap: wrap;
 		align-items: center;
+		gap: 1rem 1.4rem;
+		margin-block-start: 0.6rem;
+		padding: 1.4rem 1.6rem;
+		border: 1px dashed var(--border-bright);
+		border-radius: 18px;
+		background: var(--card-alt);
+	}
+	.request > div { flex: 1 1 20rem; }
+	.request h3 { margin: 0 0 0.25rem; font-size: 1.15rem; color: var(--text-bright); }
+	.request p { margin: 0; color: var(--text-muted); font-size: 0.95rem; }
+	.request-chip { --accent: var(--orange); --tint: var(--tint-orange); }
+
+	.commercial { padding-block: 4.5rem; }
+	.commercial[hidden] { display: none; }
+	.commercial-head { margin-block-end: 2rem; }
+	.commercial-head h2 { font-size: var(--step-3); margin: 0 0 0.3rem; }
+	.commercial-head p { margin: 0; color: var(--band-muted); }
+	.ccards {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr));
+		gap: 1.4rem;
+	}
+	.ccard {
+		display: flex;
+		flex-direction: column;
 		background: none;
 		border: 1px solid var(--band-muted);
 		border-radius: 20px;
-		padding: 1.8rem 2rem;
-		box-shadow: none;
+		padding: 1.4rem;
+		gap: 1.3rem;
 	}
-	.ccard > :global(.shot) { width: 100%; margin-inline: 0; }
-	.ccard:hover { border-color: var(--orange); }
-	.ccard:focus-within { border-color: var(--orange); }
-	.ccard h3 { font-size: var(--step-2); margin: 0 0 0.5rem; }
+	.ccard > :global(.shot) { inline-size: 100%; margin: 0; }
+	@media (hover: hover) and (pointer: fine) {
+		.ccard:hover { border-color: var(--orange); box-shadow: none; }
+	}
+	.ccard h3 { font-size: var(--step-1); margin: 0 0 0.45rem; }
 	.ccard .card-link { color: var(--band-ink); }
 	.ccard p { margin: 0; color: var(--band-muted); line-height: 1.55; }
-	.highlights { list-style: none; margin: 1rem 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.4rem; }
-	.highlights li { font-size: 0.82rem; padding: 0.2rem 0.65rem; border-radius: 999px; border: 1px solid var(--band-muted); }
-	.ccard .ccard-more { margin-top: 1.1rem; color: var(--cyan); font-weight: 600; }
+	.highlights { list-style: none; margin: 0.9rem 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.4rem; }
+	.highlights li { font-size: 0.8rem; padding: 0.2rem 0.65rem; border-radius: 999px; border: 1px solid var(--band-muted); color: var(--band-ink); }
+	.ccard .ccard-more { margin-block-start: 1rem; color: var(--cyan); font-weight: 600; }
 
-	.after { padding: 4rem 0 5rem; background: var(--bg); }
-	.after h2 { margin-top: 2.4rem; }
-	.after-links { display: flex; flex-wrap: wrap; gap: 0.8rem; margin-top: 1.6rem; }
-
-	@media (max-width: 860px) {
-		.ccard { grid-template-columns: minmax(0, 1fr); gap: 1.2rem; padding: 1.4rem; }
+	.after { padding-block: 4.5rem 5rem; background: var(--bg); }
+	.after-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr));
+		gap: 2rem 3.5rem;
+		align-items: start;
 	}
-
+	.after h2 { margin-block: 0 1rem; }
+	.after p { color: var(--text-muted); }
+	.after-links { display: flex; flex-wrap: wrap; gap: 0.8rem; margin-block-start: 1.6rem; }
 </style>
