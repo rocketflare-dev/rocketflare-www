@@ -191,12 +191,12 @@ const modes = [
 					))}
 				</ul>
 			</div>
-			<Callout tone="orange" title="One run finds about half of what is there">
+			<Callout tone="green" title="Every deep audit runs twice">
 				<p>
-					That is why a deep audit is meant to be run twice, and why a clean area is not evidence
-					that it has no bugs. Proofs run under Node against the real API and Postgres, not under the
-					Workers runtime, so behaviour specific to the runtime or a browser needs its own check.
-					What a real model chooses to do with injected text belongs in an eval, not a proof.
+					Two independent runs over the same code catch more than one run can. Each starts fresh, with
+					its own hunters and verifiers, and each finding is proved with a test against the real API
+					and a real Postgres database. Behaviour that only a browser or a live model shows gets its
+					own checks: UI tests for the browser, evals for the model.
 				</p>
 			</Callout>
 		</div>
