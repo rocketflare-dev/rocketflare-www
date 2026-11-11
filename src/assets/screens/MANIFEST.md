@@ -130,6 +130,15 @@ The commercial `sites` plugin as merged to the commercial plugins repository's `
 | `sites-elements` | `/sites/www?tab=elements` | Site header and Site footer regions | `#blocks` |
 | `sites-public` | `http://www.localhost:3421/` | The published English home page, light only | `#public` |
 | `sites-build` | `/sites/www?tab=pages` → New page → Build with AI | Description filled in, Choose sources expanded, **not submitted** | `#ai` |
+| `sites-forms` | `/sites/www/forms` → View | 0.4.0 pass (below): the contact submission's view, Workflow Succeeded with View run, the Summary and the Reply draft | `#forms` |
+
+`sites-forms` was added in a later pass: the sites plugin 0.4.0 (commercial plugins PR #3, branch `feat/sites-form-events`, unreleased; needs kit 0.32.1), installed in a host at `~/tmp/sites-040-host` (kit 0.32.0 commit `750b36b` plus the plugin, uncommitted), captured 2026-11-10.
+
+- Stack: `pnpm dev` on `http://localhost:3440` (API :3441), dev Postgres `sites-040-dev-pg` on :5745, signed in with `/login?as=owner@example.test`. The host's `app/index.ts` declared no site, which left the plugin dormant; `www` (`en` only, matching its data) was declared for the pass and the file restored afterwards
+- Same tool and format as above: `playwright-core`, Chrome headless, 1440×900 at `deviceScaleFactor: 2`, theme by `localStorage.theme` in an init script
+- **Read-only**: no new submission and no new agent run. The submission ("Ada Lovelace", a nonprofit-discount question) and its succeeded `sites.form-reply` run were made by an earlier pass on Workers AI
+- Retouched in the DOM, nothing saved: the `DEV` badge, the `vdev` label and the TanStack Query devtools button hidden (`visibility: hidden`), and in the dialog only, the host organisation's name `Rocketflare` in the model's summary and reply replaced with `Pellorin`
+- Also captured, not used (a feature has one frame): the Form block's **On submit, start** picker set to Draft a reply, on `/sites/www/pages/<contact>/en`
 
 ## Rocketflare Launch captures (`launch-*`, used by `/launch/`)
 

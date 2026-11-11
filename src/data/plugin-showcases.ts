@@ -22,6 +22,8 @@ import sitesEditorDark from '../assets/screens/sites-editor.dark.png'
 import sitesEditorLight from '../assets/screens/sites-editor.light.png'
 import sitesElementsDark from '../assets/screens/sites-elements.dark.png'
 import sitesElementsLight from '../assets/screens/sites-elements.light.png'
+import sitesFormsDark from '../assets/screens/sites-forms.dark.png'
+import sitesFormsLight from '../assets/screens/sites-forms.light.png'
 import sitesLanguageDark from '../assets/screens/sites-language.dark.png'
 import sitesLanguageLight from '../assets/screens/sites-language.light.png'
 import sitesPaletteDark from '../assets/screens/sites-palette.dark.png'
@@ -207,14 +209,22 @@ const sites: PluginShowcase = {
 		{
 			id: 'forms',
 			nav: 'Forms',
-			title: 'Forms that land in your app',
-			lede: 'Drop a Form block on any page. What visitors send arrives in the app beside the site, not in someone’s inbox.',
+			title: 'Forms that start work',
+			lede: 'Drop a Form block on any page. Each submission lands in the app beside the site, and can start an agent that reads it and drafts the reply.',
 			points: [
-				'With JavaScript, a small script under 5 KB sends the form in place and shows field errors next to the fields. Without it, the form posts normally and lands on a page in the site’s own layout.',
-				'Turnstile on every form, failing closed, and a limit of 10 submissions a minute.',
-				'The success message and the page to go to next come from the published block, never from what was submitted.',
-				'Submissions are listed per form in the site’s Forms tab for people who can publish, and deleted after 90 days.',
+				'Every saved submission announces the kit event <code>sites.form.submitted</code>. Your app’s own code, another plugin, or an agent with <code>triggers</code> can act on each one.',
+				'The Form block’s <strong>On submit, start</strong> setting lets an editor pick an agent with no code, from the agents that opt in. Only the agent in the published block starts: nothing a visitor sends can choose it, and a choice saved only in a draft does not count.',
+				'Runs go through the kit’s agent workflow, inside its run caps and daily budgets. The plugin ships one agent, Draft a reply, which summarises a submission and drafts a reply. It sends nothing.',
+				'The site’s Forms tab lists submissions per form for people who can publish, with each one’s workflow status and a link to its run, or why nothing started. Submissions are deleted after 90 days.',
+				'With JavaScript, a small script under 5 KB sends the form in place and shows field errors next to the fields. Without it, the form posts normally and lands on a page in the site’s own layout. Both announce the event, and if announcing fails, the visitor still sees success and the event is sent again later.',
+				'Turnstile on every form, failing closed, and a limit of 10 submissions a minute. The success message and the page to go to next come from the published block, never from what was submitted.',
 			],
+			shot: {
+				light: sitesFormsLight,
+				dark: sitesFormsDark,
+				alt: 'The Forms tab with a submission to the contact form open: the visitor’s name, email and question about a nonprofit discount, then a Workflow row reading Succeeded with a View run link, the agent’s summary of the question and a reply draft.',
+				url: `${SITES_APP}/sites/www/forms`,
+			},
 		},
 		{
 			id: 'ai',
@@ -256,6 +266,7 @@ const sites: PluginShowcase = {
 		'Media cannot be deleted from a library, and replacing an image does not update the pages using the old one.',
 		'A publish anywhere makes every page and image variant on every site render again.',
 		'Plain-text fields on the canvas are editable on hover or focus, so touch and keyboard users edit them in the side panel.',
+		'The On submit, start picker lists every agent that opts in, with no filter per form. The run a form starts has no requester, so only owners and admins can open its run page; other publishers see its status in the Forms tab.',
 	],
 	afterInstall:
 		'Run <code>/sites-setup</code> to choose the organisation that owns the sites and map the hosts, and have a person run <code>/rf-provision</code> for its R2 bucket, KV namespace and Images binding.',
