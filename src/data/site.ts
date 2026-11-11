@@ -47,14 +47,11 @@ export const PLUGIN_REQUEST_URL = 'https://github.com/rocketflare-dev/rocketflar
 export const PLUGINS_GITHUB_URL = 'https://github.com/rocketflare-dev/rocketflare-plugins'
 
 /**
- * The security docs, pinned to the release that ships them so the page and the text it links to
- * cannot drift apart. Move the tag when a later release changes them.
+ * The kit release whose security docs (docs/THREAT-MODEL.md, docs/SECURITY-AUDIT.md, SECURITY.md)
+ * `npm run sync:security` vendors by default. They render at /security/<doc>/ and are never linked
+ * on GitHub. Move the tag, re-sync and commit when a later release changes them.
  */
 export const SECURITY_DOCS_TAG = '0.35.0'
-const SECURITY_DOCS = `${GITHUB_URL}/blob/${SECURITY_DOCS_TAG}`
-export const THREAT_MODEL_URL = `${SECURITY_DOCS}/docs/THREAT-MODEL.md`
-export const SECURITY_AUDIT_URL = `${SECURITY_DOCS}/docs/SECURITY-AUDIT.md`
-export const SECURITY_POLICY_URL = `${SECURITY_DOCS}/SECURITY.md`
 /** GitHub private vulnerability reporting, one form per repository. */
 export const REPORT_KIT_VULN_URL = `${GITHUB_URL}/security/advisories/new`
 export const REPORT_PLUGINS_VULN_URL = `${PLUGINS_GITHUB_URL}/security/advisories/new`

@@ -262,9 +262,45 @@ export const PAGES: SitePage[] = [
 		description:
 			'What every copy of Rocketflare enforces by design, the threat model behind it, the multi-agent audit it is tested with, every finding fixed in a released version, and how to report a vulnerability privately.',
 		audience: 'both',
-		order: 12,
+		// After Plugins (6), so it is the last page link before Partners, which Nav.astro places last.
+		order: 6.5,
+		ready: true,
+	},
+	{
+		path: '/security/threat-model/',
+		title: 'Threat model — what a security review of Rocketflare tries to break',
+		nav: 'Threat model',
+		description:
+			'The kit’s own threat model: the assets, every actor from an anonymous visitor to a plugin with what each may and must not do, the trust boundaries, what is out of scope, and what a plugin author must prove.',
+		audience: 'engineer',
+		order: 13,
 		ready: true,
 		inNav: false,
+		inFooter: false,
+	},
+	{
+		path: '/security/audit/',
+		title: 'Security audit — how /rf-security audits a Rocketflare app',
+		nav: 'Security audit',
+		description:
+			'The audit that ships in every copy: its modes and what each costs, how hunters, verifiers, critics and reviewers work, the sandbox every proof runs in, where results go, and what a run does not prove.',
+		audience: 'engineer',
+		order: 13,
+		ready: true,
+		inNav: false,
+		inFooter: false,
+	},
+	{
+		path: '/security/policy/',
+		title: 'Security policy — reporting a vulnerability in Rocketflare',
+		nav: 'Security policy',
+		description:
+			'How security fixes reach a copy of the kit, and how to report a vulnerability privately rather than in a public issue.',
+		audience: 'both',
+		order: 13,
+		ready: true,
+		inNav: false,
+		inFooter: false,
 	},
 	{
 		path: '/security/track-record/',
