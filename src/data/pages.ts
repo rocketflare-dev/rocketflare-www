@@ -256,6 +256,17 @@ export const PAGES: SitePage[] = [
 		inFooter: false,
 	},
 	{
+		path: '/security/',
+		title: 'Security — what the kit enforces, how it is audited, and what was fixed',
+		nav: 'Security',
+		description:
+			'What every copy of Rocketflare enforces by design, the threat model behind it, the multi-agent audit it is tested with, every finding fixed in a released version, and how to report a vulnerability privately.',
+		audience: 'both',
+		order: 12,
+		ready: true,
+		inNav: false,
+	},
+	{
 		path: '/license/',
 		title: 'License terms — what is free, what is commercial, and why',
 		nav: 'License terms',

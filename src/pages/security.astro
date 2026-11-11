@@ -1,0 +1,692 @@
+---
+/**
+ * Security: what every copy of the kit enforces, the threat model it is held to, the audit it is
+ * tested with, and the public record of what that audit found and which release fixed it.
+ *
+ * Every posture claim here is one `docs/CONCEPTS.md` or `docs/THREAT-MODEL.md` makes; claim nothing
+ * they do not. The track record comes from `src/data/security.ts`, which lists only findings fixed
+ * in a released version, one neutral line each — never how to reproduce one.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro'
+import SectionHead from '../components/SectionHead.astro'
+import Callout from '../components/Callout.astro'
+import ConceptIcon from '../components/ConceptIcon.astro'
+import Steps from '../components/Steps.astro'
+import { pageByPath } from '../data/pages'
+import {
+	CLOUDFLARE_AUDIT_SKILL_URL,
+	REPORT_KIT_VULN_URL,
+	REPORT_PLUGINS_VULN_URL,
+	SECURITY_AUDIT_URL,
+	SECURITY_DOCS_TAG,
+	SECURITY_POLICY_URL,
+	THREAT_MODEL_URL,
+} from '../data/site'
+import { SKILLS } from '../data/get-started'
+import {
+	CONFIRMED_IN_BOTH_FIRST_RUNS,
+	FINDINGS,
+	HARDENING,
+	REPOS,
+	ROUNDS,
+	RUNS,
+	SEVERITIES,
+	countBySeverity,
+	releaseUrl,
+	repoOfRelease,
+} from '../data/security'
+
+const page = pageByPath('/security/')
+if (!page) throw new Error('Page not in the registry: /security/')
+
+const total = countBySeverity(FINDINGS)
+const SEVERITY_TONE = { high: 'red', medium: 'orange', low: 'blue' } as const
+const SEVERITY_LABEL = { high: 'High', medium: 'Medium', low: 'Low' } as const
+
+const dateLabel = (iso: string) =>
+	new Date(`${iso}T00:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })
+const releaseLabel = (release: string) => `${REPOS[repoOfRelease(release)].label.toLowerCase()} ${release}`
+
+const posture = [
+	{
+		icon: 'database',
+		tone: 'blue',
+		title: 'Every query names its organisation',
+		body: 'The organisation comes from the signed-in session or key, never from the request. Every domain query filters by it, and a test fails any function that reads a tenant table without naming one. Every tenant table also carries a row-level security policy, and a coverage test fails a table that lacks one.',
+		source: '/concepts/database/',
+	},
+	{
+		icon: 'key',
+		tone: 'orange',
+		title: 'API keys stay in their organisation',
+		body: 'A key belongs to one organisation and acts with its creator’s role. Its scope is checked on every request, so a read key cannot write. It cannot reach the admin area, list its creator’s other organisations or act on their account. Keys are hashed, expire and can be revoked.',
+		source: '/concepts/auth/',
+	},
+	{
+		icon: 'users',
+		tone: 'green',
+		title: 'Roles are checked on the server',
+		body: 'Owner, admin, member and support are a CASL permission matrix the API checks. Only an owner can create or remove an owner, and an invitation carries only the authority its issuer still holds when it is accepted.',
+		source: '/concepts/tenancy/',
+	},
+	{
+		icon: 'sparkles',
+		tone: 'purple',
+		title: 'The model works for the person asking',
+		body: 'Chat and agent tools run with the requester’s access, read when the tool runs, and the model never picks an organisation. Chat never runs a tool that needs approval. A tool that fetches the web reads only addresses the person wrote or its own search returned.',
+		source: '/concepts/ai/',
+	},
+	{
+		icon: 'shield',
+		tone: 'cyan',
+		title: 'Secrets go in and never come out',
+		body: 'Tenant AI keys and plugin credentials are sealed with AES-GCM and never returned: the API answers whether a credential is set, not what it is. A stored key stays with the provider and address it was saved for; changing either needs the key again.',
+		source: '/concepts/ai/',
+	},
+	{
+		icon: 'puzzle',
+		tone: 'yellow',
+		title: 'Plugins compose through declared seams',
+		body: 'A plugin reaches the kit only through declared entries and the context it is handed. The plugin check refuses an import past them, a table another plugin declares, and a tenant table with no isolation test. A plugin that adds a query surface of its own owns the test that proves it stays in one organisation.',
+		source: '/concepts/plugins/',
+	},
+] as const
+
+const actors = [
+	{ who: 'Anyone on the internet', may: 'Open public pages, sign in, and use an invitation they hold.', mustNot: 'Read or change an organisation’s data, or learn whether an account exists.' },
+	{ who: 'Someone awaiting approval', may: 'See the page that says they are waiting.', mustNot: 'Get into an organisation or use the platform’s resources.' },
+	{ who: 'Member', may: 'Use what their role allows in their organisation, and read documents shared with them.', mustNot: 'Reach another organisation, read a document kept from them, or raise their own role.' },
+	{ who: 'Admin', may: 'Run their organisation within the permission matrix.', mustNot: 'Create or remove an owner, or read a stored credential back.' },
+	{ who: 'Owner', may: 'Do everything in their organisation.', mustNot: 'Reach another organisation.' },
+	{ who: 'API key', may: 'Act as its organisation and its creator’s role, within its scope and expiry.', mustNot: 'Go past either, reach the admin area, or act in its creator’s other organisations.' },
+	{ who: 'Support and global admins', may: 'Work across organisations through the admin area, on a path that is logged.', mustNot: 'Keep that access after losing the role.' },
+	{ who: 'A document’s author', may: 'Write text the model will read, including a colleague or the source of an uploaded file.', mustNot: 'Steer someone else’s conversation into revealing data or taking an action.' },
+	{ who: 'The model', may: 'Call tools bound to the person asking.', mustNot: 'Choose an organisation, or do more than that person could.' },
+	{ who: 'Identity providers and webhook senders', may: 'Assert what their configuration trusts.', mustNot: 'Be believed about anything else, or replay old messages.' },
+	{ who: 'A plugin', may: 'Use the declared entries and the context it is given.', mustNot: 'Reach the kit any other way. It runs in the same Worker, so installing one is as trusting as merging its code.' },
+]
+
+const auditSteps = [
+	{ title: 'Reconnaissance', body: 'One agent maps the system against the threat model: entry points, trust boundaries, the sign-in and tenancy paths.' },
+	{ title: 'Hunters', body: 'Each hunter gets one narrow unit: a subsystem, a boundary and a list of attack classes. A hunter never sees another hunter’s results or a list of suspected bugs.' },
+	{ title: 'Independent verifiers', body: 'Every candidate goes to a fresh verifier on a different model from the hunters, so a mistake one model tends to make is not repeated by the model checking it. It confirms with a proof, rejects, or names the one fact it could not settle.' },
+	{ title: 'A critic', body: 'A critic reads the coverage ledger and names what nobody looked at. That becomes the next wave of hunters while the budget lasts.' },
+	{ title: 'Reviewers', body: 'Reviewers challenge every confirmed finding. A review that changes one materially sends it to a new verifier before it stands.' },
+]
+
+const rules = [
+	{ title: 'Confirmed means proven', body: 'A finding counts only when a test, built with the kit’s own test helpers, fails on the untouched code. Every file and line it cites is checked.' },
+	{ title: 'Proofs never touch a deployment', body: 'They run in a locked-down container with its own throwaway database and test organisations, a read-only filesystem and no route out. No agent sends traffic to a deployed app.' },
+	{ title: 'Findings stay private until the fix ships', body: 'Nothing goes in an issue, a pull request or a commit message before the release. The repository is public, and an early write-up would work against every copy that has not upgraded.' },
+	{ title: 'A fix keeps its proof', body: 'Each fixed finding’s proof becomes a permanent regression test, named for the behaviour rather than the attack.' },
+]
+
+const modes = [
+	{ mode: 'quick', calls: 16, cost: '≈ $35', when: 'A quick look, a re-run, or a renamed copy’s first check.' },
+	{ mode: 'standard', calls: 50, cost: '≈ $110–150', when: 'Before a release, over what changed since the last one.' },
+	{ mode: 'deep', calls: 90, cost: '≈ $200+', when: 'A first audit, or after sign-in, tenancy or AI changed a lot.' },
+]
+---
+<BaseLayout title={page.title} description={page.description} noindex={!page.ready}>
+	<header class="hero page-hero bg-sky">
+		<div class="wrap">
+			<span class="eyebrow">Security</span>
+			<h1>What the kit enforces, and how we test it</h1>
+			<p class="lede">
+				Every copy starts with organisation isolation, scoped keys and server-side role checks. The
+				kit is audited by AI agents that try to break those rules and check each other’s work. Every
+				finding that has been fixed and released is listed here, with the release that fixed it.
+			</p>
+			<dl class="stats">
+				<div>
+					<dt>Findings fixed and released</dt>
+					<dd><a href="#track-record">{FINDINGS.length}</a></dd>
+				</div>
+				<div>
+					<dt>Audit runs published</dt>
+					<dd><a href="#runs">{RUNS.length}</a></dd>
+				</div>
+				<div>
+					<dt>Hardening changes</dt>
+					<dd><a href="#hardening">{HARDENING.length}</a></dd>
+				</div>
+			</dl>
+			<nav class="toc" aria-label="On this page">
+				<a href="#posture">Posture</a>
+				<a href="#threat-model">Threat model</a>
+				<a href="#testing">How it is tested</a>
+				<a href="#when-it-runs">Cadence</a>
+				<a href="#track-record">Track record</a>
+				<a href="#run-it">Run it on your copy</a>
+				<a href="#report">Report a vulnerability</a>
+			</nav>
+		</div>
+	</header>
+
+	<!-- ================================================================ posture -->
+	<section class="block" id="posture">
+		<div class="wrap">
+			<SectionHead
+				align="left"
+				eyebrow="Posture"
+				title="What every copy enforces"
+				lede="These are rules in the code, each with a test that fails when a change breaks it. Each card links to the concept page that explains the mechanism."
+			/>
+			<div class="cards">
+				{posture.map((p) => (
+					<article class={`card tone-${p.tone}`}>
+						<span class="chip"><ConceptIcon name={p.icon} /></span>
+						<h3>{p.title}</h3>
+						<p>{p.body}</p>
+						<a href={p.source}>How it works <span aria-hidden="true">→</span></a>
+					</article>
+				))}
+			</div>
+			<Callout tone="yellow" title="Where the design stops">
+				<p>
+					Row-level security ships switched off, so isolation is the query filter alone. One missed
+					filter would be a cross-organisation read, and the tests are what catch it. A plugin runs
+					with no sandbox and is trusted like a dependency. Deployed configuration, your Cloudflare
+					account and your secrets are yours to get right: the audit reads code.
+				</p>
+			</Callout>
+		</div>
+	</section>
+
+	<!-- =========================================================== threat model -->
+	<section class="block bg-band" id="threat-model">
+		<div class="wrap">
+			<SectionHead
+				align="left"
+				eyebrow="Threat model"
+				title="Who may do what"
+				lede="The audit starts from a written threat model: who touches the app, what each may do, and what each must never manage. In a copy it is yours to rewrite for your own product."
+			/>
+			<ul class="actors">
+				{actors.map((a) => (
+					<li>
+						<h3>{a.who}</h3>
+						<p><span class="lbl may">May</span>{a.may}</p>
+						<p><span class="lbl must-not">Must not</span>{a.mustNot}</p>
+					</li>
+				))}
+			</ul>
+			<p class="band-note">
+				Out of scope: an attacker who already controls the operator’s account or a developer’s
+				machine, upstream bugs with no reachable effect here, and floods of traffic. Running up the
+				AI bill, or one request that exhausts a resource, stays in scope.
+			</p>
+			<a class="btn btn-ghost band-btn" href={THREAT_MODEL_URL} target="_blank" rel="noopener">
+				Read docs/THREAT-MODEL.md at {SECURITY_DOCS_TAG} <span aria-hidden="true">↗</span>
+			</a>
+		</div>
+	</section>
+
+	<!-- ================================================================ testing -->
+	<section class="block" id="testing">
+		<div class="wrap">
+			<SectionHead
+				align="left"
+				eyebrow="How it is tested"
+				title="An audit by agents that check each other"
+			>
+				<p class="lede">
+					<code>/rf-security</code> is a multi-agent security review that ships in the kit, built on
+					Cloudflare’s <a href={CLOUDFLARE_AUDIT_SKILL_URL} target="_blank" rel="noopener">security-audit skill</a> (MIT).
+					Separate agents look for holes, and other agents check each one from scratch.
+				</p>
+			</SectionHead>
+			<div class="split">
+				<Steps steps={auditSteps} direction="column" />
+				<ul class="rules">
+					{rules.map((r) => (
+						<li>
+							<h3>{r.title}</h3>
+							<p>{r.body}</p>
+						</li>
+					))}
+				</ul>
+			</div>
+			<Callout tone="orange" title="One run finds about half of what is there">
+				<p>
+					That is why a deep audit is meant to be run twice, and why a clean area is not evidence
+					that it has no bugs. Proofs run under Node against the real API and Postgres, not under the
+					Workers runtime, so behaviour specific to the runtime or a browser needs its own check.
+					What a real model chooses to do with injected text belongs in an eval, not a proof.
+				</p>
+			</Callout>
+		</div>
+	</section>
+
+	<!-- ================================================================ cadence -->
+	<section class="block cadence-block" id="when-it-runs">
+		<div class="wrap">
+			<SectionHead align="left" eyebrow="Cadence" title="When it runs" />
+			<div class="cadence">
+				<article class="card tone-blue">
+					<h3>Before a release that touches a boundary</h3>
+					<p>
+						A <code>standard</code> run scoped to what changed since the previous release, whenever the
+						changes reach sign-in, tenancy or row-level security, the identity or plugin seams, or the
+						tools the model is given. The kit’s release script warns when they do. It is a reminder,
+						not a gate.
+					</p>
+				</article>
+				<article class="card tone-purple">
+					<h3>Every quarter</h3>
+					<p>A <code>deep</code> run over the whole kit, with the plugins installed.</p>
+				</article>
+			</div>
+			<p class="plain-note">
+				Nothing runs it on a schedule, and there is no audit in CI yet. A person starts every run.
+			</p>
+		</div>
+	</section>
+
+	<!-- =========================================================== track record -->
+	<section class="block bg-lift record" id="track-record">
+		<div class="wrap">
+			<SectionHead
+				align="left"
+				eyebrow="Track record"
+				title="What the audits found, and what fixed it"
+				lede="Only findings fixed in a released version appear here. Each line says what could happen before and what holds now. How to reproduce one stays private."
+			/>
+
+			<ul class="totals" aria-label="Fixed findings by severity">
+				{SEVERITIES.map((s) => (
+					<li class={`tone-${SEVERITY_TONE[s]}`}>
+						<strong>{total[s]}</strong>
+						<span>{SEVERITY_LABEL[s]}</span>
+					</li>
+				))}
+				<li class="tone-green">
+					<strong>{FINDINGS.length}</strong>
+					<span>Fixed in all</span>
+				</li>
+			</ul>
+
+			<h3 class="sub" id="runs">The runs</h3>
+			<div class="table-wrap" role="region" aria-labelledby="runs" tabindex="0">
+				<table>
+					<thead>
+						<tr>
+							<th scope="col">Run</th>
+							<th scope="col">Date</th>
+							<th scope="col">Commit</th>
+							<th scope="col">Scope</th>
+							<th scope="col" class="num">Units</th>
+							<th scope="col" class="num">Agent calls</th>
+							<th scope="col">Confirmed</th>
+							<th scope="col">Fixed in</th>
+						</tr>
+					</thead>
+					<tbody>
+						{RUNS.map((r, i) => (
+							<tr>
+								<th scope="row">{i + 1}</th>
+								<td class="nowrap"><time datetime={r.date}>{dateLabel(r.date)}</time></td>
+								<td><a href={`${REPOS[r.repo].url}/commit/${r.commit}`} target="_blank" rel="noopener"><code>{r.commit}</code></a></td>
+								<td class="scope">{r.scope}</td>
+								<td class="num">{r.coverageUnits}</td>
+								<td class="num">{r.agentCalls}</td>
+								<td class="nowrap">
+									{SEVERITIES.filter((s) => r.confirmed[s] > 0).map((s) => (
+										<span class={`tag tone-${SEVERITY_TONE[s]}`}>{r.confirmed[s]} {s}</span>
+									))}
+								</td>
+								<td class="nowrap">
+									{r.fixedIn.map((rel) => (
+										<a class="rel" href={releaseUrl(rel)} target="_blank" rel="noopener">{releaseLabel(rel)}</a>
+									))}
+								</td>
+							</tr>
+						))}
+					</tbody>
+				</table>
+			</div>
+			<p class="plain-note">
+				Runs 1 and 2 both confirmed {CONFIRMED_IN_BOTH_FIRST_RUNS} of the same findings; the lists
+				below count them once. A unit is one subsystem, one trust boundary and the attack classes
+				tried against it. Run 3 checked the fixes from the first two and the changes since.
+			</p>
+
+			{ROUNDS.map((round) => {
+				const c = countBySeverity(round.findings)
+				return (
+					<div class="round">
+						<h3 class="sub" id={round.id}>{round.title}</h3>
+						<p class="round-count">
+							{SEVERITIES.filter((s) => c[s] > 0).map((s) => `${c[s]} ${s}`).join(' · ')}
+						</p>
+						<ul class="findings">
+							{round.findings.map((f) => (
+								<li>
+									<span class={`tag sev tone-${SEVERITY_TONE[f.severity]}`}>{SEVERITY_LABEL[f.severity]}</span>
+									<p>{f.line}</p>
+									<a class="rel" href={releaseUrl(f.release)} target="_blank" rel="noopener">{releaseLabel(f.release)}</a>
+								</li>
+							))}
+						</ul>
+					</div>
+				)
+			})}
+
+			<div class="round">
+				<h3 class="sub" id="hardening">Hardening, not confirmed exploitable</h3>
+				<p class="measure hardening-lede">
+					Some candidates could not be settled, usually because the answer needed a browser, a real
+					identity provider or a real model. Where the cautious fix was small, it shipped anyway.
+					They are listed apart because nobody proved they could be exploited.
+				</p>
+				<ul class="findings">
+					{HARDENING.map((h) => (
+						<li>
+							<span class="tag sev tone-green">Hardening</span>
+							<p>{h.line}</p>
+							<a class="rel" href={releaseUrl(h.release)} target="_blank" rel="noopener">{releaseLabel(h.release)}</a>
+						</li>
+					))}
+				</ul>
+			</div>
+		</div>
+	</section>
+
+	<!-- ================================================================= run it -->
+	<section class="block" id="run-it">
+		<div class="wrap">
+			<SectionHead align="left" eyebrow="Your copy" title="Run it on your own app">
+				<p class="lede">
+					Every copy ships <code>/rf-security</code> and a threat model to rewrite for your product.
+					Ask your coding agent for it. It agrees the mode and the budget with you before it starts,
+					and it needs Docker for the sandbox.
+				</p>
+			</SectionHead>
+			<div class="table-wrap" role="region" aria-label="Audit modes" tabindex="0">
+				<table class="modes">
+					<thead>
+						<tr>
+							<th scope="col">Mode</th>
+							<th scope="col" class="num">Agent calls</th>
+							<th scope="col">Cost</th>
+							<th scope="col">When</th>
+						</tr>
+					</thead>
+					<tbody>
+						{modes.map((m) => (
+							<tr>
+								<th scope="row"><code>/rf-security {m.mode}</code></th>
+								<td class="num">{m.calls}</td>
+								<td class="nowrap">{m.cost}</td>
+								<td>{m.when}</td>
+							</tr>
+						))}
+					</tbody>
+				</table>
+			</div>
+			<p class="plain-note">
+				Costs are at API prices, about $2.00–2.50 per agent call. A <code>standard</code> run takes a
+				range of refs, such as <code>/rf-security standard 0.34.0..HEAD</code>, and audits the files
+				that changed and the code that reaches them. Its results stay in your home directory, outside
+				the repository.
+			</p>
+			<a class="btn btn-ghost" href={SECURITY_AUDIT_URL} target="_blank" rel="noopener">
+				Read docs/SECURITY-AUDIT.md at {SECURITY_DOCS_TAG} <span aria-hidden="true">↗</span>
+			</a>
+		</div>
+	</section>
+
+	<!-- ================================================================= report -->
+	<section class="block report-block" id="report">
+		<div class="wrap">
+			<div class="report tone-orange">
+				<div>
+					<span class="eyebrow">Found something?</span>
+					<h2>Report a vulnerability privately</h2>
+					<p>
+						Please do not open a public issue for anything exploitable. Use GitHub’s private
+						vulnerability reporting on the repository the problem is in. You will get an
+						acknowledgement, and a fix or a reasoned answer, before anything is made public.
+					</p>
+					<div class="actions">
+						<a class="btn btn-primary" href={REPORT_KIT_VULN_URL} target="_blank" rel="noopener">Report one in the kit</a>
+						<a class="btn btn-ghost" href={REPORT_PLUGINS_VULN_URL} target="_blank" rel="noopener">Report one in a plugin</a>
+					</div>
+					<p class="small">
+						The policy is in <a href={SECURITY_POLICY_URL} target="_blank" rel="noopener">SECURITY.md</a>.
+					</p>
+				</div>
+				<div class="report-side">
+					<h3>Taking a fix</h3>
+					<p>
+						Fixes land in the next kit or plugin release. A copy takes them with
+						<code>{SKILLS.upgrade}</code>, which ports each later release into your app. Each
+						release’s porting note says what changed, never how to exploit it.
+					</p>
+					<a href="/changelog/">See the changelog <span aria-hidden="true">→</span></a>
+				</div>
+			</div>
+		</div>
+	</section>
+</BaseLayout>
+
+<style>
+	.hero { border-block-end: 1px solid var(--border); }
+	.hero .lede { max-inline-size: 70ch; }
+	.block { padding-block: 4rem; }
+	.block p { color: var(--text-muted); }
+
+	/* ------------------------------------------------------------- hero -- */
+	.stats {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 1rem 2.6rem;
+		margin-block: 2.2rem 0;
+	}
+	.stats div { display: flex; flex-direction: column-reverse; gap: 0.2rem; }
+	.stats dt { font-size: 0.85rem; color: var(--text-muted); }
+	.stats dd { margin: 0; font-size: var(--step-3); font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+	.stats dd a { color: var(--text-bright); }
+	.toc {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		margin-block-start: 2rem;
+	}
+	.toc a {
+		padding: 0.35rem 0.85rem;
+		border: 1px solid var(--border-bright);
+		border-radius: 999px;
+		background: var(--card);
+		color: var(--text);
+		font-size: 0.88rem;
+		font-weight: 600;
+	}
+	@media (hover: hover) and (pointer: fine) {
+		.toc a:hover { text-decoration: none; border-color: var(--orange); }
+	}
+	.toc a:active { background: var(--card-alt); }
+
+	/* ------------------------------------------------------------ cards -- */
+	.cards {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+		gap: 1.2rem;
+	}
+	.card {
+		display: flex;
+		flex-direction: column;
+		padding: 1.5rem;
+		border: 1px solid var(--border);
+		border-radius: 18px;
+		background: var(--card);
+		box-shadow: var(--shadow-sm);
+	}
+	.card h3 { margin-block: 0.9rem 0.4rem; font-size: 1.1rem; }
+	.card p { margin-block: 0 1rem; font-size: 0.93rem; }
+	.card > a { margin-block-start: auto; font-size: 0.88rem; font-weight: 600; }
+	.chip {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		inline-size: 44px;
+		block-size: 44px;
+		border-radius: 13px;
+		background: var(--tint);
+		color: var(--accent);
+	}
+
+	/* ----------------------------------------------------------- actors -- */
+	.actors { list-style: none; margin: 0; padding: 0; }
+	.actors li {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+		gap: 0.4rem 1.8rem;
+		padding-block: 0.95rem;
+		border-block-start: 1px solid color-mix(in oklch, var(--band-ink) 14%, transparent);
+	}
+	.actors li:last-child { border-block-end: 1px solid color-mix(in oklch, var(--band-ink) 14%, transparent); }
+	.actors h3 { margin: 0; font-size: 1.02rem; color: var(--band-ink); }
+	.actors p { margin: 0; font-size: 0.93rem; color: var(--band-muted); }
+	.lbl {
+		display: block;
+		font-size: 0.7rem;
+		font-weight: 700;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		margin-block-end: 0.15rem;
+	}
+	.may { color: var(--green); }
+	.must-not { color: var(--orange); }
+	.block.bg-band .band-note { color: var(--band-muted); margin-block: 1.6rem 1.4rem; max-inline-size: 75ch; }
+
+	/* ---------------------------------------------------------- testing -- */
+	.split {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(min(100%, 26rem), 1fr));
+		gap: 2.5rem 3.5rem;
+		align-items: start;
+	}
+	.rules { list-style: none; margin: 0; padding: 0; display: grid; gap: 1.2rem; }
+	.rules li { padding-inline-start: 1rem; border-inline-start: 3px solid var(--orange); }
+	.rules h3 { margin: 0 0 0.2rem; font-size: 1.05rem; }
+	.rules p { margin: 0; font-size: 0.93rem; }
+
+	/* ---------------------------------------------------------- cadence -- */
+	.cadence-block { padding-block-start: 1rem; }
+	.cadence {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+		gap: 1.2rem;
+	}
+	.cadence .card { border-block-start: 4px solid var(--accent); }
+	.cadence .card h3 { margin-block-start: 0; }
+	.cadence .card p { margin-block-end: 0; }
+	.plain-note { margin-block: 1.4rem; font-size: 0.93rem; max-inline-size: 75ch; }
+
+	/* ------------------------------------------------------ track record -- */
+	.record { border-block: 1px solid var(--border); }
+	.totals {
+		list-style: none;
+		margin: 0 0 2.6rem;
+		padding: 0;
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr));
+		gap: 1rem;
+	}
+	.totals li {
+		display: flex;
+		flex-direction: column;
+		gap: 0.2rem;
+		padding: 1rem 1.2rem;
+		border: 1px solid var(--border);
+		border-block-start: 4px solid var(--accent);
+		border-radius: 14px;
+		background: var(--card);
+	}
+	.totals strong { font-size: var(--step-3); line-height: 1; color: var(--text-bright); font-variant-numeric: tabular-nums; }
+	.totals span { font-size: 0.85rem; font-weight: 600; color: var(--accent-ink); }
+	.sub { font-size: 1.25rem; margin-block: 2.4rem 0.4rem; scroll-margin-block-start: 5rem; }
+	.round-count { margin-block: 0 1rem; font-size: 0.88rem; font-variant-numeric: tabular-nums; }
+	.hardening-lede { margin-block: 0 1rem; font-size: 0.93rem; }
+
+	.table-wrap {
+		overflow-x: auto;
+		margin-block: 1rem;
+		border: 1px solid var(--border);
+		border-radius: 14px;
+		background: var(--card);
+	}
+	.table-wrap:focus-visible { outline: 3px solid var(--orange); outline-offset: 3px; }
+	table { inline-size: 100%; border-collapse: collapse; font-size: 0.9rem; }
+	th, td { text-align: start; vertical-align: top; padding: 0.65rem 0.8rem; border-block-end: 1px solid var(--border); }
+	tbody tr:last-child > * { border-block-end: 0; }
+	thead th {
+		font-size: 0.72rem;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		color: var(--text-muted);
+		border-block-end-width: 2px;
+		white-space: nowrap;
+	}
+	tbody th { color: var(--text-bright); }
+	td { color: var(--text-muted); }
+	.num { text-align: end; font-variant-numeric: tabular-nums; }
+	.nowrap { white-space: nowrap; }
+	.scope { min-inline-size: 16rem; }
+	td .tag + .tag, td .rel + .rel { margin-inline-start: 0.4rem; }
+
+	.tag {
+		display: inline-block;
+		border-radius: 999px;
+		padding: 0.1rem 0.55rem;
+		border: 1px solid var(--accent);
+		background: var(--tint);
+		color: var(--accent-ink);
+		font-size: 0.78rem;
+		font-weight: 700;
+	}
+	.findings { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.6rem; }
+	.findings li {
+		display: grid;
+		grid-template-columns: 6.5rem minmax(0, 1fr) auto;
+		align-items: baseline;
+		gap: 0.4rem 1rem;
+		padding: 0.75rem 1rem;
+		border: 1px solid var(--border);
+		border-radius: 12px;
+		background: var(--card);
+	}
+	.findings p { margin: 0; color: var(--text); font-size: 0.93rem; }
+	.sev { justify-self: start; }
+	.rel { font-size: 0.85rem; font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; }
+	@media (max-width: 640px) {
+		.findings li { grid-template-columns: minmax(0, 1fr) auto; }
+		.findings p { grid-column: 1 / -1; grid-row: 2; }
+	}
+
+	/* ----------------------------------------------------------- report -- */
+	.report-block { padding-block-end: 5rem; }
+	.report {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr));
+		gap: 2.5rem;
+		padding: 2.4rem 2.6rem;
+		border: 2px solid var(--orange);
+		border-radius: 24px;
+		background:
+			radial-gradient(700px 320px at 0% 0%, var(--tint), transparent 70%),
+			var(--card);
+		box-shadow: var(--shadow);
+	}
+	.report .eyebrow { color: var(--accent-ink); }
+	.report h2 { margin-block-end: 0.7rem; }
+	.actions { display: flex; flex-wrap: wrap; gap: 0.9rem; margin-block: 1.4rem 1rem; }
+	.small { font-size: 0.9rem; margin: 0; }
+	.report-side { padding-inline-start: 1.4rem; border-inline-start: 3px solid var(--orange); align-self: center; }
+	.report-side h3 { margin: 0 0 0.4rem; font-size: 1.1rem; }
+	.report-side a { font-weight: 600; }
+	@media (max-width: 560px) {
+		.report { padding: 1.8rem 1.4rem; }
+	}
+</style>
