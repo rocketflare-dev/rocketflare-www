@@ -432,6 +432,17 @@ const stops: Stop[] = [
 		concepts: ['cli'],
 	},
 	{
+		id: 'security',
+		section: 'core',
+		label: 'Security',
+		title: 'Isolation you can audit yourself',
+		body: [
+			'Every screen above stays inside one organisation because every query names it, and tests fail when one does not. API keys stay in their organisation, roles are checked on the server, and the model only ever acts for the person asking.',
+			'The kit ships the audit it is tested with: <code>/rf-security</code>, a review by AI agents that check each other’s findings with a proof. Every finding fixed so far is on <a href="/security/">the security page</a>, with the release that fixed it.',
+		],
+		concepts: ['tenancy', 'auth'],
+	},
+	{
 		id: 'analytics',
 		section: 'plugin',
 		plugin: 'analytics',

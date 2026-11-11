@@ -1,0 +1,171 @@
+---
+/**
+ * One of the kit's three security documents — the threat model, the audit guide and the security
+ * policy — rendered from the copy `npm run sync:security` vendors into src/content/security/.
+ * The text is the kit's, at the ref in the copy's frontmatter; edit it in the kit and re-sync.
+ *
+ * A doc with no synced copy FAILS the build rather than shipping an empty page. Links inside the
+ * copies were mapped by the sync: to each other's pages here, to concept pages, or to GitHub.
+ */
+import type { MarkdownInstance } from 'astro'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import { SECURITY_DOCS, securityDocPath, type SecurityDoc } from '../../data/security-docs'
+import { GITHUB_URL } from '../../data/site'
+
+interface Synced {
+	source: string
+	ref: string
+	commit: string
+	tag: string | null
+}
+
+const copies = import.meta.glob<MarkdownInstance<Synced>>('../../content/security/*.md', { eager: true })
+
+export function getStaticPaths() {
+	return SECURITY_DOCS.map((d) => ({ params: { doc: d.slug } }))
+}
+
+const doc = SECURITY_DOCS.find((d) => d.slug === Astro.params.doc) as SecurityDoc
+const copy = copies[`../../content/security/${doc.slug}.md`]
+if (!copy) {
+	throw new Error(
+		`security: src/content/security/${doc.slug}.md is missing — run \`npm run sync:security\``
+	)
+}
+const { ref, commit, tag } = copy.frontmatter
+const short = String(commit).slice(0, 7)
+/** A tag names the release; a branch is shown as the commit it was read at. */
+const syncedFrom = tag ? `kit ${tag}` : `kit commit ${short}`
+const syncedHref = `${GITHUB_URL}/${tag ? `releases/tag/${tag}` : `commit/${commit}`}`
+
+const headings = copy.getHeadings().filter((h) => h.depth === 2)
+/** A table of contents only where there is enough to find your way around. */
+const toc = headings.length >= 4 ? headings : []
+const others = SECURITY_DOCS.filter((d) => d.slug !== doc.slug)
+const title = `${doc.title} — Rocketflare security`
+---
+<BaseLayout title={title} description={doc.description} ogType="article">
+	<header class="hero page-hero bg-sky">
+		<div class="wrap">
+			<a class="back" href="/security/"><span aria-hidden="true">←</span> Security</a>
+			<span class="eyebrow">Security · from the kit</span>
+			<h1>{doc.title}</h1>
+			<p class="synced">
+				Synced from <a href={syncedHref} target="_blank" rel="noopener">{syncedFrom}</a>
+				(<code>{doc.path}</code>{!tag && <Fragment>, read at <code>{ref}</code></Fragment>}).
+			</p>
+		</div>
+	</header>
+
+	<div class:list={['wrap', 'doc-body', toc.length > 0 && 'has-toc']}>
+		{toc.length > 0 && (
+			<aside class="toc">
+				<p class="toc-head" id="toc-head">On this page</p>
+				<nav aria-labelledby="toc-head">
+					{toc.map((h) => <a href={`#${h.slug}`}>{h.text}</a>)}
+				</nav>
+			</aside>
+		)}
+		<article class="prose">
+			<copy.Content />
+			<nav class="others" aria-label="Other security documents">
+				{others.map((d) => (
+					<a href={securityDocPath(d.slug)}>{d.label} <span aria-hidden="true">→</span></a>
+				))}
+				<a href="/security/">Back to Security <span aria-hidden="true">→</span></a>
+			</nav>
+		</article>
+	</div>
+</BaseLayout>
+
+<style>
+	.hero { border-block-end: 1px solid var(--border); }
+	.back { display: block; inline-size: fit-content; margin-block-end: 1rem; font-size: 0.9rem; font-weight: 600; }
+	.synced { margin-block: 1.2rem 0; font-size: 0.9rem; color: var(--text-muted); max-inline-size: 70ch; }
+	.synced a { text-decoration: underline; text-underline-offset: 0.18em; }
+
+	.doc-body { padding-block: 3rem 5rem; }
+	.doc-body.has-toc {
+		display: grid;
+		grid-template-columns: 15rem minmax(0, 1fr);
+		gap: 3rem;
+		align-items: start;
+	}
+
+	/* ------------------------------------------------------------- toc -- */
+	.toc { position: sticky; inset-block-start: 5.5rem; }
+	.toc-head {
+		margin-block: 0 0.7rem;
+		font-size: 0.72rem;
+		font-weight: 700;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: var(--text-muted);
+	}
+	.toc nav { display: flex; flex-direction: column; border-inline-start: 2px solid var(--border); }
+	.toc a {
+		padding: 0.35rem 0.9rem;
+		margin-inline-start: -2px;
+		border-inline-start: 2px solid transparent;
+		font-size: 0.9rem;
+		line-height: 1.4;
+		color: var(--text-muted);
+	}
+	@media (hover: hover) and (pointer: fine) {
+		.toc a:hover { color: var(--text-bright); text-decoration: none; border-inline-start-color: var(--orange); }
+	}
+
+	/* ----------------------------------------------------------- prose -- */
+	.prose { max-inline-size: 78ch; }
+	.prose :global(h2) { font-size: 1.55rem; margin-block: 2.8rem 0.7rem; scroll-margin-block-start: 5.5rem; }
+	.prose :global(h2:first-child) { margin-block-start: 0; }
+	.prose :global(h3) { font-size: 1.1rem; margin-block: 2rem 0.5rem; scroll-margin-block-start: 5.5rem; }
+	.prose :global(p), .prose :global(li) { line-height: 1.65; }
+	.prose :global(p) { color: var(--text); }
+	/* Links sit inside running text, so they are underlined rather than told apart by colour. */
+	.prose :global(a) { text-decoration: underline; text-underline-offset: 0.18em; }
+	.prose :global(ul), .prose :global(ol) { padding-inline-start: 1.25rem; margin-block: 0 1.2rem; }
+	.prose :global(li + li) { margin-block-start: 0.45rem; }
+	.prose :global(li::marker) { color: var(--orange); }
+	.prose :global(code) { overflow-wrap: anywhere; }
+	.prose :global(pre) { margin-block: 1.2rem; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 0.85rem; }
+	/* Wide tables wrap their cells rather than scroll: the actors table must read on a phone. */
+	.prose :global(table) {
+		inline-size: 100%;
+		border-collapse: collapse;
+		margin-block: 1.4rem;
+		font-size: 0.9rem;
+	}
+	.prose :global(th) {
+		text-align: start;
+		font-size: 0.74rem;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--text-muted);
+		border-block-end: 2px solid var(--border);
+		padding: 0.5rem 0.6rem;
+	}
+	.prose :global(td) {
+		border-block-end: 1px solid var(--border);
+		padding: 0.6rem;
+		vertical-align: top;
+		color: var(--text);
+	}
+	.prose :global(td:first-child) { font-weight: 600; color: var(--text-bright); }
+
+	.others {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.6rem 1.6rem;
+		margin-block-start: 3.5rem;
+		padding-block-start: 1.6rem;
+		border-block-start: 1px solid var(--border);
+		font-weight: 600;
+	}
+	.prose .others a { text-decoration: none; }
+
+	@media (max-width: 900px) {
+		.doc-body.has-toc { grid-template-columns: minmax(0, 1fr); gap: 1.5rem; }
+		.toc { position: static; }
+	}
+</style>

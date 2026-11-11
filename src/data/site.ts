@@ -42,3 +42,18 @@ export const PARTNER_CONTACT_URL = 'mailto:partners@rocketflare.dev?subject=Beco
 export const LAUNCH_CONTACT_URL = 'mailto:clifton@guidemode.dev?subject=Rocketflare%20Launch'
 /** A new GitHub issue in the plugins repository, opened on its plugin-request form. */
 export const PLUGIN_REQUEST_URL = 'https://github.com/rocketflare-dev/rocketflare-plugins/issues/new?template=plugin-request.yml'
+
+/** The public plugins repository. */
+export const PLUGINS_GITHUB_URL = 'https://github.com/rocketflare-dev/rocketflare-plugins'
+
+/**
+ * The kit release whose security docs (docs/THREAT-MODEL.md, docs/SECURITY-AUDIT.md, SECURITY.md)
+ * `npm run sync:security` vendors by default. They render at /security/<doc>/ and are never linked
+ * on GitHub. Move the tag, re-sync and commit when a later release changes them.
+ */
+export const SECURITY_DOCS_TAG = '0.35.0'
+/** GitHub private vulnerability reporting, one form per repository. */
+export const REPORT_KIT_VULN_URL = `${GITHUB_URL}/security/advisories/new`
+export const REPORT_PLUGINS_VULN_URL = `${PLUGINS_GITHUB_URL}/security/advisories/new`
+/** The audit skill /rf-security is built on (MIT, vendored at a pinned commit). */
+export const CLOUDFLARE_AUDIT_SKILL_URL = 'https://github.com/cloudflare/security-audit-skill'

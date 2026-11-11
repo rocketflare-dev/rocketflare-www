@@ -1,0 +1,63 @@
+---
+/**
+ * A list of fixed findings (with their severity) or hardening changes, each with the release that
+ * fixed it. Only a round's own page renders one.
+ */
+import { REPOS, type Severity, releaseUrl, repoOfRelease } from '../../data/security'
+
+interface Item {
+	severity?: Severity
+	line: string
+	release: string
+}
+interface Props {
+	items: Item[]
+	/** Label for an item with no severity. */
+	plainLabel?: string
+}
+const { items, plainLabel = 'Hardening' } = Astro.props
+
+const TONE = { high: 'red', medium: 'orange', low: 'blue' } as const
+const LABEL = { high: 'High', medium: 'Medium', low: 'Low' } as const
+const releaseLabel = (release: string) => `${REPOS[repoOfRelease(release)].label.toLowerCase()} ${release}`
+---
+<ul class="findings">
+	{items.map((f) => (
+		<li>
+			<span class={`tag tone-${f.severity ? TONE[f.severity] : 'green'}`}>{f.severity ? LABEL[f.severity] : plainLabel}</span>
+			<p>{f.line}</p>
+			<a class="rel" href={releaseUrl(f.release)} target="_blank" rel="noopener">{releaseLabel(f.release)}</a>
+		</li>
+	))}
+</ul>
+
+<style>
+	.findings { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.6rem; }
+	.findings li {
+		display: grid;
+		grid-template-columns: 6.5rem minmax(0, 1fr) auto;
+		align-items: baseline;
+		gap: 0.4rem 1rem;
+		padding: 0.75rem 1rem;
+		border: 1px solid var(--border);
+		border-radius: 12px;
+		background: var(--card);
+	}
+	.findings p { margin: 0; color: var(--text); font-size: 0.93rem; }
+	.tag {
+		justify-self: start;
+		display: inline-block;
+		border-radius: 999px;
+		padding: 0.1rem 0.55rem;
+		border: 1px solid var(--accent);
+		background: var(--tint);
+		color: var(--accent-ink);
+		font-size: 0.78rem;
+		font-weight: 700;
+	}
+	.rel { font-size: 0.85rem; font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; }
+	@media (max-width: 640px) {
+		.findings li { grid-template-columns: minmax(0, 1fr) auto; }
+		.findings p { grid-column: 1 / -1; grid-row: 2; }
+	}
+</style>

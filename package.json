@@ -17,7 +17,9 @@
 		"sync:releases": "node scripts/sync-releases.mjs",
 		"check:releases": "node scripts/sync-releases.mjs --check",
 		"sync:plugins": "node scripts/sync-plugins.mjs",
-		"check:plugins": "node scripts/sync-plugins.mjs --check"
+		"check:plugins": "node scripts/sync-plugins.mjs --check",
+		"sync:security": "node scripts/sync-security.mjs",
+		"check:security": "node scripts/sync-security.mjs --check"
 	},
 	"dependencies": {
 		"@astrojs/sitemap": "^3.7.2",

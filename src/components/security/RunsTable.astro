@@ -1,0 +1,72 @@
+---
+/**
+ * The audit runs as a table: date, commit, scope, coverage, agent calls and the releases that
+ * fixed what each found. Used on the track-record index and on each round's page.
+ */
+import { REPOS, type Run, releaseUrl, repoOfRelease } from '../../data/security'
+
+interface Props {
+	runs: Run[]
+	label: string
+}
+const { runs, label } = Astro.props
+
+const dateLabel = (iso: string) =>
+	new Date(`${iso}T00:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })
+const releaseLabel = (release: string) => `${REPOS[repoOfRelease(release)].label.toLowerCase()} ${release}`
+---
+<div class="table-wrap" role="region" aria-label={label} tabindex="0">
+	<table>
+		<thead>
+			<tr>
+				<th scope="col">Run</th>
+				<th scope="col">Date</th>
+				<th scope="col">Commit</th>
+				<th scope="col">Scope</th>
+				<th scope="col" class="num">Units</th>
+				<th scope="col" class="num">Agent calls</th>
+				<th scope="col">Fixed in</th>
+			</tr>
+		</thead>
+		<tbody>
+			{runs.map((r) => (
+				<tr>
+					<th scope="row">{r.id.replace('run-', '')}</th>
+					<td class="nowrap"><time datetime={r.date}>{dateLabel(r.date)}</time></td>
+					<td><a href={`${REPOS[r.repo].url}/commit/${r.commit}`} target="_blank" rel="noopener"><code>{r.commit}</code></a></td>
+					<td class="scope">{r.scope}</td>
+					<td class="num">{r.coverageUnits}</td>
+					<td class="num">{r.agentCalls}</td>
+					<td class="nowrap">
+						{r.fixedIn.map((rel) => (
+							<a class="rel" href={releaseUrl(rel)} target="_blank" rel="noopener">{releaseLabel(rel)}</a>
+						))}
+					</td>
+				</tr>
+			))}
+		</tbody>
+	</table>
+</div>
+
+<style>
+	.table-wrap { overflow-x: auto; margin-block: 1rem; }
+	.table-wrap:focus-visible { outline: 3px solid var(--orange); outline-offset: 3px; }
+	table { inline-size: 100%; border-collapse: collapse; font-size: 0.9rem; }
+	th, td { text-align: start; vertical-align: top; padding: 0.65rem 0.8rem; border-block-end: 1px solid var(--border); }
+	tbody tr:last-child > * { border-block-end: 0; }
+	thead th {
+		font-size: 0.72rem;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		color: var(--text-muted);
+		border-block-end-width: 2px;
+		white-space: nowrap;
+	}
+	tbody th { color: var(--text-bright); }
+	td { color: var(--text-muted); }
+	.num { text-align: end; font-variant-numeric: tabular-nums; }
+	.nowrap { white-space: nowrap; }
+	.scope { min-inline-size: 16rem; }
+	.rel { font-size: 0.85rem; font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; }
+	.rel + .rel { margin-inline-start: 0.6rem; }
+</style>

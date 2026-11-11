@@ -32,6 +32,9 @@ function candidateSources(pathname: string): string[] {
 	if (plugin) {
 		return ['src/pages/plugins/[id].astro', 'src/data/plugins.ts', `src/content/plugins/${plugin[1]}.md`]
 	}
+	// A security document is one dynamic route over the copy `sync:security` vendors.
+	const securityDoc = slug.match(/^security\/(threat-model|audit|policy)$/)
+	if (securityDoc) return ['src/pages/security/[doc].astro', `src/content/security/${securityDoc[1]}.md`]
 	return [`src/pages/${slug}.astro`, `src/pages/${slug}/index.astro`]
 }
 

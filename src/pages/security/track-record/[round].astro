@@ -1,0 +1,71 @@
+---
+/**
+ * One round of the security track record: the runs in it, every finding they confirmed that is
+ * fixed in a released version (one neutral line each, with its release), and the hardening that
+ * shipped beside them. This is the only place findings are listed.
+ */
+import BaseLayout from '../../../layouts/BaseLayout.astro'
+import FindingList from '../../../components/security/FindingList.astro'
+import RunsTable from '../../../components/security/RunsTable.astro'
+import { ROUNDS, type Round } from '../../../data/security'
+
+export function getStaticPaths() {
+	return ROUNDS.map((r) => ({ params: { round: r.slug } }))
+}
+
+const round = ROUNDS.find((r) => r.slug === Astro.params.round) as Round
+const others = ROUNDS.filter((r) => r.slug !== round.slug)
+const title = `${round.title} — security track record — Rocketflare`
+const description = `${round.summary} Every finding it confirmed that is fixed in a released version, with the release that fixed it.`
+---
+<BaseLayout title={title} description={description}>
+	<header class="hero page-hero bg-sky">
+		<div class="wrap">
+			<a class="back" href="/security/track-record/"><span aria-hidden="true">←</span> Track record</a>
+			<span class="eyebrow">Track record</span>
+			<h1>{round.title}</h1>
+			<p class="lede">{round.summary}</p>
+		</div>
+	</header>
+
+	<section class="block">
+		<div class="wrap">
+			<RunsTable runs={round.runs} label={`${round.title}: runs`} />
+
+			<h2>Fixed findings</h2>
+			<p class="note">
+				Each line says what could happen before and what holds now, with the release that fixed it.
+				{round.runs.length > 1 && ' A finding both runs confirmed is listed once.'}
+			</p>
+			<FindingList items={round.findings} />
+
+			{round.hardening.length > 0 && (
+				<Fragment>
+					<h2>Hardening, not confirmed exploitable</h2>
+					<p class="note">
+						Candidates the audit could not settle, usually because the answer needed a browser, a real
+						identity provider or a real model. The cautious fix was small, so it shipped anyway.
+					</p>
+					<FindingList items={round.hardening} />
+				</Fragment>
+			)}
+
+			<nav class="others" aria-label="Other rounds">
+				{others.map((r) => (
+					<a href={r.path}>{r.title} <span aria-hidden="true">→</span></a>
+				))}
+				<a href="/security/">How the kit is audited <span aria-hidden="true">→</span></a>
+			</nav>
+		</div>
+	</section>
+</BaseLayout>
+
+<style>
+	.hero { border-block-end: 1px solid var(--border); }
+	.hero .lede { max-inline-size: 70ch; }
+	.back { display: block; inline-size: fit-content; margin-block-end: 1rem; font-size: 0.9rem; font-weight: 600; }
+	.block { padding-block: 2.5rem 4.5rem; }
+	h2 { margin-block: 2.6rem 0.4rem; }
+	.note { margin-block: 0 1rem; font-size: 0.93rem; color: var(--text-muted); max-inline-size: 75ch; }
+	.others { display: flex; flex-wrap: wrap; gap: 0.6rem 1.6rem; margin-block-start: 3rem; font-weight: 600; }
+</style>
