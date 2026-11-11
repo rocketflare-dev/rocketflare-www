@@ -61,8 +61,8 @@ const day1 = [
 
 const start = [
 	{
-		title: 'Look at the dashboard that ships',
-		body: 'The demo organisation has a populated overview built from the same pieces you would use. Open it and then open the template it was copied from.',
+		title: 'Add the plugin, then look at the dashboard that ships',
+		body: 'Analytics is a first-party plugin, not in a fresh clone: ask your agent for /rf-plugin add analytics, then generate and run its migration. The demo organisation gets an overview built from the same pieces you would use. Open it and then open the template it was copied from.',
 	},
 	{
 		title: 'Write one cube over one of your tables',
@@ -115,9 +115,9 @@ const start = [
 	<section class="day1">
 		<div class="wrap">
 			<SectionHead
-				eyebrow="On the first run"
-				title="What is already there"
-				lede="The semantic layer is drizzle-cube, which is a separate open source project, wired in and scoped here."
+				eyebrow="One command in"
+				title="What the analytics plugin adds"
+				lede="None of this is in a fresh clone: it is the analytics plugin, added in one command. The semantic layer is drizzle-cube, which is a separate open source project, wired in and scoped here."
 			/>
 			<div class="grid reveal reveal-stagger">
 				{day1.map((d) => (
@@ -189,6 +189,7 @@ const start = [
 			<div class="next-actions">
 				<a class="btn btn-primary" href="/get-started/">Get it running</a>
 				<a class="btn btn-ghost" href="/who-is-it-for/">See the other two shapes</a>
+				<a class="btn btn-ghost" href="/compare/backend-platforms/">Compare with Supabase and others</a>
 			</div>
 		</div>
 	</section>

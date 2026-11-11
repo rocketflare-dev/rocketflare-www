@@ -1,0 +1,175 @@
+---
+/**
+ * Rocketflare vs the paid SaaS starter kits (ShipFast, Supastarter, Makerkit,
+ * SaaS Pegasus). Facts from each kit's own site, docs and licence page,
+ * checked in CHECKED_ON. Bullet Train moved to the open-source page when its
+ * paid features were released under MIT.
+ */
+import CompareLayout from '../../components/CompareLayout.astro'
+
+const profiles = [
+	{
+		anchor: 'shipfast',
+		lead: 'If you are looking for a ShipFast alternative because your product is sold to companies rather than individuals, Rocketflare starts where ShipFast stops: organisations, roles and single sign-on, plus an AI layer, for nothing.',
+		what: 'ShipFast is a Next.js boilerplate for solo founders, built to get a landing page, sign-in and payments live quickly. It uses NextAuth with Google and magic links, MongoDB or Supabase for data, and Stripe or Lemon Squeezy for checkout. You pay once and get access to a private repository.',
+		strong: 'Speed to a first sale for a consumer or single-user product: landing page, SEO and blog pages, checkout. It has a large and active community of people shipping with it.',
+		stops: 'There are no teams, organisations or roles, no SSO, no background jobs and no AI features in the app. The site lists its last update around February 2026. The licence forbids redistributing the boilerplate, and does not say whether you may open-source an app built on it.',
+		facts: [
+			{ k: 'Price', v: 'One-time, from $199 at the time of checking' },
+			{ k: 'Licence', v: 'Personal or team; non-transferable' },
+			{ k: 'Stack', v: 'Next.js, NextAuth, MongoDB or Supabase' },
+			{ k: 'Organisations and roles', v: 'Not included' },
+		],
+	},
+	{
+		anchor: 'supastarter',
+		lead: 'Supastarter is the most complete paid kit for a B2B product with billing. As a Supastarter alternative, Rocketflare trades the billing for a deeper AI layer, test-enforced isolation and an MIT licence.',
+		what: 'Supastarter is a TypeScript kit for Next.js, Nuxt or TanStack Start, with a Hono API, Prisma or Drizzle over Postgres, and better-auth. Organisations with owner, admin and member roles, invitations, an admin area with impersonation, and background jobs through trigger.dev are included.',
+		strong: 'Billing. It supports Stripe, Lemon Squeezy, Polar, Creem and Dodo Payments, with subscription, one-time, per-seat and usage-based plans. It has passkeys and two-factor sign-in, a choice of front-end frameworks, and an agency licence for client work and white-labelling.',
+		stops: 'Its AI is a chatbot example on the Vercel AI SDK with chat history: no knowledge base, no durable agents, no evals and no cost tracking. Single sign-on with a company’s identity provider is not advertised, and the docs do not describe how isolation between organisations is checked. Updates are a git pull from upstream with conflicts resolved by hand.',
+		facts: [
+			{ k: 'Price', v: 'One-time: $349 solo, $799 startup, $1,499 agency' },
+			{ k: 'Licence', v: 'Commercial; no redistribution or public repository without permission' },
+			{ k: 'Stack', v: 'Next.js, Nuxt or TanStack Start; Hono; Postgres' },
+			{ k: 'Organisations and roles', v: 'Yes, owner, admin and member' },
+		],
+	},
+	{
+		anchor: 'makerkit',
+		lead: 'Makerkit is the closest paid kit to Rocketflare on tenancy. Rocketflare is the Makerkit alternative to pick when you need AI in the product itself, or a licence that lets you hand the code to a client.',
+		what: 'Makerkit sells multi-tenant kits on Next.js 16, React Router or TanStack Start, with Supabase and row-level security or Drizzle and Prisma with Better Auth. Personal and team accounts, invitations, owner, admin and member roles, a super-admin panel and Stripe or Lemon Squeezy billing are included, plus a plugin system.',
+		strong: 'A polished, frequently released product with a Supabase-native design, a mobile kit on Expo, and good tooling for coding agents: rules, an MCP server and a CLI whose project update command merges upstream changes with AI help on the conflicts.',
+		stops: 'Makerkit’s own AI page says the kit has no model integration, chat interface, embeddings or vector store. Its licence is the strictest here: the developer tier allows no client work, client hand-offs need extra licences, and no tier may be open-sourced or used to build another template.',
+		facts: [
+			{ k: 'Price', v: 'One-time: $299 per developer, $599 for a team of five' },
+			{ k: 'Licence', v: 'Commercial, per named person; no open-sourcing' },
+			{ k: 'Stack', v: 'Next.js, React Router or TanStack Start; Supabase or Drizzle/Prisma' },
+			{ k: 'Organisations and roles', v: 'Yes, with Postgres RLS in the Supabase kit' },
+		],
+	},
+	{
+		anchor: 'saas-pegasus',
+		lead: 'SaaS Pegasus is the paid kit with the most AI in it. As a SaaS Pegasus alternative, Rocketflare is for teams that would rather write TypeScript than Python, and want the knowledge base, approvals and cost tracking that Pegasus leaves out.',
+		what: 'SaaS Pegasus generates a Django project from the features you pick: teams with roles, Stripe billing, Celery jobs, Django admin, a CMS and an optional AI chat with agents and tool use, all calls routed through Pydantic AI to OpenAI, Anthropic or Ollama.',
+		strong: 'For a Python team it is excellent: mature, regularly released (2026.10.2 in October), with a chat interface that streams and keeps full history, example agents, Stripe and several ways to take upgrades, including a GitHub pull request flow.',
+		stops: 'There is no knowledge base, embeddings or evals, and agents do not pause for a person to approve a step. Teams share one database and isolation is application code; for stricter needs the site points to another library and says adapting is “a lot of work”. Each client project needs its own licence.',
+		facts: [
+			{ k: 'Price', v: 'Free open-source edition; Unlimited $649 with a year of updates' },
+			{ k: 'Licence', v: 'Commercial; no publishing the source without consent' },
+			{ k: 'Stack', v: 'Django, HTMX or React, Celery' },
+			{ k: 'Organisations and roles', v: 'Teams with roles' },
+		],
+	},
+]
+
+const table = {
+	columns: ['ShipFast', 'Supastarter', 'Makerkit', 'SaaS Pegasus', 'Rocketflare'],
+	rows: [
+		{ row: 'Price', cells: ['From $199, once', '$349 to $1,499, once', '$299 to $599, once', '$649, then renewals for updates', 'Free'] },
+		{ row: 'Licence', cells: ['Commercial', 'Commercial', 'Commercial, strictest', 'Commercial', 'MIT'] },
+		{ row: 'Hand the code to a client', cells: ['Not stated', 'Agency tier', 'Client needs a licence', 'Client needs a licence', 'Yes'] },
+		{ row: 'Organisations and roles', cells: ['No', 'Yes', 'Yes', 'Yes', 'Yes, with groups'] },
+		{ row: 'Isolation between organisations', cells: ['n/a', 'Not documented', 'Postgres RLS (Supabase kit)', 'Application code', 'Every query scoped; a CI test fails if one is not'] },
+		{ row: 'SSO with a company’s identity provider', cells: ['No', 'Not advertised', 'Not advertised', 'Not found', 'Any OIDC issuer'] },
+		{ row: 'Billing', cells: ['Stripe, Lemon Squeezy', 'Five providers', 'Stripe, Lemon Squeezy', 'Stripe', 'Not included'] },
+		{ row: 'AI in the product', cells: ['None', 'Chatbot example', 'None (tooling for developers)', 'Chat and agents with tools', 'Chat, durable agents with approvals, knowledge base, evals, cost ledger'] },
+		{ row: 'Background jobs', cells: ['Not included', 'trigger.dev', 'Not found', 'Celery', 'Queues and Workflows'] },
+		{ row: 'Taking new releases', cells: ['Repo access', 'git pull from upstream', 'CLI merge with AI help', 'GitHub PR or merge', 'Ports releases into a renamed copy'] },
+		{ row: 'Runs on', cells: ['Not stated', 'Vercel, Docker', 'Not stated', 'Any VPS or PaaS', 'Cloudflare Workers only'] },
+	],
+}
+
+const differences = [
+	{
+		title: 'The AI is a product, not an example',
+		body: 'Agents run as durable Cloudflare Workflows that checkpoint and resume, park for a person to approve, choose, type or fill a form, and stop at per-run and per-organisation budgets. Chat and agents search a knowledge base of your customers’ documents. Every model call is costed in a usage ledger, and eval suites with baselines catch a worse prompt before your users do.',
+		icon: 'robot',
+		tone: 'purple' as const,
+	},
+	{
+		title: 'MIT, with nothing to negotiate',
+		body: 'Build a product and sell it, hand the code to a client, open-source it, or use it as the starting point for every project in an agency. The only condition is keeping the copyright notice. None of the paid kits allows all of that.',
+		icon: 'key',
+		tone: 'green' as const,
+	},
+	{
+		title: 'Releases reach a renamed copy',
+		body: 'The paid kits update by merging their repository into yours, which works until you have renamed and reshaped things. Rocketflare records which release a copy came from, translates each new release into your names, skips the parts you deleted, and ships porting notes with each version.',
+		icon: 'rocket',
+		tone: 'orange' as const,
+	},
+	{
+		title: 'Enterprise sign-in on day one',
+		body: 'Google, Microsoft, email links and any OIDC issuer such as Okta, Entra ID or Keycloak, with an option to make SSO the only way in and to take organisations and roles from the identity provider’s claims.',
+		icon: 'building',
+		tone: 'blue' as const,
+	},
+]
+
+const pickThem = [
+	{ who: 'You need to take money on day one.', when: 'Rocketflare has no billing. Supastarter has five payment providers wired in; ShipFast and Makerkit have Stripe and Lemon Squeezy. That can be worth more than everything else on this page.' },
+	{ who: 'You are selling to individuals.', when: 'A single-user consumer product gains nothing from organisations. ShipFast is built for exactly that.' },
+	{ who: 'Your team writes Python.', when: 'SaaS Pegasus is mature, maintained and has real AI features. Fighting a TypeScript stack you do not know costs more than any head start.' },
+	{ who: 'You will not run on Cloudflare.', when: 'Rocketflare deploys to Cloudflare Workers and nowhere else. Supastarter runs on Vercel or Docker, Pegasus on any VPS or PaaS.' },
+	{ who: 'You want a mobile app in the same repository.', when: 'Makerkit has an Expo kit. Rocketflare has no native mobile client.' },
+]
+
+const faqs = [
+	{
+		q: 'Is Rocketflare a free alternative to ShipFast?',
+		a: 'Yes, for products sold to companies. Rocketflare is free and MIT licensed, and includes organisations, roles, SSO, background jobs and an AI layer that ShipFast does not. ShipFast is the better choice for a single-user product that needs a landing page and Stripe checkout this weekend, because Rocketflare has no billing.',
+	},
+	{
+		q: 'Is Rocketflare an alternative to Supastarter?',
+		a: 'Yes. Both give you organisations with owner, admin and member roles on TypeScript and Postgres. Supastarter adds billing across five payment providers. Rocketflare adds durable AI agents with human approval, a knowledge base with hybrid search, evals and AI cost tracking, isolation checked by CI tests, OIDC single sign-on and an MIT licence.',
+	},
+	{
+		q: 'Is Rocketflare an alternative to Makerkit?',
+		a: 'Yes, especially for agencies and AI products. Makerkit’s licence does not allow client work on its developer tier, requires licences for client hand-offs, and forbids open-sourcing; Rocketflare is MIT. Makerkit’s kit has no AI in the product itself, while Rocketflare ships chat, agents, a knowledge base and evals.',
+	},
+	{
+		q: 'Which SaaS starter kit has the best AI features?',
+		a: 'Among the paid kits we checked, SaaS Pegasus has the most: a streaming chat interface and example agents with tool use, for Django. Rocketflare goes further in TypeScript, with durable agent runs that wait for human approval, a knowledge base over customers’ documents, eval suites and a per-call cost ledger.',
+	},
+	{
+		q: 'Does Rocketflare include Stripe billing?',
+		a: 'No, and none is planned. If you need subscriptions and a checkout on day one, a kit built around Stripe will get you there faster.',
+	},
+]
+
+const sources = [
+	{ label: 'ShipFast', url: 'https://shipfa.st/' },
+	{ label: 'ShipFast: licence', url: 'https://shipfa.st/license' },
+	{ label: 'Supastarter', url: 'https://supastarter.dev/' },
+	{ label: 'Supastarter: organisations', url: 'https://supastarter.dev/docs/nextjs/organizations/overview' },
+	{ label: 'Supastarter: AI chatbot', url: 'https://supastarter.dev/docs/nextjs/ai/chatbot' },
+	{ label: 'Supastarter: updating the codebase', url: 'https://supastarter.dev/docs/nextjs/codebase/update' },
+	{ label: 'Supastarter: licence', url: 'https://supastarter.dev/legal/license' },
+	{ label: 'Makerkit: pricing', url: 'https://makerkit.dev/pricing' },
+	{ label: 'Makerkit: licence', url: 'https://makerkit.dev/license' },
+	{ label: 'Makerkit: AI SaaS starter', url: 'https://makerkit.dev/ai-saas-starter' },
+	{ label: 'Makerkit: CLI v2', url: 'https://makerkit.dev/blog/changelog/introducing-makerkit-cli-v2' },
+	{ label: 'SaaS Pegasus: pricing', url: 'https://www.saaspegasus.com/pricing/' },
+	{ label: 'SaaS Pegasus: licence', url: 'https://www.saaspegasus.com/license/' },
+	{ label: 'SaaS Pegasus: LLM docs', url: 'https://docs.saaspegasus.com/ai/llms/' },
+	{ label: 'SaaS Pegasus: release notes', url: 'https://docs.saaspegasus.com/release-notes/' },
+	{ label: 'SaaS Pegasus: upgrading', url: 'https://docs.saaspegasus.com/upgrading/' },
+]
+---
+<CompareLayout
+	slug="saas-starter-kits"
+	h1="Rocketflare vs ShipFast, Supastarter, Makerkit and SaaS Pegasus"
+	lede="Paid SaaS starter kits save you the first month of plumbing, and the good ones are worth the money. They differ from Rocketflare in three places: they include billing and it does not, their AI is an example where Rocketflare’s is a working layer with agents and a knowledge base, and their licences restrict what you can do with the code."
+	glance={[
+		{ label: 'They include', body: 'Stripe or several payment providers, wired to plans and checkout.' },
+		{ label: 'Rocketflare includes', body: 'Durable AI agents with approvals, a knowledge base, evals and cost tracking, OIDC single sign-on, and isolation checked by tests.' },
+		{ label: 'The price', body: 'They cost $199 to $1,499 once, with licence conditions. Rocketflare is free under MIT.' },
+	]}
+	shortAnswer="If you need billing on day one, buy Supastarter (B2B, several payment providers) or ShipFast (consumer, fast checkout). If you are building a B2B product where AI does real work, or you build for clients, start from Rocketflare: it is free and MIT licensed, and its agents, knowledge base and tenancy go further than any paid kit we checked. You add Stripe yourself."
+	profiles={profiles}
+	table={table}
+	differences={differences}
+	pickThem={pickThem}
+	faqs={faqs}
+	sources={sources}
+/>

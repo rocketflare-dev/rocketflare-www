@@ -220,9 +220,10 @@ const embeddingTiers = [
 		The workflow is three steps — claim, execute, finish — each opening and closing its own database
 		client. The claim is the row itself: an update that only matches a queued or running status and
 		returns the row. Every terminal write carries the same condition, so a settled run is never
-		rewritten and a retried step simply re-claims. Exclusivity — at most one active run per tenant
-		per agent — is a partial unique index, so a second request gets the existing run back rather
-		than a race.
+		rewritten and a retried step simply re-claims. Exclusivity is a partial unique index over a slot
+		each run holds: one per organisation for an exclusive agent, one per caller-chosen key, or none
+		at all for an agent that may run many times at once. A second request for a taken slot gets the
+		existing run back rather than a race.
 	</p>
 
 	<div class="why">
@@ -241,6 +242,44 @@ const embeddingTiers = [
 		engine about any run that still claims to be active and settling it if the engine has never
 		heard of it. There is no sweeper cron, because reconcile-on-read covers the same ground at the
 		moment somebody actually cares.
+	</p>
+
+	<h2>Agents at volume: batches, fan-out, budgets and policies</h2>
+	<p>
+		A non-exclusive agent can be started in batches of up to a hundred inputs in one request, which
+		becomes one workflow call, and inside a run it can fan out over a list of items a few at a time.
+		Each item gets its own namespace for the run's durable keys, so a retried step replays the items
+		that already finished instead of paying for them twice.
+	</p>
+	<p>
+		Every model call and decision a run makes writes its own usage row carrying the run's id, as
+		the call returns — so a cancelled or failed run still accounts for every turn it paid for, and a
+		run page can say what that run cost. A budget per run, per agent and per organisation per day is
+		checked before each call, and a run that reaches one stops with a reason a person can act on.
+	</p>
+	<p>
+		An agent can also declare a policy for its tool loop: how many turns, tool calls and seconds of
+		active time it may use, and how many failing calls in a row it tolerates. The limits count across
+		retries, and time spent waiting on a person does not count. When a run runs out, the policy
+		decides: make one forced call for a final answer over what it has found so far, or fail with
+		the reason. A separate authorisation hook can refuse a tool call by rule before it runs or before
+		anyone is asked to approve it.
+	</p>
+
+	<div class="why">
+		<p>
+			<strong>Why the limits live in the loop.</strong> What happens when an agent runs out of road
+			used to be one example agent's private code. Every agent hits the same failure modes — a model
+			that answers in prose instead of calling its final tool, a tool that keeps erroring — so the
+			loop owns the answer, and an agent states its limits instead of re-implementing them.
+		</p>
+	</div>
+
+	<p>
+		Changing an agent is checked against its history before it ships: a replay script runs the
+		agent's current code over its settled runs, answering every recorded decision, effect and human
+		answer from the database, and reports which outputs would change — read-only, with no model
+		calls unless asked for.
 	</p>
 
 	<h2>The three knowledge tools every agent gets</h2>

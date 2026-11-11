@@ -1,11 +1,11 @@
 ---
 import ConceptLayout from '../../layouts/ConceptLayout.astro'
 import Terminal from '../../components/Terminal.astro'
-import { pluginById, installCommand } from '../../data/plugins'
+import { publicPluginById, installCommand } from '../../data/plugins'
 import { GITHUB_URL } from '../../data/site'
 
-const connectors = pluginById('connectors')
-const m365 = pluginById('m365')
+const connectors = publicPluginById('connectors')
+const m365 = publicPluginById('m365')
 const installConnectors = installCommand(connectors)
 const installM365 = installCommand(m365)
 if (!installConnectors || !installM365) throw new Error('Both connector plugins should have an install command')

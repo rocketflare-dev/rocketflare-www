@@ -2,6 +2,7 @@
 import LogoMark from './LogoMark.astro'
 import { GITHUB_URL } from '../data/site'
 import { FOOTER_PAGES } from '../data/pages'
+import { FOOTER_COMPARISONS } from '../data/comparisons'
 ---
 <footer>
 	<div class="footer-logo"><LogoMark size={22} /> Rocketflare</div>
@@ -9,5 +10,9 @@ import { FOOTER_PAGES } from '../data/pages'
 		{FOOTER_PAGES.map((p) => <a href={p.path}>{p.nav}</a>)}
 		<a href={GITHUB_URL} target="_blank" rel="noopener">GitHub</a>
 	</div>
-	<p>MIT licensed. Take a copy, cut it loose, make it yours.</p>
+	<nav class="footer-compare" aria-label="Comparisons">
+		<a class="footer-compare-head" href="/compare/">Alternative to</a>
+		{FOOTER_COMPARISONS.map((c) => <a href={c.href}>{c.name}</a>)}
+	</nav>
+	<p><a href="/license/">MIT licensed</a>. Take a copy, cut it loose, make it yours.</p>
 </footer>

@@ -29,8 +29,8 @@ on that organisation's chat turns and agent runs carry two more tools, `web_sear
 ## Install
 
 ```bash
-pnpm plugin add https://github.com/rocketflare-dev/rocketflare-plugins.git@3.4.2 --subdir plugins/web-knowledge
-pnpm plugin add https://github.com/rocketflare-dev/rocketflare-plugins.git@3.4.2 --subdir plugins/web-knowledge --apply
+pnpm plugin add https://github.com/rocketflare-dev/rocketflare-plugins.git@3.10.1 --subdir plugins/web-knowledge
+pnpm plugin add https://github.com/rocketflare-dev/rocketflare-plugins.git@3.10.1 --subdir plugins/web-knowledge --apply
 pnpm db:generate --name plugin-web-knowledge-3.4.0 && pnpm db:migrate
 ```
 
@@ -57,6 +57,8 @@ provider, ask your agent — the plugin's `CLAUDE.md` lists the three steps it t
 - Routes only ever answer `hasCredential`, never the key; the activity log records that a key was
   set, kept or cleared, never its value.
 - The key is decrypted only at the moment of the outbound call, inside the tool or the test route.
+- `fetch_page` reads only URLs `web_search` returned in the same chat turn or agent-run attempt; a
+  URL pasted into the conversation is refused, so search for the page first.
 - `fetch_page` refuses non-http(s) URLs, non-default ports, IP literals and local or private host
   names, re-checks every redirect, caps pages at 2 MB, and marks page text as untrusted for the
   model.

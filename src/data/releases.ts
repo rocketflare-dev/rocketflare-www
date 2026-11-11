@@ -375,6 +375,168 @@ export const RELEASES: Release[] = [
 		migrations: false,
 		areas: ['config'],
 	},
+	{
+		version: '0.18.0',
+		date: '2026-10-11',
+		summary:
+			'A launch.kit.json contract describes how Launch scaffolds, develops, gates, ships and upgrades an app from the kit, and a conformance check runs in the kit and in every renamed copy.',
+		breaking: false,
+		migrations: false,
+		areas: ['config', 'docs'],
+	},
+	{
+		version: '0.18.1',
+		date: '2026-10-11',
+		summary:
+			'The kit check now accepts a copy Launch has already provisioned with real KV ids, so a launched app passes its own gate without editing its tomls.',
+		breaking: false,
+		migrations: false,
+		areas: ['config', 'docs'],
+	},
+	{
+		version: '0.19.0',
+		date: '2026-10-12',
+		summary:
+			'Agents can ask typed questions with ctx.decide and branch in code on the answer and its confidence: TypeSafe Jev answers with calibrated probabilities as a new Decisions provider, every decision is recorded per run, and a triage-research example shows the pattern. Keyword search also stops tripping over the filler words in a question.',
+		breaking: false,
+		migrations: true,
+		areas: ['api', 'shared', 'ui', 'db', 'config', 'docs'],
+	},
+	{
+		version: '0.20.0',
+		date: '2026-10-13',
+		summary:
+			'Claude 5.x and GPT-6 work out of the box: each request now follows the model’s own rules for thinking, sampling and forced tools, OpenAI runs on the Responses API so tool calls work on every GPT-6 model, the defaults move to Claude Haiku 5.5 and GPT-6 Luna, and the cost estimates are corrected (Opus 4.5 to 4.8 were showing three times their real price).',
+		breaking: true,
+		migrations: false,
+		areas: ['api', 'shared', 'ui', 'docs'],
+	},
+	{
+		version: '0.21.0',
+		date: '2026-10-16',
+		summary:
+			'Agents can run at volume: many runs at once, batches of up to 100, fan-out inside a run, a usage row per model call with per-run budgets, and tool-loop policies that decide what happens when a run runs out. Plugin agents can ask people questions, and a replay script re-runs past runs against today’s code.',
+		breaking: true,
+		migrations: true,
+		areas: ['db', 'api', 'shared', 'cli', 'config', 'ui', 'docs'],
+	},
+	{
+		version: '0.22.0',
+		date: '2026-10-24',
+		summary:
+			'Agents call their tools concurrently under a configurable cap, and plugins can receive inbound email: a new email handler slot routes messages sent to the app’s address to the plugin that claims them.',
+		breaking: false,
+		migrations: false,
+		areas: ['api', 'shared', 'plugins'],
+	},
+	{
+		version: '0.23.0',
+		date: '2026-10-24',
+		summary:
+			'Plugins can start agent runs from jobs, scheduled tasks and inbound email, safely retried with an idempotency key; agents and tools get file storage; and documents whose converted text carries stray NUL bytes now index instead of failing.',
+		breaking: false,
+		migrations: false,
+		areas: ['api', 'ui', 'docs'],
+	},
+	{
+		version: '0.24.0',
+		date: '2026-10-30',
+		summary:
+			'An app made from the kit starts clean: the rename removes the kit’s own release scripts, maintainer hooks, tests and pending notes, so an app’s gate only checks the app while upgrades keep working. Example agents can be deleted without touching a test, the example plugin goes fully dark with its flag off, and the source no longer carries the kit’s design history in its comments.',
+		breaking: false,
+		migrations: false,
+		areas: ['api', 'config', 'docs'],
+	},
+	{
+		version: '0.25.0',
+		date: '2026-11-03',
+		summary:
+			'The kit moves to Node 26, React 19 and React Router 7, with zod 4, postgres.js 4, CASL 7 and the Anthropic API’s 2026-10-21 version, and every other dependency brought current. Its workflows pin each Action by commit and run with timeouts and read-only permissions, and the analytics plugin arrives at 3.8.1, where an organisation’s fact-table status shows only its own activity.',
+		breaking: true,
+		migrations: false,
+		areas: ['cli', 'ci', 'config', 'scripts', 'docs', 'ui', 'shared', 'api', 'db'],
+	},
+	{
+		version: '0.26.0',
+		date: '2026-11-07',
+		summary:
+			'Organisations and roles can come from your identity provider: sign-in through an OIDC issuer such as Cognito creates and updates them from the id_token, identity events keep them in step, and a session can be capped. Plugins get an identity seam of their own, so one can sign people in, provision them, add a login button and require SSO for the email domains it has verified, in both tenancy modes.',
+		breaking: false,
+		migrations: true,
+		areas: ['api', 'db', 'config', 'shared', 'ui', 'plugins', 'docs'],
+	},
+	{
+		version: '0.27.0',
+		date: '2026-11-08',
+		summary:
+			'A new rf-agent-docs skill checks the instructions a coding agent reads — every CLAUDE.md, rule and skill — for paths and commands that no longer exist, files too long to load whole and rules that contradict each other, then fixes them. Its first run split the two largest files into shorter ones beside the code they describe, and added the colour-contrast check the docs had always promised, which lifted two theme colours to WCAG AA.',
+		breaking: false,
+		migrations: false,
+		areas: ['skills', 'ui'],
+	},
+	{
+		version: '0.28.0',
+		date: '2026-11-08',
+		summary:
+			'Analytics is now opt-in: a fresh copy of the kit starts with no plugins, and one command, /rf-plugin add analytics, adds the dashboards, the semantic layer and the fact tables when your app wants them. Apps that already have analytics keep it, and the kit’s own CI still installs it on every pull request, so it stays proven against each release.',
+		breaking: false,
+		migrations: false,
+		areas: ['plugins', 'scripts', 'ci', 'docs'],
+	},
+	{
+		version: '0.29.0',
+		date: '2026-11-09',
+		summary:
+			'A hardening round across roles, sign-in, API key scopes and agent budgets. Sign-in moves to openid-client, and traces no longer keep prompts unless you opt in.',
+		breaking: true,
+		migrations: true,
+		areas: ['api', 'ui', 'shared', 'db', 'cli', 'config', 'docs', 'scripts', 'plugins'],
+	},
+	{
+		version: '0.30.0',
+		date: '2026-11-10',
+		summary:
+			'A plugin can now serve whole public websites on their own domains from the same Worker as your app, each with a strict content security policy, forms, caching and multi-host provisioning. Plugins also get a full-screen workspace page tier, and the default Workers AI model stops dropping one forced tool call in eight. An app with no such plugin sees no routing change.',
+		breaking: false,
+		migrations: false,
+		areas: ['api', 'ui', 'config', 'scripts', 'docs'],
+	},
+	{
+		version: '0.31.0',
+		date: '2026-11-10',
+		summary:
+			'Plugins can ship knowledge about the app itself, stored once for every organisation and always searchable, stream a chat of their own, add buttons to the top bar and list every page a reader may open. They can also install Claude Code hooks and seed files the developer then owns, which is what the new guide and global-search plugins are built on.',
+		breaking: false,
+		migrations: true,
+		areas: ['api', 'ui', 'config', 'scripts', 'docs', 'db'],
+	},
+	{
+		version: '0.32.0',
+		date: '2026-11-10',
+		summary:
+			'Plugins can announce events, such as a note being created, and other plugins, your own code or an agent can react to each one, once per organisation and safely retried. An agent can be started by an event, or offered in a picker as something people can attach to it.',
+		breaking: false,
+		migrations: true,
+		areas: ['api', 'ui', 'config', 'scripts', 'docs', 'db'],
+	},
+	{
+		version: '0.32.1',
+		date: '2026-11-10',
+		summary:
+			'Two fixes for plugins. A guide page found by chat no longer shows as a document card that led to a page it could not open, and an app with two plugins that announce events typechecks again.',
+		breaking: false,
+		migrations: false,
+		areas: ['shared', 'ui', 'docs'],
+	},
+	{
+		version: '0.32.2',
+		date: '2026-11-10',
+		summary:
+			'A test fix only: one of the kit’s own UI tests no longer fails on slow CI runners, so plugin repositories that run the kit’s gate stay green.',
+		breaking: false,
+		migrations: false,
+		areas: ['ui'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */

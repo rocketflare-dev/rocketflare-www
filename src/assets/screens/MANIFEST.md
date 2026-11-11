@@ -94,6 +94,52 @@ Every stop with a frame now has one; the tour's CLI stop is text only by choice 
     where the badge above says "Awaiting input". Cosmetic, visible in a marketing frame, and a kit
     fix rather than a capture one.
 
+## SSO plugin captures (`sso-*`, used by `/plugins/` and `/plugins/sso/`)
+
+The commercial `sso` plugin 0.1.0, installed in a kit checkout at `002b095`, captured 2026-11-09.
+
+- Settings frames: the dev stack through its tunnel (signing in on `localhost` fails while `APP_URL` is the tunnel), signed in as Marcus Adeyemi, admin of Acme Logistics, on a live test connection to an Okta Integrator org
+- `sso-login`: a separate non-dev Worker, built UI, `APP_ENV=staging` (`devLogin: false`, so no quick login and no Example SSO): `wrangler dev --name rf-sso-login-shot --port 3302 --inspector-port 9339 --persist-to <tmp> --var APP_ENV:staging --var APP_URL:http://localhost:3302`. The email field is filled in
+- Tool: the chrome-devtools MCP browser, `emulate --viewport 1440x900x2`, viewport only
+- **The settings frames are retouched in the DOM before capture, and nothing is saved.** These are a public site's images: replace the tunnel host with `app.acme-logistics.example`, the verified domain with `acme-logistics.example`, the connection id with `7f3a2c91`, the Okta org and app ids with `acme` placeholders, the group with `Logistics Admins`, the certificate body and fingerprint with placeholders, and the SCIM token prefix with bullets. Hide the second test connection and the `DEV` / `vdev` chrome
+
+| Stem | Route | State | Used by |
+|---|---|---|---|
+| `sso-login` | `/login` | Non-dev login: Sign in with SSO above the email link form | `/plugins/` card, `/plugins/sso/` hero and `#sign-in` |
+| `sso-connection` | `/settings?tab=sso` | Scrolled to the active Okta connection, step 1 | `#connect` |
+| `sso-domains` | `/settings?tab=sso` | Steps 2 and 3, one verified domain and one group → role mapping, the top of step 4 | `#domains` |
+| `sso-scim` | `/settings?tab=sso` | The end of step 3, step 4 with one token, step 5 with Require single sign-on **off** | `#scim` |
+
+## Sites plugin captures (`sites-*`, used by `/plugins/` and `/plugins/sites/`)
+
+The commercial `sites` plugin as merged to the commercial plugins repository's `main` at `dcd584b` (manifest 0.2.0, unreleased; needs kit 0.30.0), installed in a demo app at `~/tmp/sites-demo-app` (commit `b570410`), captured 2026-11-10.
+
+- Stack: the demo's `wrangler dev` on `http://localhost:3421`, signed in with `/login?as=owner@example.test` (owner of the one workspace). Site hosts from `SITES_HOSTS`: `www.localhost:3421` and `docs.localhost:3421`. Content is the fictional company Pellorin
+- Tool: `playwright-core` driving the installed Google Chrome headless, 1440×900 at `deviceScaleFactor: 2` → 2880×1800, viewport only. The theme is set by writing `localStorage.theme` (`rocketflare-light` / `rocketflare-dark`) in an init script before load
+- **Read-only.** Nothing was typed into a saved field, published, built or translated: a block was selected from the Outline tab, a preview width was switched, the Publish menu and the Build with AI dialog were opened and closed, and the editor still read "No changes" afterwards. The Build with AI description was typed into the unsent dialog
+- Retouched in the DOM before capture, nothing saved: the `DEV` badge and the `vdev` release label hidden (`visibility: hidden`), and on `sites-elements` a scratch element named "Blah" hidden
+- `sites-public` is the public site, which has no dark theme: the page passes the same image as both `light` and `dark`. Its frame's URL bar says `www.pellorin.example`; the app frames say `app.pellorin.example`
+
+| Stem | Route | State | Used by |
+|---|---|---|---|
+| `sites-editor` | `/sites/www/pages/<about>/en` | Outline tab, the Hero block selected, its fields in the right panel | `/plugins/` card and the `/plugins/sites/` hero |
+| `sites-palette` | `/sites/docs/pages/<home>/en` | Tablet preview, the Hero block selected (from Outline), then the Blocks tab showing the palette | `#editor` |
+| `sites-pages` | `/sites/www?tab=pages` | Four pages with en/fr state badges | `#pages` |
+| `sites-publish` | `/sites/www/pages/<about>/en` | Publish menu open: Publish now, schedule, Unpublish | `#publishing` |
+| `sites-language` | `/sites/www/pages/<about>/fr` | The French About page, language switch on fr, Translate from en in the toolbar | `#languages` |
+| `sites-elements` | `/sites/www?tab=elements` | Site header and Site footer regions | `#blocks` |
+| `sites-public` | `http://www.localhost:3421/` | The published English home page, light only | `#public` |
+| `sites-build` | `/sites/www?tab=pages` → New page → Build with AI | Description filled in, Choose sources expanded, **not submitted** | `#ai` |
+| `sites-forms` | `/sites/www/forms` → View | 0.4.0 pass (below): the contact submission's view, Workflow Succeeded with View run, the Summary and the Reply draft | `#forms` |
+
+`sites-forms` was added in a later pass: the sites plugin 0.4.0 (commercial plugins PR #3, branch `feat/sites-form-events`, unreleased; needs kit 0.32.1), installed in a host at `~/tmp/sites-040-host` (kit 0.32.0 commit `750b36b` plus the plugin, uncommitted), captured 2026-11-10.
+
+- Stack: `pnpm dev` on `http://localhost:3440` (API :3441), dev Postgres `sites-040-dev-pg` on :5745, signed in with `/login?as=owner@example.test`. The host's `app/index.ts` declared no site, which left the plugin dormant; `www` (`en` only, matching its data) was declared for the pass and the file restored afterwards
+- Same tool and format as above: `playwright-core`, Chrome headless, 1440×900 at `deviceScaleFactor: 2`, theme by `localStorage.theme` in an init script
+- **Read-only**: no new submission and no new agent run. The submission ("Ada Lovelace", a nonprofit-discount question) and its succeeded `sites.form-reply` run were made by an earlier pass on Workers AI
+- Retouched in the DOM, nothing saved: the `DEV` badge, the `vdev` label and the TanStack Query devtools button hidden (`visibility: hidden`), and in the dialog only, the host organisation's name `Rocketflare` in the model's summary and reply replaced with `Pellorin`
+- Also captured, not used (a feature has one frame): the Form block's **On submit, start** picker set to Draft a reply, on `/sites/www/pages/<contact>/en`
+
 ## Rocketflare Launch captures (`launch-*`, used by `/launch/`)
 
 Not the kit: these are frames of Rocketflare Launch (`rocketflare-dev/rocketflare-launch`), the company
@@ -114,5 +160,6 @@ console the `/launch/` overview describes.
 | `launch-approval` | `/approvals/72e15ad0-…` | Production deploy of Gate check, **Approved**: why they asked, what would go to production, Who decides (owners or admins, 1 of 1, self-approval not allowed), the decision by Marcus Adeyemi | `#ship` |
 | `launch-audit` | `/audit` | Integrity panel (Verify / CSV / JSON Lines, **before** pressing Verify — the result line reports unsealed events on a dev instance whose sealing cron is idle) and the event table: session, upgrade and setting events | `#control` |
 | `launch-app` | `/apps/hola-world` | Overview: Staging v0.15.8 up, "1 change not live" with **Ship v0.15.8 live**, Live v0.15.7 up, Kit "Requires upgrade → 0.17.0" with the upgrade session needing its owner, Active sessions | `#fleet` (`crop="top"`) |
+| `plugin-guide` | `/guide` on a demo app with the **guide** plugin (3.10.0, kit 0.31.0) installed | Getting started open; Ask the Guide pane asked "How do I invite a colleague?" and answered in numbered steps (no raw footnote marks — retake if the model leaves `[^n]` in the text). Captured 2026-11-10 by the CLI daemon, same viewport and sign-in as above | 1440×900 @2 | `/plugins/guide/` hero |
 
 Not captured: **Secrets / grants** (the deck's fleet slide describes grants in text instead).

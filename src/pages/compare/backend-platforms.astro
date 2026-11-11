@@ -1,0 +1,164 @@
+---
+/**
+ * Rocketflare vs backend-as-a-service platforms: Supabase, Firebase, Convex,
+ * Appwrite. They provide parts (database, auth, storage, functions); the
+ * comparison is about the application layers above them. Facts from each
+ * vendor's pricing, docs and licence, checked in CHECKED_ON.
+ */
+import CompareLayout from '../../components/CompareLayout.astro'
+
+const profiles = [
+	{
+		anchor: 'supabase',
+		lead: 'Supabase and Rocketflare agree on the important thing: your data belongs in Postgres. As a Supabase alternative, Rocketflare is the application on top of it, with organisations, roles, agents and an admin area already written.',
+		what: 'Supabase is a hosted Postgres platform with auth, storage, edge functions, realtime, queues, cron and vector support through pgvector. It is Apache-2.0 and can be self-hosted with Docker Compose, without some cloud features such as branching and managed backups.',
+		strong: 'Real Postgres with a strong row-level security story, a generous free tier, SAML sign-in for your users on Pro with an SSO provider id in the token for per-tenant policies, and an MCP server for coding agents. It is the most popular backend here for good reasons.',
+		stops: 'It gives you parts. The organisation, invitation and role model for your customers, the admin console, the activity log, the AI layer (agents, chat, retrieval pipeline, evals, cost tracking) and every screen are yours to build. Its compute for agents and long-running work was in private alpha in October 2026.',
+		facts: [
+			{ k: 'Pricing', v: 'Free tier; Pro from $25 a month plus usage' },
+			{ k: 'Licence', v: 'Apache-2.0' },
+			{ k: 'Self-host', v: 'Yes, Docker Compose' },
+			{ k: 'Organisations for your customers', v: 'Build with RLS' },
+		],
+	},
+	{
+		anchor: 'firebase',
+		lead: 'Firebase is built for mobile apps on Google Cloud. Rocketflare is the Firebase alternative for B2B web products that need organisations, SSO and AI over each customer’s documents, on a relational database you can take elsewhere.',
+		what: 'Firebase is Google’s app backend: Firestore, Authentication, Cloud Functions, hosting, SQL Connect over Cloud SQL Postgres, and AI Logic for calling Gemini from client apps. It is a proprietary managed service with open-source SDKs and local emulators.',
+		strong: 'The best of these for mobile: offline sync, push messaging, crash reporting, remote config and analytics, at Google’s scale, with Gemini close at hand. Identity Platform adds tenants with their own SAML or OIDC providers for B2B.',
+		stops: 'It cannot be self-hosted. Data in Firestore is shaped by Firestore, isolation between customers lives in Security Rules you write, and there is no organisation admin or durable workflow with human approval. SAML and OIDC sign-in are billed per monthly active user beyond the first 50.',
+		facts: [
+			{ k: 'Pricing', v: 'Free Spark plan; Blaze pay-as-you-go' },
+			{ k: 'Licence', v: 'Proprietary service; SDKs open source' },
+			{ k: 'Self-host', v: 'No' },
+			{ k: 'Organisations for your customers', v: 'Auth tenants via Identity Platform; data isolation is yours' },
+		],
+	},
+	{
+		anchor: 'convex',
+		lead: 'Convex has the best developer experience for realtime apps of anything here. Rocketflare is the Convex alternative when you want plain Postgres and an MIT licence under the app, and the app itself already built.',
+		what: 'Convex is a reactive TypeScript backend: a document database, server functions, realtime subscriptions, scheduling and components for agents, retrieval and durable workflows. It can be self-hosted from the same code as its cloud, under the Functional Source License.',
+		strong: 'End-to-end TypeScript with live queries, strong AI components (agent threads, a RAG component, vector search, durable workflow steps) and a model that coding agents handle well.',
+		stops: 'Code is written against Convex’s APIs and runs only on a Convex backend. Sign-in is Convex Auth in beta or a third party such as Clerk, WorkOS or Auth0, with no organisations for your users built in. The FSL is not an open-source licence: each release becomes Apache-2.0 after two years.',
+		facts: [
+			{ k: 'Pricing', v: 'Free to start; Professional $25 per developer a month plus usage' },
+			{ k: 'Licence', v: 'FSL-1.1-Apache-2.0' },
+			{ k: 'Self-host', v: 'Yes' },
+			{ k: 'Organisations for your customers', v: 'Through an auth provider, or your own code' },
+		],
+	},
+	{
+		anchor: 'appwrite',
+		lead: 'Appwrite has the closest thing to an organisation model of these backends. As an Appwrite alternative, Rocketflare adds the rest of the application around it: admin, agents with approvals, a knowledge base and dashboards.',
+		what: 'Appwrite is a BSD-licensed backend with auth, several database options including Postgres, storage, functions, messaging, realtime and site hosting. Self-hosting has the same features as its cloud, and since September 2026 it offers a vector database with built-in embeddings.',
+		strong: 'A permissive licence, full self-hosting, Teams with custom roles and team-based permissions, a broad all-in-one platform for web and mobile, and per-project pricing with unlimited seats.',
+		stops: 'There is no agent runtime, chat, evals or admin console for your customers, and we found no SAML sign-in for your users in its docs. Durable workflows that wait for a person are not part of it.',
+		facts: [
+			{ k: 'Pricing', v: 'Pro $25 a month per project, plus usage' },
+			{ k: 'Licence', v: 'BSD-3-Clause' },
+			{ k: 'Self-host', v: 'Yes, same features as cloud' },
+			{ k: 'Organisations for your customers', v: 'Teams with custom roles' },
+		],
+	},
+]
+
+const table = {
+	columns: ['Supabase', 'Firebase', 'Convex', 'Appwrite', 'Rocketflare'],
+	rows: [
+		{ row: 'What you get', cells: ['Backend services', 'Backend services', 'Backend and runtime', 'Backend services', 'A complete application'] },
+		{ row: 'Database', cells: ['Postgres', 'Firestore, or Cloud SQL Postgres', 'Convex documents', 'Several, including Postgres', 'Postgres with pgvector'] },
+		{ row: 'Licence', cells: ['Apache-2.0', 'Proprietary', 'FSL', 'BSD-3-Clause', 'MIT'] },
+		{ row: 'Organisations, invitations and roles', cells: ['Build it', 'Build it', 'Via an auth provider', 'Teams', 'Built in, with an admin area'] },
+		{ row: 'SSO for your users', cells: ['SAML on Pro', 'SAML and OIDC via Identity Platform', 'Via an auth provider', 'Not found', 'Any OIDC issuer, Google, Microsoft'] },
+		{ row: 'AI agents', cells: ['Build it', 'Gemini calls', 'Agent component', 'Build it', 'Durable runs with approvals and budgets'] },
+		{ row: 'Knowledge base', cells: ['pgvector; build the pipeline', 'Vector search in Firestore', 'RAG component', 'VectorsDB', 'Upload, convert, chunk, embed and hybrid search, done'] },
+		{ row: 'Screens', cells: ['Yours to build', 'Yours to build', 'Yours to build', 'Yours to build', 'Sign-in, settings, chat, knowledge, agents, admin; dashboards as a plugin'] },
+		{ row: 'Where it runs', cells: ['Supabase cloud or your servers', 'Google Cloud', 'Convex cloud or your servers', 'Appwrite cloud or your servers', 'Your Cloudflare account'] },
+	],
+}
+
+const differences = [
+	{
+		title: 'The layers above the backend, written',
+		body: 'Organisations, invitations, roles and groups; an admin area with support access; an activity log; feature flags; dashboards with a semantic layer; a command-line tool with API keys. A backend service gives you the tables these would sit in.',
+		icon: 'layers',
+		tone: 'blue' as const,
+	},
+	{
+		title: 'An AI layer that is finished',
+		body: 'Documents are uploaded, converted to Markdown, chunked, embedded and searched by meaning and by keyword. Chat and agents use that search with citations. Agents run durably, wait for approvals and stop at budgets you set, and every model call has a cost.',
+		icon: 'sparkles',
+		tone: 'purple' as const,
+	},
+	{
+		title: 'Plain Postgres, in your account',
+		body: 'Neon by default, or any Postgres through Cloudflare Hyperdrive. No proprietary data model, no platform SDK in your queries. A pg_dump takes your data with you, and uploaded files sit in your own R2 bucket.',
+		icon: 'database',
+		tone: 'green' as const,
+	},
+]
+
+const pickThem = [
+	{ who: 'You are building a mobile app.', when: 'Firebase’s offline sync, push and crash reporting, or Appwrite’s web and mobile SDKs, are the right foundation. Rocketflare has no native mobile client.' },
+	{ who: 'You want to design every layer yourself.', when: 'If the organisation model, the admin area and the AI layer are what you want to write, a backend service gives you clean parts to write them on. Supabase is an excellent choice.' },
+	{ who: 'Realtime collaboration is the product.', when: 'Convex’s reactive queries make collaborative apps much simpler. Rocketflare’s realtime tells the screen to refetch; it does not sync documents.' },
+	{ who: 'You will not run on Cloudflare.', when: 'Every backend here can be self-hosted somewhere else or runs in another cloud. Rocketflare deploys to Cloudflare Workers only.' },
+]
+
+const faqs = [
+	{
+		q: 'Is Rocketflare an alternative to Supabase?',
+		a: 'It sits a layer above. Supabase gives you Postgres, auth, storage and functions as a service; Rocketflare is a complete application on Postgres, with organisations, roles, SSO, an admin area, dashboards and an AI layer with durable agents and a knowledge base. Choose Supabase to build those layers yourself, or Rocketflare to start with them done.',
+	},
+	{
+		q: 'Is Rocketflare an alternative to Firebase?',
+		a: 'For B2B web products, yes. Rocketflare runs on a relational Postgres database you can move, with organisations, roles and SSO built in and isolation checked by tests. Firebase is the better choice for mobile apps and for teams committed to Google Cloud.',
+	},
+	{
+		q: 'Is Rocketflare an alternative to Convex?',
+		a: 'Yes, if you would rather build on plain Postgres under an MIT licence than on Convex’s runtime under the FSL, and want the application already built. Convex is the better choice when realtime collaboration is the heart of the product.',
+	},
+	{
+		q: 'Which database does Rocketflare use?',
+		a: 'Postgres 17 with pgvector, through Drizzle. A deployed copy uses Neon by default, or any Postgres through Cloudflare Hyperdrive. Locally it runs in Docker. Vectors live in the same database as everything else.',
+	},
+]
+
+const sources = [
+	{ label: 'Supabase: pricing', url: 'https://supabase.com/pricing' },
+	{ label: 'Supabase: self-hosting', url: 'https://supabase.com/docs/guides/self-hosting' },
+	{ label: 'Supabase: SAML SSO', url: 'https://supabase.com/docs/guides/auth/enterprise-sso/auth-sso-saml' },
+	{ label: 'Supabase: AI and vectors', url: 'https://supabase.com/docs/guides/ai' },
+	{ label: 'Supabase: Compute private alpha', url: 'https://supabase.com/blog/supabase-compute-private-alpha' },
+	{ label: 'Firebase: pricing', url: 'https://firebase.google.com/pricing' },
+	{ label: 'Google Cloud: Identity Platform multi-tenancy', url: 'https://docs.cloud.google.com/identity-platform/docs/multi-tenancy' },
+	{ label: 'Firebase: Firestore vector search', url: 'https://firebase.google.com/docs/firestore/vector-search' },
+	{ label: 'Convex: pricing', url: 'https://www.convex.dev/pricing' },
+	{ label: 'Convex: self-hosting', url: 'https://docs.convex.dev/self-hosting' },
+	{ label: 'Convex: licence', url: 'https://github.com/get-convex/convex-backend/blob/main/LICENSE.md' },
+	{ label: 'Convex: auth', url: 'https://docs.convex.dev/auth' },
+	{ label: 'Convex: agents', url: 'https://docs.convex.dev/agents/overview' },
+	{ label: 'Appwrite: pricing', url: 'https://appwrite.io/pricing' },
+	{ label: 'Appwrite: pricing update', url: 'https://appwrite.io/blog/post/appwrite-pricing-update' },
+	{ label: 'Appwrite: teams', url: 'https://appwrite.io/docs/products/auth/teams' },
+	{ label: 'Appwrite: self-hosting', url: 'https://appwrite.io/docs/advanced/self-hosting' },
+	{ label: 'Appwrite: VectorsDB', url: 'https://appwrite.io/blog/post/announcing-vectorsdb' },
+]
+---
+<CompareLayout
+	slug="backend-platforms"
+	h1="Rocketflare vs Supabase, Firebase, Convex and Appwrite"
+	lede="A backend-as-a-service gives you a database, sign-in, storage and functions without running servers. That is real work saved, and it is the bottom layer. The organisation model, the admin area, the AI layer and every screen your customers see are still yours to build. Rocketflare starts with all of those, on plain Postgres in your own account."
+	glance={[
+		{ label: 'They give you', body: 'Managed backend parts: database, auth, storage, functions, realtime.' },
+		{ label: 'Rocketflare gives you', body: 'The application: organisations, roles, SSO, admin, dashboards, durable agents and a knowledge base, on Postgres.' },
+		{ label: 'Lock-in', body: 'Supabase and Appwrite are permissive and portable; Firebase and Convex shape your code. Rocketflare is MIT code over plain Postgres.' },
+	]}
+	shortAnswer="Pick a backend platform when you want to design the application layers yourself, or when you are building for mobile. Pick Rocketflare when you would rather start with them built: a multi-tenant B2B app with SSO, an admin area, dashboards and an AI layer with durable agents and a knowledge base, as MIT-licensed code over a Postgres database you can move."
+	profiles={profiles}
+	table={table}
+	differences={differences}
+	pickThem={pickThem}
+	faqs={faqs}
+	sources={sources}
+/>

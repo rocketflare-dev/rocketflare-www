@@ -35,4 +35,8 @@ export const concept = (anchor: string) => `${CONCEPTS_URL}#${anchor}`
 export const LAUNCH_GITHUB_URL = 'https://github.com/rocketflare-dev/rocketflare-launch'
 /** The Launch meta-kit: the smallest app that conforms to the Launch kit contract, to fork. */
 export const LAUNCH_KIT_URL = 'https://github.com/rocketflare-dev/launch-kit'
+/** Having us operate and support a deployed app. */
+export const OPERATE_CONTACT_URL = 'mailto:clifton@guidemode.dev?subject=Operating%20a%20Rocketflare%20app'
+/** Commercial plugins and partner support. */
+export const PARTNER_CONTACT_URL = 'mailto:partners@rocketflare.dev?subject=Becoming%20a%20Rocketflare%20partner'
 export const LAUNCH_CONTACT_URL = 'mailto:clifton@guidemode.dev?subject=Rocketflare%20Launch'

@@ -12,31 +12,35 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
 import CloudDivider from '../../components/CloudDivider.astro'
 import Callout from '../../components/Callout.astro'
 import { pageByPath } from '../../data/pages'
-import { PLUGINS, PLUGIN_COUNT, pluginPath } from '../../data/plugins'
+import Screenshot from '../../components/Screenshot.astro'
+import { COMMERCIAL_PLUGINS, OPEN_SOURCE_PLUGINS, PLUGINS, PLUGIN_COUNT, pluginPath } from '../../data/plugins'
+import { showcaseFor } from '../../data/plugin-showcases'
 import { numberWord } from '../../data/concepts'
 
 const page = pageByPath('/plugins/')
 if (!page) throw new Error('Page not in the registry: /plugins/')
 
-/** What the search matches: name, id, summary, what it adds (tags stripped), skills and needs. */
+/** What the search matches: name, id, summary, what it adds (tags stripped), skills, needs and contributor. */
 const searchText = (p: (typeof PLUGINS)[number]) =>
-	[p.id, p.label, p.summary, ...p.adds, ...(p.skills ?? []), ...(p.requires ?? [])]
+	[p.id, p.label, p.summary, ...p.adds, ...(p.skills ?? []), ...(p.requires ?? []), p.contributedBy?.name ?? '', p.availability === 'partners' ? 'commercial partners' : '']
 		.join(' ')
 		.replace(/<[^>]+>/g, ' ')
 		.toLowerCase()
-const cards = PLUGINS.map((p) => ({ p, text: searchText(p) }))
+const cards = OPEN_SOURCE_PLUGINS.map((p) => ({ p, text: searchText(p) }))
+const commercial = COMMERCIAL_PLUGINS.map((p) => ({ p, text: searchText(p), showcase: showcaseFor(p.id) }))
 ---
 <BaseLayout title={page.title} description={page.description} noindex={!page.ready}>
 	<header class="plugins-hero page-hero">
 		<div class="wrap">
 			<div class="hero-copy">
-				<span class="eyebrow">Plugins · {numberWord(PLUGIN_COUNT)} first-party</span>
+				<span class="eyebrow">Plugins · {numberWord(OPEN_SOURCE_PLUGINS.length)} open source, {numberWord(COMMERCIAL_PLUGINS.length)} commercial</span>
 				<h1>Capabilities you copy in</h1>
 				<p class="lede">
 					A Rocketflare plugin is a git repository copied into your application — never an npm
 					package. Its code lands as ordinary source, renamed into your own vocabulary on the way
 					in, and deleting its folders takes it back out. Here is what is published today, what
-					each one adds, and the one command that installs it.
+					each one adds, and the one command that installs it — except
+					for the commercial ones, which are <a href="/partners/">available to partners</a>.
 					<a href="/concepts/plugins/">How the seam works →</a>
 				</p>
 			</div>
@@ -46,7 +50,7 @@ const cards = PLUGINS.map((p) => ({ p, text: searchText(p) }))
 
 	<section class="catalogue" aria-labelledby="catalogue-title">
 		<div class="wrap">
-			<h2 id="catalogue-title" class="visually-hidden">The plugins</h2>
+			<h2 id="catalogue-title" class="visually-hidden">Find a plugin</h2>
 			<div class="search">
 				<label for="plugin-search">Search plugins</label>
 				<input
@@ -58,6 +62,11 @@ const cards = PLUGINS.map((p) => ({ p, text: searchText(p) }))
 				/>
 				<p class="search-count" aria-live="polite" id="plugin-search-count">{PLUGIN_COUNT} plugins</p>
 			</div>
+			<div class="group" data-group>
+			<header class="group-head">
+				<h2>Open source</h2>
+				<p>MIT licensed. Anyone can install these with one command.</p>
+			</header>
 			<ul class="grid" role="list">
 				{cards.map(({ p, text }, i) => (
 					<li id={p.id} class:list={['pcard', 'reveal', i % 2 === 1 ? 'tone-cyan' : 'tone-green']} data-search={text}>
@@ -75,11 +84,36 @@ const cards = PLUGINS.map((p) => ({ p, text: searchText(p) }))
 							<li>kit ≥ <code>{p.minKit}</code></li>
 							{p.requires?.map((r) => <li class="needs">needs <code>{r}</code></li>)}
 							{p.skills && <li>{p.skills.length} {p.skills.length === 1 ? 'skill' : 'skills'}</li>}
+							{p.contributedBy && <li>by {p.contributedBy.name}</li>}
 						</ul>
 					</li>
 				))}
 			</ul>
+			</div>
 			<p class="no-match" hidden>No plugin matches that. Try a broader word, or <a href="/concepts/plugins/">read how plugins work</a>.</p>
+		</div>
+	</section>
+
+	<section class="commercial bg-band" aria-labelledby="commercial-title" data-group>
+		<div class="wrap">
+			<header class="group-head">
+				<span class="eyebrow">For Rocketflare partners</span>
+				<h2 id="commercial-title">Commercial</h2>
+				<p>Closed source, deeper, and aimed at what enterprise customers ask for. <a href="/partners/">How partnering works</a>.</p>
+			</header>
+			<ul class="ccards" role="list">
+				{commercial.map(({ p, text, showcase }) => (
+					<li id={p.id} class="pcard ccard" data-search={text}>
+						<div class="ccard-copy">
+							<h3><a class="card-link" href={pluginPath(p)}>{p.label}</a></h3>
+							<p>{showcase?.headline ?? p.summary}</p>
+							{showcase && <ul class="highlights" role="list">{showcase.highlights.map((h) => <li>{h}</li>)}</ul>}
+							<p class="ccard-more" aria-hidden="true">See what it does →</p>
+						</div>
+						{showcase && <Screenshot light={showcase.hero.light} dark={showcase.hero.dark} alt={showcase.hero.alt} url={showcase.hero.url} width={560} />}
+					</li>
+				))}
+			</ul>
 		</div>
 	</section>
 
@@ -87,7 +121,8 @@ const cards = PLUGINS.map((p) => ({ p, text: searchText(p) }))
 		// Filters the cards as you type. Without JS the input is hidden and every card shows.
 		const input = document.querySelector<HTMLInputElement>('#plugin-search')
 		const count = document.querySelector('#plugin-search-count')
-		const cards = [...document.querySelectorAll<HTMLElement>('.grid > .pcard')]
+		const cards = [...document.querySelectorAll<HTMLElement>('.pcard[data-search]')]
+		const groups = [...document.querySelectorAll<HTMLElement>('[data-group]')]
 		const none = document.querySelector<HTMLElement>('.no-match')
 		const apply = () => {
 			const words = (input?.value ?? '').toLowerCase().split(/\s+/).filter(Boolean)
@@ -98,6 +133,7 @@ const cards = PLUGINS.map((p) => ({ p, text: searchText(p) }))
 				if (hit) shown++
 			}
 			if (count) count.textContent = words.length ? `${shown} of ${cards.length} plugins` : `${cards.length} plugins`
+			for (const group of groups) group.hidden = !group.querySelector('.pcard:not([hidden])')
 			if (none) none.hidden = shown > 0
 		}
 		input?.addEventListener('input', apply)
@@ -211,8 +247,41 @@ const cards = PLUGINS.map((p) => ({ p, text: searchText(p) }))
 	.badges .needs { border-color: var(--accent); }
 	.no-match { color: var(--text-muted); }
 
-	.after { padding: 1rem 0 5rem; background: var(--bg); }
+	.group[hidden], .commercial[hidden] { display: none; }
+	.group-head { margin: 0 0 1.4rem; }
+	.group-head h2 { font-size: var(--step-3); margin: 0 0 0.3rem; }
+	.group-head p { margin: 0; color: var(--text-muted); }
+
+	.commercial { padding: 4.5rem 0; }
+	.commercial .group-head p { color: var(--band-muted); }
+	.ccards { list-style: none; margin: 0; padding: 0; display: grid; gap: 1.4rem; }
+	.ccard {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+		gap: 2.4rem;
+		align-items: center;
+		background: none;
+		border: 1px solid var(--band-muted);
+		border-radius: 20px;
+		padding: 1.8rem 2rem;
+		box-shadow: none;
+	}
+	.ccard > :global(.shot) { width: 100%; margin-inline: 0; }
+	.ccard:hover { border-color: var(--orange); }
+	.ccard:focus-within { border-color: var(--orange); }
+	.ccard h3 { font-size: var(--step-2); margin: 0 0 0.5rem; }
+	.ccard .card-link { color: var(--band-ink); }
+	.ccard p { margin: 0; color: var(--band-muted); line-height: 1.55; }
+	.highlights { list-style: none; margin: 1rem 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.4rem; }
+	.highlights li { font-size: 0.82rem; padding: 0.2rem 0.65rem; border-radius: 999px; border: 1px solid var(--band-muted); }
+	.ccard .ccard-more { margin-top: 1.1rem; color: var(--cyan); font-weight: 600; }
+
+	.after { padding: 4rem 0 5rem; background: var(--bg); }
 	.after h2 { margin-top: 2.4rem; }
 	.after-links { display: flex; flex-wrap: wrap; gap: 0.8rem; margin-top: 1.6rem; }
+
+	@media (max-width: 860px) {
+		.ccard { grid-template-columns: minmax(0, 1fr); gap: 1.2rem; padding: 1.4rem; }
+	}
 
 </style>

@@ -10,22 +10,16 @@
  *
  * Every field is transcribed from the plugin's own `rocketflare-plugin.json`
  * and README — update them together.
+ *
+ * A commercial plugin (`availability: 'partners'`) lives in a private repository that partners
+ * are given access to. It has no repository, changelog or README fields at all, so nothing here
+ * can link to that repository, sync its README or print a public install command for it.
  */
-export interface Plugin {
+interface PluginBase {
 	/** The id in `rocketflare-plugin.json`, the folder name, and the `#anchor` on /plugins/. */
 	id: string
 	/** The manifest's `label`. */
 	label: string
-	/** The repository the plugin is copied from. */
-	repo: string
-	/** Human form of the repo, for a link's text. */
-	repoLabel: string
-	/**
-	 * Where the plugin sits inside its repository, when it is not the root of one. A repository may
-	 * hold several plugins released in lockstep, so the install command needs the directory as well
-	 * as the tag.
-	 */
-	subdir?: string
 	/** The manifest's `minKit`: the oldest kit release it installs into. */
 	minKit: string
 	/** The plugin's own latest release. */
@@ -45,6 +39,30 @@ export interface Plugin {
 	requires?: string[]
 	/** The concept page that explains it, when it has one. */
 	concept?: string
+	/** The agent skills it installs into `.claude/skills/` (the manifest's `skills`). */
+	skills?: string[]
+	/**
+	 * `false` when the manifest's `schema.tables` is empty: no migration to generate after install,
+	 * so the page must not say there is one. Absent means it has tables.
+	 */
+	tables?: false
+	/** Who built it, when that is not the Rocketflare team — credited on the card and the page. */
+	contributedBy?: { name: string; url: string }
+}
+
+/** A plugin anyone can install from a public repository, MIT licensed. */
+export interface PublicPlugin extends PluginBase {
+	availability?: 'public'
+	/** The repository the plugin is copied from. */
+	repo: string
+	/** Human form of the repo, for a link's text. */
+	repoLabel: string
+	/**
+	 * Where the plugin sits inside its repository, when it is not the root of one. A repository may
+	 * hold several plugins released in lockstep, so the install command needs the directory as well
+	 * as the tag.
+	 */
+	subdir?: string
 	/** The plugin's own changelog. */
 	changelogUrl: string
 	/** Its README or docs, when that is a different page from the repo root. */
@@ -55,9 +73,26 @@ export interface Plugin {
 	 * plugin with no README (the vendored one); the build fails when it is set and not synced.
 	 */
 	readme?: string
-	/** The agent skills it installs into `.claude/skills/` (the manifest's `skills`). */
-	skills?: string[]
 }
+
+/**
+ * A commercial plugin, available to Rocketflare partners only: proprietary, in a private
+ * repository. The site names no repository for it — not its URL, not an install command — and
+ * sends the reader to /partners/ instead.
+ */
+export interface PartnerPlugin extends PluginBase {
+	availability: 'partners'
+	/** The npm packages it adds to the app, `name version`. */
+	dependencies?: string[]
+	repo?: never
+	repoLabel?: never
+	subdir?: never
+	changelogUrl?: never
+	docsUrl?: never
+	readme?: never
+}
+
+export type Plugin = PublicPlugin | PartnerPlugin
 
 const PLUGINS_REPO = 'https://github.com/rocketflare-dev/rocketflare-plugins'
 const KIT_REPO = 'https://github.com/rocketflare-dev/rocketflare'
@@ -69,9 +104,9 @@ export const PLUGINS: Plugin[] = [
 		repo: PLUGINS_REPO,
 		repoLabel: 'rocketflare-dev/rocketflare-plugins',
 		subdir: 'plugins/analytics',
-		minKit: '0.13.0',
-		version: '3.4.2',
-		shipsAs: 'installed',
+		minKit: '0.29.0',
+		version: '3.10.1',
+		shipsAs: 'optional',
 		summary:
 			'Dashboards, cubes, fact tables and the drizzle-cube query API — everything that used to be part of the kit, now a repository of its own.',
 		adds: [
@@ -96,7 +131,7 @@ export const PLUGINS: Plugin[] = [
 		repoLabel: 'rocketflare-dev/rocketflare-plugins',
 		subdir: 'plugins/web-knowledge',
 		minKit: '0.9.0',
-		version: '3.4.2',
+		version: '3.10.1',
 		shipsAs: 'optional',
 		summary:
 			'Lets agents and chat search the public web and read pages, on each organisation’s own search key — and only for the organisations that turn it on.',
@@ -118,8 +153,8 @@ export const PLUGINS: Plugin[] = [
 		repo: PLUGINS_REPO,
 		repoLabel: 'rocketflare-dev/rocketflare-plugins',
 		subdir: 'plugins/connectors',
-		minKit: '0.13.0',
-		version: '3.4.2',
+		minKit: '0.29.0',
+		version: '3.10.1',
 		shipsAs: 'optional',
 		summary:
 			'Connects an organisation’s own Microsoft 365 to your app: an admin grants consent once, and its directory and calendars sync in. It holds the rows, routes and schedules; a provider plugin (today, m365) does the talking.',
@@ -143,8 +178,8 @@ export const PLUGINS: Plugin[] = [
 		repo: PLUGINS_REPO,
 		repoLabel: 'rocketflare-dev/rocketflare-plugins',
 		subdir: 'plugins/m365',
-		minKit: '0.12.0',
-		version: '3.4.2',
+		minKit: '0.29.0',
+		version: '3.10.1',
 		shipsAs: 'optional',
 		summary:
 			'Microsoft 365 as a provider for the connectors plugin, which it requires — install connectors first. One multi-tenant Entra app for your whole deployment; each customer’s admin consents to it once.',
@@ -159,6 +194,181 @@ export const PLUGINS: Plugin[] = [
 		changelogUrl: `${PLUGINS_REPO}/blob/main/CHANGELOG.md`,
 		docsUrl: `${PLUGINS_REPO}/tree/main/plugins/m365`,
 		readme: 'plugins/m365/README.md',
+		tables: false,
+	},
+	{
+		id: 'issue-reports',
+		label: 'Issue reports',
+		repo: PLUGINS_REPO,
+		repoLabel: 'rocketflare-dev/rocketflare-plugins',
+		subdir: 'plugins/issue-reports',
+		minKit: '0.29.0',
+		version: '3.10.1',
+		shipsAs: 'optional',
+		summary:
+			'Ideas & issues: anyone on the team talks a bug or an idea through with an agent, which asks until it is clear and logs it on GitHub once they approve the draft.',
+		adds: [
+			'<strong>An Ideas & issues page</strong> — under Feedback in the sidebar: describe a problem or an idea in your own words, answer the agent’s questions one at a time, review the draft, and see the conversations you have shared.',
+			'<strong>An agent that asks before it files</strong> — <code>issue-reports</code> asks plain-language questions until it understands what the person needs, searches the repository for an existing issue, and files nothing until they pick Log it on GitHub. A confirmed duplicate becomes a comment on the existing issue.',
+			'<strong>No tables</strong> — each conversation is one agent run, parked on the person’s answers, so the run is the record and there is no migration. Many conversations can be in progress at once.',
+			'<strong>Safe to retry</strong> — every question and the filing are keyed by round, so a replayed or retried step never asks twice or opens the issue twice.',
+			'<strong>GitHub over plain fetch</strong> — four REST calls and no Octokit, on a fine-grained token with Issues access to one repository. The token never appears in an error, a log line, a response or a prompt.',
+			'<strong>A prompt you can override</strong> — <code>issue-reports</code>, per organisation in Settings → Prompts, with its model chosen in Settings → agent models. Its model calls land in the usage ledger.',
+		],
+		changelogUrl: `${PLUGINS_REPO}/blob/main/CHANGELOG.md`,
+		docsUrl: `${PLUGINS_REPO}/tree/main/plugins/issue-reports`,
+		readme: 'plugins/issue-reports/README.md',
+		tables: false,
+		contributedBy: { name: 'Mosaic Data', url: 'https://mosaicdata.ai/' },
+	},
+	{
+		id: 'freeagent',
+		label: 'FreeAgent',
+		repo: PLUGINS_REPO,
+		repoLabel: 'rocketflare-dev/rocketflare-plugins',
+		subdir: 'plugins/freeagent',
+		minKit: '0.29.0',
+		version: '3.10.1',
+		shipsAs: 'optional',
+		summary:
+			'Mirrors each organisation’s FreeAgent company (UK accounting) into your app, for pages, agents, analytics and the plugins you build on top. An admin approves it once, over OAuth.',
+		adds: [
+			'<strong>A connection per organisation</strong> — Settings → FreeAgent: one company each, approved once over OAuth, with its tokens stored sealed. A refused refresh token marks the connection as needing to be reconnected.',
+			'<strong>Incremental sync</strong> — every 30 minutes, after connecting and on Sync now: bank accounts, transactions, explanations, categories, contacts, bills and invoices. The first sync reaches back about 400 days.',
+			'<strong>A FreeAgent page</strong> — unexplained transactions and invoices, with an overdue filter. Every member can see it; owners and admins connect, disconnect and sync.',
+			'<strong>Agent tools</strong> — five that read the mirror, and two that write: <code>freeagent_explain_transaction</code> and <code>freeagent_create_bill</code>, offered only to admins and waiting for a person to approve each call.',
+			'<strong>A service API and an extension</strong> — other plugins explain transactions, attach receipts and create bills through exported functions, and hear about every sync through <code>freeagent:sync-listeners</code>.',
+			'<strong>Analytics cubes</strong> — when the analytics plugin is installed: spend and income by month and category, unexplained count and amount, outstanding and overdue. Inert without it.',
+			'<strong>Nine tables</strong> — a connection, a sync state and seven mirror tables, all with row-level security, and money stored as <code>numeric</code>.',
+			'<strong>Commands and a skill</strong> — <code>rocketflare freeagent status</code> and <code>sync</code>, and <code>/freeagent</code>, which walks through registering the app, secrets, connecting and troubleshooting.',
+		],
+		changelogUrl: `${PLUGINS_REPO}/blob/main/CHANGELOG.md`,
+		docsUrl: `${PLUGINS_REPO}/tree/main/plugins/freeagent`,
+		readme: 'plugins/freeagent/README.md',
+		skills: ['freeagent'],
+	},
+	{
+		id: 'inbox',
+		label: 'Inbox',
+		repo: PLUGINS_REPO,
+		repoLabel: 'rocketflare-dev/rocketflare-plugins',
+		subdir: 'plugins/inbox',
+		minKit: '0.29.0',
+		version: '3.10.1',
+		shipsAs: 'optional',
+		summary:
+			'Inbound email for your app: forward receipts, invoices and notices to an address on your domain, and they arrive parsed, with their attachments, ready for other plugins to act on.',
+		adds: [
+			'<strong>An address per organisation</strong> — mail reaches the Worker through Cloudflare Email Routing. Each organisation picks a local part, and <code>receipts+anything@</code> reaches it too.',
+			'<strong>Checked before it is accepted</strong> — against the organisation’s sender allow-list and the SPF, DKIM and DMARC verdicts Cloudflare recorded. Anything refused is bounced with a reason the forwarding mailbox shows.',
+			'<strong>An Inbox page</strong> — messages, sender and forwarder, authentication verdicts, text body and attachments, with reprocess and delete. Settings → Inbox holds the address, the allow-list and the on/off switch.',
+			'<strong>Forwards split apart</strong> — each email forwarded as an attachment becomes a message of its own, linked to the forward it came in. Gmail and Proton forwarding confirmations are let through, with their code and link shown.',
+			'<strong>Searchable from chat</strong> — each message and its PDF, Office, HTML and text attachments are indexed into the knowledge base, which it needs the kit’s knowledge surface for. Switchable in Settings.',
+			'<strong>Agent tools and an extension</strong> — <code>inbox_list_messages</code> and <code>inbox_get_message</code>, both read-only, and <code>inbox:consumers</code> so a plugin is called once per parsed message.',
+			'<strong>Three tables and R2</strong> — settings, messages and attachments, all with row-level security. The bytes live in R2 per organisation and are purged with it.',
+			'<strong>Commands and a skill</strong> — <code>rocketflare inbox list</code> and <code>status</code>, and <code>/inbox</code>, which covers Email Routing setup, forwarding, testing and troubleshooting.',
+		],
+		changelogUrl: `${PLUGINS_REPO}/blob/main/CHANGELOG.md`,
+		docsUrl: `${PLUGINS_REPO}/tree/main/plugins/inbox`,
+		readme: 'plugins/inbox/README.md',
+		skills: ['inbox'],
+	},
+	{
+		id: 'guide',
+		label: 'User guide',
+		repo: PLUGINS_REPO,
+		repoLabel: 'rocketflare-dev/rocketflare-plugins',
+		subdir: 'plugins/guide',
+		minKit: '0.31.0',
+		version: '3.10.1',
+		shipsAs: 'optional',
+		summary:
+			'An in-app user guide about your app itself: your coding agent writes it from the code, a Claude Code hook says when a change may have made it stale, and members search it and ask it questions from any screen.',
+		adds: [
+			'<strong>A guide reader</strong> — <code>/guide</code>: contents with search, the page and Ask the Guide side by side, with a User guide nav item and Home link. Admin pages are invisible to members: not in the contents, a 404 by URL and never in search.',
+			'<strong>Ask the Guide</strong> — a <strong>?</strong> button in the header, or the <kbd>?</kbd> key, opens it over any screen. It answers from the guide only, knows which screen you asked from, and cites the sections it used.',
+			'<strong>Search by meaning</strong> — each section is stored once as platform knowledge, the same for every organisation and always embedded, so search is semantic as well as keyword. Chat and agents can search the guide too.',
+			'<strong>Pages you own</strong> — markdown in <code>docs/guide/</code>, seeded with four starter pages and never touched by an upgrade. Each page names the code it describes and the commit it was last checked at.',
+			'<strong>A skill</strong> — <code>/guide</code> with <code>init</code>, <code>write</code>, <code>sync</code> and <code>audit</code>: your coding agent writes the pages from your screens and routes, a separate sub-agent fact-checks them, and sync rewrites only what changed.',
+			'<strong>A stale-docs hook</strong> — a Claude Code Stop hook that prints one line when a session changed code a guide page describes, so the guide is swept before the commit rather than after a customer notices.',
+		],
+		changelogUrl: `${PLUGINS_REPO}/blob/main/CHANGELOG.md`,
+		docsUrl: `${PLUGINS_REPO}/tree/main/plugins/guide`,
+		readme: 'plugins/guide/README.md',
+		skills: ['guide'],
+		tables: false,
+	},
+	{
+		id: 'global-search',
+		label: 'Global search',
+		repo: PLUGINS_REPO,
+		repoLabel: 'rocketflare-dev/rocketflare-plugins',
+		subdir: 'plugins/global-search',
+		minKit: '0.31.0',
+		version: '3.10.1',
+		shipsAs: 'optional',
+		summary:
+			'One ⌘K palette to go anywhere, run a command or find anything a person may see in your app — people, agents, chats and documents — and any installed plugin can add its own results and commands.',
+		adds: [
+			'<strong>A ⌘K palette</strong> — from any page, or the search box in the header: keyboard navigation, recent items, and a Search everything link to <code>/search/all</code>, the full ranked list with filters by kind.',
+			'<strong>Instant Go to and Commands</strong> — every page and settings tab you may open, and commands such as New chat and Invite people, matched in the browser as you type, with no request.',
+			'<strong>Four providers</strong> — people for owners and admins, agents, your own chats, and documents through the kit’s keyword-and-meaning search, each behind the permission of the page it opens.',
+			'<strong>Fused ranking</strong> — Reciprocal Rank Fusion over every provider’s list, with optional re-ranking of the top 50 by a Cohere, Voyage AI, Fireworks AI or compatible endpoint on the organisation’s own key, set in Settings → Search.',
+			'<strong>An extension point</strong> — another plugin adds results by declaring a provider and commands by declaring them on its UI entry, without importing this one, so an app without it still compiles.',
+			'<strong>One table</strong> — <code>global_search_settings</code>, one row per organisation with row-level security. The re-ranker key is sealed at rest and never sent back.',
+		],
+		changelogUrl: `${PLUGINS_REPO}/blob/main/CHANGELOG.md`,
+		docsUrl: `${PLUGINS_REPO}/tree/main/plugins/global-search`,
+		readme: 'plugins/global-search/README.md',
+	},
+	{
+		id: 'sso',
+		label: 'Single sign-on (SAML + SCIM)',
+		availability: 'partners',
+		minKit: '0.29.0',
+		version: '0.3.0',
+		shipsAs: 'optional',
+		summary:
+			'SAML sign-in and SCIM provisioning for each organisation, against its own identity provider: verify the email domain, require SSO for it, and let the directory add, change and remove the people.',
+		adds: [
+			'<strong>A SAML 2.0 service provider</strong> — native, with no broker in between. Sign-in starts from your app; an organisation imports its identity provider’s metadata as XML or from a URL. IdP-initiated sign-in is there too, off by default.',
+			'<strong>Hardened verification</strong> — the identity provider’s certificate is pinned when the connection is saved, and the one inside a response is never trusted. Signature wrapping is refused, every sign-in request is single-use, a replayed assertion is caught, and the audience, recipient and time window are all checked.',
+			'<strong>Verified email domains</strong> — an organisation proves it owns a domain with a DNS TXT record — <code>_rocketflare-sso.example.com</code> for <code>example.com</code> — checked over DNS-over-HTTPS. One domain belongs to one organisation.',
+			'<strong>SSO required</strong> — set per verified domain. Those addresses can then no longer sign in by magic link, Google, Microsoft, OIDC or dev login. Bootstrap admins stay exempt, so there is always a way back in.',
+			'<strong>SCIM 2.0 provisioning</strong> — in both the Okta and the Entra dialect: users created and updated, groups pushed and mapped to roles. Deactivating someone removes their membership and ends their sessions at once.',
+			'<strong>Sign in with SSO</strong> — on the login page: type an email, and its domain finds the organisation’s identity provider.',
+			'<strong>Eight tables</strong> — all prefixed <code>sso_</code>, with the migration generated by the host. It works in both tenancy modes, multi and single.',
+			'<strong>Tried against real providers</strong> — verified live against Okta, for SAML and SCIM, and against Mock SAML. Its README has setup guides for Okta, Microsoft Entra ID and Google Workspace.',
+		],
+		dependencies: ['xml-crypto 6.4.0', '@xmldom/xmldom 0.9.12'],
+	},
+	{
+		id: 'sites',
+		label: 'Sites',
+		availability: 'partners',
+		minKit: '0.32.2',
+		version: '0.4.0',
+		shipsAs: 'optional',
+		summary:
+			'Public websites run from your app: pages in several languages, edited visually inside the app and served from the same Worker on hosts of their own, from blocks and a theme your developers own in code.',
+		adds: [
+			'<strong>Sites on their own hosts</strong> — <code>www.example.com</code> and <code>docs.example.com</code> beside the app, from the same Worker. Pages are rendered on the server and cached at the edge; a cached page makes no database query, and a publish is live within about a minute.',
+			'<strong>A strict CSP on every page</strong> — by default a page loads no script. Site CSS is a build of its own, and the public CSP refuses the admin bundle.',
+			'<strong>A visual editor</strong> — Puck, inside the app: type on the canvas, switch between desktop, tablet and phone, change language from the toolbar, and publish now, on a schedule or through a review.',
+			'<strong>Pages in several languages</strong> — each with its own translated slug, SEO fields and <code>hreflang</code>. AI translation writes a draft in the background and asks before it replaces anyone’s edits.',
+			'<strong>Blocks and themes in code</strong> — <code>defineBlock</code> and <code>defineSite</code> in a directory the app owns, which a plugin upgrade never touches. Reusable elements, header and footer regions, menus, templates and redirects on top.',
+			'<strong>Media, forms and knowledge</strong> — images through Cloudflare Images, forms behind Turnstile that work without JavaScript and can start an agent on each submission, and published pages in the knowledge base so chat can answer from the site.',
+			'<strong>An AI page builder</strong> — Build with AI writes a new draft from a description, from the site’s own blocks, library images and knowledge. It never publishes.',
+			'<strong>A CLI and four agent skills</strong> — <code>rocketflare sites</code> for export, import, audit and authoring; <code>sites-setup</code>, <code>sites-copy-design</code>, <code>sites-migrate</code> and <code>sites-new-page</code> for Claude Code.',
+		],
+		skills: ['sites-setup', 'sites-copy-design', 'sites-migrate', 'sites-new-page'],
+		dependencies: [
+			'@puckeditor/core 0.24.0',
+			'@tiptap/core 3.33.0',
+			'@tiptap/pm 3.33.0',
+			'@tiptap/react 3.33.0',
+			'@tiptap/starter-kit 3.33.0',
+		],
 	},
 	{
 		id: 'example-feature',
@@ -190,12 +400,26 @@ export const pluginById = (id: string) => {
 	return p
 }
 
+/** A commercial plugin: partners only, from a private repository the site never names. */
+export const isPartnerOnly = (p: Plugin): p is PartnerPlugin => p.availability === 'partners'
+
+/**
+ * A plugin that must be public — for a page that links its repository or prints its install
+ * command. Throws for a commercial one, so such a page fails the build instead of linking nowhere.
+ */
+export const publicPluginById = (id: string): PublicPlugin => {
+	const p = pluginById(id)
+	if (isPartnerOnly(p)) throw new Error(`Plugin '${id}' is partners-only and has no public repository`)
+	return p
+}
+
 /**
  * The command that installs a plugin — the repository at its tag. A vendored
- * plugin has none: it is already in the tree.
+ * plugin has none: it is already in the tree. Nor does a commercial one: its
+ * repository is private, and its page sends the reader to /partners/ instead.
  */
 export const installCommand = (p: Plugin) =>
-	p.shipsAs === 'vendored'
+	isPartnerOnly(p) || p.shipsAs === 'vendored'
 		? null
 		: `pnpm plugin add ${p.repo}.git@${p.version}${p.subdir ? ` --subdir ${p.subdir}` : ''}`
 
@@ -204,3 +428,7 @@ export const pluginPath = (p: Plugin | string) => `/plugins/${typeof p === 'stri
 
 /** How many first-party plugins there are — use this, never a literal, in copy. */
 export const PLUGIN_COUNT = PLUGINS.length
+
+/** The catalogue's two groups: MIT and installable by anyone, or commercial and for partners. */
+export const OPEN_SOURCE_PLUGINS = PLUGINS.filter((p): p is PublicPlugin => !isPartnerOnly(p))
+export const COMMERCIAL_PLUGINS = PLUGINS.filter(isPartnerOnly)

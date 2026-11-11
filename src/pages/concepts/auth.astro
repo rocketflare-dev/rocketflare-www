@@ -10,6 +10,9 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		'apps/web/src/api/auth/providers/oidc.ts',
 		'apps/web/src/api/auth/oauth-encryption.ts',
 		'apps/web/src/api/routes/auth/cli.ts',
+		'apps/web/src/api/services/idp-tenancy.ts',
+		'apps/web/src/api/auth/sso-policy.ts',
+		'apps/web/src/plugins/api/identity.ts',
 	]}
 >
 	<h2>Sessions are database rows, not tokens</h2>
@@ -67,11 +70,10 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		Rather than a file per provider, there is one generic pair of routes —
 		<code>/auth/:provider</code> and <code>/auth/:provider/callback</code> — over a list of provider
 		definitions. The OAuth client underneath is
-		<a href="https://arcticjs.dev" rel="noopener">arctic</a>, which already speaks to more than fifty
-		providers — GitHub, GitLab, Slack, Apple, Okta, Auth0, Discord, LinkedIn, Keycloak and the rest —
-		so the kit is not limited to the ones it ships with. Google, Microsoft and a generic OpenID
-		Connect provider are wired; adding another is one definition file with its arctic client,
-		scopes and profile mapping, and no new routing.
+		<a href="https://github.com/panva/openid-client" rel="noopener">openid-client</a>, so the kit is
+		not limited to the ones it ships with. Google, Microsoft and a generic OpenID Connect provider
+		are wired; adding another is one definition file with its client configuration, scopes and
+		profile mapping, and no new routing.
 	</p>
 	<p>
 		Redirect URIs are derived from <code>APP_URL</code>, so there is no
@@ -105,15 +107,72 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 	<p>
 		<code>AUTH_OIDC_ONLY=true</code> makes the issuer the only way in: the login page shows a single
 		button for it and the Google and Microsoft routes refuse. The page never redirects on its own,
-		so signing in is always a click, even when the issuer still has you signed in. Magic links are
-		hidden rather than switched off, because invitations still use them. When the issuer publishes
+		so signing in is always a click, even when the issuer still has you signed in. Magic-link
+		sign-in is switched off on the server too; invitation emails still work. When the issuer publishes
 		an end-session endpoint, signing out signs out there too and comes back to the login page.
 	</p>
 	<div class="note">
 		<p>
-			One issuer per deployment. The <code>groups</code> claim is read but not yet mapped to the
-			kit's groups or roles, there is no back-channel logout, and trusting the email claim trusts
-			every address the issuer sends — there is no per-domain rule.
+			One issuer per deployment. The <code>groups</code> claim is read but not mapped to the kit's
+			groups — organisations and roles come from a separate claim, below — there is no back-channel
+			logout, and <code>OIDC_TRUST_EMAIL</code> trusts every address the issuer sends, with no
+			per-domain rule of its own.
+		</p>
+	</div>
+
+	<h2>Organisations and roles from your identity provider</h2>
+	<p>
+		With <code>OIDC_MANAGED_TENANCY=true</code> the issuer, not the app, decides who belongs where.
+		Its <code>id_token</code> lists the person's organisations in an <code>orgs</code> claim — an
+		id, a name and a role for each — and every sign-in reconciles against it: an organisation the
+		app has not seen is created, roles map through <code>OIDC_ROLE_MAP</code>, and a membership
+		gone from the claim is removed. Admission comes from the claims rather than
+		<code>SIGNUP_MODE</code>. Memberships the issuer manages are marked Managed on the People page
+		and cannot be changed in the app.
+	</p>
+	<p>
+		Between sign-ins the issuer can post identity events — a person suspended, a membership removed
+		or its role changed, an organisation renamed — to <code>POST /api/identity/events</code>,
+		signed with <a href="https://www.standardwebhooks.com" rel="noopener">Standard Webhooks</a>.
+		A suspension ends that person's sessions at once. And every session ends
+		<code>OIDC_SESSION_MAX_AGE_DAYS</code> after sign-in (seven by default, at most 30), however
+		active it is, so everyone is reconciled from fresh claims at least that often. It works with
+		Amazon Cognito: a sign-in its pre-token hook denies lands on a plain no-access page, and signing
+		out goes through Cognito's own logout.
+	</p>
+	<div class="note">
+		<p>
+			It needs <code>TENANCY_MODE=multi</code>. Without the webhook secret, claims are only as fresh
+			as the last sign-in. There is one orgs claim and one role map, with no per-organisation
+			overrides, and the app writes nothing back to the issuer.
+		</p>
+	</div>
+
+	<h2>An identity seam for plugins</h2>
+	<p>
+		Some sign-in belongs in a plugin rather than the kit: a SAML connection per customer, a
+		directory pushing users over SCIM. The kit gives plugins the parts that would otherwise mean
+		writing sessions by hand. A plugin that has proved who someone is calls
+		<code>identityFor().signIn</code>, and the kit links the identity, admits the person and sets the
+		cookie as it does for its own providers. <code>provisionFor</code> creates people and
+		memberships ahead of sign-in and removes a leaver, ending the sessions pinned to that
+		organisation. <code>loginMethods</code> puts a button on the login page, with an email field
+		when the plugin finds the identity provider from the address.
+	</p>
+	<p>
+		And <code>ssoPolicy</code> lets a plugin require SSO for the email domains it has verified. The
+		kit then refuses those addresses a magic link, Google, Microsoft, OIDC and dev login, and sends
+		them to the plugin's button instead. A policy that fails to answer fails closed. The addresses
+		in <code>BOOTSTRAP_ADMIN_EMAILS</code> stay exempt, so a broken connection can never lock out
+		the people who would fix it. The seam works in both tenancy modes, and it is open source with
+		the rest of the kit.
+	</p>
+	<div class="why">
+		<p>
+			<strong>The first plugin built on it</strong> is <a href="/plugins/sso/">single sign-on
+			(SAML + SCIM)</a>, a commercial plugin available to <a href="/partners/">Rocketflare
+			partners</a>: a native SAML 2.0 service provider, verified domains, SSO required per domain and
+			SCIM provisioning for Okta and Entra. The open kit itself speaks OIDC, not SAML or SCIM.
 		</p>
 	</div>
 

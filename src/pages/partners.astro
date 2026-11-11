@@ -1,0 +1,292 @@
+---
+/**
+ * Partners: the companies that build and run Rocketflare apps for their
+ * clients under an agreement with us, what a partner gets, and how to
+ * become one. What partners may do with commercial plugins is on /license/.
+ */
+import { Image } from 'astro:assets'
+import type { ImageMetadata } from 'astro'
+import BaseLayout from '../layouts/BaseLayout.astro'
+import SectionHead from '../components/SectionHead.astro'
+import { pageByPath } from '../data/pages'
+import { PARTNER_CONTACT_URL } from '../data/site'
+import { pluginById, pluginPath } from '../data/plugins'
+import mosaicDay from '../assets/partners/mosaic.day.webp'
+import mosaicNight from '../assets/partners/mosaic.night.webp'
+
+const page = pageByPath('/partners/')
+if (!page) throw new Error('Page not in the registry: /partners/')
+
+interface Partner {
+	name: string
+	tier: 'Gold'
+	/** The partner's site, with UTM parameters so they can see visits from us. */
+	url: string
+	urlLabel: string
+	/** Day: the logo for light backgrounds. Night: for dark ones. */
+	logo: { day: ImageMetadata; night: ImageMetadata }
+	where: string
+	about: string
+	contributor: boolean
+}
+
+const partners: Partner[] = [
+	{
+		name: 'Mosaic',
+		tier: 'Gold',
+		url: 'https://mosaicdata.ai/?utm_source=rocketflare.dev&utm_medium=referral&utm_campaign=partners',
+		urlLabel: 'mosaicdata.ai',
+		logo: { day: mosaicDay, night: mosaicNight },
+		where: 'Dublin and London',
+		about:
+			'An AI and data consultancy working with mid-sized and large organisations across Ireland, the UK and Europe. They find where AI pays off in a business, then build it: AI agents, custom development and prototyping.',
+		contributor: true,
+	},
+]
+
+const runs = [
+	{ title: 'Hosting', body: 'Your clients’ apps deployed and kept running on Cloudflare.' },
+	{
+		title: 'Security and patching',
+		body: 'Security updates to the kit, its dependencies and the platform applied as they land, not saved up for a quarterly release.',
+	},
+	{
+		title: 'Incident response',
+		body: 'Monitoring, alerting and a team that responds when something goes wrong, then tells you what happened and what changed.',
+	},
+	{ title: 'Operations', body: 'Each new kit release applied, and the app kept healthy as it grows.' },
+	{ title: 'Customer support', body: 'We can optionally act as a branded first line of support for your clients’ users.' },
+]
+
+const sso = pluginById('sso')
+const sites = pluginById('sites')
+
+/** `body` is HTML: the commercial plugins entry links each of them. */
+const benefits = [
+	{
+		title: 'Commercial plugins',
+		body: `Closed-source plugins that are not in the public catalogue, licensed for use in your own and your clients’ apps — <a href="${pluginPath(sso)}">single sign-on</a>, for SAML sign-in, verified domains and SCIM provisioning in each of your clients’ organisations, and <a href="${pluginPath(sites)}">sites</a>, for public websites in several languages, edited visually inside the app and served from it.`,
+	},
+	{
+		title: 'Help from the people who build the kit',
+		body: 'Design and architecture advice while you build, from the people who wrote the code you are building on.',
+	},
+	{
+		title: 'A listing on this page',
+		body: 'So a company looking for someone to build its Rocketflare app can find you.',
+	},
+]
+---
+<BaseLayout title={page.title} description={page.description} noindex={!page.ready}>
+	<header class="hero page-hero bg-sky">
+		<div class="wrap">
+			<span class="eyebrow">Partners</span>
+			<h1>The companies that can build Rocketflare apps for you</h1>
+			<p class="lede">
+				Partners build Rocketflare apps for their clients and — with our support — run them in
+				production. They work
+				under an agreement with us, which gives them commercial plugins and support from the people
+				who build the kit.
+			</p>
+		</div>
+	</header>
+
+	<section class="block">
+		<div class="wrap">
+			<SectionHead align="left" eyebrow="Our partners" title="Gold partners" />
+			<div class="partner-grid">
+				{partners.map((p) => (
+					<article class="partner tone-orange">
+						<a class="logo" href={p.url} target="_blank" rel="noopener">
+							<Image class="day" src={p.logo.day} alt={p.name} width={360} />
+							<Image class="night" src={p.logo.night} alt={p.name} width={360} />
+						</a>
+						<div class="partner-body">
+							<h3 class="sr-name">{p.name}</h3>
+							<div class="badges">
+								<span class="badge gold">{p.tier} partner</span>
+								{p.contributor && <span class="badge contributor">Contributor</span>}
+							</div>
+							<p class="where">{p.where}</p>
+							<p class="about">{p.about}</p>
+							{p.contributor && (
+								<p class="contrib-note">
+									They also contribute to Rocketflare: some of the plugins you can use were
+									contributed by them.
+								</p>
+							)}
+							<a class="partner-link" href={p.url} target="_blank" rel="noopener">
+								{p.urlLabel} <span aria-hidden="true">↗</span>
+							</a>
+						</div>
+					</article>
+				))}
+			</div>
+		</div>
+	</section>
+
+	<section class="block bg-band">
+		<div class="wrap">
+			<SectionHead align="left" eyebrow="What partners get" title="You build it. We can run it." />
+			<div class="run-panel">
+				<div class="run-intro">
+					<p class="run-lede">
+						You don’t have to run what you build. We can host, operate and support the apps you make
+						for your clients, so your team can move on to the next project.
+					</p>
+					<p>
+						Within our team we have deep experience running global-scale B2C and B2B SaaS, so the
+						security, patching and incident response your clients expect from a large provider come
+						with every app we run.
+					</p>
+					<p>
+						You keep the client relationship, and any further changes and development stay with you.
+						Gold, Silver and Bronze partnerships set how much of the running we take on.
+					</p>
+				</div>
+				<ul class="run-list">
+					{runs.map((r) => (
+						<li>
+							<h3>{r.title}</h3>
+							<p>{r.body}</p>
+						</li>
+					))}
+				</ul>
+			</div>
+			<h3 class="also">Also included</h3>
+			<ul class="benefits">
+				{benefits.map((b) => (
+					<li>
+						<h3>{b.title}</h3>
+						<p set:html={b.body} />
+					</li>
+				))}
+			</ul>
+		</div>
+	</section>
+
+	<section class="block">
+		<div class="wrap">
+			<div class="join tone-orange">
+				<div>
+					<span class="eyebrow">Become a partner</span>
+					<h2>Build Rocketflare apps for your clients?</h2>
+					<p>
+						If you are a consultancy, agency or product studio that builds, or wants to build,
+						Rocketflare apps for other companies, write to us at
+						<a href={PARTNER_CONTACT_URL}>partners@rocketflare.dev</a>. Tell us a little about your
+						team and the work you do, and we will set up a call to agree terms that suit you.
+					</p>
+					<p class="fine">
+						What partners can do with commercial plugins is on the <a href="/license/">license terms</a> page.
+					</p>
+				</div>
+				<a class="btn btn-primary" href={PARTNER_CONTACT_URL}>Email partners@rocketflare.dev</a>
+			</div>
+		</div>
+	</section>
+</BaseLayout>
+
+<style>
+	.hero { border-bottom: 1px solid var(--border); }
+	.hero .lede { max-width: 70ch; }
+	.block { padding: 3.5rem 0; }
+
+	.partner-grid { display: grid; gap: 1.8rem; }
+	.partner {
+		display: grid;
+		grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+		gap: 3rem;
+		align-items: center;
+		padding: 2.6rem 3rem;
+		border: 1px solid var(--border);
+		border-radius: 24px;
+		background:
+			radial-gradient(700px 300px at 0% 0%, var(--tint), transparent 70%),
+			var(--card);
+		box-shadow: var(--shadow);
+	}
+	.logo { display: flex; justify-content: center; align-items: center; padding: 1rem; }
+	.logo :global(img) { width: 100%; max-width: 360px; height: auto; }
+	:global(html[data-theme='night']) .logo :global(.day) { display: none; }
+	:global(html:not([data-theme='night'])) .logo :global(.night) { display: none; }
+	.sr-name { margin: 0 0 0.6rem; font-size: 1.9rem; }
+	.badges { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+	.badge {
+		padding: 0.25rem 0.75rem;
+		border-radius: 999px;
+		font-size: 0.74rem;
+		font-weight: 700;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+	}
+	.badge.gold { background: var(--tint-orange); color: var(--orange-ink); }
+	.badge.contributor { background: var(--tint-blue); color: var(--accent-ink); }
+	.where { margin: 0.8rem 0 0.9rem; font-size: 0.95rem; color: var(--text-muted); }
+	.about { color: var(--text-muted); font-size: 1.05rem; }
+	.contrib-note { color: var(--text); font-weight: 600; }
+	.partner-link { display: inline-block; margin-top: 0.4rem; font-weight: 600; }
+
+	.run-panel {
+		display: grid;
+		grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+		align-items: center;
+		gap: 2.5rem;
+		padding: 2.4rem 2.6rem;
+		margin-bottom: 2.8rem;
+		border: 1px solid color-mix(in srgb, var(--band-ink) 18%, transparent);
+		border-radius: 24px;
+		background: color-mix(in srgb, var(--band-ink) 6%, transparent);
+	}
+	.run-intro .run-lede { font-size: 1.3rem; line-height: 1.45; color: var(--band-ink); font-weight: 600; margin-top: 0; }
+	.run-intro p { color: var(--band-muted); }
+	.run-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 1.2rem; }
+	.run-list li { padding-left: 1rem; border-left: 3px solid var(--orange); }
+	.run-list h3 { font-size: 1.1rem; margin: 0 0 0.2rem; }
+	.run-list p { color: var(--band-muted); margin: 0; }
+	.also {
+		font-size: 0.74rem;
+		font-weight: 700;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		color: var(--band-muted);
+		margin: 0 0 1rem;
+	}
+	.benefits {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+		gap: 1.6rem;
+	}
+	.benefits h3 { font-size: 1.05rem; margin-bottom: 0.35rem; }
+	.benefits p { color: var(--band-muted); margin: 0; }
+	.benefits :global(a) { color: var(--band-ink); text-decoration: underline; text-underline-offset: 0.18em; }
+
+	.join {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto;
+		gap: 2rem;
+		align-items: center;
+		padding: 2rem 2.2rem;
+		border: 1px solid var(--border);
+		border-radius: 20px;
+		background:
+			radial-gradient(620px 260px at 0% 0%, var(--tint), transparent 70%),
+			var(--card);
+		box-shadow: var(--shadow-sm);
+	}
+	.join .eyebrow { color: var(--accent-ink); }
+	.join h2 { margin-bottom: 0.5rem; }
+	.join p { color: var(--text-muted); max-width: 70ch; }
+	.join .fine { font-size: 0.9rem; margin-bottom: 0; }
+
+	@media (max-width: 860px) {
+		.run-panel { grid-template-columns: minmax(0, 1fr); padding: 1.8rem 1.6rem; }
+		.partner { grid-template-columns: minmax(0, 1fr); gap: 1.4rem; padding: 2rem 1.6rem; }
+		.logo { justify-content: flex-start; padding: 0; }
+		.logo :global(img) { max-width: 260px; }
+		.join { grid-template-columns: minmax(0, 1fr); }
+	}
+</style>

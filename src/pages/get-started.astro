@@ -93,12 +93,12 @@ const setupTurns = [
 	{ who: 'you' as const, text: SKILLS.setup },
 	{
 		who: 'agent' as const,
-		text: 'Running the first-run script and explaining each line as it lands. It will fix anything missing — Docker, Node 24, pnpm — and ask whether to log in to Cloudflare or stay offline.',
+		text: 'Running the first-run script and explaining each line as it lands. It will fix anything missing — Docker, Node 26, pnpm — and ask whether to log in to Cloudflare or stay offline.',
 		checks: BOOTSTRAP_STEPS.map((s) => s.plain),
 	},
 	{
 		who: 'agent' as const,
-		text: `Opened ${APP_URL}. You're signed in as ${DEMO.ownerName}, owner of ${DEMO.org}. Try Chat, Agents, Knowledge or Analytics.`,
+		text: `Opened ${APP_URL}. You're signed in as ${DEMO.ownerName}, owner of ${DEMO.org}. Try Chat, Agents or Knowledge.`,
 	},
 ]
 
@@ -258,7 +258,7 @@ const provisionTurns = [
 			steps={[
 				{ title: 'Postgres in Docker', body: 'One container on port 5432, with the vector extension for search.' },
 				{ title: 'Schema migrated', body: 'Every table, with the row-level policies in place but not yet enforced.' },
-				{ title: 'Demo organisation seeded', body: `${DEMO.org}: people with roles, documents, chats and a dashboard.` },
+				{ title: 'Demo organisation seeded', body: `${DEMO.org}: people with roles, documents, chats and activity.` },
 				{ title: 'App on :3000, API on :3001', body: 'The interface and the Worker, each reloading as you edit.' },
 				{ title: 'You, signed in as the owner', body: `${DEMO.ownerName} (${DEMO.ownerEmail}) — the dev quick-login, which does not exist when deployed.` },
 			]}

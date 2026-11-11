@@ -81,9 +81,10 @@ globs:
 
 	<h2>A guide in every significant directory</h2>
 	<p>
-		Thirteen directories carry their own <code>CLAUDE.md</code> — the routes, the middleware, the
-		permission model, the database schema, the AI services, the agent runtime, the workflows, the
-		cubes, the fact tables, the dashboard templates, the UI, the CLI and the shared package. Each
+		Every significant directory carries its own <code>CLAUDE.md</code> — the routes, the middleware,
+		the permission model, the database schema, the AI services, the agent runtime, the workflows, the
+		UI, the CLI and the shared package — and a plugin brings its own: with analytics added, the
+		cubes, the fact tables and the dashboard templates have one too. Each
 		one describes the local shape: what a file in this folder looks like, what it must not do, and
 		what to copy when adding another.
 	</p>
@@ -122,10 +123,10 @@ globs:
 		<thead><tr><th>Check</th><th>What it refuses to let through</th></tr></thead>
 		<tbody>
 			<tr><td>Row-level-security coverage</td><td>a new tenant table that arrived without a policy, or an untenanted one without a stated reason</td></tr>
-			<tr><td>Cube isolation</td><td>a new cube with no two-tenant isolation case — the test compares the cases to the registry</td></tr>
+			<tr><td>Cube isolation (analytics plugin)</td><td>a new cube with no two-tenant isolation case — the test compares the cases to the registry</td></tr>
 			<tr><td>Unscoped-query allow-list</td><td>cross-tenant SQL appearing anywhere it was not already sanctioned</td></tr>
 			<tr><td>Wrangler parity</td><td>a binding, cron or variable added to one environment and not the other</td></tr>
-			<tr><td>Dashboard templates</td><td>a renamed cube member that would silently break every saved dashboard</td></tr>
+			<tr><td>Dashboard templates (analytics plugin)</td><td>a renamed cube member that would silently break every saved dashboard</td></tr>
 			<tr><td>Bundle check</td><td>a Node-only dependency that type-checks but cannot run on the platform</td></tr>
 			<tr><td>Driver seam</td><td>raw SQL that works on the local driver and breaks on the deployed one — a hand-read error code, session state outside a transaction — and any skipped or driver-specific test in the conformance suite that proves both drivers agree</td></tr>
 		</tbody>

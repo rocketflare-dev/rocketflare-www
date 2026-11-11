@@ -1,6 +1,6 @@
 ---
 /**
- * Who the kit is for: three things you would build on it, what is already
+ * Who the kit is for: four things you would build on it, what is already
  * done for each, what you add and where to start — then, just as plainly,
  * who should pick something else, and the two doors out (ship it / read it).
  *
@@ -15,6 +15,8 @@ import { pluginById } from '../data/plugins'
 
 import peopleLight from '../assets/screens/people.light.png'
 import peopleDark from '../assets/screens/people.dark.png'
+import approvalLight from '../assets/screens/agents-approval.light.png'
+import approvalDark from '../assets/screens/agents-approval.dark.png'
 import researchLight from '../assets/screens/agents-research.light.png'
 import researchDark from '../assets/screens/agents-research.dark.png'
 import analyticsLight from '../assets/screens/analytics.light.png'
@@ -28,26 +30,62 @@ interface Sketch {
 	eyebrow: string
 	title: string
 	lede: string
-	tone: 'blue' | 'red' | 'green'
+	tone: 'purple' | 'blue' | 'red' | 'green'
 	shot: { light: ImageMetadata; dark: ImageMetadata; alt: string; url: string }
 	done: string[]
 	add: string[]
 	start: string[]
 	/** The concept page that explains the mechanism. */
 	behind: string
-	/** The page that covers this shape at length. */
-	more: string
+	/** The page that covers this shape at length, once there is one. */
+	more?: string
+	/** A comparison page for this kind of app, linked under the sketch. */
+	compare?: { href: string; label: string }
 }
 
 const HOST = 'localhost:3000'
 
 const analytics = pluginById('analytics')
+const connectors = pluginById('connectors')
 
 const sketches: Sketch[] = [
 	{
+		id: 'agentic-workflow',
+		compare: { href: '/compare/agentic-workflow-platforms/', label: 'How this compares with Dust, Copilot Studio, n8n and Mastra' },
+		eyebrow: 'What would I build · 1',
+		title: 'An agentic workflow app',
+		lede: 'A tool built around how your business actually works, with AI doing the work in the middle. It reads what comes in, pulls what it needs from the software you already pay for, carries out the steps, and asks a person when the decision is theirs.',
+		tone: 'purple',
+		shot: {
+			light: approvalLight,
+			dark: approvalDark,
+			alt: 'An agent run waiting for a decision: “Index this summary?”, with Index it or Cancel the run',
+			url: `${HOST}/agents`,
+		},
+		done: [
+			'Agents that run as durable workflows, with every step and tool call recorded',
+			'A person in the loop: a run can stop and ask, and by default waits up to a week for the answer',
+			'A knowledge base of your own documents that agents search and cite',
+			`Connections to the tools your team already uses: Microsoft 365 today, through the <a href="/plugins/${connectors.id}/">${connectors.label.toLowerCase()} plugin</a>`,
+			'Jobs on a schedule, so work starts without anyone pressing a button',
+			'AI usage and cost per organisation',
+		],
+		add: [
+			'Your workflows: the steps, the tools each agent may call, and where a person signs off',
+			'Connections to the other software you use, as a provider plugin',
+			'Or write it as a plugin, if other apps will want it too',
+		],
+		start: [
+			'Run the <code>summarize-text</code> agent and answer its “Index this summary?” question',
+			'Then give an agent of your own one tool that calls a system you use',
+		],
+		behind: 'ai',
+	},
+	{
 		id: 'internal-tool',
 		more: '/use-cases/internal-tool/',
-		eyebrow: 'What would I build · 1',
+		compare: { href: '/compare/internal-tool-builders/', label: 'How this compares with Retool, Appsmith and Budibase' },
+		eyebrow: 'What would I build · 2',
 		title: 'An internal operations tool',
 		lede: 'The app your team opens every morning: a few tables, a few pages, and the boring parts — who can sign in, who can do what, what happened — already handled.',
 		tone: 'blue',
@@ -73,7 +111,8 @@ const sketches: Sketch[] = [
 	{
 		id: 'customer-portal',
 		more: '/use-cases/customer-portal/',
-		eyebrow: 'What would I build · 2',
+		compare: { href: '/compare/ai-app-builders/', label: 'How this compares with Lovable, Replit and Base44' },
+		eyebrow: 'What would I build · 3',
 		title: 'A customer portal with AI over documents',
 		lede: 'Each customer uploads their own documents and asks questions about them — and never sees another customer’s.',
 		tone: 'red',
@@ -99,7 +138,8 @@ const sketches: Sketch[] = [
 	{
 		id: 'analytics-product',
 		more: '/use-cases/analytics-product/',
-		eyebrow: 'What would I build · 3',
+		compare: { href: '/compare/backend-platforms/', label: 'How this compares with building on Supabase or Firebase' },
+		eyebrow: 'What would I build · 4',
 		title: 'An analytics-heavy B2B product',
 		lede: 'Numbers are the product: each organisation gets dashboards over its own data, kept fresh on a schedule, with a query surface for questions you did not anticipate.',
 		tone: 'green',
@@ -113,7 +153,7 @@ const sketches: Sketch[] = [
 			'A semantic layer: name a measure once, chart it anywhere',
 			'Dashboards per organisation, copied from templates in the repo',
 			'Summary tables rebuilt on a schedule, one organisation at a time',
-			`All of it from the <a href="/plugins/${analytics.id}/">${analytics.label.toLowerCase()} plugin</a>, installed by default — so it is there on the first run, and yours to upgrade or remove`,
+			`All of it from the <a href="/plugins/${analytics.id}/">${analytics.label.toLowerCase()} plugin</a>, which you add in one command — and which is then yours to upgrade or remove`,
 		],
 		add: ['Your cubes — the measures and dimensions of your domain', 'Or your own plugin, handing its cubes and dashboards to this one'],
 		start: [
@@ -146,8 +186,9 @@ const notFor = [
 				<h1>Who this is for — and who it isn't</h1>
 				<p class="lede">
 					Rocketflare is for a product where people belong to organisations and the organisation is the
-					boundary: a team's internal tool, a customer portal, a B2B product. Three sketches of what you
-					would build on it, then the honest list of what to pick something else for.
+					boundary: an AI workflow tool built for how your business runs, a team's internal tool, a
+					customer portal, a B2B product. Four sketches of what you would build on it, then the honest
+					list of what to pick something else for.
 				</p>
 			</div>
 		</div>
@@ -159,29 +200,36 @@ const notFor = [
 				const behind = behindOf(s.behind)
 				return (
 					<article id={s.id} class:list={['sketch', 'reveal', `tone-${s.tone}`, i % 2 === 1 && 'flip']} aria-labelledby={`${s.id}-title`}>
-						<div class="media">
-							<Screenshot light={s.shot.light} dark={s.shot.dark} alt={s.shot.alt} url={s.shot.url} crop="top" priority={i === 0} />
-						</div>
-						<div class="text">
+						<header class="sketch-head">
 							<span class="eyebrow">{s.eyebrow}</span>
 							<h2 id={`${s.id}-title`}>{s.title}</h2>
 							<p class="sketch-lede">{s.lede}</p>
-							<div class="lists">
-								<div class="list">
-									<h3>Already done</h3>
-									<ul>{s.done.map((x) => <li set:html={x} />)}</ul>
+						</header>
+						<div class="sketch-body">
+							<div class="media">
+								<Screenshot light={s.shot.light} dark={s.shot.dark} alt={s.shot.alt} url={s.shot.url} priority={i === 0} />
+							</div>
+							<div class="text">
+								<div class="lists">
+									<div class="list">
+										<h3>Already done</h3>
+										<ul>{s.done.map((x) => <li set:html={x} />)}</ul>
+									</div>
+									<div class="list">
+										<h3>You add</h3>
+										<ul>{s.add.map((x) => <li set:html={x} />)}</ul>
+									</div>
+									<div class="list">
+										<h3>Start</h3>
+										<ul>{s.start.map((x) => <li set:html={x} />)}</ul>
+									</div>
 								</div>
-								<div class="list">
-									<h3>You add</h3>
-									<ul>{s.add.map((x) => <li set:html={x} />)}</ul>
-								</div>
-								<div class="list">
-									<h3>Start</h3>
-									<ul>{s.start.map((x) => <li set:html={x} />)}</ul>
+								<div class="links">
+									{s.more && <p class="more-link"><a href={s.more}>Read the longer version <span aria-hidden="true">→</span></a></p>}
+									{s.compare && <p class="more-link"><a href={s.compare.href}>{s.compare.label} <span aria-hidden="true">→</span></a></p>}
+									<p class="behind">Behind it: <a href={behind.href}>{behind.title}</a></p>
 								</div>
 							</div>
-							<p class="more-link"><a href={s.more}>Read the longer version <span aria-hidden="true">→</span></a></p>
-						<p class="behind">(behind it: <a href={behind.href}>{behind.title}</a>)</p>
 						</div>
 					</article>
 				)
@@ -233,48 +281,51 @@ const notFor = [
 	.hero { border-bottom: 1px solid var(--border); }
 
 	/* --------------------------------------------------------- sketches -- */
-	.sketches { padding: 3rem 0 4rem; }
-	.sketch {
-		display: grid;
-		grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-		gap: 2.6rem;
-		align-items: center;
-		padding: 3rem 0;
-		border-top: 1px solid var(--border);
-	}
+	.sketches { padding: 3.5rem 0 4rem; }
+	.sketch { padding: 4rem 0; border-top: 1px solid var(--border); }
 	.sketch:first-child { border-top: 0; padding-top: 0; }
+	.sketch-head { max-width: 760px; margin-bottom: 2rem; }
+	.sketch-head .eyebrow { color: var(--accent-ink); margin-bottom: 0.5rem; }
+	.sketch-head h2 { font-size: var(--step-3); margin-bottom: 0.6rem; }
+	.sketch-lede { color: var(--text-muted); font-size: 1.08rem; margin: 0; }
+	/* The screenshot gets the larger share and its natural shape; the lists sit
+	   beside it, top-aligned, and the side swaps on every other sketch. */
+	.sketch-body {
+		display: grid;
+		grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+		gap: 2.8rem;
+		align-items: start;
+	}
+	.sketch.flip .sketch-body { grid-template-columns: minmax(0, 1fr) minmax(0, 1.55fr); }
 	.sketch.flip .media { order: 2; }
 	.media { min-width: 0; }
 	.media :global(.shot) { margin: 0; }
-	.media :global(figure.shot.crop-top .body) { max-height: 340px; } /* outranks the component's 420px */
-	.text { min-width: 0; }
-	.text .eyebrow { color: var(--accent-ink); margin-bottom: 0.5rem; }
-	.text h2 { font-size: var(--step-2); margin-bottom: 0.5rem; }
-	.sketch-lede { color: var(--text-muted); margin-bottom: 1.3rem; }
-	.lists { display: grid; gap: 1.1rem; }
+	.text { min-width: 0; display: flex; flex-direction: column; gap: 1.4rem; }
+	.lists { display: grid; gap: 1.3rem; }
 	.list h3 {
 		font-size: 0.74rem;
 		font-weight: 700;
 		letter-spacing: 0.12em;
 		text-transform: uppercase;
-		color: var(--text-muted);
-		margin: 0 0 0.35rem;
+		color: var(--accent-ink);
+		margin: 0 0 0.45rem;
 	}
 	.list ul { list-style: none; margin: 0; padding: 0; }
-	.list li { position: relative; padding-left: 1.2rem; margin-bottom: 0.3rem; font-size: 0.95rem; }
+	.list li { position: relative; padding-left: 1.2rem; margin-bottom: 0.35rem; font-size: 0.95rem; }
 	.list li::before {
 		content: '';
 		position: absolute;
 		left: 0;
 		top: 0.62em;
-		width: 7px;
-		height: 7px;
-		border-radius: 2px;
+		width: 6px;
+		height: 6px;
+		border-radius: 50%;
 		background: var(--accent);
-		transform: rotate(45deg);
 	}
-	.more-link { margin: 1.2rem 0 0; font-weight: 600; }
-	.behind { margin: 0.4rem 0 0; font-size: 0.9rem; color: var(--text-muted); }
+	.list li :global(a) { text-decoration: underline; text-underline-offset: 0.18em; }
+	.links { padding-top: 1.1rem; border-top: 1px solid var(--border); }
+	.more-link { margin: 0 0 0.4rem; font-weight: 600; }
+	.behind { margin: 0; font-size: 0.9rem; color: var(--text-muted); }
 
 	/* ----------------------------------------------------------- not for -- */
 	.not-for { padding: 4.5rem 0; }
@@ -312,19 +363,14 @@ const notFor = [
 	.door-cta { margin-top: auto; font-weight: 700; color: var(--accent-ink); }
 
 	@media (max-width: 860px) {
-		.sketch, .sketch.flip { grid-template-columns: minmax(0, 1fr); gap: 1.4rem; padding: 2.2rem 0; }
+		.sketch { padding: 2.6rem 0; }
+		.sketch-body, .sketch.flip .sketch-body { grid-template-columns: minmax(0, 1fr); gap: 1.6rem; }
 		.sketch.flip .media { order: 0; }
 		.door-grid { grid-template-columns: 1fr; }
 	}
-	/* "Already done" is the long list: full width, with "You add" and "Start"
-	   side by side under it. */
-	@media (min-width: 560px) {
+	/* Stacked under the screenshot, there is room for the lists side by side. */
+	@media (min-width: 560px) and (max-width: 860px) {
 		.lists { grid-template-columns: 1fr 1fr; }
 		.list:first-child { grid-column: 1 / -1; }
-		.list:first-child ul { columns: 2; column-gap: 1.4rem; }
-		.list:first-child li { break-inside: avoid; }
-	}
-	@media (max-width: 860px) {
-		.sketch, .sketch.flip { grid-template-columns: minmax(0, 1fr); }
 	}
 </style>
