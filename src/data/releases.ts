@@ -546,6 +546,15 @@ export const RELEASES: Release[] = [
 		migrations: true,
 		areas: ['ci', 'db', 'api', 'ui', 'shared'],
 	},
+	{
+		version: '0.34.0',
+		date: '2026-11-11',
+		summary:
+			'Suspending an organisation now also stops its agents and tells plugins, invitations and owner roles follow the rules on every path, API keys stay inside their own organisation, and Microsoft sign-in checks that an address belongs to the directory before trusting it.',
+		breaking: false,
+		migrations: true,
+		areas: ['api', 'db', 'docs'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
