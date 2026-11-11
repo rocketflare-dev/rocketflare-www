@@ -1,0 +1,76 @@
+---
+/**
+ * The security track record: every published audit run, and one page per round of fixes. The
+ * findings themselves are listed only on a round's page.
+ */
+import BaseLayout from '../../../layouts/BaseLayout.astro'
+import RunsTable from '../../../components/security/RunsTable.astro'
+import { ROUNDS, RUNS } from '../../../data/security'
+import { pageByPath } from '../../../data/pages'
+
+const page = pageByPath('/security/track-record/')
+if (!page) throw new Error('Page not in the registry: /security/track-record/')
+---
+<BaseLayout title={page.title} description={page.description} noindex={!page.ready}>
+	<header class="hero page-hero bg-sky">
+		<div class="wrap">
+			<a class="back" href="/security/"><span aria-hidden="true">←</span> Security</a>
+			<span class="eyebrow">Track record</span>
+			<h1>Every audit run, and what fixed what it found</h1>
+			<p class="lede">
+				Each round has its own page. A finding appears there once it is fixed in a released version,
+				as one line saying what could happen before and what holds now. How to reproduce one stays
+				private.
+			</p>
+		</div>
+	</header>
+
+	<section class="block">
+		<div class="wrap">
+			<h2>Rounds</h2>
+			<ul class="rounds">
+				{ROUNDS.map((r) => (
+					<li>
+						<a href={r.path}>
+							<h3>{r.title}</h3>
+							<p>{r.summary}</p>
+							<span class="more">See what it found <span aria-hidden="true">→</span></span>
+						</a>
+					</li>
+				))}
+			</ul>
+
+			<h2 class="runs-head">The runs</h2>
+			<RunsTable runs={RUNS} label="Audit runs" />
+			<p class="note">
+				A unit is one subsystem, one trust boundary and the attack classes tried against it. A run's
+				units and agent calls include work on code outside this site's public repositories.
+			</p>
+		</div>
+	</section>
+</BaseLayout>
+
+<style>
+	.hero { border-block-end: 1px solid var(--border); }
+	.hero .lede { max-inline-size: 70ch; }
+	.back { display: inline-block; margin-block-end: 1rem; font-size: 0.9rem; font-weight: 600; }
+	.block { padding-block: 3.5rem 4.5rem; }
+	.rounds { list-style: none; margin: 1rem 0 0; padding: 0; display: grid; gap: 0.8rem; }
+	.rounds a {
+		display: block;
+		padding: 1.2rem 1.4rem;
+		border: 1px solid var(--border);
+		border-radius: 14px;
+		background: var(--card);
+		color: inherit;
+	}
+	@media (hover: hover) and (pointer: fine) {
+		.rounds a:hover { text-decoration: none; border-color: var(--orange); }
+	}
+	.rounds a:active { background: var(--card-alt); }
+	.rounds h3 { margin: 0 0 0.3rem; font-size: 1.15rem; }
+	.rounds p { margin: 0 0 0.6rem; color: var(--text-muted); font-size: 0.93rem; }
+	.more { font-size: 0.88rem; font-weight: 600; color: var(--link, var(--orange)); }
+	.runs-head { margin-block-start: 3rem; }
+	.note { margin-block: 1rem 0; font-size: 0.9rem; color: var(--text-muted); max-inline-size: 75ch; }
+</style>

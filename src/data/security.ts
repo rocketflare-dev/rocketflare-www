@@ -197,27 +197,43 @@ export const countBySeverity = (list: Finding[]): Record<Severity, number> =>
 const SEVERITY_RANK: Record<Severity, number> = { high: 0, medium: 1, low: 2 }
 
 /**
- * The findings in rounds: the releases that fixed one audit round's findings, most recent first,
- * each list ordered by severity.
+ * The track record in rounds: the runs whose findings one set of releases fixed, most recent first.
+ * Each round has its own page at `/security/track-record/<slug>/`, which is the only place its
+ * findings are listed; each list is ordered by severity.
  */
 export const ROUNDS = [
 	{
-		id: 'round-run-3',
-		title: 'Run 3, fixed in kit 0.34.0 and plugins 3.12.0',
+		slug: 'run-3',
+		title: 'Run 3',
+		summary: 'A confirmation run over everything that changed after the first audit, up to kit 0.33.0.',
+		runIds: ['run-3'],
 		releases: ['0.34.0', '3.12.0'],
 	},
 	{
-		id: 'round-runs-1-2',
-		title: 'Runs 1 and 2, fixed in kit 0.29.0 and plugins 3.9.0',
+		slug: 'runs-1-and-2',
+		title: 'Runs 1 and 2',
+		summary: 'The first audit: the whole kit, then every open plugin and the kit areas the first run deferred.',
+		runIds: ['run-1', 'run-2'],
 		releases: ['0.29.0', '3.9.0'],
 	},
 ].map((r) => ({
 	...r,
+	path: `/security/track-record/${r.slug}/`,
+	runs: RUNS.filter((run) => r.runIds.includes(run.id)),
 	findings: FINDINGS.filter((f) => r.releases.includes(f.release)).sort(
 		(a, b) => SEVERITY_RANK[a.severity] - SEVERITY_RANK[b.severity]
 	),
+	hardening: HARDENING.filter((h) => r.releases.includes(h.release)),
 }))
+
+export type Round = (typeof ROUNDS)[number]
 
 if (ROUNDS.reduce((n, r) => n + r.findings.length, 0) !== FINDINGS.length) {
 	throw new Error('security.ts: a finding names a release no round lists')
+}
+if (ROUNDS.reduce((n, r) => n + r.hardening.length, 0) !== HARDENING.length) {
+	throw new Error('security.ts: a hardening line names a release no round lists')
+}
+if (ROUNDS.reduce((n, r) => n + r.runs.length, 0) !== RUNS.length) {
+	throw new Error('security.ts: a run belongs to no round')
 }

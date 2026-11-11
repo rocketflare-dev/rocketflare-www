@@ -267,6 +267,18 @@ export const PAGES: SitePage[] = [
 		inNav: false,
 	},
 	{
+		path: '/security/track-record/',
+		title: 'Security track record — every audit run and what fixed what it found',
+		nav: 'Track record',
+		description:
+			'Every published Rocketflare audit run, and one page per round of fixes listing each finding fixed in a released version with the release that fixed it.',
+		audience: 'both',
+		order: 13,
+		ready: true,
+		inNav: false,
+		inFooter: false,
+	},
+	{
 		path: '/license/',
 		title: 'License terms — what is free, what is commercial, and why',
 		nav: 'License terms',

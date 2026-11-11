@@ -4,8 +4,8 @@
  * tested with, and the public record of what that audit found and which release fixed it.
  *
  * Every posture claim here is one `docs/CONCEPTS.md` or `docs/THREAT-MODEL.md` makes; claim nothing
- * they do not. The track record comes from `src/data/security.ts`, which lists only findings fixed
- * in a released version, one neutral line each — never how to reproduce one.
+ * they do not. No figures here and no findings: the track record lives on its own pages
+ * (`/security/track-record/`), which list only findings fixed in a released version.
  */
 import BaseLayout from '../layouts/BaseLayout.astro'
 import SectionHead from '../components/SectionHead.astro'
@@ -23,29 +23,10 @@ import {
 	THREAT_MODEL_URL,
 } from '../data/site'
 import { SKILLS } from '../data/get-started'
-import {
-	CONFIRMED_IN_BOTH_FIRST_RUNS,
-	FINDINGS,
-	HARDENING,
-	REPOS,
-	ROUNDS,
-	RUNS,
-	SEVERITIES,
-	countBySeverity,
-	releaseUrl,
-	repoOfRelease,
-} from '../data/security'
+import { ROUNDS } from '../data/security'
 
 const page = pageByPath('/security/')
 if (!page) throw new Error('Page not in the registry: /security/')
-
-const total = countBySeverity(FINDINGS)
-const SEVERITY_TONE = { high: 'red', medium: 'orange', low: 'blue' } as const
-const SEVERITY_LABEL = { high: 'High', medium: 'Medium', low: 'Low' } as const
-
-const dateLabel = (iso: string) =>
-	new Date(`${iso}T00:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })
-const releaseLabel = (release: string) => `${REPOS[repoOfRelease(release)].label.toLowerCase()} ${release}`
 
 const posture = [
 	{
@@ -134,23 +115,9 @@ const modes = [
 			<h1>What the kit enforces, and how we test it</h1>
 			<p class="lede">
 				Every copy starts with organisation isolation, scoped keys and server-side role checks. The
-				kit is audited by AI agents that try to break those rules and check each other’s work. Every
-				finding that has been fixed and released is listed here, with the release that fixed it.
+				kit is audited by AI agents that try to break those rules and check each other’s work, and
+				what they find is fixed before anything about it is published.
 			</p>
-			<dl class="stats">
-				<div>
-					<dt>Findings fixed and released</dt>
-					<dd><a href="#track-record">{FINDINGS.length}</a></dd>
-				</div>
-				<div>
-					<dt>Audit runs published</dt>
-					<dd><a href="#runs">{RUNS.length}</a></dd>
-				</div>
-				<div>
-					<dt>Hardening changes</dt>
-					<dd><a href="#hardening">{HARDENING.length}</a></dd>
-				</div>
-			</dl>
 			<nav class="toc" aria-label="On this page">
 				<a href="#posture">Posture</a>
 				<a href="#threat-model">Threat model</a>
@@ -263,7 +230,7 @@ const modes = [
 		<div class="wrap">
 			<SectionHead align="left" eyebrow="Cadence" title="When it runs" />
 			<div class="cadence">
-				<article class="card tone-blue">
+				<div>
 					<h3>Before a release that touches a boundary</h3>
 					<p>
 						A <code>standard</code> run scoped to what changed since the previous release, whenever the
@@ -271,11 +238,11 @@ const modes = [
 						tools the model is given. The kit’s release script warns when they do. It is a reminder,
 						not a gate.
 					</p>
-				</article>
-				<article class="card tone-purple">
+				</div>
+				<div>
 					<h3>Every quarter</h3>
 					<p>A <code>deep</code> run over the whole kit, with the plugins installed.</p>
-				</article>
+				</div>
 			</div>
 			<p class="plain-note">
 				Nothing runs it on a schedule, and there is no audit in CI yet. A person starts every run.
@@ -289,106 +256,20 @@ const modes = [
 			<SectionHead
 				align="left"
 				eyebrow="Track record"
-				title="What the audits found, and what fixed it"
-				lede="Only findings fixed in a released version appear here. Each line says what could happen before and what holds now. How to reproduce one stays private."
+				title="What the audits found, once it is fixed"
+				lede="Each run is published with the release that fixed what it found. A finding is listed only after that release ships, as one line saying what could happen before and what holds now. How to reproduce one stays private."
 			/>
-
-			<ul class="totals" aria-label="Fixed findings by severity">
-				{SEVERITIES.map((s) => (
-					<li class={`tone-${SEVERITY_TONE[s]}`}>
-						<strong>{total[s]}</strong>
-						<span>{SEVERITY_LABEL[s]}</span>
+			<ul class="rounds">
+				{ROUNDS.map((r) => (
+					<li>
+						<a href={r.path}>
+							<h3>{r.title}</h3>
+							<p>{r.summary}</p>
+						</a>
 					</li>
 				))}
-				<li class="tone-green">
-					<strong>{FINDINGS.length}</strong>
-					<span>Fixed in all</span>
-				</li>
 			</ul>
-
-			<h3 class="sub" id="runs">The runs</h3>
-			<div class="table-wrap" role="region" aria-labelledby="runs" tabindex="0">
-				<table>
-					<thead>
-						<tr>
-							<th scope="col">Run</th>
-							<th scope="col">Date</th>
-							<th scope="col">Commit</th>
-							<th scope="col">Scope</th>
-							<th scope="col" class="num">Units</th>
-							<th scope="col" class="num">Agent calls</th>
-							<th scope="col">Confirmed</th>
-							<th scope="col">Fixed in</th>
-						</tr>
-					</thead>
-					<tbody>
-						{RUNS.map((r, i) => (
-							<tr>
-								<th scope="row">{i + 1}</th>
-								<td class="nowrap"><time datetime={r.date}>{dateLabel(r.date)}</time></td>
-								<td><a href={`${REPOS[r.repo].url}/commit/${r.commit}`} target="_blank" rel="noopener"><code>{r.commit}</code></a></td>
-								<td class="scope">{r.scope}</td>
-								<td class="num">{r.coverageUnits}</td>
-								<td class="num">{r.agentCalls}</td>
-								<td class="nowrap">
-									{SEVERITIES.filter((s) => r.confirmed[s] > 0).map((s) => (
-										<span class={`tag tone-${SEVERITY_TONE[s]}`}>{r.confirmed[s]} {s}</span>
-									))}
-								</td>
-								<td class="nowrap">
-									{r.fixedIn.map((rel) => (
-										<a class="rel" href={releaseUrl(rel)} target="_blank" rel="noopener">{releaseLabel(rel)}</a>
-									))}
-								</td>
-							</tr>
-						))}
-					</tbody>
-				</table>
-			</div>
-			<p class="plain-note">
-				Runs 1 and 2 both confirmed {CONFIRMED_IN_BOTH_FIRST_RUNS} of the same findings; the lists
-				below count them once. A unit is one subsystem, one trust boundary and the attack classes
-				tried against it. Run 3 checked the fixes from the first two and the changes since.
-			</p>
-
-			{ROUNDS.map((round) => {
-				const c = countBySeverity(round.findings)
-				return (
-					<div class="round">
-						<h3 class="sub" id={round.id}>{round.title}</h3>
-						<p class="round-count">
-							{SEVERITIES.filter((s) => c[s] > 0).map((s) => `${c[s]} ${s}`).join(' · ')}
-						</p>
-						<ul class="findings">
-							{round.findings.map((f) => (
-								<li>
-									<span class={`tag sev tone-${SEVERITY_TONE[f.severity]}`}>{SEVERITY_LABEL[f.severity]}</span>
-									<p>{f.line}</p>
-									<a class="rel" href={releaseUrl(f.release)} target="_blank" rel="noopener">{releaseLabel(f.release)}</a>
-								</li>
-							))}
-						</ul>
-					</div>
-				)
-			})}
-
-			<div class="round">
-				<h3 class="sub" id="hardening">Hardening, not confirmed exploitable</h3>
-				<p class="measure hardening-lede">
-					Some candidates could not be settled, usually because the answer needed a browser, a real
-					identity provider or a real model. Where the cautious fix was small, it shipped anyway.
-					They are listed apart because nobody proved they could be exploited.
-				</p>
-				<ul class="findings">
-					{HARDENING.map((h) => (
-						<li>
-							<span class="tag sev tone-green">Hardening</span>
-							<p>{h.line}</p>
-							<a class="rel" href={releaseUrl(h.release)} target="_blank" rel="noopener">{releaseLabel(h.release)}</a>
-						</li>
-					))}
-				</ul>
-			</div>
+			<a class="btn btn-ghost" href="/security/track-record/">See every run <span aria-hidden="true">→</span></a>
 		</div>
 	</section>
 
@@ -476,17 +357,6 @@ const modes = [
 	.block { padding-block: 4rem; }
 	.block p { color: var(--text-muted); }
 
-	/* ------------------------------------------------------------- hero -- */
-	.stats {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 1rem 2.6rem;
-		margin-block: 2.2rem 0;
-	}
-	.stats div { display: flex; flex-direction: column-reverse; gap: 0.2rem; }
-	.stats dt { font-size: 0.85rem; color: var(--text-muted); }
-	.stats dd { margin: 0; font-size: var(--step-3); font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
-	.stats dd a { color: var(--text-bright); }
 	.toc {
 		display: flex;
 		flex-wrap: wrap;
@@ -579,44 +449,13 @@ const modes = [
 		grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
 		gap: 1.2rem;
 	}
-	.cadence .card { border-block-start: 4px solid var(--accent); }
-	.cadence .card h3 { margin-block-start: 0; }
-	.cadence .card p { margin-block-end: 0; }
+	.cadence h3 { margin-block: 0 0.4rem; font-size: 1.1rem; }
+	.cadence p { margin-block-end: 0; }
 	.plain-note { margin-block: 1.4rem; font-size: 0.93rem; max-inline-size: 75ch; }
 
 	/* ------------------------------------------------------ track record -- */
 	.record { border-block: 1px solid var(--border); }
-	.totals {
-		list-style: none;
-		margin: 0 0 2.6rem;
-		padding: 0;
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr));
-		gap: 1rem;
-	}
-	.totals li {
-		display: flex;
-		flex-direction: column;
-		gap: 0.2rem;
-		padding: 1rem 1.2rem;
-		border: 1px solid var(--border);
-		border-block-start: 4px solid var(--accent);
-		border-radius: 14px;
-		background: var(--card);
-	}
-	.totals strong { font-size: var(--step-3); line-height: 1; color: var(--text-bright); font-variant-numeric: tabular-nums; }
-	.totals span { font-size: 0.85rem; font-weight: 600; color: var(--accent-ink); }
-	.sub { font-size: 1.25rem; margin-block: 2.4rem 0.4rem; scroll-margin-block-start: 5rem; }
-	.round-count { margin-block: 0 1rem; font-size: 0.88rem; font-variant-numeric: tabular-nums; }
-	.hardening-lede { margin-block: 0 1rem; font-size: 0.93rem; }
-
-	.table-wrap {
-		overflow-x: auto;
-		margin-block: 1rem;
-		border: 1px solid var(--border);
-		border-radius: 14px;
-		background: var(--card);
-	}
+	.table-wrap { overflow-x: auto; margin-block: 1rem; }
 	.table-wrap:focus-visible { outline: 3px solid var(--orange); outline-offset: 3px; }
 	table { inline-size: 100%; border-collapse: collapse; font-size: 0.9rem; }
 	th, td { text-align: start; vertical-align: top; padding: 0.65rem 0.8rem; border-block-end: 1px solid var(--border); }
@@ -633,37 +472,22 @@ const modes = [
 	td { color: var(--text-muted); }
 	.num { text-align: end; font-variant-numeric: tabular-nums; }
 	.nowrap { white-space: nowrap; }
-	.scope { min-inline-size: 16rem; }
-	td .tag + .tag, td .rel + .rel { margin-inline-start: 0.4rem; }
-
-	.tag {
-		display: inline-block;
-		border-radius: 999px;
-		padding: 0.1rem 0.55rem;
-		border: 1px solid var(--accent);
-		background: var(--tint);
-		color: var(--accent-ink);
-		font-size: 0.78rem;
-		font-weight: 700;
-	}
-	.findings { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.6rem; }
-	.findings li {
-		display: grid;
-		grid-template-columns: 6.5rem minmax(0, 1fr) auto;
-		align-items: baseline;
-		gap: 0.4rem 1rem;
-		padding: 0.75rem 1rem;
+	.rounds { list-style: none; margin: 0 0 1.6rem; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); gap: 1rem; }
+	.rounds a {
+		display: block;
+		block-size: 100%;
+		padding: 1.2rem 1.4rem;
 		border: 1px solid var(--border);
-		border-radius: 12px;
+		border-radius: 14px;
 		background: var(--card);
+		color: inherit;
 	}
-	.findings p { margin: 0; color: var(--text); font-size: 0.93rem; }
-	.sev { justify-self: start; }
-	.rel { font-size: 0.85rem; font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; }
-	@media (max-width: 640px) {
-		.findings li { grid-template-columns: minmax(0, 1fr) auto; }
-		.findings p { grid-column: 1 / -1; grid-row: 2; }
+	@media (hover: hover) and (pointer: fine) {
+		.rounds a:hover { text-decoration: none; border-color: var(--orange); }
 	}
+	.rounds a:active { background: var(--card-alt); }
+	.rounds h3 { margin: 0 0 0.3rem; font-size: 1.15rem; }
+	.rounds p { margin: 0; font-size: 0.93rem; }
 
 	/* ----------------------------------------------------------- report -- */
 	.report-block { padding-block-end: 5rem; }
