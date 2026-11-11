@@ -17,7 +17,7 @@ import { pageByPath } from '../data/pages'
 import { CLOUDFLARE_AUDIT_SKILL_URL, REPORT_KIT_VULN_URL, REPORT_PLUGINS_VULN_URL } from '../data/site'
 import { SKILLS } from '../data/get-started'
 import { ROUNDS } from '../data/security'
-import { GAPS, POSTURE } from '../data/security-posture'
+import { POSTURE } from '../data/security-posture'
 import { SECURITY_DOCS, securityDocPath } from '../data/security-docs'
 import { conceptBySlug } from '../data/concepts'
 
@@ -130,17 +130,6 @@ const modes = [
 					</section>
 				))}
 			</div>
-			<Callout tone="yellow" title="Where the design stops">
-				<p>What the kit does not do, from the known gaps its own documentation lists:</p>
-				<ul class="gaps">
-					{GAPS.map((g) => (
-						<li>
-							<span set:html={inline(g.text)} />{' '}
-							<a href={g.href} class="prop-link">{linkLabel(g.href)}<span aria-hidden="true">&nbsp;→</span></a>
-						</li>
-					))}
-				</ul>
-			</Callout>
 		</div>
 	</section>
 
@@ -392,7 +381,7 @@ const modes = [
 		columns: 3 17rem;
 		column-gap: 2.6rem;
 	}
-	.props li, .gaps li {
+	.props li {
 		position: relative;
 		break-inside: avoid;
 		margin-block-end: 0.85rem;
@@ -401,7 +390,7 @@ const modes = [
 		line-height: 1.55;
 		color: var(--text);
 	}
-	.props li::before, .gaps li::before {
+	.props li::before {
 		content: '';
 		position: absolute;
 		inset-inline-start: 0;
@@ -411,7 +400,7 @@ const modes = [
 		border-radius: 50%;
 		background: var(--accent);
 	}
-	.props :global(code), .gaps :global(code) { font-size: 0.85em; overflow-wrap: anywhere; }
+	.props :global(code) { font-size: 0.85em; overflow-wrap: anywhere; }
 	.prop-link {
 		font-size: 0.82rem;
 		font-weight: 600;
@@ -422,15 +411,6 @@ const modes = [
 		.prop-link:hover { text-decoration: underline; text-underline-offset: 0.18em; }
 	}
 	.prop-link:focus-visible { outline: 2px solid var(--orange); outline-offset: 2px; border-radius: 3px; }
-	.gaps {
-		list-style: none;
-		margin: 0.9rem 0 0;
-		padding: 0;
-		columns: 2 22rem;
-		column-gap: 2.4rem;
-	}
-	.gaps li::before { background: var(--yellow); }
-	.gaps .prop-link { color: var(--text-muted); }
 
 	/* ----------------------------------------------------------- actors -- */
 	.actors { list-style: none; margin: 0; padding: 0; }

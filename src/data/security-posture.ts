@@ -1,6 +1,6 @@
 /**
  * "What every copy enforces" on /security/: the security properties of the kit, grouped, one plain
- * statement each, and the gaps a security reader should know.
+ * statement each.
  *
  * **Every line must be something the kit's own docs state**, at the ref the security docs are
  * synced from (`src/content/security/*.md` frontmatter): docs/CONCEPTS.md (its sections and their
@@ -198,26 +198,4 @@ export const POSTURE: PostureGroup[] = [
 			{ text: 'Findings stay outside the repository until the fix ships, and a fix commit describes the behaviour, not the attack.', href: AUDIT },
 		],
 	},
-]
-
-/**
- * "Where the design stops": the Known gaps a security reader should weigh. Same rule: each is
- * stated in the kit's docs.
- */
-export const GAPS: PostureItem[] = [
-	{ text: 'Row-level security ships switched off, and the trial that would let you turn it on has not been run. Isolation is the query filter alone: one missed filter would be a cross-organisation read, and the tests are what catch it.', href: DATABASE },
-	{ text: 'The unscoped-query test does not prove the admin area is the only cross-organisation surface.', href: DATABASE },
-	{ text: 'A plugin runs in the same Worker with no sandbox, review or signing, so installing one is as trusting as merging its code. The isolation check proves a test exists, not that it is right.', href: PLUGINS },
-	{ text: 'The kit takes a plugin’s word for the identity it signs in: subject, email, verification and organisation.', href: AUTH },
-	{ text: 'Rate limits are approximate sliding windows in KV and do nothing when the KV binding is missing. On plugin routes they are keyed by IP, so senders behind one address share a limit.', href: AUTH },
-	{ text: 'Chat has no spend cap: budgets and the daily cap cover agent runs only. A budget is checked before a call, so a run can go over by its last call, and the active-run cap can be overshot in a burst.', href: AI },
-	{ text: 'There is no audit log beyond the activity feed, and the activity feed has no retention limit.', href: TENANCY },
-	{ text: 'Group restrictions cover knowledge documents only. Agent runs, prompts and other files have none.', href: TENANCY },
-	{ text: 'Keys belong to an organisation (there are no personal keys), CLI logout does not revoke the key, and the only session control in the UI is “log out everywhere”.', href: AUTH },
-	{ text: 'With one OIDC issuer there is no back-channel logout. Without the identity webhook, a removal at the issuer waits for the next sign-in or the session’s end, and suspending a person at the issuer does not revoke their API keys in organisations they joined by hand.', href: AUTH },
-	{ text: 'Turning on required single sign-on does not end sessions or API keys that already exist.', href: AUTH },
-	{ text: 'Signed plugin state has no replay ledger: a token is reusable until it expires unless the plugin records it.', href: PLUGINS },
-	{ text: 'Code behind a feature flag still ships in the bundle; the server is the protection.', href: FLAGS },
-	{ text: 'Shared platform documents can be read by every organisation by design, so no tenant data may go in one.', href: PLUGINS },
-	{ text: 'Deployed configuration, your Cloudflare account and your secrets are yours to get right. The audit reads code.', href: AUDIT },
 ]
