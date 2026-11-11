@@ -537,6 +537,15 @@ export const RELEASES: Release[] = [
 		migrations: false,
 		areas: ['ui'],
 	},
+	{
+		version: '0.33.0',
+		date: '2026-11-10',
+		summary:
+			'Tools a plugin adds to chat or to an agent can now tell which links a person typed themselves, so the web-knowledge plugin reads a page you paste. Create organisation is offered only to people the server would let create one.',
+		breaking: false,
+		migrations: true,
+		areas: ['ci', 'db', 'api', 'ui', 'shared'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
