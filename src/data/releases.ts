@@ -564,6 +564,24 @@ export const RELEASES: Release[] = [
 		migrations: false,
 		areas: ['docs', 'config'],
 	},
+	{
+		version: '0.36.0',
+		date: '2026-11-13',
+		summary:
+			'Provisioning an app with a public site now reaches a working production site on its own: zone routes instead of custom domains that could answer 403, production-only setups, deploys that really deploy, and an edge cache that starts fresh on every deploy. Go straight to 0.36.1: this release cannot be deployed.',
+		breaking: false,
+		migrations: false,
+		areas: ['config', 'api', 'cli', 'docs'],
+	},
+	{
+		version: '0.36.1',
+		date: '2026-11-13',
+		summary:
+			'Apps on 0.36.0 can deploy again: a random id it made while loading, which Cloudflare refuses at upload, is now made on first use, a test loads the whole Worker the way the upload does, and an upgrade that stopped on conflicts finishes with --continue.',
+		breaking: false,
+		migrations: false,
+		areas: ['api', 'tooling', 'docs'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
