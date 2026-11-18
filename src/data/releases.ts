@@ -582,6 +582,15 @@ export const RELEASES: Release[] = [
 		migrations: false,
 		areas: ['api', 'tooling', 'docs'],
 	},
+	{
+		version: '0.37.0',
+		date: '2026-11-18',
+		summary:
+			'Your knowledge base can now pull typed facts out of documents, such as a customer’s fee, contact or renewal date, attach them to your own records, and flag what is unconfirmed or contradicted for a person to settle. It is off by default. Search is faster, measured, and stays consistent when you change embedding models.',
+		breaking: false,
+		migrations: true,
+		areas: ['evals', 'docs', 'db', 'api', 'shared', 'ui', 'config', 'scripts'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
