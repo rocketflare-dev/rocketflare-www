@@ -582,6 +582,24 @@ export const RELEASES: Release[] = [
 		migrations: false,
 		areas: ['api', 'tooling', 'docs'],
 	},
+	{
+		version: '0.37.0',
+		date: '2026-11-18',
+		summary:
+			'Your knowledge base can now pull typed facts out of documents, such as a customer’s fee, contact or renewal date, attach them to your own records, and flag what is unconfirmed or contradicted for a person to settle. It is off by default. Search is faster, measured, and stays consistent when you change embedding models.',
+		breaking: false,
+		migrations: true,
+		areas: ['evals', 'docs', 'db', 'api', 'shared', 'ui', 'config', 'scripts'],
+	},
+	{
+		version: '0.38.0',
+		date: '2026-11-18',
+		summary:
+			'You can now browse the facts read from your documents: a Facts tab on every document and a Facts view across the knowledge base. Search gets a full-width page with filters. Fewer false alarms: a decision model now judges whether two readings name the same person, service or value, in any language.',
+		breaking: false,
+		migrations: true,
+		areas: ['db', 'api', 'shared', 'ui', 'evals', 'docs', 'plugins'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
