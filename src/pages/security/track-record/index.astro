@@ -1,9 +1,10 @@
 ---
 /**
- * The security track record: every published audit run, and one page per round of fixes. The
- * findings themselves are listed only on a round's page.
+ * The security track record: every published audit run, and one page per round of fixes with
+ * its counts. Only numbers are published, never the individual issues.
  */
 import BaseLayout from '../../../layouts/BaseLayout.astro'
+import NotPublished from '../../../components/security/NotPublished.astro'
 import RunsTable from '../../../components/security/RunsTable.astro'
 import { ROUNDS, RUNS } from '../../../data/security'
 import { pageByPath } from '../../../data/pages'
@@ -18,9 +19,8 @@ if (!page) throw new Error('Page not in the registry: /security/track-record/')
 			<span class="eyebrow">Track record</span>
 			<h1>Every audit run, and what fixed what it found</h1>
 			<p class="lede">
-				Each round has its own page. A finding appears there once it is fixed in a released version,
-				as one line saying what could happen before and what holds now. How to reproduce one stays
-				private.
+				Each round has its own page with the number of findings fixed, by severity and release. A
+				finding is counted once the release that fixes it ships. <NotPublished />
 			</p>
 		</div>
 	</header>
@@ -34,7 +34,7 @@ if (!page) throw new Error('Page not in the registry: /security/track-record/')
 						<a href={r.path}>
 							<h3>{r.title}</h3>
 							<p>{r.summary}</p>
-							<span class="more">See what it found <span aria-hidden="true">→</span></span>
+							<span class="more">See the numbers <span aria-hidden="true">→</span></span>
 						</a>
 					</li>
 				))}
@@ -70,7 +70,7 @@ if (!page) throw new Error('Page not in the registry: /security/track-record/')
 	.rounds a:active { background: var(--card-alt); }
 	.rounds h3 { margin: 0 0 0.3rem; font-size: 1.15rem; }
 	.rounds p { margin: 0 0 0.6rem; color: var(--text-muted); font-size: 0.93rem; }
-	.more { font-size: 0.88rem; font-weight: 600; color: var(--link, var(--orange)); }
+	.more { font-size: 0.88rem; font-weight: 600; color: var(--orange-ink); }
 	.runs-head { margin-block-start: 3rem; }
 	.note { margin-block: 1rem 0; font-size: 0.9rem; color: var(--text-muted); max-inline-size: 75ch; }
 </style>

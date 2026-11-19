@@ -1,11 +1,12 @@
 ---
 /**
- * One round of the security track record: the runs in it, every finding they confirmed that is
- * fixed in a released version (one neutral line each, with its release), and the hardening that
- * shipped beside them. This is the only place findings are listed.
+ * One round of the security track record: the runs in it (scope, coverage, agent calls), and per
+ * release the number of findings fixed, by severity, and of hardening changes. Numbers only: no
+ * individual finding or hardening change is published.
  */
 import BaseLayout from '../../../layouts/BaseLayout.astro'
-import FindingList from '../../../components/security/FindingList.astro'
+import FixedCounts from '../../../components/security/FixedCounts.astro'
+import NotPublished from '../../../components/security/NotPublished.astro'
 import RunsTable from '../../../components/security/RunsTable.astro'
 import { ROUNDS, type Round } from '../../../data/security'
 
@@ -16,7 +17,7 @@ export function getStaticPaths() {
 const round = ROUNDS.find((r) => r.slug === Astro.params.round) as Round
 const others = ROUNDS.filter((r) => r.slug !== round.slug)
 const title = `${round.title} — security track record — Rocketflare`
-const description = `${round.summary} Every finding it confirmed that is fixed in a released version, with the release that fixed it.`
+const description = `${round.summary} How many findings it confirmed are fixed, by severity and release, with the hardening shipped beside them.`
 ---
 <BaseLayout title={title} description={description}>
 	<header class="hero page-hero bg-sky">
@@ -32,23 +33,17 @@ const description = `${round.summary} Every finding it confirmed that is fixed i
 		<div class="wrap">
 			<RunsTable runs={round.runs} label={`${round.title}: runs`} />
 
-			<h2>Fixed findings</h2>
+			<h2>Fixed, by release</h2>
 			<p class="note">
-				Each line says what could happen before and what holds now, with the release that fixed it.
-				{round.runs.length > 1 && ' A finding both runs confirmed is listed once.'}
+				{round.totals.findings} confirmed findings fixed in released versions
+				({round.totals.high} high, {round.totals.medium} medium, {round.totals.low} low), and
+				{round.totals.hardening} hardening changes: candidates the audit could not settle, usually
+				because the answer needed a browser, a real identity provider or a real model, where the
+				cautious fix was small enough to ship anyway.
+				{round.runs.length > 1 && ' A finding both runs confirmed is counted once.'}
 			</p>
-			<FindingList items={round.findings} />
-
-			{round.hardening.length > 0 && (
-				<Fragment>
-					<h2>Hardening, not confirmed exploitable</h2>
-					<p class="note">
-						Candidates the audit could not settle, usually because the answer needed a browser, a real
-						identity provider or a real model. The cautious fix was small, so it shipped anyway.
-					</p>
-					<FindingList items={round.hardening} />
-				</Fragment>
-			)}
+			<FixedCounts fixed={round.fixed} label={`${round.title}: fixes by release`} />
+			<p class="note"><NotPublished /></p>
 
 			<nav class="others" aria-label="Other rounds">
 				{others.map((r) => (

@@ -5,14 +5,15 @@
  *
  * Every posture claim here is one the kit's docs make (src/data/security-posture.ts says which);
  * claim nothing they do not. The three security docs are rendered on this site at /security/<doc>/
- * (`npm run sync:security`) and are never linked on GitHub. No figures here and no findings: the track record lives on its own pages
- * (`/security/track-record/`), which list only findings fixed in a released version.
+ * (`npm run sync:security`) and are never linked on GitHub. No figures here: the track record lives on its own pages
+ * (`/security/track-record/`), which publish only counts of what released versions fixed, never the issues.
  */
 import BaseLayout from '../layouts/BaseLayout.astro'
 import SectionHead from '../components/SectionHead.astro'
 import Callout from '../components/Callout.astro'
 import ConceptIcon from '../components/ConceptIcon.astro'
 import Steps from '../components/Steps.astro'
+import NotPublished from '../components/security/NotPublished.astro'
 import { pageByPath } from '../data/pages'
 import { CLOUDFLARE_AUDIT_SKILL_URL, REPORT_KIT_VULN_URL, REPORT_PLUGINS_VULN_URL } from '../data/site'
 import { SKILLS } from '../data/get-started'
@@ -231,8 +232,12 @@ const modes = [
 				align="left"
 				eyebrow="Track record"
 				title="What the audits found, once it is fixed"
-				lede="Each run is published with the release that fixed what it found. A finding is listed only after that release ships, as one line saying what could happen before and what holds now. How to reproduce one stays private."
-			/>
+			>
+				<p class="lede">
+					Each run is published with the releases that fixed what it found, and how many findings
+					each fixed, by severity. A finding is counted only after its release ships. <NotPublished />
+				</p>
+			</SectionHead>
 			<ul class="rounds">
 				{ROUNDS.map((r) => (
 					<li>

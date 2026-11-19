@@ -260,7 +260,7 @@ export const PAGES: SitePage[] = [
 		title: 'Security — what the kit enforces, how it is audited, and what was fixed',
 		nav: 'Security',
 		description:
-			'What every copy of Rocketflare enforces by design, the threat model behind it, the multi-agent audit it is tested with, every finding fixed in a released version, and how to report a vulnerability privately.',
+			'What every copy of Rocketflare enforces by design, the threat model behind it, the multi-agent audit it is tested with, how many findings released versions have fixed, and how to report a vulnerability privately.',
 		audience: 'both',
 		// After Plugins (6), so it is the last page link before Partners, which Nav.astro places last.
 		order: 6.5,
@@ -307,7 +307,7 @@ export const PAGES: SitePage[] = [
 		title: 'Security track record — every audit run and what fixed what it found',
 		nav: 'Track record',
 		description:
-			'Every published Rocketflare audit run, and one page per round of fixes listing each finding fixed in a released version with the release that fixed it.',
+			'Every published Rocketflare audit run, and one page per round of fixes with the number of findings each release fixed, by severity.',
 		audience: 'both',
 		order: 13,
 		ready: true,
