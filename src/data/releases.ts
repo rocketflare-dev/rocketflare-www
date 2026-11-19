@@ -600,6 +600,15 @@ export const RELEASES: Release[] = [
 		migrations: true,
 		areas: ['db', 'api', 'shared', 'ui', 'evals', 'docs', 'plugins'],
 	},
+	{
+		version: '0.39.0',
+		date: '2026-11-19',
+		summary:
+			'Agent runs now survive crashes, deploys and cancels. A retry picks up from the last model turn without re-billing it or re-running a finished tool, and a cancel stops the call in flight. Agents can pin a version, start child runs, and send an approval to named people with a deadline and a reminder. The Agents page lists one row per agent, with its last run and its runs, tokens, time and cost over 30 days, and each agent gets a page of its own.',
+		breaking: true,
+		migrations: true,
+		areas: ['db', 'api', 'shared', 'config', 'cli', 'ui', 'tooling', 'docs'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
