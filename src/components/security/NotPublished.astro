@@ -1,0 +1,10 @@
+---
+/**
+ * The sentences every security track-record page says where an issue list would be: numbers only,
+ * each fix is in its release, and where to ask for the detailed report. Inline content; the caller
+ * supplies the paragraph.
+ */
+import { SECURITY_CONTACT_URL, SECURITY_EMAIL } from '../../data/site'
+---
+Individual issues are not published; each fix is in the linked release. Please request the detailed
+report by emailing <a href={SECURITY_CONTACT_URL}>{SECURITY_EMAIL}</a>.

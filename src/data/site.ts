@@ -39,6 +39,9 @@ export const LAUNCH_KIT_URL = 'https://github.com/rocketflare-dev/launch-kit'
 export const OPERATE_CONTACT_URL = 'mailto:clifton@guidemode.dev?subject=Operating%20a%20Rocketflare%20app'
 /** Commercial plugins and partner support. */
 export const PARTNER_CONTACT_URL = 'mailto:partners@rocketflare.dev?subject=Becoming%20a%20Rocketflare%20partner'
+/** Security contact: where to request a run's detailed report (individual issues are not published). */
+export const SECURITY_EMAIL = 'security@rocketflare.dev'
+export const SECURITY_CONTACT_URL = `mailto:${SECURITY_EMAIL}`
 export const LAUNCH_CONTACT_URL = 'mailto:clifton@guidemode.dev?subject=Rocketflare%20Launch'
 /** A new GitHub issue in the plugins repository, opened on its plugin-request form. */
 export const PLUGIN_REQUEST_URL = 'https://github.com/rocketflare-dev/rocketflare-plugins/issues/new?template=plugin-request.yml'

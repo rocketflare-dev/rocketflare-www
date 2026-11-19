@@ -1,0 +1,72 @@
+---
+/**
+ * What a set of releases fixed, as numbers: one row per release with its fixed findings by
+ * severity and its hardening changes, each release linking to its notes, and a total row when
+ * there is more than one. Individual issues are never listed.
+ */
+import { type Fixed, REPOS, SEVERITIES, releaseUrl, sumFixed } from '../../data/security'
+
+interface Props {
+	fixed: Fixed[]
+	label: string
+}
+const { fixed, label } = Astro.props
+
+const LABEL = { high: 'High', medium: 'Medium', low: 'Low' } as const
+const releaseLabel = (f: Fixed) => `${REPOS[f.repo].label.toLowerCase()} ${f.release}`
+const total = sumFixed(fixed)
+---
+<div class="table-wrap" role="region" aria-label={label} tabindex="0">
+	<table>
+		<thead>
+			<tr>
+				<th scope="col">Release</th>
+				{SEVERITIES.map((s) => <th scope="col" class="num">{LABEL[s]}</th>)}
+				<th scope="col" class="num">Findings fixed</th>
+				<th scope="col" class="num">Hardening</th>
+			</tr>
+		</thead>
+		<tbody>
+			{fixed.map((f) => (
+				<tr>
+					<th scope="row"><a class="rel" href={releaseUrl(f.release)} target="_blank" rel="noopener">{releaseLabel(f)}</a></th>
+					{SEVERITIES.map((s) => <td class="num">{f[s]}</td>)}
+					<td class="num strong">{f.high + f.medium + f.low}</td>
+					<td class="num">{f.hardening}</td>
+				</tr>
+			))}
+		</tbody>
+		{fixed.length > 1 && (
+			<tfoot>
+				<tr>
+					<th scope="row">Total</th>
+					{SEVERITIES.map((s) => <td class="num">{total[s]}</td>)}
+					<td class="num strong">{total.findings}</td>
+					<td class="num">{total.hardening}</td>
+				</tr>
+			</tfoot>
+		)}
+	</table>
+</div>
+
+<style>
+	.table-wrap { overflow-x: auto; margin-block: 1rem; }
+	.table-wrap:focus-visible { outline: 3px solid var(--orange); outline-offset: 3px; }
+	table { inline-size: 100%; border-collapse: collapse; font-size: 0.9rem; }
+	th, td { text-align: start; vertical-align: top; padding: 0.65rem 0.8rem; border-block-end: 1px solid var(--border); }
+	tbody tr:last-child > * { border-block-end: 0; }
+	thead th {
+		font-size: 0.72rem;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		color: var(--text-muted);
+		border-block-end-width: 2px;
+		white-space: nowrap;
+	}
+	tfoot > tr > * { border-block-start: 2px solid var(--border); border-block-end: 0; color: var(--text-bright); font-weight: 700; }
+	tbody th { color: var(--text-bright); white-space: nowrap; }
+	td { color: var(--text-muted); }
+	.num { text-align: end; font-variant-numeric: tabular-nums; }
+	.strong { color: var(--text-bright); font-weight: 700; }
+	.rel { font-size: 0.85rem; font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; }
+</style>
