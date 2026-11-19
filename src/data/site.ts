@@ -54,7 +54,7 @@ export const PLUGINS_GITHUB_URL = 'https://github.com/rocketflare-dev/rocketflar
  * `npm run sync:security` vendors by default. They render at /security/<doc>/ and are never linked
  * on GitHub. Move the tag, re-sync and commit when a later release changes them.
  */
-export const SECURITY_DOCS_TAG = '0.35.0'
+export const SECURITY_DOCS_TAG = '0.40.0'
 /** GitHub private vulnerability reporting, one form per repository. */
 export const REPORT_KIT_VULN_URL = `${GITHUB_URL}/security/advisories/new`
 export const REPORT_PLUGINS_VULN_URL = `${PLUGINS_GITHUB_URL}/security/advisories/new`
