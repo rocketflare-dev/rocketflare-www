@@ -609,6 +609,15 @@ export const RELEASES: Release[] = [
 		migrations: true,
 		areas: ['db', 'api', 'shared', 'config', 'cli', 'ui', 'tooling', 'docs'],
 	},
+	{
+		version: '0.40.0',
+		date: '2026-11-19',
+		summary:
+			'Knowledge facts now follow document visibility all the way through: what extraction is shown, the names an entity picks up, and what lookups and supersessions reveal. Only a fact’s reviewer or an admin can settle a conflict. An invitation stops admitting anyone once its issuer is blocked, and a suspended organisation’s queued work stops. Uploads are chunked in bounded time, and public security reports now carry counts only.',
+		breaking: false,
+		migrations: false,
+		areas: ['api', 'docs', 'config', 'shared'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
