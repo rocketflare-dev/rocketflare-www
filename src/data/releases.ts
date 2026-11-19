@@ -600,6 +600,24 @@ export const RELEASES: Release[] = [
 		migrations: true,
 		areas: ['db', 'api', 'shared', 'ui', 'evals', 'docs', 'plugins'],
 	},
+	{
+		version: '0.39.0',
+		date: '2026-11-19',
+		summary:
+			'Agent runs now survive crashes, deploys and cancels. A retry picks up from the last model turn without re-billing it or re-running a finished tool, and a cancel stops the call in flight. Agents can pin a version, start child runs, and send an approval to named people with a deadline and a reminder. The Agents page lists one row per agent, with its last run and its runs, tokens, time and cost over 30 days, and each agent gets a page of its own.',
+		breaking: true,
+		migrations: true,
+		areas: ['db', 'api', 'shared', 'config', 'cli', 'ui', 'tooling', 'docs'],
+	},
+	{
+		version: '0.40.0',
+		date: '2026-11-19',
+		summary:
+			'Knowledge facts now follow document visibility all the way through: what extraction is shown, the names an entity picks up, and what lookups and supersessions reveal. Only a fact’s reviewer or an admin can settle a conflict. An invitation stops admitting anyone once its issuer is blocked, and a suspended organisation’s queued work stops. Uploads are chunked in bounded time, and public security reports now carry counts only.',
+		breaking: false,
+		migrations: false,
+		areas: ['api', 'docs', 'config', 'shared'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
