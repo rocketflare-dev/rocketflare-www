@@ -85,6 +85,17 @@ export const RUNS: Run[] = [
 		confirmed: { high: 0, medium: 0, low: 9 },
 		fixedIn: ['0.40.0'],
 	},
+	{
+		id: 'run-5',
+		date: '2026-11-20',
+		commit: 'a8d64f4',
+		repo: 'rocketflare',
+		scope: 'Every kit change from 0.40.0 to the 0.41.0 candidate: the MCP server, its OAuth authorization server and the plugin tool seam',
+		coverageUnits: 69,
+		agentCalls: 38,
+		confirmed: { high: 0, medium: 0, low: 6 },
+		fixedIn: ['0.41.0'],
+	},
 ]
 
 /** How many findings both run 1 and run 2 confirmed (counted once in `FIXED`). */
@@ -107,6 +118,7 @@ export const FIXED: Fixed[] = [
 	{ release: '0.34.0', repo: 'rocketflare', high: 0, medium: 0, low: 8, hardening: 2 },
 	{ release: '3.12.0', repo: 'rocketflare-plugins', high: 0, medium: 0, low: 1, hardening: 1 },
 	{ release: '0.40.0', repo: 'rocketflare', high: 0, medium: 0, low: 9, hardening: 2 },
+	{ release: '0.41.0', repo: 'rocketflare', high: 0, medium: 0, low: 6, hardening: 5 },
 ]
 
 /** Which repository cut each release named here. A release missing here fails the build. */
@@ -114,6 +126,7 @@ const RELEASE_REPO: Record<string, Repo> = {
 	'0.29.0': 'rocketflare',
 	'0.34.0': 'rocketflare',
 	'0.40.0': 'rocketflare',
+	'0.41.0': 'rocketflare',
 	'3.9.0': 'rocketflare-plugins',
 	'3.12.0': 'rocketflare-plugins',
 }
@@ -153,6 +166,13 @@ export const sumFixed = (list: Fixed[]): FixedTotals => {
  * Each round has its own page at `/security/track-record/<slug>/`, with its counts by release.
  */
 export const ROUNDS = [
+	{
+		slug: 'run-5',
+		title: 'Run 5',
+		summary: 'A run over every kit change from 0.40.0 to the 0.41.0 candidate: the MCP server, its OAuth authorization server and the plugin tool seam.',
+		runIds: ['run-5'],
+		releases: ['0.41.0'],
+	},
 	{
 		slug: 'run-4',
 		title: 'Run 4',

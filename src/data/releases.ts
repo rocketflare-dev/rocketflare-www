@@ -618,6 +618,15 @@ export const RELEASES: Release[] = [
 		migrations: false,
 		areas: ['api', 'docs', 'config', 'shared'],
 	},
+	{
+		version: '0.41.0',
+		date: '2026-11-20',
+		summary:
+			'An MCP server in core: Claude and ChatGPT connect to an organisation’s tools with OAuth, as the person who connects, with that person’s permissions and document visibility. It is off by default, and admins choose who may connect and which tools are offered. Chat, agents and MCP now share one tool list, so a plugin’s tools reach MCP clients with no extra wiring. Deleting a document now repairs the facts it touched. If you use the analytics plugin, upgrade it in the same sitting.',
+		breaking: false,
+		migrations: true,
+		areas: ['api', 'config', 'db', 'shared', 'ui', 'docs'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */

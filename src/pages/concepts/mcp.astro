@@ -1,0 +1,168 @@
+---
+import ConceptLayout from '../../layouts/ConceptLayout.astro'
+import Terminal from '../../components/Terminal.astro'
+---
+<ConceptLayout
+	slug="mcp"
+	source={[
+		'apps/web/src/api/routes/mcp.ts',
+		'apps/web/src/api/routes/oauth.ts',
+		'apps/web/src/api/services/mcp/',
+		'apps/web/src/api/services/agents/tools/surfaces.ts',
+		'apps/web/src/ui/pages/settings/Mcp.tsx',
+		'apps/web/tests/api/security/mcp-visibility.test.ts',
+		'.claude/rules/tools.md',
+		'.claude/skills/rf-mcp/',
+	]}
+>
+	<h2>An AI client, acting as one person</h2>
+	<p>
+		From kit 0.41.0 the app is an MCP server. Claude (claude.ai, Claude Desktop and Claude Code) and
+		ChatGPT connect to it at <code>/mcp</code>, and each connection acts as the one person who signed
+		in, in one organisation, with that person's role and permissions and nothing more. A
+		knowledge-base document shared with a group stays invisible to someone outside the group, exactly
+		as it is in the browser. Support users cannot connect at all, and a client never carries a
+		platform admin's reach, even when the person who connected it has it.
+	</p>
+	<p>
+		Nothing about the person is cached on the connection. Every call reads their membership, role,
+		groups and block status again, so a role change applies to the next call and a removed member's
+		connections are revoked in the same transaction as the removal. The kit's own tools
+		are the knowledge tools chat already uses: search, list and read documents, and look up facts.
+		A test calls each one as an outsider and proves a group-only document, its facts and its
+		entities do not exist for them, and that every answer matches what chat would give the same person.
+	</p>
+
+	<h2>Off until the deployment ships it and an organisation turns it on</h2>
+	<p>
+		The server is behind the environment-gated <code>mcp</code> <a href="/concepts/feature-flags/">feature
+		flag</a>. Until a deployment lists <code>mcp</code> in <code>FEATURES_ENABLED</code>, every MCP and
+		OAuth path answers 404. Once it ships, each organisation's owners and admins still have to turn it
+		on, at Settings → MCP, where the rest of the controls live:
+	</p>
+	<table>
+		<thead><tr><th>Setting</th><th>What it does</th></tr></thead>
+		<tbody>
+			<tr><td>The switch</td><td>off by default; turning it off suspends every connection without revoking it</td></tr>
+			<tr><td>Server URL</td><td>the organisation's own <code>/mcp/t/&lt;slug&gt;</code> under multi-tenancy, <code>/mcp</code> under single, with setup snippets for Claude and ChatGPT</td></tr>
+			<tr><td>Who can connect</td><td>everyone, admins only, or chosen groups</td></tr>
+			<tr><td>Exposure</td><td>read-only tools (the default), all tools after a confirmation, or a ticked selection</td></tr>
+			<tr><td>Tools</td><td>grouped by provider, each with a read-only or writes badge and its 30-day call count; a tool that cannot reach a client is greyed with the reason</td></tr>
+			<tr><td>Connected clients</td><td>every live connection: the person, the client, read or read-and-write, last used, with Revoke and Revoke all</td></tr>
+		</tbody>
+	</table>
+	<p>
+		Each person also sees their own connections, in every organisation, under Profile → Connected
+		apps, and can revoke any of them there.
+	</p>
+	<Terminal
+		title="zsh — connecting Claude Code"
+		lines={[
+			{ cmd: 'curl -si -X POST https://app.example.com/mcp | head -1' },
+			{ out: 'HTTP/2 401' },
+			{ cmd: 'claude mcp add --transport http acme-tools https://app.example.com/mcp/t/acme' },
+		]}
+		expect="Then /mcp inside Claude Code opens the app's own sign-in in the browser."
+	/>
+
+	<h2>OAuth 2.1, with the app as its own authorization server</h2>
+	<p>
+		A client never holds an API key, a session cookie or a CLI key: <code>/mcp</code> refuses all
+		three. It holds an OAuth access token, issued by the app itself from tables in Postgres. The
+		token lasts an hour, is stored only as a hash, belongs to a grant for one person, one
+		organisation and one client, and is accepted only on the exact URL the grant was made for.
+	</p>
+	<p>
+		Clients are identified by a <strong>client metadata document</strong> (CIMD): the client id is
+		an https URL, and the app fetches the JSON document behind it to learn the client's name and
+		redirect addresses. That fetch only goes to a public host on the default port, follows no
+		redirect and reads at most 5 KB. There is no dynamic registration and no list of pre-registered
+		clients. PKCE with S256 is mandatory, an authorization code is single-use and lives sixty
+		seconds, and a refresh token rotates on every use.
+	</p>
+	<p>
+		Sign-in is the app's own login page, so every sign-in method, the single-sign-on policy, the
+		sign-up mode and blocking apply unchanged. The consent page then shows the client's name beside
+		the host its id was verified on, the organisations where the person may connect, the scopes and
+		the tools. There are two scopes: <code>mcp:read</code> and <code>mcp:write</code>. A tool that
+		writes needs <code>mcp:write</code> as well as the person's own permission; a read-only
+		connection that calls one is refused with 403 <code>insufficient_scope</code>, and the client
+		asks the person to consent again.
+	</p>
+
+	<div class="why">
+		<p>
+			<strong>Why the app's own login.</strong> An MCP connection is one more way for a person to
+			act in an organisation, so it should be admitted by the same rules as every other way. Reusing
+			the login page means an organisation that requires single sign-on, a deployment that is
+			invite-only and a blocked account all behave on the OAuth path exactly as they do in the
+			browser, with no second copy of those rules to keep in step.
+		</p>
+	</div>
+
+	<h2>Limits and the call log</h2>
+	<p>
+		Each request carries one call: a batch of JSON-RPC messages is refused, and no request is held
+		open. Calls are capped per minute per connection (60), per person across all their connections
+		in the organisation (120) and per organisation (600), checked in that order; each cap is a
+		setting. A client over a cap gets a tool error telling it when to retry, not a 429. A model
+		called by a tool is billed and capped as it is from chat, under the organisation's own limits.
+	</p>
+	<p>
+		Every result opens with a line telling the client's model that it is data, not instructions,
+		and is cut off at 60,000 characters. Each call is logged with who made it, through which
+		connection, which tool, the outcome and how long it took, never its arguments or its result.
+		The log is kept for 90 days, and each call is also a span in the trace.
+	</p>
+
+	<h2>One tool list for chat, agents and MCP</h2>
+	<p>
+		There is no separate MCP API to build. A tool is declared once and serves three surfaces: the
+		chat panel, agent runs and the MCP server. <code>surfaces</code> keeps a tool off any of them
+		(absent means all three), an optional <code>mcp</code> block sets the title and hints a client
+		shows, and <code>toolsFor(surface, ctx)</code> is the one filter every surface calls. A tool
+		marked as having side effects needs <code>mcp:write</code> and is hidden under the default
+		read-only exposure. A tool with no handler, or one that needs a person's approval, is never
+		offered over MCP.
+	</p>
+	<p>
+		So a <a href="/concepts/plugins/">plugin's</a> tools reach MCP clients with no extra wiring: the
+		plugin lists them in <code>tools</code>, with no route and no authentication of its own, and they
+		appear under the plugin's name in Settings → MCP. The <a href="/concepts/analytics/">analytics
+		plugin</a> offers its cube queries this way, to MCP clients and agent runs but not to chat.
+	</p>
+
+	<h2>Adding a tool with a coding agent</h2>
+	<p>
+		The kit ships an <code>/rf-mcp</code> skill that turns the server on for a deployment, adds a tool
+		to the app or a plugin, connects Claude or ChatGPT to a local instance through a tunnel, and maps
+		every 401, 403 and missing tool to its cause. When the agent opens a tool file, a rules file loads
+		with the checklist for a safe tool: the tenant and the person come from the tool's context, never
+		from its arguments; group-visible rows are read through the same visibility helpers the core tools
+		use; every tool that writes, sends or charges says so; and no description names a brand.
+	</p>
+	<p>
+		The test helper <code>callMcpTool</code> connects as a given member and calls a tool over the
+		real <code>/mcp</code>, tokens and exposure included. Every tool owes three cases: a member of a
+		second organisation sees none of the first's rows, a member outside a group does not see that
+		group's rows, and a write tool is unlisted under read-only exposure and refused to a read-only token.
+	</p>
+
+	<h2>Under your name, not the kit's</h2>
+	<p>
+		Everything a client and its user see carries the deployment's own <code>APP_NAME</code> and the
+		organisation's name: the server's name, its instructions, the consent page and every error. A
+		test sets the app name to "Acme Tools" and fails if "Rocketflare" appears in any response, and
+		<code>pnpm plugin check</code> warns on it in a plugin tool's title or description.
+	</p>
+
+	<div class="note">
+		<p>
+			What it does not do yet: only clients that publish a client metadata document can connect,
+			which today means Claude and ChatGPT (Cursor only supports dynamic registration, and VS Code is
+			untested). ChatGPT cannot reach a local <code>wrangler dev</code>, so test it on staging. The
+			server offers tools only, with no resources or prompts, and renaming an organisation's slug
+			breaks connections made on its URL until the client reconnects.
+		</p>
+	</div>
+</ConceptLayout>

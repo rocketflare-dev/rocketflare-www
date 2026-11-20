@@ -44,7 +44,7 @@ export const CONCEPT_GROUPS: ConceptGroup[] = [
 	{
 		key: 'product',
 		title: 'Product',
-		lede: 'What you build the product on — the AI layer, analytics, and connections to the tools your customers already use.',
+		lede: 'What you build the product on — the AI layer, analytics, an MCP server for AI clients, and connections to the tools your customers already use.',
 	},
 ]
 
@@ -153,8 +153,18 @@ export const CONCEPTS: Concept[] = [
 		group: 'product',
 	},
 	{
-		slug: 'deployment',
+		slug: 'mcp',
 		num: '11',
+		title: 'The MCP server',
+		blurb: 'Claude and ChatGPT connect to an organisation’s tools as the person who signs in, with that person’s role and permissions — off until an admin turns it on, signed in through the app’s own OAuth server.',
+		tone: 'purple',
+		icon: 'server',
+		anchor: '19-mcp-server',
+		group: 'product',
+	},
+	{
+		slug: 'deployment',
+		num: '12',
 		title: 'Deployment',
 		blurb: 'Staging and production as two wrangler files a test keeps identical, and a release you ship by pushing a tag.',
 		tone: 'blue',
@@ -164,7 +174,7 @@ export const CONCEPTS: Concept[] = [
 	},
 	{
 		slug: 'cli',
-		num: '12',
+		num: '13',
 		title: 'The CLI',
 		blurb: 'A browser sign-in that ends with a tenant API key on your machine, and commands that parse the server’s own schemas.',
 		tone: 'yellow',
@@ -174,7 +184,7 @@ export const CONCEPTS: Concept[] = [
 	},
 	{
 		slug: 'contracts',
-		num: '13',
+		num: '14',
 		title: 'Shared contracts',
 		blurb: 'One zod package the API validates with and the UI and CLI parse with — no build step, so the three can never drift.',
 		tone: 'cyan',
@@ -184,7 +194,7 @@ export const CONCEPTS: Concept[] = [
 	},
 	{
 		slug: 'feature-flags',
-		num: '14',
+		num: '15',
 		title: 'Feature flags',
 		blurb: 'Ship a surface to production dark, then turn it on for one customer at a time — a percentage or an override, with no redeploy.',
 		tone: 'yellow',
@@ -194,7 +204,7 @@ export const CONCEPTS: Concept[] = [
 	},
 	{
 		slug: 'plugins',
-		num: '15',
+		num: '16',
 		title: 'Plugins',
 		blurb: 'A capability is a git repository copied into your app, not an npm package — it lands as ordinary source, reaches the app through five lines, and deleting the folder uninstalls it.',
 		tone: 'cyan',
@@ -204,7 +214,7 @@ export const CONCEPTS: Concept[] = [
 	},
 	{
 		slug: 'connectors',
-		num: '16',
+		num: '17',
 		title: 'Connectors',
 		blurb: 'An organisation’s admin connects its Microsoft 365 once, and its directory and calendars sync in on a schedule — a connection for the organisation, not a login for one person.',
 		tone: 'green',

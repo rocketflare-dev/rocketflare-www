@@ -123,19 +123,20 @@ export const PLUGINS: Plugin[] = [
 		repo: PLUGINS_REPO,
 		repoLabel: 'rocketflare-dev/rocketflare-plugins',
 		subdir: 'plugins/analytics',
-		minKit: '0.29.0',
-		version: '3.12.0',
+		minKit: '0.41.0',
+		version: '3.13.0',
 		shipsAs: 'optional',
 		summary:
 			'Dashboards, cubes, fact tables and the drizzle-cube query API — everything that used to be part of the kit, now a repository of its own.',
 		adds: [
 			'<strong>Dashboards</strong> — one row per dashboard, stored whole as JSON, with a unique slug per organisation and the option to restrict it to a group. A list page, a view page with inline editing and autosave, and an explore page.',
 			'<strong>Templates</strong> — one ships, Organisation Overview, copied into every organisation when it is created and repaired lazily on every read, so a template added later still reaches the customers you already have.',
-			'<strong>Cubes</strong> — <code>ActivityEvents</code>, <code>TenantActivityDaily</code>, <code>TenantUsers</code> and <code>Users</code>, served at <code>/cubejs-api</code> and <code>/mcp</code>. Every cube scopes its own query by organisation.',
+			'<strong>Cubes</strong> — <code>ActivityEvents</code>, <code>TenantActivityDaily</code>, <code>TenantUsers</code> and <code>Users</code>, served at <code>/cubejs-api</code>. Every cube scopes its own query by organisation.',
+			'<strong>MCP tools</strong> — <code>analytics_discover</code>, <code>analytics_validate</code> and <code>analytics_load</code>, drizzle-cube\'s own tools offered read-only through the app\'s MCP server to Claude, ChatGPT and agent runs, with the reader\'s own scoping.',
 			'<strong>Fact tables</strong> — <code>analytics_tenant_activity_daily_facts</code>, rebuilt one organisation at a time by an hourly schedule, in one transaction each.',
 			'<strong>Permissions</strong> — a dashboard subject (admin and above manage, members read) and an analytics subject (every role reads; the query API is read-only by nature).',
 			'<strong>Commands</strong> — <code>rocketflare analytics pages list</code>, <code>check-facts</code> (exit 1 when a table is stale) and <code>refresh-facts</code>.',
-			'<strong>Four agent skills</strong> — <code>analytics</code> checks the plugin is healthy and routes; <code>analytics-cubes</code> adds measures, cubes and fact tables with the isolation test; <code>analytics-queries</code> queries the cubes and connects Claude Code or Claude Desktop to <code>/mcp</code>; <code>analytics-dashboards</code> builds, shares and templates dashboards.',
+			'<strong>Four agent skills</strong> — <code>analytics</code> checks the plugin is healthy and routes; <code>analytics-cubes</code> adds measures, cubes and fact tables with the isolation test; <code>analytics-queries</code> queries the cubes and connects Claude or ChatGPT through the app\'s MCP server; <code>analytics-dashboards</code> builds, shares and templates dashboards.',
 		],
 		concept: 'analytics',
 		changelogUrl: `${PLUGINS_REPO}/blob/main/CHANGELOG.md`,
@@ -152,7 +153,7 @@ export const PLUGINS: Plugin[] = [
 		repoLabel: 'rocketflare-dev/rocketflare-plugins',
 		subdir: 'plugins/web-knowledge',
 		minKit: '0.9.0',
-		version: '3.12.0',
+		version: '3.13.0',
 		shipsAs: 'optional',
 		summary:
 			'Lets agents and chat search the public web and read pages, on each organisation’s own search key — and only for the organisations that turn it on.',
@@ -177,7 +178,7 @@ export const PLUGINS: Plugin[] = [
 		repoLabel: 'rocketflare-dev/rocketflare-plugins',
 		subdir: 'plugins/connectors',
 		minKit: '0.29.0',
-		version: '3.12.0',
+		version: '3.13.0',
 		shipsAs: 'optional',
 		summary:
 			'Connects an organisation’s own Microsoft 365 to your app: an admin grants consent once, and its directory and calendars sync in. It holds the rows, routes and schedules; a provider plugin (today, m365) does the talking.',
@@ -204,7 +205,7 @@ export const PLUGINS: Plugin[] = [
 		repoLabel: 'rocketflare-dev/rocketflare-plugins',
 		subdir: 'plugins/m365',
 		minKit: '0.29.0',
-		version: '3.12.0',
+		version: '3.13.0',
 		shipsAs: 'optional',
 		summary:
 			'Microsoft 365 as a provider for the connectors plugin, which it requires — install connectors first. One multi-tenant Entra app for your whole deployment; each customer’s admin consents to it once.',
@@ -230,7 +231,7 @@ export const PLUGINS: Plugin[] = [
 		repoLabel: 'rocketflare-dev/rocketflare-plugins',
 		subdir: 'plugins/issue-reports',
 		minKit: '0.29.0',
-		version: '3.12.0',
+		version: '3.13.0',
 		shipsAs: 'optional',
 		summary:
 			'Ideas & issues: anyone on the team talks a bug or an idea through with an agent, which asks until it is clear and logs it on GitHub once they approve the draft.',
@@ -257,7 +258,7 @@ export const PLUGINS: Plugin[] = [
 		repoLabel: 'rocketflare-dev/rocketflare-plugins',
 		subdir: 'plugins/freeagent',
 		minKit: '0.29.0',
-		version: '3.12.0',
+		version: '3.13.0',
 		shipsAs: 'optional',
 		summary:
 			'Mirrors each organisation’s FreeAgent company (UK accounting) into your app, for pages, agents, analytics and the plugins you build on top. An admin approves it once, over OAuth.',
@@ -285,7 +286,7 @@ export const PLUGINS: Plugin[] = [
 		repoLabel: 'rocketflare-dev/rocketflare-plugins',
 		subdir: 'plugins/inbox',
 		minKit: '0.29.0',
-		version: '3.12.0',
+		version: '3.13.0',
 		shipsAs: 'optional',
 		summary:
 			'Inbound email for your app: forward receipts, invoices and notices to an address on your domain, and they arrive parsed, with their attachments, ready for other plugins to act on.',
@@ -313,7 +314,7 @@ export const PLUGINS: Plugin[] = [
 		repoLabel: 'rocketflare-dev/rocketflare-plugins',
 		subdir: 'plugins/guide',
 		minKit: '0.31.0',
-		version: '3.12.0',
+		version: '3.13.0',
 		shipsAs: 'optional',
 		summary:
 			'An in-app user guide about your app itself: your coding agent writes it from the code, a Claude Code hook says when a change may have made it stale, and members search it and ask it questions from any screen.',
@@ -340,7 +341,7 @@ export const PLUGINS: Plugin[] = [
 		repoLabel: 'rocketflare-dev/rocketflare-plugins',
 		subdir: 'plugins/global-search',
 		minKit: '0.31.0',
-		version: '3.12.0',
+		version: '3.13.0',
 		shipsAs: 'optional',
 		summary:
 			'One ⌘K palette to go anywhere, run a command or find anything a person may see in your app — people, agents, chats and documents — and any installed plugin can add its own results and commands.',
