@@ -26,6 +26,8 @@ import peopleLight from '../assets/screens/people.light.png'
 import peopleDark from '../assets/screens/people.dark.png'
 import groupsLight from '../assets/screens/groups.light.png'
 import groupsDark from '../assets/screens/groups.dark.png'
+import settingsMcpLight from '../assets/screens/settings-mcp.light.png'
+import settingsMcpDark from '../assets/screens/settings-mcp.dark.png'
 import settingsAiLight from '../assets/screens/settings-ai.light.png'
 import settingsAiDark from '../assets/screens/settings-ai.dark.png'
 import chatLight from '../assets/screens/chat.light.png'
@@ -320,6 +322,29 @@ const stops: Stop[] = [
 			alt: 'A succeeded research-topic run: the Markdown answer, and under Sources the citation “Customs paperwork: EU shipments”',
 			url: `${HOST}/agents/runs/c9672156-…`,
 			caption: 'research-topic: the answer and its citation to the document it read.',
+		},
+	},
+	{
+		id: 'mcp',
+		section: 'core',
+		label: 'MCP',
+		title: 'Claude and ChatGPT, signed in as one of your people',
+		body: [
+			'Turn on the MCP server and anyone you allow can connect Claude or ChatGPT to their organisation. The client signs in through your app, asks for the person’s consent, and from then on acts as that person: their role, their permissions, and only the documents their groups can see.',
+			'Admins choose who may connect and which tools a client is offered; read-only is the default. The same tools chat and agents use are on offer, plugins’ included, under your app’s name rather than the kit’s.',
+		],
+		concepts: ['mcp'],
+		shot: {
+			light: settingsMcpLight,
+			dark: settingsMcpDark,
+			alt: 'Settings → MCP for Acme Logistics: the Allow MCP clients switch on, the server URL ending /mcp/t/acme with a Copy button, and how to connect Claude, Claude Code and ChatGPT',
+			url: 'localhost:3600/settings?tab=mcp',
+			caption: 'One switch, one URL per organisation, and the steps for each client.',
+		},
+		callout: {
+			tone: 'blue',
+			title: 'OAuth, not API keys',
+			body: 'The app is its own OAuth authorization server: PKCE, tokens bound to the server URL, read and write scopes, and a person can see and revoke their connected apps. Every call re-checks that the person is still a member and still allowed.',
 		},
 	},
 	{
