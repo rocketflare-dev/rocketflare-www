@@ -48,10 +48,10 @@ if (!install) throw new Error('The analytics plugin should have an install comma
 	<h2>A semantic layer inside the same Worker</h2>
 	<p>
 		Analytics is <a href="https://try.drizzle-cube.dev" target="_blank" rel="noopener">drizzle-cube</a> mounted inside the same Worker as the rest of the API, behind the same
-		authentication. One router is mounted at two paths — <code>/cubejs-api</code> for the query API
-		and <code>/mcp</code> for the same layer spoken as MCP — and every request through either one
-		runs the app's own auth middleware first, then checks that the caller may read analytics, then
-		builds the security context from the session.
+		authentication. The query API is mounted at <code>/cubejs-api</code>, and every request runs the
+		app's own auth middleware first, then checks that the caller may read analytics, then builds the
+		security context from the session. The same layer also answers AI clients, as three read-only
+		tools offered through the app's <a href="/concepts/mcp/">MCP server</a>.
 	</p>
 	<p>
 		A cube is a TypeScript definition over the Drizzle schema: a base query, a set of measures and a
@@ -64,8 +64,8 @@ if (!install) throw new Error('The analytics plugin should have an install comma
 		<p>
 			<strong>Why a semantic layer at all.</strong> The alternative is a growing pile of bespoke
 			report endpoints, each with its own hand-written SQL and its own chance to forget the tenant
-			predicate. A cube is declared once; the dashboards, the query builder and an AI client
-			through MCP all ask the same layer the same way, and there is exactly one place per table
+			predicate. A cube is declared once; the dashboards, the query builder, agent runs and an
+			AI client over MCP all ask the same layer the same way, and there is exactly one place per table
 			where the scoping lives.
 		</p>
 	</div>
@@ -193,17 +193,29 @@ if (!install) throw new Error('The analytics plugin should have an install comma
 		from a template is refused, because the next read would simply create it again.
 	</p>
 
-	<h2>The MCP endpoint: the same cubes, for an AI client</h2>
+	<h2>MCP tools: the same cubes, for an AI client</h2>
 	<p>
-		The MCP endpoint is not a second implementation. It is the same router, the same cubes and the
-		same tenant scoping, exposed in the shape an AI client expects — so pointing a model at a
-		tenant's analytics is a tenant API key and nothing else. Whatever the model asks for, it is
-		asking a layer that already filters every query by the tenant that key belongs to.
+		The plugin has no MCP endpoint of its own. It offers drizzle-cube's own MCP tools as three tools
+		of the app: <code>analytics_discover</code> to find the cubes and their members,
+		<code>analytics_validate</code> to check a query, and <code>analytics_load</code> to run it. They
+		reach clients through the kit's <a href="/concepts/mcp/">MCP server</a>, and agent runs through the
+		same tool list, but not the chat panel. All three are read-only, so they are listed under the
+		default read-only exposure.
 	</p>
 	<p>
-		The query API is read-only by nature, and access to it is membership plus one read permission
-		rather than a role check — no cube consults the caller's role. Filtering is by tenant, and only
-		by tenant.
+		They are not a second implementation. Each call compiles against the same semantic layer as
+		<code>/cubejs-api</code>, under the security context <code>/cubejs-api</code> builds for the same
+		person, inside the same 20-second statement timeout, so a client's <code>analytics_load</code>
+		answers what the query API would answer that person. <code>ActivityEvents</code> stays
+		admin-only, a reader without permission to read analytics is offered no tools, and neither is an
+		agent run with no person behind it.
+	</p>
+	<p>
+		A client connects with OAuth, through the app's own sign-in, at the URL shown in Settings → MCP:
+		<code>&lt;APP_URL&gt;/mcp/t/&lt;slug&gt;</code>. API keys do not work on <code>/mcp</code>, so a
+		client set up against the plugin's old endpoint with an API key has to connect again. drizzle-cube's
+		<code>chart</code> tool is not offered, because it is a UI resource and the app's MCP server
+		serves tools only.
 	</p>
 
 	<h2>Skills for your coding agent</h2>
@@ -213,8 +225,8 @@ if (!install) throw new Error('The analytics plugin should have an install comma
 		the right one of the other three. <code>analytics-cubes</code> adds a measure, models a new table
 		as a cube, adds a fact table or contributes a cube from another plugin — and writes the isolation
 		test that has to come with it. <code>analytics-queries</code> answers a data question through the
-		cubes, calls the query API from a terminal, and connects Claude Code or Claude Desktop to the
-		<code>/mcp</code> endpoint with an API key. <code>analytics-dashboards</code> builds, shares,
+		cubes, calls the query API from a terminal, and connects Claude or ChatGPT to the analytics
+		tools through the app's MCP server. <code>analytics-dashboards</code> builds, shares,
 		resets and templates dashboards.
 	</p>
 	<p>
