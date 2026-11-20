@@ -163,3 +163,4 @@ console the `/launch/` overview describes.
 | `plugin-guide` | `/guide` on a demo app with the **guide** plugin (3.10.0, kit 0.31.0) installed | Getting started open; Ask the Guide pane asked "How do I invite a colleague?" and answered in numbered steps (no raw footnote marks — retake if the model leaves `[^n]` in the text). Captured 2026-11-10 by the CLI daemon, same viewport and sign-in as above | 1440×900 @2 | `/plugins/guide/` hero |
 
 Not captured: **Secrets / grants** (the deck's fleet slide describes grants in text instead).
+| `settings-mcp` | `/settings?tab=mcp` | Settings → MCP with Allow MCP clients on: the server URL `http://localhost:3600/mcp/t/acme` (dev ports 3600/3601, `APP_URL` set to localhost for the capture) and the Connect a client card for Claude, Claude Code and ChatGPT. Kit commit `8fb720f` (the 0.41.0 branch), captured 2026-11-20, same account | 1440×900 @2 | tour `#mcp` |
