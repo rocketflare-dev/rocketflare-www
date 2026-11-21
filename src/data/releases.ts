@@ -636,6 +636,15 @@ export const RELEASES: Release[] = [
 		migrations: false,
 		areas: ['config', 'db', 'docs'],
 	},
+	{
+		version: '0.42.0',
+		date: '2026-11-21',
+		summary:
+			'A new app now starts with one prompt: /rf-start detaches the clone, gets it running, then holds a design conversation with the app’s owner (/rf-design) that settles tenancy, roles, AI, stages and brand before any screen is built, and renders it as pages in their brand. pnpm plugin list --available shows the plugins that already exist. Setup handles Windows through WSL, plugins gain four seams (the API key id, guarded settings tabs, seed hooks and pnpm seed --feature), licence files are never rewritten by the rename or a plugin install, and type checking gets a 4 GB heap.',
+		breaking: false,
+		migrations: false,
+		areas: ['api', 'config', 'docs', 'shared', 'ui'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
