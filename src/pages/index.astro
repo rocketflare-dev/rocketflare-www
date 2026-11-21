@@ -1,7 +1,7 @@
 ---
 /**
  * The landing page. Nine sections, no two neighbours sharing a layout family:
- * hero (sky) → proof (one big screenshot) → first run (chat | terminal, on a
+ * hero (sky) → proof (one big screenshot) → first run (the prompt | the chat, on a
  * card between two cloud edges) → what it does (triptych) → also included
  * (flat icon list) → under the hood (dark band) → who it is for (two columns)
  * → before you start (three callouts) → call to action.
@@ -17,21 +17,20 @@ import SectionHead from '../components/SectionHead.astro'
 import Screenshot from '../components/Screenshot.astro'
 import AgentChat from '../components/AgentChat.astro'
 import Terminal from '../components/Terminal.astro'
-import Steps from '../components/Steps.astro'
 import Callout from '../components/Callout.astro'
 import { GITHUB_URL } from '../data/site'
 import { CONCEPT_COUNT, conceptBySlug, numberWord } from '../data/concepts'
 import { pageByPath } from '../data/pages'
 import {
 	AGENT_NAME,
-	AGENT_PROMPT,
 	APP_URL,
 	BOOTSTRAP_EXPECT,
-	BOOTSTRAP_READY_LINE,
 	BOOTSTRAP_STEPS,
-	bootstrapLine,
 	INSTALL_CMD,
 	DEMO,
+	START_DURATION,
+	START_PROMPT,
+	START_STEPS,
 } from '../data/get-started'
 
 import homeLight from '../assets/screens/home.light.png'
@@ -122,25 +121,22 @@ const also = [
 
 const conceptCount = numberWord(CONCEPT_COUNT)
 
-/** What the agent says it did — every bootstrap step in plain words. */
+/** What the agent does with the prompt — the rf-start steps in plain words. */
 const agentTurns = [
-	{ who: 'you' as const, text: AGENT_PROMPT },
+	{ who: 'you' as const, text: `${START_PROMPT[0]} …` },
 	{
 		who: 'agent' as const,
-		text: 'Reading CLAUDE.md, then running the first-run script. Here is what it did:',
-		checks: BOOTSTRAP_STEPS.map((s) => s.plain),
+		text: 'Cloned it into my-app and read CLAUDE.md. Running rf-start with you:',
+		checks: START_STEPS,
 	},
 	{
 		who: 'agent' as const,
-		text: `You're signed in as the demo owner. Try Chat, Agents or Knowledge.`,
+		text: 'Your app has its own name, brand and design. Start Claude again inside my-app and ask for Stage 1.',
 	},
 ]
 
-const terminalLines = [
-	{ cmd: INSTALL_CMD },
-	...BOOTSTRAP_STEPS.map((_, i) => ({ out: bootstrapLine(i), ok: true })),
-	{ out: BOOTSTRAP_READY_LINE, ok: true },
-]
+/** The secondary path: the one-line installer, no design step. */
+const installLines = [{ cmd: INSTALL_CMD }]
 
 /**
  * The questions people actually ask before they commit a weekend to a starter
@@ -155,7 +151,7 @@ const FAQS: { q: string; a: string }[] = [
 	},
 	{
 		q: 'Do I need to be a developer to use it?',
-		a: 'You need to be comfortable running commands in a terminal, and you will be editing code eventually — this is a codebase, not a no-code builder. You do not need to know Cloudflare, Postgres or any of the libraries beforehand. The repository is written to be driven by a coding agent such as Claude Code: open the folder, type /rf-setup, and it does the setup, the rename and the deploy for you, showing each step as it goes.',
+		a: 'You need to be comfortable running commands in a terminal, and you will be editing code eventually — this is a codebase, not a no-code builder. You do not need to know Cloudflare, Postgres or any of the libraries beforehand. The repository is written to be driven by a coding agent such as Claude Code: paste the prompt from the Get started page and it sets the app up, designs it with you and renames it, showing each step as it goes. Deploying is one more skill, /rf-provision, which you run yourself.',
 	},
 	{
 		q: 'What does it cost?',
@@ -213,12 +209,12 @@ const faqLd = {
 					Rocketflare is a ready-made web app you copy and make your own. Out of the box it has
 					sign-in, teams and permissions, an AI assistant that can read your documents,
 					a command-line tool, and a clean way to run background jobs — all on Cloudflare, over a normal Postgres
-					database — with dashboards one command away. Run it on your laptop in a couple of minutes; deploy it when you're ready.
+					database — with dashboards one command away. Paste one prompt into Claude Code to start your app; deploy it when you're ready.
 				</p>
 				<p class="engineer-line">One Cloudflare Worker · Hono · React · Postgres · MIT</p>
 				<div class="hero-actions">
-					<a href="/get-started/" class="btn btn-primary">
-						Get it running
+					<a href="#first-run" class="btn btn-primary">
+						Start with one prompt
 						<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
 					</a>
 					<a href="/tour/" class="btn btn-secondary">See what's inside</a>
@@ -263,30 +259,41 @@ const faqLd = {
 			<div class="reveal">
 				<SectionHead
 					audience="builder"
-					title="Running in about two minutes"
-					lede="Run one script, ask your coding agent, or do it by hand. All three end in the same place: your browser, signed in."
+					title="Start with one prompt"
+					lede="Install Claude Code, open it in the folder where you keep your projects, and paste this."
 				/>
 			</div>
 			<div class="split">
+				<div class="split-term reveal">
+					<Terminal
+						title={AGENT_NAME}
+						lines={START_PROMPT.map((out) => ({ out }))}
+						copy={START_PROMPT.join('\n')}
+						wrap
+					/>
+					<p class="next">
+						It gets the app running on your machine, then holds a design conversation with you: how
+						many organisations, the roles and the words your users use, AI on or off, money, the
+						licence, which existing plugins already do what you need, the stages, and your brand. It
+						shows the design as pages in your colours, then renames the kit to your app. Allow
+						{START_DURATION}, most of it the conversation.
+					</p>
+				</div>
 				<div class="split-chat reveal">
 					<AgentChat agent={AGENT_NAME} turns={agentTurns} />
 				</div>
-				<div class="split-term reveal">
-					<Terminal title="zsh" lines={terminalLines} expect={BOOTSTRAP_EXPECT} />
-				</div>
 			</div>
 			<div class="strip reveal">
-				<Steps
-					direction="row"
-					steps={[
-						{ title: 'Get a copy', body: 'The installer clones it, makes the history yours from the first commit, and starts the bootstrap.', time: '10 s' },
-						{ title: 'Bootstrap', body: `${numberWord(BOOTSTRAP_STEPS.length, { capital: true })} checked steps: toolchain, database, migrations, plugins, demo data. Or ask your agent.`, time: '2–3 min' },
-						{ title: "You're in", body: `${APP_URL}, signed in as the demo owner.`, time: 'now' },
-					]}
-				/>
+				<h3 class="strip-head">Only want to try the kit first?</h3>
+				<p>
+					The installer clones it, makes the history yours from the first commit, and runs the
+					bootstrap: {numberWord(BOOTSTRAP_STEPS.length)} checked steps, then {APP_URL} opens, signed
+					in as the demo owner. Design and rename it later.
+				</p>
+				<Terminal title="zsh" lines={installLines} expect={BOOTSTRAP_EXPECT} />
 			</div>
 			<p class="strip-more">
-				<a href="/get-started/">Every path, step by step <span aria-hidden="true">→</span></a>
+				<a href="/get-started/">Every path, step by step, and the Windows steps <span aria-hidden="true">→</span></a>
 			</p>
 		</div>
 		<CloudDivider fill="var(--bg)" />
@@ -446,9 +453,9 @@ const faqLd = {
 				<SectionHead title="Before you start" lede="Three things worth knowing, so nothing surprises you." />
 			</div>
 			<div class="notes reveal reveal-stagger">
-				<Callout tone="blue" title="A Mac or Linux machine, with Docker running">
+				<Callout tone="blue" title="A Mac, Linux or WSL2, with Docker running">
 					<svg slot="icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 18v3"/></svg>
-					<p>Postgres runs in a container on your laptop, so Docker Desktop (or colima) has to be up. Windows works through WSL2, but that path is untested.</p>
+					<p>Postgres runs in a container on your laptop, so Docker Desktop (or colima) has to be up. On Windows, set up WSL2 with a normal (not root) user, turn on Docker Desktop's WSL integration for that distro, and install Node through nvm inside WSL. Don't rely on Windows' own node or pnpm: they leak into WSL through the PATH. <a href="/get-started/#windows">The Windows steps</a>.</p>
 				</Callout>
 				<Callout tone="orange" title="A free Cloudflare login the first time it starts">
 					<ConceptIcon slot="icon" name="cloud" />
@@ -600,7 +607,11 @@ const faqLd = {
 		align-items: start;
 		margin-bottom: 3.2rem;
 	}
+	@media (min-width: 861px) {
+		.firstrun .split { grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr); }
+	}
 	.split-term :global(.terminal) { margin: 0; }
+	.next { margin: 1.2rem 0 0; color: var(--text-muted); }
 	@media (max-width: 860px) {
 		/* minmax(0, …), not 1fr: the terminal's longest line would otherwise set the
 		   column's min-content width and push the page wider than the viewport at 390px. */
@@ -612,8 +623,11 @@ const faqLd = {
 		border-radius: 18px;
 		background: var(--card-alt);
 	}
-	/* The clone command is one long token in a third-width column. */
+	/* The install command is one long token. */
 	.strip :global(code) { overflow-wrap: anywhere; }
+	.strip-head { font-size: 1.15rem; margin: 0 0 0.4rem; }
+	.strip p { color: var(--text-muted); margin: 0; }
+	.strip :global(.terminal) { margin: 1rem 0 0.4rem; }
 	.strip-more { text-align: center; margin: 1.6rem 0 0; font-weight: 600; }
 
 	/* -------------------------------------------------- 4 · what it does -- */

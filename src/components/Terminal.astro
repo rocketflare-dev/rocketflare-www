@@ -9,6 +9,7 @@
  *              an `out` line with `ok` gets a ✔ in --terminal-ok, `muted` dims it
  * - `copy?`    the text the button copies; defaults to every `cmd` joined by "\n"
  * - `expect?`  an "expected output" footer, in --terminal-ok
+ * - `wrap?`    wrap long lines instead of scrolling (prose, such as a prompt)
  */
 interface Line {
 	cmd?: string
@@ -21,11 +22,12 @@ interface Props {
 	lines: Line[]
 	copy?: string
 	expect?: string
+	wrap?: boolean
 }
-const { title = 'Terminal', lines, copy, expect } = Astro.props
+const { title = 'Terminal', lines, copy, expect, wrap = false } = Astro.props
 const copyText = copy ?? lines.filter((l) => l.cmd !== undefined).map((l) => l.cmd).join('\n')
 ---
-<figure class="terminal">
+<figure class:list={['terminal', wrap && 'wrap-lines']}>
 	<div class="bar">
 		<span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
 		<span class="title">{title}</span>
@@ -78,6 +80,7 @@ const copyText = copy ?? lines.filter((l) => l.cmd !== undefined).map((l) => l.c
 
 	pre { background: none; color: inherit; border-radius: 0; padding: 1rem 1.2rem; }
 	.line { display: block; white-space: pre; }
+	.wrap-lines .line { white-space: pre-wrap; overflow-wrap: anywhere; }
 	.cmd::before { content: '$ '; color: var(--terminal-prompt); font-weight: 600; }
 	.out { opacity: 0.85; }
 	.out.muted { opacity: 0.5; }
