@@ -627,6 +627,15 @@ export const RELEASES: Release[] = [
 		migrations: true,
 		areas: ['api', 'config', 'db', 'shared', 'ui', 'docs'],
 	},
+	{
+		version: '0.41.1',
+		date: '2026-11-21',
+		summary:
+			'Fixes from a builder’s field report. Running without Workers AI no longer edits tracked files: the switch lives in .dev.vars, so an offline copy stays clean and upgrades without forcing. Kit upgrades now delete what the kit deleted, carry the example plugin along, and stage what they write. A freshly renamed copy passes the agent-docs check, test startup failures show the real error, and generating a migration tries it on a scratch database first. Offline copies: follow step 4 of the porting note before upgrading.',
+		breaking: false,
+		migrations: false,
+		areas: ['config', 'db', 'docs'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
