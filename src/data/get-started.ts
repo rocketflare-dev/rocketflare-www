@@ -7,29 +7,51 @@
  * an `ok` line, and `AgentChat` draws the ✔ of a checklist. Store the words,
  * let the component draw the mark.
  *
- * Sources (kit repo): scripts/bootstrap.{sh,mjs}, scripts/install.sh,
- * .claude/skills/{setup,adapt,provision}/SKILL.md, apps/web/scripts/provision.ts,
+ * Sources (kit repo): README.md "Getting started", scripts/bootstrap.{sh,mjs}, scripts/install.sh,
+ * scripts/detach.sh, .claude/skills/rf-{start,setup,adapt,provision}/SKILL.md, apps/web/scripts/provision.ts,
  * apps/web/scripts/seed.ts, SETUP.md Part 1 and Part 3.
  */
 import { INSTALL_SH_URL } from './site'
+
+// ---- The front door: one prompt -------------------------------------------
+
+/**
+ * The prompt the kit's README leads with, verbatim, line breaks included. Pasted into Claude Code
+ * in the folder where you keep your projects, it clones the kit and runs the `rf-start` skill:
+ * detach, setup, the design conversation (`rf-design`), then the rename (`rf-adapt`).
+ */
+export const START_PROMPT = [
+	'I want to build an app with Rocketflare.',
+	'Clone https://github.com/rocketflare-dev/rocketflare into a folder I name',
+	'(default my-app), read its CLAUDE.md, then run the rf-start skill with me.',
+	"Follow its steps in order, and don't settle anything about the app's",
+	'design until it asks.',
+]
+/** The skill the prompt runs. */
+export const START_SKILL = '/rf-start'
+/** The whole of `rf-start`, start to signed-off design and renamed app (its §0). */
+export const START_DURATION = '20 to 40 minutes'
+/** What `rf-start` does, in order (`.claude/skills/rf-start/SKILL.md`), in plain words. */
+export const START_STEPS = [
+	'Detached the copy from the kit\'s history, keeping a note of where it came from',
+	'Got it running, one missing prerequisite at a time',
+	'Held the design conversation: organisations, roles and your words, AI, money, licence, plugins, stages, brand',
+	'Showed the design as pages in your colours',
+	'Renamed the kit to your app',
+]
 
 // ---- Getting a copy -------------------------------------------------------
 
 /** The directory every example clones into. */
 export const APP_DIR = 'myapp'
+/** The by-hand clone, as the kit's README writes it: a full clone, detached on the next line. */
+export const CLONE_CMD = `git clone https://github.com/rocketflare-dev/rocketflare.git ${APP_DIR} && cd ${APP_DIR}`
 /**
- * `--depth 1` because the kit's history is not yours — it is deleted on the next line. Shown as two
- * commands, never one bare `git clone`: a copy that keeps the kit's history fights a template that
- * carries on evolving (docs/ADAPTING.md §0). The one-liner below does both for you.
+ * Your history starts here. `scripts/detach.sh` records the kit commit in `.rocketflare.json` (what
+ * `/rf-upgrade` diffs against), then replaces the kit's history with one commit, "Start from
+ * Rocketflare". The installer, `/rf-start` and `/rf-setup` all run the same script.
  */
-export const CLONE_CMD = `git clone --depth 1 https://github.com/rocketflare-dev/rocketflare.git ${APP_DIR} && cd ${APP_DIR}`
-/**
- * Your history starts here. Provenance does not depend on this line: `.rocketflare.json` ships with
- * the kit version already set, so a copy made by hand still knows what it descends from and can be
- * upgraded later. The installer additionally stamps the exact commit.
- */
-export const DETACH_CMD =
-  'rm -rf .git && git init -q && git add -A && git commit -qm "Start from Rocketflare"'
+export const DETACH_CMD = 'bash scripts/detach.sh'
 /** Both of the above, as a terminal transcript. */
 export const CLONE_LINES = [{ cmd: CLONE_CMD }, { cmd: DETACH_CMD }]
 
@@ -141,6 +163,7 @@ export const AGENT_PROMPT = 'Help me set up this project'
  * upgrading dependencies.
  */
 export const SKILLS = {
+	start: START_SKILL,
 	setup: '/rf-setup',
 	adapt: '/rf-adapt <slug> "Your App"',
 	provision: '/rf-provision',

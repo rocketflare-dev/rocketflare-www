@@ -73,10 +73,10 @@ export const PAGES: SitePage[] = [
 	},
 	{
 		path: '/get-started/',
-		title: 'Get started — your SaaS running locally in two minutes',
+		title: 'Get started — one prompt to start your app',
 		nav: 'Get started',
 		description:
-			'One command takes you from an empty folder to an app you are signed in to, with demo data. No accounts, no keys, no config. Then deploy it for real with three free accounts and one more command.',
+			'Paste one prompt into Claude Code and it gets Rocketflare running, designs your app with you and renames the kit to it. Or one command takes you from an empty folder to the kit running with demo data, no keys or config. Then deploy it with three accounts and one more command.',
 		audience: 'both',
 		order: 7,
 		ready: true,

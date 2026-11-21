@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro'
 import { CONCEPTS } from '../data/concepts'
 import { PAGES } from '../data/pages'
+import { START_PROMPT } from '../data/get-started'
 import { GITHUB_URL } from '../data/site'
 
 /**
@@ -36,11 +37,19 @@ pgvector (Drizzle over the Neon serverless driver, or postgres.js through
 Hyperdrive, chosen per deployment), React 19 + Vite,
 drizzle-cube for analytics, a commander CLI. Node 26, pnpm 10.
 
-Getting started: clone the repository and run "bash scripts/bootstrap.sh" (macOS
-or Linux, Docker running) — it checks the toolchain, starts Postgres, migrates,
-seeds a demo workspace and opens the browser signed in; or open the folder in
-Claude Code and type /rf-setup (the repository ships /rf-setup, /rf-preflight,
-/rf-adapt, /rf-provision and /rf-upgrade as skills). Local development needs a
+Getting started: to start a new app, paste this prompt into Claude Code in the
+folder where you keep your projects:
+
+${START_PROMPT.join('\n')}
+
+It runs the rf-start skill: it detaches the clone from the kit's history, gets the
+app running, holds a design conversation (organisations, roles and words, AI,
+money, licence, plugins, stages, brand), shows the design as pages in your
+colours, then renames the kit to your app. To try the kit as it ships instead:
+clone the repository, run "bash scripts/detach.sh", then "bash
+scripts/bootstrap.sh" (macOS, Linux or Windows through WSL2, Docker running), or
+open the folder in Claude Code and type /rf-setup (the repository also ships
+/rf-preflight, /rf-adapt, /rf-provision and /rf-upgrade as skills). Local development needs a
 free Cloudflare login only because the Workers AI binding always calls out
 (--offline turns it off); deploying is scripted by "pnpm provision".
 

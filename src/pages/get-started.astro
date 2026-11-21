@@ -1,7 +1,8 @@
 ---
 /**
- * Get started: three ways from a clone to a browser you are signed in to
- * (ask your agent · one command · by hand), what the bootstrap did, how to
+ * Get started: the prompt that starts a new app (rf-start), then three ways
+ * from a clone to a browser you are signed in to (one command · ask your
+ * agent · by hand), the Windows steps, what the bootstrap did, how to
  * deploy with /rf-provision, the honest notes, and the rename that makes the
  * kit yours. Every kit literal comes from src/data/get-started.ts.
  */
@@ -50,6 +51,8 @@ import {
 	PROVISION_SKIP_EMAIL_FLAG,
 	PROVISION_VERIFY_WORD,
 	SKILLS,
+	START_DURATION,
+	START_PROMPT,
 	KIT_MANIFEST_FILE,
 	UPGRADE_CMD,
 	UPGRADE_NOTES_DIR,
@@ -62,7 +65,7 @@ const page = pageByPath('/get-started/')
 if (!page) throw new Error('Page not in the registry: /get-started/')
 
 const description =
-	'Run Rocketflare on your laptop in about two minutes — ask your coding agent, run one script, or follow the steps by hand — then deploy it to Cloudflare with one command. A Mac or Linux machine, Docker, and a free Cloudflare login are the whole list.'
+	'Start a new app by pasting one prompt into Claude Code: it gets Rocketflare running, designs the app with you, and renames the kit to it. Or run one script, or follow the steps by hand, then deploy to Cloudflare with one command. A Mac, a Linux machine or Windows with WSL2, plus Docker and a free Cloudflare login, are the whole list.'
 
 /** Steps bodies are inline HTML; the commands need their ampersands escaped. */
 const esc = (s: string) => s.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
@@ -104,7 +107,9 @@ const setupTurns = [
 
 /** The left-hand index: one entry per section of the page. */
 const SECTIONS = [
-	{ id: 'ways', label: 'Three ways in' },
+	{ id: 'prompt', label: 'Start with a prompt' },
+	{ id: 'ways', label: 'Other ways in' },
+	{ id: 'windows', label: 'On Windows' },
 	{ id: 'happened', label: 'What just happened' },
 	{ id: 'deploy', label: 'Deploy it' },
 	{ id: 'honest', label: 'Honest notes' },
@@ -134,10 +139,12 @@ const provisionTurns = [
 			<span class="eyebrow">From a clone to signed in</span>
 			<h1>Get started</h1>
 			<p class="lede">
-				You need a Mac or a Linux machine, Docker Desktop running, and a free Cloudflare login the
-				first time it starts — that's the list. Nothing to sign up for beyond that, no keys to
-				paste. Pick whichever of the three paths below suits you; they all end in your browser,
-				signed in as the owner of a demo organisation.
+				You need a Mac or a Linux machine (Windows works through WSL2,
+				<a href="#windows">below</a>), Docker Desktop running, and a free Cloudflare login the
+				first time it starts. That's the list. Nothing to sign up for beyond that, no keys to
+				paste. Starting a new app? Paste one prompt into Claude Code. Only want to try the kit
+				first? Any of the three paths further down ends in your browser, signed in as the owner of
+				a demo organisation.
 			</p>
 			</div>
 		</div>
@@ -156,12 +163,37 @@ const provisionTurns = [
 		</aside>
 
 		<div class="gs-main">
+	<!-- ======================================================= the prompt -->
+	<section class="prompt" id="prompt">
+		<SectionHead
+			align="left"
+			title="Start with a prompt"
+			lede="Install Claude Code, open it in the folder where you keep your projects, and paste this."
+		/>
+		<Terminal
+			title={AGENT_NAME}
+			lines={START_PROMPT.map((out) => ({ out }))}
+			copy={START_PROMPT.join('\n')}
+			wrap
+		/>
+		<p class="after">
+			It clones the kit into <code>my-app</code> (or the name you give it), cuts it loose from the
+			kit's history and gets it running on your machine, one missing prerequisite at a time. Then
+			it holds a design conversation with you: how many organisations, the roles and the words
+			your users use, AI on or off, money, the licence, which existing
+			<a href="/plugins/">plugins</a> already do what you need, the stages, and your brand. It
+			shows the design as pages in your colours, and once you sign it off, renames the kit to your
+			app. Allow {START_DURATION}, most of it the conversation. You can stop after any step and
+			ask for <code>{SKILLS.start}</code> again later to carry on.
+		</p>
+	</section>
+
 	<!-- ===================================================== three ways -->
 	<section class="ways" id="ways">
 		<SectionHead
 			align="left"
-			title="Three ways in"
-			lede="Run one script, ask your coding agent, or do each step yourself. Same result, your choice of company."
+			title="Other ways in"
+			lede="To try the kit as it ships before you design anything: run one script, ask your coding agent to set it up, or do each step yourself. Same result, your choice of company."
 		/>
 		<Tabs
 			tabs={[
@@ -175,7 +207,7 @@ const provisionTurns = [
 				<p class="step-line">
 					<span class="num">1</span>
 					<span>Install <a href={CLAUDE_CODE_URL} target="_blank" rel="noopener">Claude Code</a>, clone the
-					repository and open the folder in it.</span>
+					repository, detach it and open the folder in it.</span>
 				</p>
 				<Terminal title="zsh" lines={[...CLONE_LINES, { cmd: AGENT_CLI_CMD }]} />
 				<p class="step-line">
@@ -243,6 +275,39 @@ const provisionTurns = [
 				</div>
 			</Fragment>
 		</Tabs>
+	</section>
+
+	<!-- ======================================================== windows -->
+	<section class="windows" id="windows">
+		<SectionHead
+			align="left"
+			title="On Windows: before you start"
+			lede="The kit runs inside WSL2, Windows' own Linux. Three things need to be in place first, and the bootstrap names whichever one is missing."
+		/>
+		<ol class="win-steps">
+			<li>
+				<strong>WSL2 with a normal user.</strong> A distro that only has <code>root</code> is refused.
+				Inside it, <code>adduser &lt;name&gt; &amp;&amp; usermod -aG sudo &lt;name&gt;</code>, then
+				make that user the default (<code>wsl --manage &lt;distro&gt; --set-default-user &lt;name&gt;</code>
+				in PowerShell). Clone into your Linux home, <code>~</code>, not under <code>/mnt/c</code>.
+			</li>
+			<li>
+				<strong>Docker Desktop with WSL integration on.</strong> Settings → Resources → WSL
+				integration, turn on your distro, Apply, then quit Docker Desktop and start it again.
+				<code>docker version</code> inside the distro must answer.
+			</li>
+			<li>
+				<strong>Node 26 through a version manager, inside WSL.</strong> Install nvm (or fnm) in the
+				distro, open a new shell, and run <code>nvm install 26</code>.
+			</li>
+		</ol>
+		<p class="measure">
+			Don't rely on a Node or pnpm installed on Windows itself. WSL adds Windows' PATH to Linux's,
+			so <code>node</code>, <code>pnpm</code> or <code>corepack</code> can quietly resolve to the
+			Windows copy under <code>/mnt/c</code> and fail with errors like
+			<code>/bin/sh^M: bad interpreter</code>. The bootstrap skips anything on a Windows drive, but
+			the version inside WSL is the one that has to work.
+		</p>
 	</section>
 
 	<!-- ============================================== what just happened -->
@@ -341,7 +406,7 @@ const provisionTurns = [
 		<div class="notes">
 			<Callout tone="blue" title="macOS or Linux">
 				<svg slot="icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 18v3"/></svg>
-				<p>The bootstrap is a shell script and refuses other systems. Windows works through WSL2, but that path is untested.</p>
+				<p>The bootstrap is a shell script and refuses other systems. Windows works through WSL2, with the <a href="#windows">three steps above</a> done first.</p>
 			</Callout>
 			<Callout tone="green" title="Docker must be running">
 				<ConceptIcon slot="icon" name="database" />
@@ -484,6 +549,11 @@ const provisionTurns = [
 		background: linear-gradient(150deg, var(--orange), var(--red));
 	}
 	.after { margin-top: 1.4rem; color: var(--text-muted); }
+
+	/* --------------------------------------------------------- windows -- */
+	.win-steps { max-width: 62ch; padding-left: 1.3rem; display: grid; gap: 0.8rem; margin: 0 0 1.2rem; }
+	.win-steps strong { color: var(--text-bright); }
+	.win-steps code, .windows .measure code { overflow-wrap: anywhere; }
 
 	.flags {
 		width: 100%;
