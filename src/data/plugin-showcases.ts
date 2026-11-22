@@ -198,6 +198,7 @@ const sites: PluginShowcase = {
 				'A strict CSP per site: by default a page loads no script. Site CSS is a separate build, and the public CSP refuses the admin bundle.',
 				'Images stored in R2 and served through Cloudflare Images, as AVIF or WebP at fixed widths.',
 				'<code>robots.txt</code>, a sitemap, an HTML 404 and redirects on every host.',
+				'Text for AI tools: <code>/llms.txt</code>, <code>/llms-full.txt</code> and a Markdown twin of every published page at <code>&lt;path&gt;.md</code>, built from the page’s own blocks. On by default, with a switch per site.',
 			],
 			shot: {
 				light: sitesPublicLight,
