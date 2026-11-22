@@ -663,6 +663,15 @@ export const RELEASES: Release[] = [
 		migrations: false,
 		areas: ['api', 'config', 'ui', 'docs'],
 	},
+	{
+		version: '0.44.1',
+		date: '2026-11-22',
+		summary:
+			'Plugin repositories pass their CI against the newest kit again: a kit check that assumed the kit’s own test folder was present now follows it, and the release script stages the new porting note.',
+		breaking: false,
+		migrations: false,
+		areas: ['config'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
