@@ -127,7 +127,7 @@ export const POSTURE: PostureGroup[] = [
 			{ text: 'File bytes stream through the Worker with no presigned URLs, and the browser can only name a file by its database row.', href: FILES },
 			{ text: 'Uploads are checked for type and size per kind of upload.', href: FILES },
 			{ text: 'Only allowlisted file types display in the browser; everything else downloads.', href: FILES },
-			{ text: 'Request bodies are capped at 1 MB before any parsing. Upload paths allow up to 10 MB, and each upload route sets its own tighter limit.', href: API },
+			{ text: 'Request bodies are capped at 1 MB before any parsing. Upload paths allow up to 10 MB, and each upload route sets its own tighter limit. A plugin can raise one exact upload path to at most 50 MiB.', href: API },
 		],
 	},
 	{

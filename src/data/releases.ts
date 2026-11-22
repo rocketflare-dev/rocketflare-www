@@ -654,6 +654,15 @@ export const RELEASES: Release[] = [
 		migrations: false,
 		areas: [],
 	},
+	{
+		version: '0.44.0',
+		date: '2026-11-22',
+		summary:
+			'Upgrades across many releases go smoother: the target release’s upgrader plans the jump, a patch that no longer applies is merged 3-way instead of rejected, plugin upgrades stop duplicating core edits, and plugins can add Home cards, embeddable responses and upload caps up to 50 MiB.',
+		breaking: false,
+		migrations: false,
+		areas: ['api', 'config', 'ui', 'docs'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
