@@ -124,7 +124,7 @@ export const PLUGINS: Plugin[] = [
 		repoLabel: 'rocketflare-dev/rocketflare-plugins',
 		subdir: 'plugins/analytics',
 		minKit: '0.41.0',
-		version: '3.13.2',
+		version: '3.13.3',
 		shipsAs: 'optional',
 		summary:
 			'Dashboards, cubes, fact tables and the drizzle-cube query API — everything that used to be part of the kit, now a repository of its own.',
@@ -153,7 +153,7 @@ export const PLUGINS: Plugin[] = [
 		repoLabel: 'rocketflare-dev/rocketflare-plugins',
 		subdir: 'plugins/web-knowledge',
 		minKit: '0.9.0',
-		version: '3.13.2',
+		version: '3.13.3',
 		shipsAs: 'optional',
 		summary:
 			'Lets agents and chat search the public web and read pages, on each organisation’s own search key — and only for the organisations that turn it on.',
@@ -178,7 +178,7 @@ export const PLUGINS: Plugin[] = [
 		repoLabel: 'rocketflare-dev/rocketflare-plugins',
 		subdir: 'plugins/connectors',
 		minKit: '0.29.0',
-		version: '3.13.2',
+		version: '3.13.3',
 		shipsAs: 'optional',
 		summary:
 			'Connects an organisation’s own Microsoft 365 to your app: an admin grants consent once, and its directory and calendars sync in. It holds the rows, routes and schedules; a provider plugin (today, m365) does the talking.',
@@ -205,7 +205,7 @@ export const PLUGINS: Plugin[] = [
 		repoLabel: 'rocketflare-dev/rocketflare-plugins',
 		subdir: 'plugins/m365',
 		minKit: '0.29.0',
-		version: '3.13.2',
+		version: '3.13.3',
 		shipsAs: 'optional',
 		summary:
 			'Microsoft 365 as a provider for the connectors plugin, which it requires — install connectors first. One multi-tenant Entra app for your whole deployment; each customer’s admin consents to it once.',
@@ -231,7 +231,7 @@ export const PLUGINS: Plugin[] = [
 		repoLabel: 'rocketflare-dev/rocketflare-plugins',
 		subdir: 'plugins/issue-reports',
 		minKit: '0.29.0',
-		version: '3.13.2',
+		version: '3.13.3',
 		shipsAs: 'optional',
 		summary:
 			'Ideas & issues: anyone on the team talks a bug or an idea through with an agent, which asks until it is clear and logs it on GitHub once they approve the draft.',
@@ -258,7 +258,7 @@ export const PLUGINS: Plugin[] = [
 		repoLabel: 'rocketflare-dev/rocketflare-plugins',
 		subdir: 'plugins/freeagent',
 		minKit: '0.29.0',
-		version: '3.13.2',
+		version: '3.13.3',
 		shipsAs: 'optional',
 		summary:
 			'Mirrors each organisation’s FreeAgent company (UK accounting) into your app, for pages, agents, analytics and the plugins you build on top. An admin approves it once, over OAuth.',
@@ -286,7 +286,7 @@ export const PLUGINS: Plugin[] = [
 		repoLabel: 'rocketflare-dev/rocketflare-plugins',
 		subdir: 'plugins/inbox',
 		minKit: '0.29.0',
-		version: '3.13.2',
+		version: '3.13.3',
 		shipsAs: 'optional',
 		summary:
 			'Inbound email for your app: forward receipts, invoices and notices to an address on your domain, and they arrive parsed, with their attachments, ready for other plugins to act on.',
@@ -314,7 +314,7 @@ export const PLUGINS: Plugin[] = [
 		repoLabel: 'rocketflare-dev/rocketflare-plugins',
 		subdir: 'plugins/guide',
 		minKit: '0.31.0',
-		version: '3.13.2',
+		version: '3.13.3',
 		shipsAs: 'optional',
 		summary:
 			'An in-app user guide about your app itself: your coding agent writes it from the code, a Claude Code hook says when a change may have made it stale, and members search it and ask it questions from any screen.',
@@ -341,7 +341,7 @@ export const PLUGINS: Plugin[] = [
 		repoLabel: 'rocketflare-dev/rocketflare-plugins',
 		subdir: 'plugins/global-search',
 		minKit: '0.31.0',
-		version: '3.13.2',
+		version: '3.13.3',
 		shipsAs: 'optional',
 		summary:
 			'One ⌘K palette to go anywhere, run a command or find anything a person may see in your app — people, agents, chats and documents — and any installed plugin can add its own results and commands.',
@@ -364,7 +364,7 @@ export const PLUGINS: Plugin[] = [
 		label: 'Single sign-on (SAML + SCIM)',
 		availability: 'partners',
 		minKit: '0.29.0',
-		version: '0.8.0',
+		version: '0.9.0',
 		shipsAs: 'optional',
 		summary:
 			'SAML sign-in and SCIM provisioning for each organisation, against its own identity provider: verify the email domain, require SSO for it, and let the directory add, change and remove the people.',
@@ -387,7 +387,7 @@ export const PLUGINS: Plugin[] = [
 		label: 'Sites',
 		availability: 'partners',
 		minKit: '0.41.1',
-		version: '0.8.0',
+		version: '0.9.0',
 		shipsAs: 'optional',
 		summary:
 			'Public websites run from your app: pages in several languages, edited visually inside the app and served from the same Worker on hosts of their own, from blocks and a theme your developers own in code.',
@@ -401,6 +401,7 @@ export const PLUGINS: Plugin[] = [
 			'<strong>A forms library</strong> — forms built once and placed on any page, with conditions, steps, file uploads and text in every language. They sit behind Turnstile, work without JavaScript, and each submission can start an agent.',
 			'<strong>Collections</strong> — lists your editors keep up to date, such as offices or a price list, with the fields defined in code. Entries are translated and published like pages, and can fill a form’s options.',
 			'<strong>Knowledge and types to build on</strong> — published pages go into the knowledge base, so chat can answer from the site, and every contract, schema and event payload is exported for the app’s own code.',
+			'<strong>Text for AI tools</strong> — every site serves <code>/llms.txt</code>, <code>/llms-full.txt</code> and a Markdown twin of each published page at <code>&lt;path&gt;.md</code>, built from the page’s own blocks with no AI involved. On by default, with a switch per site.',
 			'<strong>An AI page builder</strong> — Build with AI writes a new draft from a description, from the site’s own blocks, library images and knowledge. It never publishes.',
 			'<strong>A CLI and eight agent skills</strong> — <code>rocketflare sites</code> for export, import (and publish), audit and authoring; skills for Claude Code that set a site up, copy a design, migrate an existing site live, write pages, and build forms and collections.',
 		],

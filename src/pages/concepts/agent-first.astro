@@ -116,8 +116,17 @@ globs:
 	<p>
 		That gate runs lint, typecheck, test and build. It is the same command before every commit, as
 		the single CI job, and in a coding sandbox's ship gate, so nothing passes in one place and fails
-		in another. It starts its own test database. Several of its checks exist specifically to catch
-		the mistakes an agent makes:
+		in another. It starts its own test database.
+	</p>
+	<p>
+		While you work, <code>pnpm gate --changed</code> runs the same four steps over only what your
+		branch changed: lint on the changed files, typecheck and build in the packages the change
+		reaches, and the tests whose imports reach it. A one-line change to a page gates in about half
+		the time of the full run. When it cannot be sure (a dependency, a config file, a migration, the
+		test harness), it runs the full gate instead. The full gate still runs before a push and in CI.
+	</p>
+	<p>
+		Several of the gate's checks exist specifically to catch the mistakes an agent makes:
 	</p>
 	<table>
 		<thead><tr><th>Check</th><th>What it refuses to let through</th></tr></thead>
