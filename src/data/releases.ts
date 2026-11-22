@@ -645,6 +645,15 @@ export const RELEASES: Release[] = [
 		migrations: false,
 		areas: ['api', 'config', 'docs', 'shared', 'ui'],
 	},
+	{
+		version: '0.43.0',
+		date: '2026-11-22',
+		summary:
+			'pnpm gate --changed gates only what your branch changed, so a one-line page change checks in about half the time, and the full gate itself runs about a third faster: TypeScript 7, shared test registries, and a copy no longer runs the kit’s own tooling tests.',
+		breaking: false,
+		migrations: false,
+		areas: [],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
