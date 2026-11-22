@@ -14,20 +14,20 @@ const report = (ok, label, evidence) => {
 	console.log(`${ok ? 'ok  ' : 'FAIL'} ${label}${evidence ? '  ' + JSON.stringify(evidence) : ''}`)
 }
 
-// LCP on /: the hero text, never an image (the first Screenshot is `priority`).
+// LCP on /: the hero's text (the headline, the lede or the line under it), never an image.
 for (const width of [1440, 390]) {
 	const page = await browser.newPage()
 	await page.setViewport({ width, height: width < 800 ? 844 : 900 })
 	await page.evaluateOnNewDocument(() => {
 		window.__lcp = []
 		new PerformanceObserver((list) => {
-			for (const e of list.getEntries()) window.__lcp.push({ tag: e.element?.tagName, cls: e.element?.className, url: e.url })
+			for (const e of list.getEntries()) window.__lcp.push({ tag: e.element?.tagName, cls: e.element?.className, url: e.url, inHero: !!e.element?.closest('.hero') })
 		}).observe({ type: 'largest-contentful-paint', buffered: true })
 	})
 	await page.goto('http://127.0.0.1:4399/', { waitUntil: 'networkidle0' })
 	await sleep(500)
 	const lcp = (await page.evaluate(() => window.__lcp)).at(-1)
-	report(lcp?.tag === 'P' && lcp.cls === 'lede', `LCP@${width} is p.lede`, lcp)
+	report(!!lcp?.inHero && !lcp.url && ['H1', 'P'].includes(lcp.tag), `LCP@${width} is hero text`, lcp)
 	await page.close()
 }
 
@@ -153,7 +153,7 @@ for (const path of ['/', '/tour/', '/get-started/', '/who-is-it-for/', '/changel
 		await sleep(200)
 		const hash = await page.evaluate(() => location.hash)
 		report(skip.text === 'Skip to content' && skip.onScreen && hash === '#main', 'skip link', { ...skip, hash })
-		for (const [sel, where] of [['.hood .hood-link a', 'band'], ['.cta .btn-ghost', 'bg-lift'], ['.split-term .copy', 'terminal']]) {
+		for (const [sel, where] of [['.hood .hood-link a', 'band'], ['.cta .btn-secondary', 'bg-lift'], ['.split-term .copy', 'terminal']]) {
 			await page.evaluate((s) => { const el = document.querySelector(s); el.scrollIntoView({ block: 'center' }); el.focus() }, sel)
 			await sleep(300)
 			const ring = await page.evaluate((s) => { const el = document.querySelector(s); const cs = getComputedStyle(el); return { focusVisible: el.matches(':focus-visible'), outline: cs.outlineStyle, width: cs.outlineWidth } }, sel)

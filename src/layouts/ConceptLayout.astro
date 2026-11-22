@@ -322,6 +322,9 @@ const articleLd = {
 	}
 	.prose :global(.why p:last-child) { margin-bottom: 0; }
 	.prose :global(.why strong:first-child) { color: var(--accent-ink); }
+	/* The plain link blue reaches 4.3:1 on the purple tint; a little text ink lifts it past AA on
+	   every tint by day, and by night --text-bright is light, so the mix stays light on dark. */
+	.prose :global(.why a) { color: color-mix(in srgb, var(--blue) 85%, var(--text-bright)); }
 
 	.prose :global(.note) {
 		border: 1px dashed var(--border-bright);

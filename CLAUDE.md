@@ -53,8 +53,8 @@ node scripts/verify/axe.mjs          # axe in BOTH themes on those + /concepts/ 
 node scripts/verify/checks.mjs       # everything else, one ok/FAIL line each:
 ```
 
-What `checks.mjs` asserts — **LCP** on `/` is `p.lede` at 1440 and 390 (the hero text, not the
-`priority` screenshot) · **widths** 390/768/1024/1440 on `/`, `/tour/`, `/get-started/`:
+What `checks.mjs` asserts — **LCP** on `/` is hero text (the `h1`, `p.lede` or
+`p.owned-line`) at 1440 and 390, never an image · **widths** 390/768/1024/1440 on `/`, `/tour/`, `/get-started/`:
 `scrollWidth <= innerWidth`, the rocket clear of the lede, every tab ≥ 24px tall · **no JS**: no
 `.reveal` at `opacity: 0`, `.tablist` and `.copy` gone, every panel visible with its heading, nav
 links visible · **JS on**: after scrolling through, nothing left at `opacity: 0` · **reduced motion**:

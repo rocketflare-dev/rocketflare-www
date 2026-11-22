@@ -1,10 +1,10 @@
 ---
 /**
- * The landing page. Nine sections, no two neighbours sharing a layout family:
- * hero (sky) → proof (one big screenshot) → first run (the prompt | the chat, on a
- * card between two cloud edges) → what it does (triptych) → also included
- * (flat icon list) → under the hood (dark band) → who it is for (two columns)
- * → before you start (three callouts) → call to action.
+ * The landing page. No two neighbours share a layout family:
+ * hero (sky) → the story (five alternating chapters, the rocket diving down the gutter between
+ * them) → yours to keep (dark band, three paths) → first run (the prompt | the chat, on a
+ * card between two cloud edges) → already built (five group cards) → under the hood (dark band)
+ * → who it is for (four cards) → before you start (three callouts) → questions → call to action.
  *
  * Every kit literal quoted here comes from src/data/get-started.ts.
  */
@@ -18,8 +18,7 @@ import Screenshot from '../components/Screenshot.astro'
 import AgentChat from '../components/AgentChat.astro'
 import Terminal from '../components/Terminal.astro'
 import Callout from '../components/Callout.astro'
-import { GITHUB_URL } from '../data/site'
-import { CONCEPT_COUNT, conceptBySlug, numberWord } from '../data/concepts'
+import { CONCEPT_COUNT, numberWord } from '../data/concepts'
 import { pageByPath } from '../data/pages'
 import {
 	AGENT_NAME,
@@ -27,20 +26,13 @@ import {
 	BOOTSTRAP_EXPECT,
 	BOOTSTRAP_STEPS,
 	INSTALL_CMD,
-	DEMO,
 	START_DURATION,
 	START_PROMPT,
 	START_STEPS,
 } from '../data/get-started'
 
-import homeLight from '../assets/screens/home.light.png'
-import homeDark from '../assets/screens/home.dark.png'
-import chatLight from '../assets/screens/chat.light.png'
-import chatDark from '../assets/screens/chat.dark.png'
 import agentsLight from '../assets/screens/agents-run.light.png'
 import agentsDark from '../assets/screens/agents-run.dark.png'
-import documentsLight from '../assets/screens/documents.light.png'
-import documentsDark from '../assets/screens/documents.dark.png'
 import analyticsLight from '../assets/screens/analytics.light.png'
 import analyticsDark from '../assets/screens/analytics.dark.png'
 import peopleLight from '../assets/screens/people.light.png'
@@ -50,74 +42,249 @@ const page = pageByPath('/')
 if (!page) throw new Error('Page not in the registry: /')
 
 const description =
-	'Rocketflare is a ready-made web app you copy and make your own: sign-in, teams and permissions, an AI assistant that reads your documents, dashboards and background jobs — one Cloudflare Worker over Postgres, open source, running on your laptop in about two minutes.'
+	'Turn your vibe-coded idea into an enterprise application you own: AI at its core, secure from the first day, built to grow, and run for you if you want. Build it yourself, have a partner build it, or let us run it.'
 
-/** The four thumbnails under the big screenshot; ids are the tour page's anchors. */
-const thumbs = [
-	{ id: 'chat', label: 'Chat', light: chatLight, dark: chatDark, alt: 'A chat thread with the built-in assistant' },
-	{ id: 'agents', label: 'Agents', light: agentsLight, dark: agentsDark, alt: 'An agent run with its timeline of steps' },
-	{ id: 'knowledge', label: 'Knowledge', light: documentsLight, dark: documentsDark, alt: 'The Knowledge page listing indexed documents' },
-	{ id: 'analytics', label: 'Analytics', light: analyticsLight, dark: analyticsDark, alt: 'The Organisation Overview dashboard' },
-]
-
-/** The triptych: one screenshot, one title, three outcomes. */
-const panels = [
+/**
+ * The story under the hero, for a reader who is not an engineer: one chapter per promise,
+ * alternating sides. Every claim is one the concept and security pages already document.
+ */
+const chapters: {
+	id: string
+	tone: string
+	eyebrow: string
+	title: string
+	body: string[]
+	href: string
+	linkLabel: string
+	/** A screenshot; or `checks`, drawn as a ticked list; or `modules`, drawn as parts that snap in. */
+	light?: ImageMetadata
+	dark?: ImageMetadata
+	alt?: string
+	url?: string
+	checks?: string[]
+	modules?: string[]
+}[] = [
 	{
-		title: 'People and sign-in',
+		id: 'real',
+		tone: 'purple',
+		eyebrow: 'Real software',
+		title: 'Built properly. Not just built quickly.',
+		body: [
+			'A vibe-coded prototype is a brilliant way to show an idea. It is a less brilliant way to run a business. Rocketflare gives your idea the foundations real software needs, designed by an experienced CTO and engineers who have run software at global scale.',
+			'Every change is checked before it goes live, whoever made it, human or AI. So when your IT team, or an investor’s due diligence, looks under the hood, they nod instead of wince.',
+		],
+		href: '/concepts/',
+		linkLabel: 'How it is built',
+		checks: [
+			'Each customer’s data kept separate',
+			'People see only what their role allows',
+			'Every change tested before it goes live',
+			'AI use tracked and costed',
+			'Constantly tested for security holes',
+			'Every design choice written down',
+		],
+	},
+	{
+		id: 'build',
+		tone: 'orange',
+		eyebrow: 'Build anything',
+		title: 'Build anything. Start with the boring bits done.',
+		body: [
+			'Your app is made of modules that snap together. A public website, dashboards, sign-in with work accounts, your accounting system, Microsoft 365 calendars: add the module, skip the six-month project.',
+			'Then build the part only your business has: an internal tool, a product you sell, or both. New modules keep arriving, and your app keeps up with them.',
+		],
+		href: '/plugins/',
+		linkLabel: 'See the modules',
+		modules: [
+			'Website builder',
+			'Dashboards',
+			'Company sign-in',
+			'Accounting',
+			'Microsoft 365',
+			'Search',
+			'Feedback',
+			'Your own',
+		],
+	},
+	{
+		id: 'ai',
+		tone: 'red',
+		eyebrow: 'AI at the core',
+		title: 'AI that does the work, not just the chat.',
+		body: [
+			'Most software bolts AI on as a chat box in the corner. Here it is built in. AI agents take on whole tasks, show their working, and answer from your own documents, receipts included.',
+			'They can only see and do what the person using them is allowed to, so you can put them to work without a nervous call to legal. Your team can even use the app from Claude or ChatGPT.',
+		],
+		href: '/concepts/ai/',
+		linkLabel: 'How the AI fits in',
+		light: agentsLight,
+		dark: agentsDark,
+		alt: 'An AI agent’s task: the timeline of its steps and the finished summary',
+		url: 'your-app.com/agents',
+	},
+	{
+		id: 'secure',
+		tone: 'blue',
+		eyebrow: 'Secure from the first day',
+		title: 'Your customers’ data stays theirs.',
+		body: [
+			'Sell to many customers and each one’s data is kept strictly apart. Run it for one company and it gets its own app and its own database, shared with no one.',
+			'People sign in with their work Google or Microsoft account and see only what their role allows. Meanwhile, automated security testers keep trying to break in, so the holes are found by us, not by someone less friendly.',
+		],
+		href: '/security/',
+		linkLabel: 'How we keep it secure',
 		light: peopleLight,
 		dark: peopleDark,
 		alt: 'The People page: members with their roles and a pending invitation',
-		url: 'localhost:3000/settings?tab=people',
-		points: [
-			'Sign in with a link in your email, or with Google, Microsoft or any other single sign-on provider.',
-			'Owners, admins and members — one rule decides what a page shows and what the server allows.',
-			'Invite people; the list updates live in every open browser.',
-		],
+		url: 'your-app.com/settings',
 	},
 	{
-		title: 'An assistant and agents',
-		light: agentsLight,
-		dark: agentsDark,
-		alt: 'An agent run: the timeline of steps and the finished summary',
-		url: 'localhost:3000/agents',
-		points: [
-			'Chat that streams answers and remembers the thread.',
-			'Agents that run long tasks in the background and show their steps as they go.',
-			'Drop in PDFs and documents; search them by meaning and let the assistant cite them.',
+		id: 'ready',
+		tone: 'green',
+		eyebrow: 'Ready for real use',
+		title: 'Grows with you. Looked after once it’s live.',
+		body: [
+			'It runs on Cloudflare’s worldwide network, so it is quick wherever your users are, and it grows from your first ten users to thousands without a rebuild.',
+			'Dashboards show how it is used and what the AI is costing you, before the bill does. Rather not run it yourself? We will: hosting, updates, security fixes and support, priced on what the app uses, not on how many people use it. Keep your weekends.',
 		],
-	},
-	{
-		title: 'Dashboards, one command away',
+		href: '/costs/',
+		linkLabel: 'What running it costs',
 		light: analyticsLight,
 		dark: analyticsDark,
-		alt: 'The Organisation Overview dashboard with live member and activity numbers',
-		url: 'localhost:3000/analytics',
-		points: [
-			'Add the analytics plugin and every organisation gets an overview with live numbers.',
-			'Build your own pages from the same data, no SQL required.',
-			'Every AI call is recorded with what it cost, before Cloudflare sends the bill.',
-		],
+		alt: 'A dashboard with live numbers for members and activity',
+		url: 'your-app.com/analytics',
 	},
 ]
 
-/** Also included — one line each, linking to the concept page that explains it. */
-const also = [
-	{ slug: 'background-work', icon: 'bolt', title: 'Background jobs and realtime', line: 'Long work runs off the request; open pages hear about it and refresh.' },
-	{ slug: 'email-and-files', icon: 'inbox', title: 'Email and files', line: 'Sign-in and invitation mail, plus uploads with avatars wired end to end.' },
-	{ slug: 'cli', icon: 'terminal', title: 'A command-line tool', line: 'Log in from the terminal and script what the app can do.' },
-	{ slug: 'auth', icon: 'key', title: 'API keys', line: 'Per-organisation keys you can mint and revoke in Settings.' },
-	{ slug: 'tenancy', icon: 'building', title: 'An admin area', line: 'See every organisation, approve sign-ups, step in to help a customer.' },
-	{ slug: 'ai', icon: 'gauge', title: 'AI you can measure', line: 'Every call priced, every run a span tree, and evals that catch a worse prompt or model before your users do.' },
-	{ slug: 'database', icon: 'database', title: 'Tests that guard isolation', line: 'The suite fails if one organisation could ever see another’s rows.' },
-	{ slug: 'deployment', icon: 'cloud', title: 'One-command deploys', line: 'Staging from a tag, production from a release, secrets never in a file.' },
-	{ slug: 'plugins', icon: 'puzzle', title: 'Plugins', line: 'Add a capability by copying a repository in, not by installing a package.' },
-	{ slug: 'mcp', icon: 'server', title: 'An MCP server', line: 'Claude and ChatGPT connect as one of your customer’s people, with that person’s permissions.' },
-	{ slug: 'connectors', icon: 'plug', title: 'Microsoft 365 connections', line: 'A customer’s admin connects once; their directory and calendars sync in on a schedule.' },
-].map((a) => {
-	const c = conceptBySlug(a.slug)
-	if (!c) throw new Error(`Unknown concept: ${a.slug}`)
-	return { ...a, href: `/concepts/${c.slug}/`, tone: c.tone }
-})
+/** The three ways to get an app built and run; every one ends with the customer owning it. */
+const paths = [
+	{
+		title: 'Build it yourself',
+		body: 'Describe what you want in plain words and build it with AI, one step at a time.',
+		href: '#first-run',
+		linkLabel: 'Start with one prompt',
+	},
+	{
+		title: 'Have a partner build it',
+		body: 'A Rocketflare partner builds it for you. You keep the code, and you can change partners if you ever need to.',
+		href: '/partners/',
+		linkLabel: 'Meet the partners',
+	},
+	{
+		title: 'Let us run it',
+		body: 'We host, patch, monitor and support it, however it was built. A monthly fee that follows real usage, with transparent metrics, and no per-user licences. Want it back? It’s yours. It always was.',
+		href: '/costs/',
+		linkLabel: 'How running it works',
+	},
+]
+
+/** Who it is for: the four readers this page now speaks to, each with the next step that fits. */
+const audiences = [
+	{
+		tone: 'orange',
+		icon: 'rocket',
+		title: 'You have an idea, maybe a prototype',
+		body: 'And you’d like it to survive contact with real customers. Build it properly from the first day, with AI doing the heavy lifting.',
+		href: '#first-run',
+		linkLabel: 'Start with one prompt',
+	},
+	{
+		tone: 'blue',
+		icon: 'building',
+		title: 'Your business rents software that almost fits',
+		body: 'Swap the workarounds and the per-seat invoices for an app built around how you actually work. A partner can build it, and we can run it.',
+		href: '/partners/',
+		linkLabel: 'Talk to a partner',
+	},
+	{
+		tone: 'green',
+		icon: 'puzzle',
+		title: 'You build software for clients',
+		body: 'Deliver applications your clients own, on foundations you don’t rebuild every time. Partners get commercial plugins and support from the people who build the kit.',
+		href: '/partners/',
+		linkLabel: 'Become a partner',
+	},
+	{
+		tone: 'purple',
+		icon: 'shield',
+		title: 'You’re the one who has to sign it off',
+		body: 'IT, security or technical due diligence. Every design decision is written down with its reasons, and how we test security is published. Bring your hardest questions.',
+		href: '/concepts/',
+		linkLabel: 'Every decision, with its reasons',
+	},
+]
+
+/** What is already built: the whole inventory, in five groups, in words a non-engineer reads. */
+const built = [
+	{
+		title: 'People and access',
+		icon: 'users',
+		tone: 'blue',
+		href: '/tour/#people',
+		items: [
+			'Sign-in with an email link, Google, Microsoft or your company’s single sign-on',
+			'Invite people, give them roles, change your mind later',
+			'Groups for departments, regions or clients, each seeing only its own',
+			'An admin area to see every customer and step in to help',
+			'Switches to turn a new feature on one customer at a time',
+		],
+	},
+	{
+		title: 'AI that does the work',
+		icon: 'sparkles',
+		tone: 'red',
+		href: '/tour/#chat',
+		items: [
+			'Chat that answers as it types and remembers the thread',
+			'Agents that run whole tasks while you watch the steps',
+			'Agents that stop and ask before anything important',
+			'Upload your documents, get answers with sources',
+			'Search by meaning, not just by keyword',
+			'Use the app from Claude or ChatGPT, as yourself',
+		],
+	},
+	{
+		title: 'Knowing what’s going on',
+		icon: 'gauge',
+		tone: 'orange',
+		href: '/tour/#usage',
+		items: [
+			'A dashboard for every customer from day one',
+			'Every AI call priced, before the bill arrives',
+			'Every agent run recorded, step by step',
+			'Tests that catch a worse AI answer before your customers do',
+		],
+	},
+	{
+		title: 'The plumbing, done',
+		icon: 'bolt',
+		tone: 'cyan',
+		href: '/concepts/',
+		items: [
+			'Emails for sign-in and invitations',
+			'File uploads, stored safely',
+			'Long jobs run in the background, and pages update live',
+			'One command to staging, one to production',
+			'A command line and API keys for automation',
+			'Tests that fail if one customer could ever see another’s data',
+		],
+	},
+	{
+		title: 'Modules you can add',
+		icon: 'puzzle',
+		tone: 'green',
+		href: '/plugins/',
+		items: [
+			'A website builder with forms, in several languages (partner)',
+			'Enterprise single sign-on with SAML, and people added and removed from your directory (partner)',
+			'Your Microsoft 365 directory and calendars',
+			'Accounting, through FreeAgent',
+			'Email straight into the app',
+			'Feedback and bug reports from your users',
+			'A built-in guide, and search across the app and the web',
+		],
+	},
+]
 
 const conceptCount = numberWord(CONCEPT_COUNT)
 
@@ -171,7 +338,7 @@ const FAQS: { q: string; a: string }[] = [
 	},
 	{
 		q: 'What is not included?',
-		a: 'Billing and subscriptions are the big one — there is no Stripe integration, no plans and no metering of your customers. There is also no marketing site, no blog or CMS, and no mobile app. What is included is the platform underneath a product: tenancy, sign-in, roles, files, email, background jobs, realtime, an AI layer and a command-line tool — with dashboards as a first-party plugin you add in one command.',
+		a: 'Billing and subscriptions: there is no Stripe integration, no plans and no metering of your customers yet. That is on the roadmap. There is no native mobile app either; the app works in a phone’s browser. Two things you might expect to find missing are available as partner plugins: a website builder with forms and several languages, and enterprise single sign-on with SAML and SCIM. Everything underneath a business app is included: sign-in, roles, files, email, background jobs, AI, and dashboards you add in one command.',
 	},
 	{
 		q: 'How is it different from other SaaS starter kits?',
@@ -204,57 +371,111 @@ const faqLd = {
 		<SkyScene />
 		<div class="hero-inner wrap">
 			<div class="hero-copy">
-				<h1>Ship your product.<br /><span class="grad">Not the platform.</span></h1>
+				<h1>Stop renting software<br /><span class="misfit-line">that doesn't <span class="misfit">fit</span></span></h1>
 				<p class="lede">
-					Rocketflare is a ready-made web app you copy and make your own. Out of the box it has
-					sign-in, teams and permissions, an AI assistant that can read your documents,
-					a command-line tool, and a clean way to run background jobs — all on Cloudflare, over a normal Postgres
-					database — with dashboards one command away. Paste one prompt into Claude Code to start your app; deploy it when you're ready.
+					Turn your vibe-coded idea into an enterprise application, with AI at its core. We handle the
+					hard parts, like security and keeping it running at 3am. Build it yourself, bring in a partner,
+					or hand it to us. Either way, it's yours.
 				</p>
-				<p class="engineer-line">One Cloudflare Worker · Hono · React · Postgres · MIT</p>
+				<p class="owned-line"><strong>The SaaS you own.</strong> Build anything you like, then we can run it for you so it feels like SaaS. You pay for what it uses, with the numbers in plain sight. No per-user licences. Or you can run it yourself.</p>
 				<div class="hero-actions">
 					<a href="#first-run" class="btn btn-primary">
 						Start with one prompt
 						<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
 					</a>
-					<a href="/tour/" class="btn btn-secondary">See what's inside</a>
+					<a href="/partners/" class="btn btn-secondary">Have a partner build it</a>
 				</div>
 			</div>
 		</div>
-		<CloudDivider fill="var(--sky-mid)" />
+		<CloudDivider fill="var(--bg)" />
 	</header>
 
-	<!-- ===================================================== 2 · proof -->
-	<section class="proof" aria-labelledby="proof-title">
+	<!-- ====================================== 2b · the story, one chapter each -->
+	<section class="story" aria-label="Why Rocketflare">
+		<!-- The rocket dives down the gutter between the chapters as the page scrolls (CSS scroll timeline, no script). -->
+		<div class="story-track" aria-hidden="true">
+			<div class="story-rocket">
+				<svg viewBox="0 0 220 470" width="64" height="137">
+					<path fill="var(--red)" d="M62 150C30 168 12 200 6 246l56-22z"/>
+					<path fill="var(--red)" d="M158 150c32 18 50 50 56 96l-56-22z"/>
+					<path fill="var(--blue-bright)" d="M110 8C67 43 46 98 46 168v108c0 20 14 34 34 34h60c20 0 34-14 34-34V168c0-70-21-125-64-160z"/>
+					<path fill="var(--blue)" d="M110 8c14 35 22 88 22 160v150h8c20 0 34-14 34-34V168c0-70-21-125-64-160z" opacity="0.55"/>
+					<path fill="var(--yellow-bright)" d="M110 8C86 28 70 53 60 83h100C150 53 134 28 110 8z"/>
+					<circle cx="110" cy="140" r="30" fill="var(--cloud)"/>
+					<circle cx="110" cy="140" r="20" fill="var(--cyan-soft)"/>
+					<path fill="var(--text-muted)" d="M78 306h64l-10 34H88z"/>
+					<g class="story-flame">
+						<path fill="var(--yellow-bright)" d="M110 336c-22 34-33 62-33 84 0 19 15 30 33 30s33-11 33-30c0-22-11-50-33-84z"/>
+						<path fill="var(--orange)" d="M110 348c-14 26-21 47-21 62 0 13 9 21 21 21s21-8 21-21c0-15-7-36-21-62z"/>
+					</g>
+				</svg>
+			</div>
+		</div>
 		<div class="wrap">
-			<h2 id="proof-title" class="sr-only">What it looks like</h2>
-			<div class="bleed reveal">
-				<Screenshot
-					light={homeLight}
-					dark={homeDark}
-					alt={`The Home page of a Rocketflare app, signed in as ${DEMO.ownerName}, owner of the demo organisation ${DEMO.org}`}
-					url="localhost:3000"
-					caption="This is the first thing you see: signed in, with a demo organisation already there."
-					priority
-					tilt
+			{chapters.map((ch, i) => (
+				<article class:list={['chapter', i % 2 === 1 && 'chapter-flip', `tone-${ch.tone}`]} aria-labelledby={`chapter-${ch.id}`}>
+					<div class="chapter-copy reveal">
+						<p class="chapter-eyebrow"><span class="chapter-num">{String(i + 1).padStart(2, '0')}</span>{ch.eyebrow}</p>
+						<h2 id={`chapter-${ch.id}`}>{ch.title}</h2>
+						{ch.body.map((para) => <p>{para}</p>)}
+						<a class="chapter-link" href={ch.href}>{ch.linkLabel} <span aria-hidden="true">→</span></a>
+					</div>
+					<div class="chapter-shot reveal">
+						{ch.checks ? (
+							<div class="checks-card">
+								<p class="checks-head">Checked on every change</p>
+								<ul class="checks">
+									{ch.checks.map((c) => (
+										<li>
+											<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+											{c}
+										</li>
+									))}
+								</ul>
+								<p class="checks-foot">All checks passed. Every time.</p>
+							</div>
+						) : ch.modules ? (
+							<div class="checks-card">
+								<p class="checks-head">Add what you need</p>
+								<ul class="modules">
+									{ch.modules.map((m, j) => <li class:list={[j === ch.modules!.length - 1 && 'module-own']}>{j === ch.modules!.length - 1 ? `+ ${m}` : m}</li>)}
+								</ul>
+								<p class="checks-foot">Or build your own. We won’t be offended.</p>
+							</div>
+						) : (
+							ch.light && ch.dark && ch.alt && <Screenshot light={ch.light} dark={ch.dark} alt={ch.alt} url={ch.url} crop="top" width={620} />
+						)}
+					</div>
+				</article>
+			))}
+		</div>
+	</section>
+
+	<!-- ============================================= 2c · yours to keep -->
+	<section class="bg-band owned" aria-labelledby="owned-title">
+		<div class="wrap">
+			<div class="reveal">
+				<SectionHead
+					eyebrow="The SaaS you own"
+					title="Your software. Your IP."
+					lede="Build anything you like. Then it runs like SaaS: we handle hosting, updates, security and support, for a monthly fee that scales with what the app actually uses. You see the same metrics we do, and nobody counts seats. The app, the code and the data stay yours, and you can move them to your own team, a partner or another host whenever you like. We keep your business the old-fashioned way: by being worth keeping."
 				/>
 			</div>
-			<ul class="thumbs reveal reveal-stagger">
-				{thumbs.map((t) => (
+			<ol class="paths reveal reveal-stagger">
+				{paths.map((p) => (
 					<li>
-						<a href={`/tour/#${t.id}`}>
-							<Screenshot light={t.light} dark={t.dark} alt={t.alt} frame="none" width={260} />
-							<span class="thumb-label">{t.label} <span aria-hidden="true">→</span></span>
-						</a>
+						<h3>{p.title}</h3>
+						<p>{p.body}</p>
+						<a href={p.href}>{p.linkLabel} <span aria-hidden="true">→</span></a>
 					</li>
 				))}
-			</ul>
+			</ol>
 		</div>
+		<CloudDivider fill="var(--card)" />
 	</section>
 
 	<!-- ================================================= 3 · first run -->
 	<section class="firstrun" id="first-run">
-		<CloudDivider flip fill="var(--sky-bottom)" />
 		<div class="wrap">
 			<div class="reveal">
 				<SectionHead
@@ -305,86 +526,33 @@ const faqLd = {
 			<div class="reveal">
 				<SectionHead
 					eyebrow="Out of the box"
-					title="What is already built"
-					lede="The parts every app needs and nobody wants to build twice — finished, tested, and already on the screen."
+					title="Already built, so you don’t have to"
+					lede="Everything a serious app needs on day one, before you’ve written a word of your own. Partner plugins come with a partner agreement. The tour shows every screen."
 				/>
 			</div>
-			<div class="tri">
-				{panels.map((p) => (
-					<article class="tri-panel reveal">
-						<Screenshot light={p.light} dark={p.dark} alt={p.alt} url={p.url} crop="top" width={360} />
-						<h3>{p.title}</h3>
+			<div class="built reveal reveal-stagger">
+				{built.map((g) => (
+					<article class={`built-group tone-${g.tone}`}>
+						<h3><span class="chip"><ConceptIcon name={g.icon} /></span>{g.title}</h3>
 						<ul>
-							{p.points.map((pt) => <li>{pt}</li>)}
+							{g.items.map((it) =>
+								it.endsWith(' (partner)') ? (
+									<li>{it.slice(0, -' (partner)'.length)} <span class="partner-tag">Partner plugin</span></li>
+								) : (
+									<li>{it}</li>
+								)
+							)}
 						</ul>
+						<a href={g.href}>See it <span aria-hidden="true">→</span></a>
 					</article>
 				))}
+				<article class="built-group built-missing tone-purple">
+					<h3><span class="chip"><ConceptIcon name="sparkles" /></span>Not on the list?</h3>
+					<p>Then it’s probably the bit that makes your business yours. Describe it and build it with AI, or have a partner build it for you. That’s rather the point.</p>
+					<a href="/partners/">Talk to a partner <span aria-hidden="true">→</span></a>
+				</article>
 			</div>
-		</div>
-	</section>
-
-	<!-- ============================================== 5 · also included -->
-	<!-- ========================================================= cli -->
-	<section class="cli" id="cli">
-		<div class="wrap">
-			<div class="split cli-split">
-				<div class="split-term reveal">
-					<Terminal
-						title="your terminal"
-						lines={[
-							{ cmd: 'pnpm cli login --server http://localhost:3001' },
-							{ out: 'Opening the browser… signed in. Key stored in ~/.rocketflare/config.json', muted: true },
-							{ cmd: 'pnpm cli whoami' },
-							{ out: 'user    owner@example.test' },
-							{ out: 'tenant  Acme Logistics (acme)' },
-							{ out: 'key     rocketflare_Of8D…' },
-							{ cmd: "pnpm cli members list --json | jq '.items[].email'" },
-							{ out: '"owner@example.test"' },
-							{ out: '"marcus.adeyemi@acme.example"' },
-							{ out: '…', muted: true },
-						]}
-					/>
-				</div>
-				<div class="reveal">
-					<SectionHead
-						audience="builder"
-						align="left"
-						eyebrow="Also on the command line"
-						title="A command line, for you and your agents"
-						lede="Everything the app does in the browser it also does from the terminal — same routes, same rules, one API key."
-					/>
-					<ul class="cli-points">
-						<li>Log in once from the terminal; it opens the browser, then keeps a key for your organisation.</li>
-						<li>List people, keys and activity. Every command takes <code>--json</code>, so the output pipes into <code>jq</code> — or straight into a coding agent's hands.</li>
-						<li>Add a command for your own feature in three files; the server, the browser and the CLI share one contract, so they cannot drift apart.</li>
-					</ul>
-					<a class="cli-link" href="/concepts/cli/">Behind it: the CLI concept →</a>
-				</div>
-			</div>
-		</div>
-	</section>
-
-	<section class="also">
-		<div class="wrap">
-			<div class="reveal">
-				<SectionHead
-					title="Also included"
-					lede={`Each of these has its own page among the ${conceptCount} concepts, with the reasoning behind it.`}
-				/>
-			</div>
-			<ul class="also-grid reveal reveal-stagger">
-				{also.map((a) => (
-					<li class={`tone-${a.tone}`}>
-						<a href={a.href}>
-							<span class="chip"><ConceptIcon name={a.icon} /></span>
-							<span class="also-text">
-								<strong>{a.title}</strong>
-								<span>{a.line}</span>
-							</span>
-						</a>
-					</li>
-				))}
-			</ul>
+			<p class="built-more reveal"><a href="/tour/">Take the full tour <span aria-hidden="true">→</span></a></p>
 		</div>
 	</section>
 
@@ -422,27 +590,20 @@ const faqLd = {
 	<!-- ============================================== 7 · who it is for -->
 	<section class="who">
 		<div class="wrap">
-			<div class="who-grid">
-				<div class="who-col reveal">
-					<h2>I want to ship a product</h2>
-					<ul>
-						<li>You have an idea and a customer, and no wish to build sign-in again.</li>
-						<li>You work with a coding agent and want it to know its way around from the first session.</li>
-						<li>You want to deploy on a Sunday and not think about it on Monday.</li>
-					</ul>
-					<a class="who-link" href="/get-started/">Start here <span aria-hidden="true">→</span></a>
-				</div>
-				<div class="who-col reveal">
-					<h2>I want to read the design</h2>
-					<ul>
-						<li>You want to know how organisations stay apart in one database, and what enforces it.</li>
-						<li>You want to see how long work, realtime and AI fit on Cloudflare without a second service.</li>
-						<li>You would rather disagree with a written decision than guess at an unwritten one.</li>
-					</ul>
-					<a class="who-link" href="/concepts/">Every decision, with its reasons <span aria-hidden="true">→</span></a>
-				</div>
+			<div class="reveal">
+				<SectionHead title="Who it’s for" lede="Pick the one that sounds like you. Some people are two of them before lunch." />
 			</div>
-			<p class="who-more reveal"><a href="/who-is-it-for/">More on who it's for <span aria-hidden="true">→</span></a></p>
+			<div class="who-grid reveal reveal-stagger">
+				{audiences.map((a) => (
+					<article class={`who-card tone-${a.tone}`}>
+						<span class="chip"><ConceptIcon name={a.icon} /></span>
+						<h3>{a.title}</h3>
+						<p>{a.body}</p>
+						<a href={a.href}>{a.linkLabel} <span aria-hidden="true">→</span></a>
+					</article>
+				))}
+			</div>
+			<p class="who-more reveal"><a href="/who-is-it-for/">More on who it’s for, and who it isn’t <span aria-hidden="true">→</span></a></p>
 		</div>
 	</section>
 
@@ -498,14 +659,18 @@ const faqLd = {
 	<section class="cta bg-lift">
 		<div class="wrap cta-inner reveal">
 			<LogoMark size={48} class="cta-mark" />
-			<h2>Everything above is already written.</h2>
-			<p>Your first commit can be a feature — and your next product starts the same way.</p>
+			<h2>Stop renting software<br /><span class="misfit-line">that doesn't <span class="misfit">fit</span></span></h2>
+			<p>
+				Turn your vibe-coded idea into an enterprise application, with AI at its core. We handle the hard
+				parts, like security and keeping it running at 3am. Build it yourself, bring in a partner, or hand it to us.
+				Either way, it's yours.
+			</p>
 			<div class="cta-actions">
-				<a href="/get-started/" class="btn btn-primary">Get started</a>
-				<a href={GITHUB_URL} class="btn btn-ghost" target="_blank" rel="noopener">
-					<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-					GitHub
+				<a href="#first-run" class="btn btn-primary">
+					Start with one prompt
+					<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
 				</a>
+				<a href="/partners/" class="btn btn-secondary">Have a partner build it</a>
 			</div>
 		</div>
 	</section>
@@ -532,11 +697,44 @@ const faqLd = {
 	}
 	.hero-inner { position: relative; z-index: 2; width: 100%; }
 	.hero-copy { max-width: 900px; }
-	.grad {
-		background: linear-gradient(100deg, var(--orange), var(--red) 40%, var(--blue-bright));
-		-webkit-background-clip: text;
-		background-clip: text;
-		color: transparent;
+	/* The headline's joke: "fit." does not fit its box. The word is tilted and pokes out of a
+	   dashed frame drawn too small for it, and jostles against it once on load. The frame sits
+	   behind the letters (z-index -1 inside the isolated word), so its dashes never cross them. */
+	/* A vivid red-orange that still clears 3:1 on the light sky; the night sky takes the bright orange. */
+	.misfit-line { color: color-mix(in srgb, var(--red) 85%, var(--text-bright)); }
+	:global(html[data-theme='night']) .misfit-line { color: var(--orange); }
+	:global(html[data-theme='night']) .misfit { color: var(--blue-bright); }
+	/* Yellow over navy turns olive: at night the frame is its dashed edge alone. */
+	:global(html[data-theme='night']) .misfit::before { background: transparent; border-color: var(--yellow-bright); }
+	.misfit {
+		position: relative;
+		display: inline-block;
+		margin-left: 0.08em;
+		color: color-mix(in srgb, var(--blue-bright) 85%, var(--text-bright));
+		isolation: isolate;
+		transform: rotate(-5deg);
+		transform-origin: 20% 80%;
+		animation: jostle 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) 0.6s both;
+	}
+	.misfit::before {
+		content: '';
+		position: absolute;
+		left: -0.12em;
+		top: 0.1em;
+		bottom: 0;
+		width: 68%;
+		z-index: -1;
+		border: 0.06em dashed color-mix(in srgb, var(--yellow-bright) 75%, var(--orange));
+		border-radius: 0.14em;
+		background: color-mix(in srgb, var(--yellow-bright) 45%, transparent);
+		transform: rotate(6deg);
+		pointer-events: none;
+	}
+	@keyframes jostle {
+		0%   { transform: rotate(0deg) translateX(-0.15em); }
+		45%  { transform: rotate(-9deg) translateX(0.05em); }
+		70%  { transform: rotate(-3deg); }
+		100% { transform: rotate(-5deg); }
 	}
 	.lede {
 		font-size: var(--step-1);
@@ -544,54 +742,183 @@ const faqLd = {
 		max-width: 58ch;
 		margin-bottom: 1.1rem;
 	}
-	.engineer-line {
-		font-family: var(--mono);
-		font-size: 0.82rem;
-		color: var(--text-muted);
-		letter-spacing: 0.02em;
+	.owned-line strong { color: var(--text-bright); }
+	.owned-line {
+		font-size: 1.05rem;
+		color: var(--text);
+		max-width: 58ch;
+		letter-spacing: 0.01em;
 		margin-bottom: 1.9rem;
 	}
 	.hero-actions { display: flex; flex-wrap: wrap; gap: 0.8rem; }
 
-	/* -------------------------------------------------------- 2 · proof -- */
-	.proof {
-		padding: 1rem 0 5rem;
-		background: linear-gradient(180deg, var(--sky-mid) 0%, var(--sky-bottom) 100%);
+	/* ----------------------------------------------------- 2b · the story -- */
+	.story {
+		position: relative;
+		padding: 4rem 0 5rem;
+		background: var(--bg);
+		view-timeline: --story block;
 	}
-	.bleed { position: relative; z-index: 2; }
-	@media (min-width: 1100px) {
-		.bleed {
-			width: min(1320px, calc(100vw - 3rem));
-			margin-left: calc(50% - min(660px, 50vw - 1.5rem));
-		}
+	.chapter {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+		gap: 9rem;
+		align-items: center;
+		padding: 3.5rem 0;
 	}
-	.thumbs {
+	.chapter-flip .chapter-copy { order: 2; }
+	.chapter-eyebrow {
+		display: flex;
+		align-items: center;
+		gap: 0.7rem;
+		margin: 0 0 0.8rem;
+		font-size: 0.82rem;
+		font-weight: 700;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--accent-ink, var(--accent));
+	}
+	.chapter-num {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 2.1rem;
+		height: 2.1rem;
+		border-radius: 10px;
+		background: var(--tint);
+		color: var(--accent-ink, var(--accent));
+		letter-spacing: 0;
+	}
+	.chapter h2 { font-size: var(--step-2); margin-bottom: 1rem; text-wrap: balance; }
+	.chapter-copy p { color: var(--text-muted); line-height: 1.65; max-width: 52ch; }
+	.chapter-link { font-weight: 600; color: var(--accent-ink, var(--accent)); }
+	.chapter-shot :global(.shot) { margin: 0 auto; }
+
+	/* :global — the card is drawn inside a conditional, whose elements Astro leaves unscoped. */
+	.chapter-shot :global(.checks-card) {
+		max-width: 520px;
+		margin: 0 auto;
+		padding: 1.6rem 1.7rem 1.3rem;
+		border: 1px solid var(--border);
+		border-radius: 18px;
+		background: var(--card);
+		box-shadow: 0 18px 40px -24px var(--shadow-ink);
+	}
+	.chapter-shot :global(.checks-head) { margin: 0 0 1rem; font-weight: 700; color: var(--text-bright); }
+	.chapter-shot :global(.checks) { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.75rem; }
+	.chapter-shot :global(.checks) :global(li) { display: flex; gap: 0.75rem; align-items: flex-start; color: var(--text); line-height: 1.45; }
+	.chapter-shot :global(.checks) :global(svg) {
+		flex: none;
+		margin-top: 0.1rem;
+		padding: 3px;
+		box-sizing: content-box;
+		border-radius: 50%;
+		color: var(--green);
+		background: var(--tint-green);
+	}
+	.chapter-shot :global(.checks-foot) {
+		margin: 1.2rem 0 0;
+		padding-top: 0.9rem;
+		border-top: 1px solid var(--border);
+		font-size: 0.9rem;
+		color: var(--text-muted);
+	}
+
+	.chapter-shot :global(.modules) {
 		list-style: none;
-		margin: 2.6rem 0 0;
+		margin: 0;
 		padding: 0;
 		display: grid;
-		grid-template-columns: repeat(4, minmax(0, 1fr));
-		gap: 1.2rem;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 0.7rem;
 	}
-	.thumbs a {
-		display: block;
+	.chapter-shot :global(.modules li) {
+		padding: 0.85rem 1rem;
+		border-radius: 12px;
+		background: var(--tint);
 		color: var(--text-bright);
-		border-radius: 14px;
-		transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
-	}
-	.thumbs a:hover { text-decoration: none; transform: translateY(-4px); }
-	/* The component's own figure margin, unwanted inside a tile. */
-	.thumbs :global(.shot) { margin: 0; }
-	.thumb-label {
-		display: block;
-		margin-top: 0.6rem;
 		font-weight: 600;
-		font-size: 0.95rem;
-		text-align: center;
+		border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
 	}
-	.thumbs a:hover .thumb-label { color: var(--blue); }
+	.chapter-shot :global(.modules li.module-own) {
+		background: transparent;
+		border-style: dashed;
+		border-color: var(--accent);
+		color: var(--accent-ink, var(--accent));
+	}
+
+	/* The flight path: a faint dashed line down the gutter, and the rocket held in view on it. */
+	.story-track {
+		position: absolute;
+		top: 6rem;
+		bottom: 6rem;
+		left: 50%;
+		width: 0;
+		border-left: 2px dashed color-mix(in srgb, var(--text-muted) 28%, transparent);
+		z-index: 1;
+	}
+	/* Held mid-screen while the chapters scroll past, nose down, so it reads as diving through them. */
+	.story-rocket {
+		position: sticky;
+		top: calc(50vh - 68px);
+		width: 64px;
+		margin-left: -33px;
+	}
+	.story-rocket svg { display: block; transform: rotate(180deg); }
+	@supports (animation-timeline: view()) {
+		.story-rocket svg {
+			animation: dive linear both;
+			animation-timeline: --story;
+			animation-range: entry 20% exit 80%;
+		}
+		.story-flame { transform-origin: 110px 336px; animation: story-flicker 0.18s ease-in-out infinite alternate; }
+	}
+	/* Leans toward each chapter's picture in turn: right, left, right, left, right. */
+	@keyframes dive {
+		0%   { transform: translateY(-40px) rotate(180deg) scale(0.7); opacity: 0; }
+		7%   { transform: translateY(0) rotate(180deg) scale(1); opacity: 1; }
+		18%  { transform: translateX(26px) rotate(166deg); }
+		34%  { transform: translateX(-26px) rotate(194deg); }
+		50%  { transform: translateX(26px) rotate(166deg); }
+		66%  { transform: translateX(-26px) rotate(194deg); }
+		82%  { transform: translateX(26px) rotate(166deg); }
+		93%  { transform: translateY(0) rotate(180deg) scale(1); opacity: 1; }
+		100% { transform: translateY(60px) rotate(180deg) scale(0.8); opacity: 0; }
+	}
+	@keyframes story-flicker { from { transform: scaleY(0.82); } to { transform: scaleY(1.12); } }
+	@media (prefers-reduced-motion: reduce) {
+		.story-rocket svg, .story-flame { animation: none !important; }
+	}
+	@media (max-width: 900px) {
+		.story { padding-top: 1rem; }
+		.chapter { grid-template-columns: minmax(0, 1fr); gap: 2rem; padding: 2.5rem 0; }
+		.chapter:first-child { padding-top: 0; }
+		.chapter-flip .chapter-copy { order: 0; }
+		.story-track { display: none; }
+	}
+
+	/* -------------------------------------------------- 2c · yours to keep -- */
+	.owned { position: relative; padding: 5.5rem 0 clamp(8rem, 12vw, 10.5rem); }
+	.paths {
+		list-style: none;
+		max-width: 960px;
+		margin: 0 auto;
+		padding: 0;
+	}
+	.paths li {
+		display: grid;
+		grid-template-columns: 15rem minmax(0, 1fr) auto;
+		gap: 1rem 2rem;
+		align-items: baseline;
+		padding: 1.5rem 0;
+		border-top: 1px solid color-mix(in srgb, var(--band-ink) 18%, transparent);
+	}
+	.paths li:last-child { border-bottom: 1px solid color-mix(in srgb, var(--band-ink) 18%, transparent); }
+	.paths h3 { margin: 0; font-size: 1.25rem; }
+	.paths p { margin: 0; color: var(--band-muted); }
+	.paths a { font-weight: 600; white-space: nowrap; }
 	@media (max-width: 760px) {
-		.thumbs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+		.paths li { grid-template-columns: minmax(0, 1fr); gap: 0.4rem; }
 	}
 
 	/* ---------------------------------------------------- 3 · first run -- */
@@ -632,66 +959,56 @@ const faqLd = {
 
 	/* -------------------------------------------------- 4 · what it does -- */
 	.what { padding: 5.5rem 0; background: var(--bg); }
-	.tri {
+	.built {
 		display: grid;
-		grid-template-columns: repeat(3, minmax(0, 1fr));
-		gap: 2.2rem;
+		grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+		gap: 1.4rem;
 	}
-	.tri-panel :global(.shot) { margin: 0 0 1.2rem; }
-	.tri-panel h3 { margin-bottom: 0.6rem; }
-	.tri-panel ul { list-style: none; margin: 0; padding: 0; }
-	.tri-panel li {
+	.built-group {
+		display: flex;
+		flex-direction: column;
+		padding: 1.5rem 1.5rem 1.3rem;
+		border: 1px solid var(--border);
+		border-radius: 18px;
+		background: var(--card);
+	}
+	.built-group h3 { display: flex; align-items: center; gap: 0.75rem; margin: 0 0 1rem; font-size: 1.15rem; }
+	.built-group ul { list-style: none; margin: 0 0 1.1rem; padding: 0; display: grid; gap: 0.55rem; flex: 1; align-content: start; }
+	.built-group li {
 		position: relative;
-		padding-left: 1.35rem;
-		margin-bottom: 0.55rem;
+		padding-left: 1.2rem;
 		font-size: 0.95rem;
 		color: var(--text-muted);
-		line-height: 1.55;
+		line-height: 1.5;
 	}
-	.tri-panel li::before {
+	.built-group li::before {
 		content: '';
 		position: absolute;
 		left: 0;
 		top: 0.6em;
-		width: 8px;
-		height: 8px;
+		width: 7px;
+		height: 7px;
 		border-radius: 2px;
-		background: var(--cyan);
+		background: var(--accent);
 		transform: rotate(45deg);
 	}
-	@media (max-width: 900px) {
-		.tri { grid-template-columns: 1fr; gap: 3rem; max-width: 560px; margin: 0 auto; }
+	.built-group a { font-weight: 600; color: var(--accent-ink, var(--accent)); }
+	.built-missing { background: transparent; border: 2px dashed color-mix(in srgb, var(--accent) 45%, transparent); }
+	.built-missing p { flex: 1; margin: 0 0 1.1rem; color: var(--text-muted); line-height: 1.55; }
+	.partner-tag {
+		display: inline-block;
+		margin-left: 0.25rem;
+		padding: 0.05rem 0.5rem;
+		border-radius: 999px;
+		font-size: 0.72rem;
+		font-weight: 700;
+		letter-spacing: 0.02em;
+		vertical-align: 0.1em;
+		color: var(--accent-ink, var(--accent));
+		background: var(--tint);
 	}
+	.built-more { text-align: center; margin: 2.2rem 0 0; font-weight: 600; }
 
-	/* ------------------------------------------------- 5 · also included -- */
-	.cli { padding: 5.5rem 0; background: var(--card); border-top: 1px solid var(--border); }
-	.cli-points { margin: 1.2rem 0 1.4rem; padding-left: 1.2rem; display: grid; gap: 0.7rem; }
-	.cli-points li { line-height: 1.55; }
-	.cli-link { font-weight: 600; color: var(--orange-ink); }
-	.also {
-		padding: 5rem 0;
-		background: var(--card-alt);
-		border-top: 1px solid var(--border);
-		border-bottom: 1px solid var(--border);
-	}
-	.also-grid {
-		list-style: none;
-		margin: 0;
-		padding: 0;
-		display: grid;
-		grid-template-columns: repeat(3, minmax(0, 1fr));
-		gap: 1.4rem 2rem;
-	}
-	.also-grid a {
-		display: flex;
-		gap: 0.9rem;
-		align-items: flex-start;
-		color: var(--text);
-		padding: 0.6rem 0.4rem;
-		border-radius: 12px;
-	}
-	.also-grid a:hover { text-decoration: none; background: var(--card); }
-	.also-grid a:hover strong { color: var(--accent); }
 	.chip {
 		flex: none;
 		display: inline-flex;
@@ -704,12 +1021,6 @@ const faqLd = {
 		color: var(--accent);
 	}
 	.chip :global(svg) { width: 22px; height: 22px; }
-	.also-text { display: flex; flex-direction: column; gap: 0.15rem; min-width: 0; }
-	.also-text strong { color: var(--text-bright); font-size: 0.98rem; line-height: 1.3; }
-	.also-text span { font-size: 0.88rem; color: var(--text-muted); line-height: 1.5; }
-	@media (max-width: 980px) { .also-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-	@media (max-width: 520px) { .also-grid { grid-template-columns: 1fr; } }
-
 	/* ------------------------------------------------- 6 · under the hood -- */
 	.hood { padding: 5.5rem 0; }
 	.flow {
@@ -765,31 +1076,24 @@ const faqLd = {
 	.who-grid {
 		display: grid;
 		grid-template-columns: repeat(2, minmax(0, 1fr));
-		gap: 3rem;
+		gap: 1.4rem;
+		max-width: 1000px;
+		margin: 0 auto;
 	}
-	.who-col h2 { font-size: var(--step-2); margin-bottom: 1rem; }
-	.who-col ul { list-style: none; margin: 0 0 1.4rem; padding: 0; }
-	.who-col li {
-		position: relative;
-		padding-left: 1.5rem;
-		margin-bottom: 0.7rem;
-		color: var(--text-muted);
-		line-height: 1.55;
+	.who-card {
+		display: flex;
+		flex-direction: column;
+		padding: 1.6rem 1.7rem 1.4rem;
+		border: 1px solid var(--border);
+		border-radius: 18px;
+		background: var(--card);
 	}
-	.who-col li::before {
-		content: '';
-		position: absolute;
-		left: 0;
-		top: 0.7em;
-		width: 10px;
-		height: 2px;
-		background: var(--orange);
-	}
-	.who-col:nth-child(2) li::before { background: var(--blue-bright); }
-	.who-link { font-weight: 600; font-size: 1.02rem; }
-	.who-col:first-child .who-link { color: var(--orange-ink); }
+	.who-card .chip { margin-bottom: 1rem; }
+	.who-card h3 { margin: 0 0 0.6rem; font-size: 1.2rem; text-wrap: balance; }
+	.who-card p { flex: 1; margin: 0 0 1.1rem; color: var(--text-muted); line-height: 1.6; }
+	.who-card a { font-weight: 600; color: var(--accent-ink, var(--accent)); }
 	.who-more { margin: 2.8rem 0 0; text-align: center; color: var(--text-muted); }
-	@media (max-width: 760px) { .who-grid { grid-template-columns: 1fr; gap: 2.4rem; } }
+	@media (max-width: 760px) { .who-grid { grid-template-columns: 1fr; } }
 
 	/* ----------------------------------------------- 8 · before you start -- */
 	.before {
@@ -817,8 +1121,8 @@ const faqLd = {
 	/* Keeps the .wrap edge; the copy inside stays a readable width. */
 	.cta-inner > * { max-width: 860px; margin-inline: auto; }
 	.cta-inner :global(.cta-mark) { display: block; margin: 0 auto 1.2rem; }
-	.cta h2 { margin-bottom: 0.3rem; }
-	.cta p { color: var(--text-muted); font-size: 1.1rem; margin-bottom: 2rem; }
+	.cta h2 { font-size: var(--step-4); font-weight: 800; margin-bottom: 1rem; line-height: 1.08; }
+	.cta p { color: var(--text-muted); font-size: 1.15rem; max-width: 60ch; margin-bottom: 2rem; }
 	.cta-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.8rem; }
 
 	/* Narrow screens: the hero copy becomes one column and leaves the
@@ -826,14 +1130,11 @@ const faqLd = {
 	@media (max-width: 860px) {
 		.hero { padding: 2.5rem 0 5rem; min-height: 0; }
 		.hero-copy { max-width: none; }
-		.lede { max-width: none; padding-right: 26%; }
-		.engineer-line { padding-right: 26%; }
-		.hero-actions { flex-direction: column; align-items: stretch; width: min(15rem, 62%); }
-		.hero-actions .btn { justify-content: center; }
-	}
-	@media (max-width: 560px) {
-		.lede, .engineer-line { padding-right: 20%; }
-		.hero-actions { width: min(14rem, 68%); }
+		/* Full width: the rocket sits beside the buttons, below the copy, so the text needs no gutter. */
+		.lede { max-width: none; }
+		/* Sized to their words, stacked on the left, clear of the rocket in the right-hand gutter. */
+		.hero-actions { flex-direction: column; align-items: flex-start; }
+		.hero-actions .btn { justify-content: center; white-space: nowrap; }
 	}
 
 	/* ---------------------------------------------------- 9 · questions -- */
