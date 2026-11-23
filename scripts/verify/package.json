@@ -1,0 +1,11 @@
+{
+  "name": "rocketflare-www-verify",
+  "private": true,
+  "description": "The release pass's own tools (CLAUDE.md, \"The full pass\"). Not part of the site: the root npm install and CI never install these; lib.mjs runs `npm ci` here on first use.",
+  "type": "module",
+  "dependencies": {
+    "axe-core": "4.14.1",
+    "lighthouse": "13.6.0",
+    "puppeteer-core": "25.18.1"
+  }
+}

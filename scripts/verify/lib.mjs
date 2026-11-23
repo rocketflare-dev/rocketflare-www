@@ -1,28 +1,34 @@
 /**
  * Headless Chrome for the verification pass (CLAUDE.md, "The full pass").
  *
- * No dependency is added to this repo: puppeteer-core, lighthouse and axe-core
- * are borrowed from the chrome-devtools-mcp plugin cache (PLUGIN), and the
- * browser is the installed Google Chrome (CHROME_PATH overrides). Every launch
- * gets a throwaway profile under $TMPDIR, so nothing touches a real one.
+ * puppeteer-core, lighthouse and axe-core are pinned in scripts/verify/package.json,
+ * a package of their own: the site's `npm install` and CI never install them, and
+ * the first run here does (`npm ci` beside this file). The browser is the installed
+ * Google Chrome (CHROME_PATH overrides). Every launch gets a throwaway profile
+ * under $TMPDIR, so nothing touches a real one.
  */
 import { createRequire } from 'node:module'
-import { mkdtempSync, readdirSync } from 'node:fs'
-import { tmpdir, homedir } from 'node:os'
-import { join } from 'node:path'
+import { execFileSync } from 'node:child_process'
+import { existsSync, mkdtempSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
-const cache = join(homedir(), '.claude/plugins/cache/claude-plugins-official/chrome-devtools-mcp')
-const versions = readdirSync(cache).sort()
-/** The newest installed plugin version's node_modules. */
-export const PLUGIN = join(cache, versions.at(-1), 'node_modules')
-export const AXE = join(PLUGIN, 'axe-core/axe.min.js')
-export const LIGHTHOUSE = join(PLUGIN, 'lighthouse/cli/index.js')
+const HERE = dirname(fileURLToPath(import.meta.url))
+/** This package's node_modules, installed from its lockfile on first use. */
+export const MODULES = join(HERE, 'node_modules')
+if (!existsSync(join(MODULES, '.package-lock.json'))) {
+	console.error('scripts/verify: installing puppeteer-core, lighthouse, axe-core (first run)…')
+	execFileSync('npm', ['ci', '--no-audit', '--no-fund', '--silent'], { cwd: HERE, stdio: 'inherit' })
+}
+export const AXE = join(MODULES, 'axe-core/axe.min.js')
+export const LIGHTHOUSE = join(MODULES, 'lighthouse/cli/index.js')
 export const CHROME =
 	process.env.CHROME_PATH ?? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
 /** The served dist/ — `npx wrangler dev --port 4399 --ip 127.0.0.1`. */
 export const BASE = process.env.BASE ?? 'http://127.0.0.1:4399'
 
-const require = createRequire(join(PLUGIN, 'puppeteer-core/package.json'))
+const require = createRequire(join(HERE, 'package.json'))
 export const puppeteer = require('puppeteer-core')
 
 export async function launch() {

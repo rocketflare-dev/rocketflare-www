@@ -41,10 +41,11 @@ npm run check:plugins                                            # every synced 
 npm run check:security -- --ref <tag>                            # the vendored security docs match the kit at that ref
 ```
 
-Then the three scripts in `scripts/verify/` (plain Node, no dependency in this repo: they borrow
-`puppeteer-core`, `lighthouse` and `axe-core` from the `chrome-devtools-mcp` plugin cache in
-`~/.claude/plugins`, drive the installed Google Chrome headless with a throwaway profile, and read
-`BASE` / `CHROME_PATH` from the environment if the defaults are wrong). All three exit 1 on a miss:
+Then the three scripts in `scripts/verify/` (plain Node; `puppeteer-core`, `lighthouse` and
+`axe-core` are pinned in `scripts/verify/package.json`, a package of their own that the site's
+`npm install` and CI never touch — the first run installs it with `npm ci` there. They drive the
+installed Google Chrome headless with a throwaway profile, and read `BASE` / `CHROME_PATH` from the
+environment if the defaults are wrong). All three exit 1 on a miss:
 
 ```bash
 node scripts/verify/lighthouse.mjs   # mobile + desktop on /, /tour/, /get-started/, /who-is-it-for/, /changelog/, /concepts/auth/
