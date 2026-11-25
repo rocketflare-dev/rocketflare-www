@@ -153,7 +153,7 @@ const stops: Stop[] = [
 		shot: {
 			light: peopleLight,
 			dark: peopleDark,
-			alt: 'The People tab: a members table of nine people with their roles, groups and last sign-in, and the pending invitations panel starting below it',
+			alt: 'The People tab: a members table of eight people with their roles, groups and last sign-in, and below it the pending invitations panel with one invitation',
 			url: `${HOST}/settings?tab=people`,
 			caption: 'Members with roles and groups; pending invitations below. Refreshes live in a second browser.',
 		},
@@ -171,7 +171,7 @@ const stops: Stop[] = [
 		shot: {
 			light: groupsLight,
 			dark: groupsDark,
-			alt: 'Settings → Groups with the Finance dialog open: the four people not in the group on the left, the five already in it on the right',
+			alt: 'Settings → Groups with the Finance dialog open: the five people not in the group on the left, the three already in it on the right',
 			url: `${HOST}/settings?tab=groups`,
 			caption: 'Group types on the left, the groups of the selected type beside them; the dialog moves people in and out.',
 		},
@@ -194,7 +194,7 @@ const stops: Stop[] = [
 		shot: {
 			light: settingsAiLight,
 			dark: settingsAiDark,
-			alt: 'Settings → AI: four readiness cards, all Ready — chat on Anthropic claude-haiku-5-5 and embeddings on Workers AI bge-m3 from the platform default, decisions on TypeSafe Jev set for this workspace, reranking on Workers AI bge-reranker-base — and no chat providers of the organisation’s own yet',
+			alt: 'Settings → AI: four readiness cards, all Ready — chat on Anthropic claude-haiku-5-5 and embeddings on Workers AI bge-m3 from the platform default, decisions falling back to the chat model, uncalibrated, reranking on Workers AI bge-reranker-base — and no chat providers of the organisation’s own yet',
 			url: `${HOST}/settings?tab=ai`,
 			caption: 'Readiness: which model answers chat, embeddings, decisions and reranking, and where each choice came from.',
 		},
@@ -217,7 +217,7 @@ const stops: Stop[] = [
 		shot: {
 			light: chatLight,
 			dark: chatDark,
-			alt: 'The chat page: four conversations in the list, the thread “What documents related to MOTs?” open, its answer citing the document “Fleet maintenance schedule” as its source',
+			alt: 'The chat page: three conversations in the list, the thread “How often does each truck need a safety inspection?” open, its answer drawn from the document “Fleet maintenance schedule” with its sources listed below it',
 			url: `${HOST}/chat`,
 			caption: 'Streamed answers that cite the documents they used; threads persist.',
 		},
@@ -236,8 +236,8 @@ const stops: Stop[] = [
 		shot: {
 			light: agentsRunLight,
 			dark: agentsRunDark,
-			alt: 'A succeeded research-topic run on its own page: the question, a timeline of its knowledge-base searches over two documents, and beside it the answer, a table of what a new carrier must provide and who checks each item',
-			url: `${HOST}/agents/runs/37e1ec4c-…`,
+			alt: 'A succeeded research-topic run on its own page: the question, a timeline of its knowledge-base searches over two documents, and beside it the answer: the six gates a new carrier passes before its first EU load, starting with its licences and insurance',
+			url: `${HOST}/agents/runs/17f8db49-…`,
 			caption: 'A research-topic run: what it searched and read on the timeline, the answer beside it.',
 		},
 	},
@@ -255,7 +255,7 @@ const stops: Stop[] = [
 			light: agentsApprovalLight,
 			dark: agentsApprovalDark,
 			alt: 'A summarize-text run marked Awaiting input: a panel above the timeline asks “Index this summary?” with Index it and Cancel the run, and the Agents nav item carries a badge of one',
-			url: `${HOST}/agents/runs/2eb77e70-…`,
+			url: `${HOST}/agents/runs/343db00e-…`,
 			caption: 'The decision comes first, above the timeline — and the nav says one run is waiting on you.',
 		},
 		callout: {
@@ -278,9 +278,9 @@ const stops: Stop[] = [
 		shot: {
 			light: documentsLight,
 			dark: documentsDark,
-			alt: 'The Knowledge page: a table of nine documents with one shown as Indexing, one restricted to the Finance group, download icons on the uploaded files, and the paste-text form below',
+			alt: 'The Knowledge page: a table of five documents, one shown as Indexing and four Indexed with their passage counts, and the paste-text form below',
 			url: `${HOST}/documents`,
-			caption: 'Nine documents, one still indexing; the original is one click away.',
+			caption: 'Five documents, one still indexing; paste or upload the next one below.',
 		},
 		callout: {
 			tone: 'green',
@@ -301,7 +301,7 @@ const stops: Stop[] = [
 		shot: {
 			light: searchLight,
 			dark: searchDark,
-			alt: 'The Search page with the query “customs paperwork EU shipments”: 10 passages from 3 documents, the first group “Customs paperwork: EU shipments” with the matching words highlighted, and filters by document, source, type and date on the left',
+			alt: 'The Search page with the query “customs paperwork EU shipments”: 10 passages from 2 documents, the first group “Customs paperwork: EU shipments” with the matching words highlighted, and filters by document, source, type and date on the left',
 			url: `${HOST}/search`,
 			caption: 'Hybrid search: passages grouped by document, best first, with filters beside them.',
 		},
@@ -360,9 +360,9 @@ const stops: Stop[] = [
 		shot: {
 			light: usageLight,
 			dark: usageDark,
-			alt: 'Settings → Usage: 16 AI calls in the last 30 days, 12,032 tokens in and 1,469 out, $0.0030 estimated, with three priced rows across Anthropic and Workers AI for chat, embeddings and reranking',
+			alt: 'Settings → Usage: 32 AI calls in the last 30 days, 97,020 tokens in and 11,449 out, $0.0118 estimated, with eight priced rows across Anthropic and Workers AI for chat, the agents, embeddings and reranking',
 			url: `${HOST}/settings?tab=usage`,
-			caption: 'Sixteen calls, two providers, a third of a cent — with the estimate labelled as one.',
+			caption: 'Thirty-two calls, two providers, about a cent — with the estimate labelled as one.',
 		},
 	},
 	{
@@ -412,7 +412,7 @@ const stops: Stop[] = [
 		shot: {
 			light: adminTenantsLight,
 			dark: adminTenantsDark,
-			alt: 'Admin → Organisations: five organisations with their member counts, when each was last active and when it was created',
+			alt: 'Admin → Organisations: the three demo organisations with their member counts, when each was last active and when it was created',
 			url: `${HOST}/admin/tenants`,
 			caption: 'Every organisation on the deployment, with Open to enter one as support.',
 		},
@@ -435,7 +435,7 @@ const stops: Stop[] = [
 		shot: {
 			light: featureFlagsLight,
 			dark: featureFlagsDark,
-			alt: 'Admin → Feature flags: the Knowledge facts flag switched on for everyone, its per-organisation overrides open with one organisation forced off and one forced on, and the Contextual search flag below it',
+			alt: 'Admin → Feature flags: the Knowledge facts flag off for everyone, its per-organisation overrides open with two organisations forced on, and the Contextual search flag below it',
 			url: `${HOST}/admin/feature-flags`,
 			caption: 'Off, on or a percentage rollout, with an override that pins one organisation either way.',
 		},
@@ -742,7 +742,7 @@ const pad = (n: number) => String(n).padStart(2, '0')
 				</div>
 				<div class="phones-grid">
 					<Screenshot light={mHomeLight} dark={mHomeDark} alt="Home on a phone: the Ask anything box with its suggested prompts, and the agent runs chart below it" frame="none" width={300} />
-					<Screenshot light={mChatLight} dark={mChatDark} alt="A chat thread on a phone: an answer citing the document it came from, and the next question below it" frame="none" width={300} />
+					<Screenshot light={mChatLight} dark={mChatDark} alt="A chat thread on a phone: the end of an answer, the three documents it drew on, and the thumbs to rate it" frame="none" width={300} />
 				</div>
 			</section>
 
