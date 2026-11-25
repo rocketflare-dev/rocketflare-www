@@ -16,7 +16,7 @@ waitfor() {
 }
 # HIDE_JS: hide dev-only chrome before a capture
 HIDE_JS='() => { const hide = el => { if (el) el.style.display = "none" };
-  document.querySelectorAll("div[role=\"status\"].alert-warning, .tsqd-parent-container, .tsqd-open-btn-container, #react-query-devtools, vite-error-overlay, .toast, [title^=\"Dev environment\"], [title^=\"Staging environment\"]").forEach(hide);
+  document.querySelectorAll("div[role=\"status\"].alert-warning, .tsqd-parent-container, .tsqd-open-btn-container, #react-query-devtools, vite-error-overlay, .toast, [title^=\"Dev environment\"], [title^=\"Staging environment\"], #dev-design-panel").forEach(hide);
   document.querySelectorAll("button").forEach(b => { if (/tanstack/i.test(b.getAttribute("aria-label") || "")) hide(b) });
   return "hidden" }'
 hide() { cdt evaluate_script "$HIDE_JS" | grep -c hidden >/dev/null; }

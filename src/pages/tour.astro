@@ -111,7 +111,7 @@ const stops: Stop[] = [
 		shot: {
 			light: loginLight,
 			dark: loginDark,
-			alt: 'The sign-in page: an email field for a magic link, and four dev quick-login buttons for the demo owner, admin, member and global admin',
+			alt: 'The sign-in page: a work-email field for single sign-on, an email field for a magic link, and four dev quick-login buttons for the demo owner, admin, member and global admin',
 			url: `${HOST}/login`,
 			caption: 'Magic link, or a demo account while developing. Google, Microsoft and your own identity provider appear once their keys are set.',
 		},
@@ -134,9 +134,9 @@ const stops: Stop[] = [
 		shot: {
 			light: homeLight,
 			dark: homeDark,
-			alt: 'The home page for Acme Logistics, signed in as the owner: quick links and the five most recent activity rows',
+			alt: 'The home page for Acme Logistics, signed in as the owner: an Ask anything box with suggested prompts, a chart of agent runs over the last 14 days above the latest runs, and the newest knowledge documents beside it',
 			url: `${HOST}/`,
-			caption: 'Home for the demo owner: quick links and recent activity.',
+			caption: 'Home for the demo owner: ask a question, see what the agents did this fortnight, pick up the newest documents.',
 		},
 	},
 	{
@@ -153,9 +153,9 @@ const stops: Stop[] = [
 		shot: {
 			light: peopleLight,
 			dark: peopleDark,
-			alt: 'The People tab: a members table of eight people with their roles, and a pending invitations panel below it',
+			alt: 'The People tab: a members table of nine people with their roles, groups and last sign-in, and the pending invitations panel starting below it',
 			url: `${HOST}/settings?tab=people`,
-			caption: 'Members with roles; pending invitations below. Refreshes live in a second browser.',
+			caption: 'Members with roles and groups; pending invitations below. Refreshes live in a second browser.',
 		},
 	},
 	{
@@ -171,7 +171,7 @@ const stops: Stop[] = [
 		shot: {
 			light: groupsLight,
 			dark: groupsDark,
-			alt: 'Settings → Groups with the Finance dialog open: the three people not in the group on the left, the five already in it on the right',
+			alt: 'Settings → Groups with the Finance dialog open: the four people not in the group on the left, the five already in it on the right',
 			url: `${HOST}/settings?tab=groups`,
 			caption: 'Group types on the left, the groups of the selected type beside them; the dialog moves people in and out.',
 		},
@@ -194,9 +194,9 @@ const stops: Stop[] = [
 		shot: {
 			light: settingsAiLight,
 			dark: settingsAiDark,
-			alt: 'Settings → AI: chat readiness shows Cloudflare Workers AI, llama-3.3-70b-instruct-fp8-fast, platform default, and embeddings show bge-m3; no tenant providers yet',
+			alt: 'Settings → AI: four readiness cards, all Ready — chat on Anthropic claude-haiku-5-5 and embeddings on Workers AI bge-m3 from the platform default, decisions on TypeSafe Jev set for this workspace, reranking on Workers AI bge-reranker-base — and no chat providers of the organisation’s own yet',
 			url: `${HOST}/settings?tab=ai`,
-			caption: 'Readiness with nothing configured: the zero-key floor for chat and for embeddings.',
+			caption: 'Readiness: which model answers chat, embeddings, decisions and reranking, and where each choice came from.',
 		},
 		callout: {
 			tone: 'orange',
@@ -217,9 +217,9 @@ const stops: Stop[] = [
 		shot: {
 			light: chatLight,
 			dark: chatDark,
-			alt: 'The chat page: three conversations in the list, the thread “Late deliveries on the Rotterdam lane” open, with token counts under each turn',
+			alt: 'The chat page: four conversations in the list, the thread “What documents related to MOTs?” open, its answer citing the document “Fleet maintenance schedule” as its source',
 			url: `${HOST}/chat`,
-			caption: 'Streamed answers; threads and token counts persist.',
+			caption: 'Streamed answers that cite the documents they used; threads persist.',
 		},
 	},
 	{
@@ -229,16 +229,16 @@ const stops: Stop[] = [
 		label: 'Agents',
 		title: 'An agent is a run you can watch',
 		body: [
-			'Start an agent and it gets a page of its own — every step on a timeline that fills as it happens, not on a refresh. This one is <code>summarize-text</code>, the kit’s single-call example: its answer is checked against a schema before it is stored, and the artifacts it produced are listed beside it.',
+			'Start an agent and it gets a page of its own — every step on a timeline that fills as it happens, not on a refresh. This one is <code>research-topic</code>: the timeline shows it searching the knowledge base and reading two documents, the answer sits beside it, and the artifacts it produced are a tab away.',
 			'A run that stalls can be cancelled; a second request while one is already running for the organisation gets that run back instead of starting another.',
 		],
 		concepts: ['background-work'],
 		shot: {
 			light: agentsRunLight,
 			dark: agentsRunDark,
-			alt: 'A succeeded summarize-text run on its own page: the input, the timeline of steps, and the summary with its key points beside them',
-			url: `${HOST}/agents/runs/50e1bef0-…`,
-			caption: 'A summarize-text run: the timeline, the validated output, the key points.',
+			alt: 'A succeeded research-topic run on its own page: the question, a timeline of its knowledge-base searches over two documents, and beside it the answer, a table of what a new carrier must provide and who checks each item',
+			url: `${HOST}/agents/runs/37e1ec4c-…`,
+			caption: 'A research-topic run: what it searched and read on the timeline, the answer beside it.',
 		},
 	},
 	{
@@ -255,7 +255,7 @@ const stops: Stop[] = [
 			light: agentsApprovalLight,
 			dark: agentsApprovalDark,
 			alt: 'A summarize-text run marked Awaiting input: a panel above the timeline asks “Index this summary?” with Index it and Cancel the run, and the Agents nav item carries a badge of one',
-			url: `${HOST}/agents/runs/d6565412-…`,
+			url: `${HOST}/agents/runs/2eb77e70-…`,
 			caption: 'The decision comes first, above the timeline — and the nav says one run is waiting on you.',
 		},
 		callout: {
@@ -278,9 +278,9 @@ const stops: Stop[] = [
 		shot: {
 			light: documentsLight,
 			dark: documentsDark,
-			alt: 'The Knowledge page: a table of six documents with one shown as Indexing, a download icon on an uploaded file, and the paste-text form below',
+			alt: 'The Knowledge page: a table of nine documents with one shown as Indexing, one restricted to the Finance group, download icons on the uploaded files, and the paste-text form below',
 			url: `${HOST}/documents`,
-			caption: 'Six documents, one still indexing; the original is one click away.',
+			caption: 'Nine documents, one still indexing; the original is one click away.',
 		},
 		callout: {
 			tone: 'green',
@@ -294,16 +294,16 @@ const stops: Stop[] = [
 		label: 'Search',
 		title: 'Search by meaning and by words, ranked',
 		body: [
-			'One box searches by meaning and by exact words at once and fuses the two rankings — every hit shows how it ranked on each. A phrase from a PDF you uploaded a minute ago is already findable.',
+			'One box searches by meaning and by exact words at once and fuses the two rankings into one order, with the matching words highlighted. A phrase from a PDF you uploaded a minute ago is already findable.',
 			'Each passage says which document it came from and where in it, so a reader — or an agent — can jump straight to the spot.',
 		],
 		concepts: ['ai'],
 		shot: {
 			light: searchLight,
 			dark: searchDark,
-			alt: 'The Search page with the query “customs paperwork EU shipments”: the first hit is the document “Customs paperwork: EU shipments” with dense and lexical rank badges',
+			alt: 'The Search page with the query “customs paperwork EU shipments”: 10 passages from 3 documents, the first group “Customs paperwork: EU shipments” with the matching words highlighted, and filters by document, source, type and date on the left',
 			url: `${HOST}/search`,
-			caption: 'Hybrid search: the badges show the dense and the lexical rank of each hit.',
+			caption: 'Hybrid search: passages grouped by document, best first, with filters beside them.',
 		},
 	},
 	{
@@ -319,8 +319,8 @@ const stops: Stop[] = [
 		shot: {
 			light: agentsResearchLight,
 			dark: agentsResearchDark,
-			alt: 'A succeeded research-topic run: the Markdown answer, and under Sources the citation “Customs paperwork: EU shipments”',
-			url: `${HOST}/agents/runs/c9672156-…`,
+			alt: 'A succeeded research-topic run: the Markdown answer listing the documents an EU shipment needs and who signs each, and under Source the citation “Customs paperwork: EU shipments”',
+			url: `${HOST}/agents/runs/9be4d5cc-…`,
 			caption: 'research-topic: the answer and its citation to the document it read.',
 		},
 	},
@@ -360,9 +360,9 @@ const stops: Stop[] = [
 		shot: {
 			light: usageLight,
 			dark: usageDark,
-			alt: 'Settings → Usage: 40 AI calls in the last 30 days, 134,788 tokens in and 10,112 out, $0.1498 estimated, with nine priced rows across Anthropic and Workers AI',
+			alt: 'Settings → Usage: 16 AI calls in the last 30 days, 12,032 tokens in and 1,469 out, $0.0030 estimated, with three priced rows across Anthropic and Workers AI for chat, embeddings and reranking',
 			url: `${HOST}/settings?tab=usage`,
-			caption: 'Forty calls, two providers, fifteen cents — with the estimate labelled as one.',
+			caption: 'Sixteen calls, two providers, a third of a cent — with the estimate labelled as one.',
 		},
 	},
 	{
@@ -405,14 +405,14 @@ const stops: Stop[] = [
 		label: 'Admin',
 		title: 'Every organisation from one place',
 		body: [
-			'A global admin sees every organisation from one screen — the demo has three: Acme Logistics, Northwind Freight and Bluebird Clinics — plus the access requests waiting for a decision.',
+			'A global admin sees every organisation from one screen — the demo seeds three: Acme Logistics, Northwind Freight and Bluebird Clinics — plus the access requests waiting for a decision.',
 			'To help a customer, “enter” their organisation: that creates a real support membership, visible to them by design, and everything you do there is logged like any other member’s actions.',
 		],
 		concepts: ['tenancy'],
 		shot: {
 			light: adminTenantsLight,
 			dark: adminTenantsDark,
-			alt: 'Admin → Organisations: three organisations with their member counts, when each was last active and when it was created',
+			alt: 'Admin → Organisations: five organisations with their member counts, when each was last active and when it was created',
 			url: `${HOST}/admin/tenants`,
 			caption: 'Every organisation on the deployment, with Open to enter one as support.',
 		},
@@ -435,9 +435,9 @@ const stops: Stop[] = [
 		shot: {
 			light: featureFlagsLight,
 			dark: featureFlagsDark,
-			alt: 'Admin → Feature flags: one flag set to a 50% rollout counting organisations, with two per-organisation overrides, one forced on and one forced off',
+			alt: 'Admin → Feature flags: the Knowledge facts flag switched on for everyone, its per-organisation overrides open with one organisation forced off and one forced on, and the Contextual search flag below it',
 			url: `${HOST}/admin/feature-flags`,
-			caption: 'The flag gating “Example feature” in the sidebar beside it — one screen decides who sees that nav item.',
+			caption: 'Off, on or a percentage rollout, with an override that pins one organisation either way.',
 		},
 		callout: {
 			tone: 'orange',
@@ -741,8 +741,8 @@ const pad = (n: number) => String(n).padStart(2, '0')
 					<p>The same app at 390 pixels: home and a chat thread. Nothing here is a second front end — one UI, one set of routes.</p>
 				</div>
 				<div class="phones-grid">
-					<Screenshot light={mHomeLight} dark={mHomeDark} alt="Home on a phone: the organisation, quick links and recent activity stacked in one column" frame="none" width={300} />
-					<Screenshot light={mChatLight} dark={mChatDark} alt="A chat thread on a phone, scrolled to the last assistant turn" frame="none" width={300} />
+					<Screenshot light={mHomeLight} dark={mHomeDark} alt="Home on a phone: the Ask anything box with its suggested prompts, and the agent runs chart below it" frame="none" width={300} />
+					<Screenshot light={mChatLight} dark={mChatDark} alt="A chat thread on a phone: an answer citing the document it came from, and the next question below it" frame="none" width={300} />
 				</div>
 			</section>
 
