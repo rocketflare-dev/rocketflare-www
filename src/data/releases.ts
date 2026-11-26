@@ -672,6 +672,15 @@ export const RELEASES: Release[] = [
 		migrations: false,
 		areas: ['config'],
 	},
+	{
+		version: '0.45.0',
+		date: '2026-11-26',
+		summary:
+			'A new default look (a warm ember palette and IBM Plex Sans), a redesigned Home, sign-in page and source links on answers; agent runs show every model call; knowledge gains contextual passages and command-line docs and facts; and a guard and a UI lint keep coding agents on the seams and off the AI-generated look. Existing apps are offered the new look, never switched to it.',
+		breaking: false,
+		migrations: true,
+		areas: ['api', 'cli', 'db', 'shared', 'ui', 'plugins', 'config', 'docs'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
