@@ -246,9 +246,12 @@ const siteLd = { '@context': 'https://schema.org', '@graph': graph }
 		/* A drop-shadow() colour — filters cannot take a box-shadow token */
 		--shadow-ink: rgba(16, 36, 58, 0.25);
 
-		/* Browser chrome around a screenshot */
-		--frame: #E4EEF6;
-		--frame-dots: #B4C8D8;
+		/* Browser chrome around a screenshot: neutral grey, never the site's
+		   blue, so the app's own palette reads as the app's */
+		--frame: #ECECEE;
+		--frame-dots: #C4C4C9;
+		--frame-border: #D6D6DA;
+		--frame-url: #FFFFFF;
 
 		/* Terminal */
 		--terminal-bg: #10243A;
@@ -329,8 +332,10 @@ const siteLd = { '@context': 'https://schema.org', '@graph': graph }
 		--orange-ink: var(--orange);
 		--shadow-ink: rgba(0, 0, 0, 0.55);
 
-		--frame: #1F3450;
-		--frame-dots: #4A6A8C;
+		--frame: #262628;
+		--frame-dots: #56565B;
+		--frame-border: #3A3A3E;
+		--frame-url: #1A1A1C;
 
 		--terminal-bg: #081120;
 		--terminal-text: #C7DCF0;
