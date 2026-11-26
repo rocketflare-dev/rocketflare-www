@@ -1,20 +1,29 @@
 # Rocketflare product screenshots
 
-- Kit commit: `39790e4` (`git -C <kit> rev-parse --short HEAD` at capture time; working tree carried uncommitted doc/rules edits)
-- `groups` was added in a later pass: kit commit `3fa71eb` (clean tree), captured 2026-09-14, same stack and same signed-in account. The viewport is set with `emulate --viewport 1440x900x2` — `resize_page` alone leaves the device pixel ratio at 1 and produces a 1440×900 file rather than 2880×1800
-- `feature-flags` and `admin-tenants` were added in a later pass again: kit commit `cffb14a` (clean tree), captured 2026-09-15, same stack, signed in as the **global admin** (`/login?as=admin@rocketflare.local`) rather than Olivia Bennett — both are `/admin` screens. That account holds a `support` membership in Acme Logistics from an earlier dev session, which is why the sidebar is full and the footer carries a Support badge; signed in with no membership at all the nav is only Home + Admin and the frames read as empty
-- `agents-run`, `agents-research` and the new `agents-approval` were retaken in a later pass again: kit commit `d9e4937` (release 0.4.0, clean tree), captured 2026-09-16, same stack and same signed-in account. **0.4.0 deleted the run drawer** — a run is now its own page at `/agents/runs/:id`, so the two older frames showed a UI that no longer exists. The runs list no longer sits behind them, which also retires known-noise 2 below for these frames
-- Captured: 2026-09-02, against the kit's local dev stack (Vite http://localhost:3000, wrangler http://localhost:3001), read-only
-- Signed in as Olivia Bennett, owner of "Acme Logistics" (`/login?as=owner@example.test`, dev-only auto login)
+## The kit frames (current pass)
+
+Every kit frame below, `settings-mcp`, `analytics` and `analytics-explore` included, was retaken on 2026-11-25 from a **fresh, clean demo stack** in the kit's new default look (the warm palette, the dark sidebar, the Home dashboard, run pages, grouped search and provenance on answers).
+
+- Kit commit: `465a2e16` (branch `feat/default-design-guard`), checked out clean in a throw-away worktree, plus the **analytics plugin 3.14.0** (`pnpm plugin add analytics --apply`, then its generated migration)
+- Stack: a new Postgres 17 + pgvector container with nothing in it, `pnpm db:migrate`, `pnpm seed --demo` (it re-dates the demo's runs to the last 14 days and refreshes the analytics fact tables), then `pnpm dev` on Vite http://localhost:3600 and wrangler http://localhost:3601 with `APP_URL=http://localhost:3600` and `FEATURES_ENABLED=mcp`. Models: Anthropic `claude-haiku-5-5` as the platform chat key, Workers AI for embeddings and reranking
+- Signed in as Olivia Bennett, owner of "Acme Logistics" (`/login?as=owner@example.test`, dev-only auto login); `admin-tenants` and `feature-flags` as the **global admin** (`/login?as=admin@rocketflare.local`), who belongs to no organisation in a clean seed — hence the short Platform sidebar and "No organisation" in those two frames
 - Files: `<stem>.<light|dark>.png`, PNG, viewport only (not full page)
 - Desktop: 1440×900 @2 → 2880×1800 px. Mobile (`m-*`): 390×844 @3, mobile + touch emulation → 1170×2532 px
-- Tool: the `chrome-devtools` CLI daemon from the chrome-devtools-mcp package (`chrome-devtools start --headless --isolated --allowUnrestrictedPaths`) — a headless Chrome with a throw-away profile. `capture.sh` in this directory holds the helpers a pass sources (`nav`, `waitfor`, `hide`, `theme`, `shot`, `both`, `errs`); it writes to `/tmp/rf-screens/`, so copy the PNGs here afterwards
+- Tool: headless Chrome driven over CDP with a throw-away profile (`Emulation.setDeviceMetricsOverride` with `deviceScaleFactor` 2, or 3 and `mobile: true` plus `Emulation.setTouchEmulationEnabled` for `m-*`). Before each shot: `document.fonts.ready`, no `.loading-spinner`/`.skeleton`/`.loading` left, then the hide-chrome step below. `capture.sh` (the chrome-devtools CLI daemon) does the same job
+- **No DOM retouching** beyond the hide-chrome step
+- **Written through the UI for this pass, nothing else**, in this order:
+  1. Search → **Re-index now**: the demo seed embeds its documents with deterministic vectors, so a fresh stack with Workers AI says "4 documents were indexed with a different model…" until they are re-indexed
+  2. A `research-topic` run (`17f8db49`) asking what a new carrier must provide before its first EU shipment, which customs documents travel with the load and who signs off each step — `agents-run`
+  3. A `summarize-text` run (`343db00e`) over a November returns review, *Index the result* ticked, left parked on its "Index this summary?" decision — `agents-approval`. Answering it settles the run and the frame cannot be retaken from it
+  4. One chat question, "How often does each truck need a safety inspection, and what happens if one is missed?" (thread `4b0f03a6`) — `chat`, `m-chat`. The demo's two seeded threads have no sourced answer
+  5. Settings → MCP → **Allow MCP clients** switched on — `settings-mcp`
+  6. As the global admin, Knowledge facts → Per-organisation overrides: Acme Logistics and Northwind Freight **forced on** — `feature-flags`
 
 ## Retaking a frame
 
-1. Run the kit from a clean demo seed (`bash scripts/bootstrap.sh`) and sign in as the account above.
+1. Run the kit from a clean demo seed (`bash scripts/bootstrap.sh`, or the steps under "Stack" above) with the analytics plugin added and `FEATURES_ENABLED=mcp`, and sign in as the account above. Repeat the six UI steps above — the seed has none of them
 2. `. capture.sh`, then `nav <route>` from the table, `waitfor "<text>"` for the text the row lists, and `both <stem>` — light, then dark, hiding the dev-only chrome before each shot.
-3. Copy the pair here, update the row and the kit commit above, and look at the frame in both themes on the page that uses it (`/tour/`, `/who-is-it-for/`).
+3. Copy the pair here, update the row and the kit commit above, and look at the frame in both themes on the page that uses it (`/tour/`, `/who-is-it-for/`, the use-case pages).
 
 Theme flip (persisted by the app in `localStorage.theme`; done by clicking the app's own toggle so its icon stays in sync, with a manual fallback):
 
@@ -27,72 +36,62 @@ Theme flip (persisted by the app in `localStorage.theme`; done by clicking the a
   }
   return document.documentElement.dataset.theme }
 ```
-then wait ~400 ms. drizzle-cube surfaces (`analytics`, `analytics-explore`) mirror the theme into a `dark` class: for `analytics` the dark frame was taken after flipping and re-navigating to the page; for `analytics-explore` the live flip re-themed the chart (verified `classList.contains('dark') === true`).
+then wait ~600 ms. drizzle-cube surfaces (`analytics`, `analytics-explore`) mirror the theme into a `dark` class: for `analytics` the dark frame was taken after flipping and re-navigating to the page; for `analytics-explore` the live flip re-themed the chart (verified `classList.contains('dark') === true`).
 
 Hide dev-only chrome (run after the page's data rendered, right before each screenshot):
 
 ```js
 () => { const hide = el => { if (el) el.style.display = 'none' };
-  document.querySelectorAll('div[role="status"].alert-warning, .tsqd-parent-container, .tsqd-open-btn-container, #react-query-devtools, vite-error-overlay, .toast, [title^="Dev environment"], [title^="Staging environment"]').forEach(hide);
+  document.querySelectorAll('div[role="status"].alert-warning, .tsqd-parent-container, .tsqd-open-btn-container, #react-query-devtools, vite-error-overlay, .toast, [title^="Dev environment"], [title^="Staging environment"], #dev-design-panel').forEach(hide);
   document.querySelectorAll('button').forEach(b => { if (/tanstack/i.test(b.getAttribute('aria-label') || '')) hide(b) });
   return 'hidden' }
 ```
 (covers `ConnectionBanner`, the TanStack Query devtools button, the Vite error overlay, toasts, and the `DEV` environment badge in the header — the badge is a real feature, hidden for marketing frames; drop the `[title^="Dev environment"]` selector from `HIDE_JS` in `capture.sh` to show it.)
 
-Wait strategy: poll `document.body.innerText.includes('<text>')` once a second (e.g. "Recent activity", "Pending invitations", "Workers AI", "Organisation Overview"), then 1.5–6 s extra for TanStack / charts.
+Wait strategy: poll `document.body.innerText.includes('<text>')` once a second (e.g. "Agent runs", "Pending invitations", "Readiness", "Organisation Overview"), then 2–7 s extra for TanStack / charts.
 
 ## Shots
 
 | Stem | Route | State | Viewport | Used by |
 |---|---|---|---|---|
-| `login` | `/login` | signed out: magic-link form + the four DEV QUICK LOGIN buttons (Owner, Admin, Member, Global admin) | 1440×900 @2 | tour `#sign-in` |
-| `home` | `/` | Home: Acme Logistics · Owner, quick links, 5 recent activity rows | 1440×900 @2 | tour `#home`, landing |
-| `people` | `/settings?tab=people` | Members table, 8 people with roles, plus the "Pending invitations" panel (`invited@example.test`) at the bottom | 1440×900 @2 | tour `#people`, who-is-it-for |
-| `groups` | `/settings?tab=groups` | Settings → Groups with the Finance **Members dialog open** (click the first `Members` button): group types Department (3) and Team (0) behind the overlay, dialog showing 3 people not in the group and the 5 in it | 1440×900 @2 | tour `#groups` |
-| `settings-ai` | `/settings?tab=ai` | Readiness: Chat = Cloudflare Workers AI · llama-3.3-70b-instruct-fp8-fast · platform default (Ready); Embeddings = Workers AI · bge-m3 (Ready); no tenant providers | 1440×900 @2 | tour `#ai-settings` |
-| `chat` | `/chat/eb7c618a-…` ("Late deliveries on the Rotterdam lane") | 3 conversations in the list, thread open, scrolled to the last two turns with token counts | 1440×900 @2 | tour `#chat` |
-| `agents-run` | `/agents/runs/50e1bef0-…` | Summarize text run (29 Aug, Succeeded) on its own page: input block, timeline (input check, summarising), output + key points in the Output tab, Artifacts 1. Output-major split — the run is settled | 1440×900 @2 | tour `#agents`, landing |
-| `agents-research` | `/agents/runs/c9672156-…` | Research a topic run (30 Aug, Succeeded) on its own page; the Markdown answer with the "Sources → Customs paperwork: EU shipments" citation rendered as a one-line document link | 1440×900 @2 | tour `#research`, who-is-it-for |
-| `agents-approval` | `/agents/runs/d6565412-…` | Summarize text **Awaiting input**: the action panel above the timeline asks "Index this summary?" (Index it / Cancel the run, "expires in 7 days"), the timeline ends on "Asked for a decision", the Output tab reads "No answer yet" and the **Agents nav item carries a badge of 1**. Timeline-major split — the run is active | 1440×900 @2 | tour `#approval` |
-| `documents` | `/documents` | Knowledge table: 6 documents, "Returns policy" shown as Indexing, download icon on the uploaded Markdown file; Paste text form below | 1440×900 @2 | tour `#knowledge` |
-| `search` | `/search` | query "customs paperwork EU shipments" typed and run (the page does not read `?q=`); hit #1 = Customs paperwork: EU shipments with dense/lexical rank badges | 1440×900 @2 | tour `#search` |
-| `analytics` | `/analytics/1b2364b4-…` (Organisation Overview, default template) | KPI strip (Members 8 / Owners 1 / Admins 2 / Active users 2), Sign-ups over time line, Members by role proportion bar, Daily activity below the fold | 1440×900 @2 | tour `#analytics`, who-is-it-for |
-| `analytics-explore` | `/analytics/explore` | Query built: metric `ActivityEvents.count`, breakdown `ActivityEvents.type`, chart type "Bar Chart" (15 rows) | 1440×900 @2 | tour `#analytics` (second frame) |
-| `usage` | `/settings?tab=usage` | AI usage, last 30 days: 40 calls, 134,788 in / 10,112 out, $0.1498 estimated; 9 priced rows across anthropic and workers_ai | 1440×900 @2 | tour `#usage` |
-| `admin-tenants` | `/admin/tenants` | Admin → Organisations: 3 total — Acme Logistics (8 members, active 34 minutes ago), Northwind Freight (1), Bluebird Clinics (1) | 1440×900 @2 | tour `#admin` |
-| `feature-flags` | `/admin/feature-flags` | Admin → Feature flags: the one shipped flag `example-feature` set to **Rollout 50%** counting organisations, **overrides expanded** showing Bluebird Clinics forced off and Northwind Freight forced on. The sidebar shows the “Example feature” nav item the flag gates | 1440×900 @2 | tour `#feature-flags` |
-| `m-home` | `/` | mobile Home | 390×844 @3 | tour, phone pair |
-| `m-chat` | `/chat/eb7c618a-…` | mobile chat thread, scrolled to the last assistant turn | 390×844 @3 | tour, phone pair |
-| `m-agents` | `/agents` | mobile Agents: available agents + runs list | 390×844 @3 | unused — dev noise in the runs list (see below) |
+| `login` | `/login` | signed out: the Example SSO (development only) work-email field and button, the magic-link form, and the Dev quick login panel with Owner, Admin, Member and Global admin; the rocket illustration on the right | 1440×900 @2 | tour `#sign-in` |
+| `home` | `/` | Home: "Good evening, Olivia", the Ask anything box with three suggested prompts, Agent runs (23 runs in 14 days · 82% succeeded · 3 failed — the seed's 21 plus this pass's two, the parked one in progress) as a stacked daily bar chart over the latest runs, Knowledge (5 documents · 1 indexing) beside it, the Team card starting below | 1440×900 @2 | tour `#home`, get-started |
+| `people` | `/settings?tab=people` | Members, 8 people with role selects, groups, joined and last sign-in; Pending invitations below with the seed's one invitation (`invited@example.test`) | 1440×900 @2 | tour `#people`, landing, who-is-it-for, internal-tool |
+| `groups` | `/settings?tab=groups` | Settings → Groups with the Finance **Members dialog open** (click the first `Members` button): 5 people not in the group on the left, the 3 in it on the right; the Department group type behind the overlay | 1440×900 @2 | tour `#groups` |
+| `settings-ai` | `/settings?tab=ai` | Readiness, four cards all Ready: Chat = Anthropic · claude-haiku-5-5 · platform default; Embeddings = Workers AI · bge-m3 · platform default; Decisions = Anthropic · claude-haiku-5-5 · chat model fallback, uncalibrated; Reranking = Workers AI · bge-reranker-base · platform default. Chat providers empty below | 1440×900 @2 | tour `#ai-settings` |
+| `chat` | `/chat/4b0f03a6-…` | 3 conversations in the list (this pass's question and the seed's two), the thread open: the question, the answer on inspection intervals and missed inspections from the Fleet maintenance schedule, **3 sources** (Q3 warehouse safety audit, Fleet maintenance schedule, Customs paperwork: EU shipments) and thumbs, the composer below | 1440×900 @2 | tour `#chat` |
+| `agents-run` | `/agents/runs/17f8db49-…` | Research a topic, **Succeeded**, 17 s, run for this pass: the question, the timeline (Searching the knowledge base · 3 turns, 2 documents consulted · 3 model calls · 4 tools; Answer and Sources artifacts; Writing the answer · 2 citations), and the Output tab opening on the answer: the two documents it drew on, then Gate 1 (licences) and Gate 2 (insurance) of the six onboarding gates | 1440×900 @2 | tour `#agents`, landing |
+| `agents-research` | `/agents/runs/9be4d5cc-…` | Research a topic (seeded, Succeeded, 52 s), **scrolled to the bottom**: the timeline (Searching the knowledge base · 3 turns, 1 document consulted; Writing the answer · 1 citation), the Markdown answer listing the five documents an EU shipment needs and who signs each, then **Source 1 · Customs paperwork: EU shipments · Text · 8 passages** and "Read 1 document in 3 model turns" | 1440×900 @2 | tour `#research`, who-is-it-for, customer-portal |
+| `agents-approval` | `/agents/runs/343db00e-…` | Summarize text **Awaiting input** (run for this pass, left parked): the "Index this summary?" panel above everything (Index it / Cancel the run, "expires in 7 days"), Ran 3s · Waited, the input (the November returns review, bullets, Index Yes), the timeline ending on "Asked for a decision" and "Waiting for an answer" with the note box, the Output tab reading "No answer yet"; the Agents nav item carries a badge of 1 | 1440×900 @2 | tour `#approval`, who-is-it-for |
+| `documents` | `/documents` | Knowledge: 5 documents — Returns policy **Indexing** (0 passages; the seed leaves it pending) and four Indexed seeded logistics documents with their passage counts; the Paste text / Upload file form below | 1440×900 @2 | tour `#knowledge`, customer-portal |
+| `search` | `/search?q=customs+paperwork+EU+shipments` | the page reads `?q=` and runs the query: "10 passages from 2 documents", the first group Customs paperwork: EU shipments with highlighted matches, the filters panel (document, source, type, date) on the left; input blurred so no focus ring | 1440×900 @2 | tour `#search` |
+| `analytics` | `/analytics/5a61ec4c-…` (Organisation Overview, default template) | KPI strip (Members 8 / Owners 1 / Admins 2 / Active Users 8), Sign-ups Over Time line, Members by Role proportion bar, Daily Activity starting below the fold | 1440×900 @2 | tour `#analytics`, who-is-it-for, analytics-product |
+| `analytics-explore` | `/analytics/explore` | Query built through the panel: metric Events (`ActivityEvents.count`), breakdown Event Type (`ActivityEvents.type`), chart type switched to Bar Chart on the Chart tab, then the panel back on Query (13 rows) | 1440×900 @2 | tour `#analytics` (second frame), analytics-product |
+| `usage` | `/settings?tab=usage` | AI usage, 30 days (26 Oct – 25 Nov): 32 calls, 97,020 in / 11,449 out, $0.0118 estimated; eight rows — anthropic claude-haiku-5-5 for agent:research-topic, agent:summarize-text and chat; workers_ai bge-m3 knowledge.embeddings, bge-reranker-base knowledge.rerank, and the seed's glm-4.7-flash rows | 1440×900 @2 | tour `#usage` |
+| `settings-mcp` | `/settings?tab=mcp` | Settings → MCP with Allow MCP clients on: the server URL `http://localhost:3600/mcp/t/acme` with Copy, and the Connect a client card for Claude, Claude Code and ChatGPT | 1440×900 @2 | tour `#mcp` |
+| `admin-tenants` | `/admin/tenants` | Admin → Organisations, 3 total: Acme Logistics (8 members), Northwind Freight and Bluebird Clinics (1 each, never active) | 1440×900 @2 | tour `#admin` |
+| `feature-flags` | `/admin/feature-flags` | Admin → Feature flags at the top of the page: Knowledge facts (`knowledge-facts`) **Off** with its **Per-organisation overrides (2) expanded** — Acme Logistics and Northwind Freight forced on — and Contextual search below | 1440×900 @2 | tour `#feature-flags`, internal-tool |
+| `m-home` | `/` | mobile Home: greeting, Ask anything with its three prompts, Agent runs (23 runs, the parked one in progress) and the chart | 390×844 @3 | tour, phone pair |
+| `m-chat` | `/chat/4b0f03a6-…` | mobile chat thread as it opens (scrolled to the end): the end of the answer, **3 sources**, thumbs, the composer; the card runs to the bottom of the viewport | 390×844 @3 | tour, phone pair |
+| `m-agents` | `/agents` | mobile Agents: "1 waiting on you" and All runs, the Last 30 days list stacked one agent per row (name, status badge, last run, Run) — no longer cut off | 390×844 @3 | unused |
 
 Every stop with a frame now has one; the tour's CLI stop is text only by choice (it is a terminal, and `Terminal.astro` renders that better than a screenshot would).
 
-## Known noise — what to fix in the seed before the next pass
+## What looked wrong in the app during the 2026-11-25 clean pass
 
-1. ~~**`admin-tenants` could not be captured.**~~ **Fixed.** `/admin/*` is now `ProtectedRoute`'s one exemption, so a global admin with no membership reaches it; the junk-named `asdcasdcsdcsdac` tenant is also gone, and the list is the three the tour copy names. Captured 2026-09-15.
-2. **Agents runs list is cluttered by ad-hoc dev runs**: 22 runs, most from 1 Sep by user `49604981` (Failed / Cancelled research runs, a 14m47s cancelled run…). The two seeded runs (29–30 Aug) are at the bottom, so the list views behind `agents-run` / `agents-research` and all of `m-agents` show the noisy rows — which is why `m-agents` is not used. "Requested by" renders a short user id rather than a name (known gap in CONCEPTS §9).
-3. **Search results 2–4 come from a dev upload** (`interviewing-techniques-review.md`, 24 chunks) rather than the seeded logistics documents (1–2 chunks each). The seeded docs are small, so dense retrieval fills the list with the big off-topic file. `search` is used anyway — hit #1 and the rank badges are the point. Either remove that document or seed longer logistics texts.
-4. **Knowledge page**: the same `interviewing-techniques-review` Markdown row sits second in the table (created 1 Sep 17:46, uploaded file). Not seed data.
-5. **Analytics "Daily Activity" KPI reads `Events 0 / +0 since 2026-06-05`** (below the fold): the fact table is fresh but activity is sparse in the last-90-days window; the Sign-ups chart is a single spike at end of August. Fine for the top half; the bottom half is not impressive.
-6. **Settings → AI shows two empty-state panels** ("No chat providers configured", "No embeddings providers configured") under the readiness cards — expected for the zero-key default, but the lower two-thirds of the frame are empty states.
-7. **Mobile Home**: recent-activity actor names truncate to "Olivia B…", "Mar…" at 390 px.
-8. **Chat**: the third seeded conversation is titled "In one short sentence, what is Cloudflare Workers AI?" (a test prompt) — a dev leftover next to the two logistics threads.
-9. Cosmetic: the theme toggle keeps a component-local icon state — flipping via `localStorage` + `data-theme` alone leaves the icon out of sync, which is why the frames flip through the button.
-10. No console errors on any captured page except the expected 401 from `/auth/session` on the signed-out login page. The very first load through the Vite proxy took ~19 s (one-off).
-11. **`/search` is not deep-linkable**: `SearchPage` reads only `?documentId=`, not `?q=`, so `/search?q=…` renders an empty page. The `search` frames were produced by filling the box and pressing Search.
-12. The `DEV` environment badge was hidden in every frame after `login` by the hide-chrome step (see above).
-13. **`groups`: two rows behind the dialog are not seed data** — a `Sales` group (1 person) and an empty `Team` group type, both created by hand in dev. The demo seed makes one type, `Department`, with `Finance` and `Operations` only. They sit behind the dimmed overlay in the captured frame and read as ordinary data; delete them before any frame that shows the Groups page *without* the dialog open.
-14. **`feature-flags`: both per-organisation overrides are hand-made dev data**, not seed data — the demo seed ships `example-feature` with no overrides. They were created through the admin UI to show the panel doing the thing it exists for (one organisation forced on, one forced off). Clear them before any frame that is meant to show the default state.
+1. **A fresh demo seed is not searchable by meaning on a real stack**: the seed embeds with deterministic vectors, so Search shows "4 documents were indexed with a different model…" until someone presses Re-index now.
+2. **Returns policy stays Indexing forever**: the seed creates it pending with 0 passages and no job picks it up, so Home and Knowledge show "1 indexing" indefinitely (re-indexing did not touch it).
+3. **Modal backdrop leaves the sidebar undimmed** (`groups`): the overlay dims the header and content but the sidebar stays at full brightness.
+4. **Chat lists every retrieved document as a source**: the safety-inspection answer drew only on Fleet maintenance schedule, but "3 sources" puts Q3 warehouse safety audit first and Customs paperwork third. The thread title is the question cut at ~60 characters ("…and what"), and the model opened with "This is about Acme Logistics's own fleet policy, so I'll check the knowledge base."
+5. **Analytics has two date-range controls** (`analytics`): the page's Last 7/30/90 days/Custom and the dashboard's own Today…12M/Custom/XTD bar.
+6. The demo seed backdates Acme Logistics (created 11 Nov) but not Northwind Freight or Bluebird Clinics ("created 9m ago", "never" active).
 
-15. **`agents-approval` is a run created for the frame**, not seed data: `summarize-text` with
-    `index: true` over a Q3 carrier-onboarding review written to match the Acme Logistics workspace.
-    It is **left parked on purpose** — answering it settles the run and the frame cannot be retaken
-    from it. It also holds the exclusive slot for `summarize-text`, so cancel it before starting
-    another run of that agent. The demo seed ships no parked run; seeding one would be the way to
-    make this frame reproducible without a manual step.
-16. `agents-approval`'s timeline renders the raw status string **`awaiting_input`** in its last row,
-    where the badge above says "Awaiting input". Cosmetic, visible in a marketing frame, and a kit
-    fix rather than a capture one.
+Fixed since the earlier pass the same day: the mobile Agents list stacks (no clipped status column), the mobile chat card reaches the bottom, seeded research runs carry timeline steps, waited runs show "Ran · Waited" separately, no stale decision notification, Home and People agree on 8 people, and Search reads `?q=`.
+
+## Earlier passes
+
+- An earlier pass on 2026-11-25 (kit `b71c9093`) used a long-lived dev database; this clean pass replaces all of its frames.
+- The first pass: kit commit `39790e4`, captured 2026-09-02 on the dev stack at :3000/:3001, same account. `groups` (`3fa71eb`, 2026-09-14), `feature-flags` and `admin-tenants` (`cffb14a`, 2026-09-15), the agents frames (`d9e4937`, 0.4.0, 2026-09-16) and `settings-mcp` (`8fb720f`, 2026-11-20) followed. The viewport must be set with the device pixel ratio (`emulate --viewport 1440x900x2` with the CLI) — `resize_page` alone gives a 1440×900 file
 
 ## SSO plugin captures (`sso-*`, used by `/plugins/` and `/plugins/sso/`)
 
@@ -163,4 +162,3 @@ console the `/launch/` overview describes.
 | `plugin-guide` | `/guide` on a demo app with the **guide** plugin (3.10.0, kit 0.31.0) installed | Getting started open; Ask the Guide pane asked "How do I invite a colleague?" and answered in numbered steps (no raw footnote marks — retake if the model leaves `[^n]` in the text). Captured 2026-11-10 by the CLI daemon, same viewport and sign-in as above | 1440×900 @2 | `/plugins/guide/` hero |
 
 Not captured: **Secrets / grants** (the deck's fleet slide describes grants in text instead).
-| `settings-mcp` | `/settings?tab=mcp` | Settings → MCP with Allow MCP clients on: the server URL `http://localhost:3600/mcp/t/acme` (dev ports 3600/3601, `APP_URL` set to localhost for the capture) and the Connect a client card for Claude, Claude Code and ChatGPT. Kit commit `8fb720f` (the 0.41.0 branch), captured 2026-11-20, same account | 1440×900 @2 | tour `#mcp` |
