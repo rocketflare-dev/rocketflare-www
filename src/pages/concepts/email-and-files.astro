@@ -7,6 +7,10 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		'apps/web/src/api/services/email.ts',
 		'apps/web/src/api/services/storage.ts',
 		'apps/web/src/api/routes/files.ts',
+		'apps/web/src/api/routes/uploads.ts',
+		'apps/web/src/api/services/uploads/service.ts',
+		'apps/web/src/api/services/uploads/targets.ts',
+		'apps/web/src/db/schema/pending-uploads.ts',
 		'apps/web/src/db/schema/files.ts',
 		'packages/shared/src/files.ts',
 	]}
@@ -68,11 +72,51 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		UUID means every key is unique whatever the client happened to call the file.
 	</p>
 	<p>
-		Bytes stream through the Worker in both directions. The binding cannot mint presigned URLs, so
-		there is no path that hands the browser a direct link to the bucket — which also means every
-		download passes the same authorisation check as every other route, with no separate signing
-		scheme to get wrong.
+		Downloads stream through the Worker, so every download passes the same organisation and
+		visibility checks as every other route. Uploads do not have to: the next section is how a file
+		gets in.
 	</p>
+
+	<h2>Uploads: ask, put, confirm</h2>
+	<p>
+		An upload takes three requests. The client first asks <code>POST /api/uploads</code> for a
+		place to put the file, naming the kind of upload, the file's name, type and size. Every check
+		that kind makes runs here, before a byte moves: permission, type, size, an empty file, and
+		whether storage (and, for a document, conversion and embeddings) is configured at all. The
+		answer is a <code>PUT</code> URL that lasts 10 minutes, recorded in a
+		<code>pending_uploads</code> row.
+	</p>
+	<p>
+		The client then <code>PUT</code>s the bytes with the type and length it declared, and asks
+		<code>POST /api/uploads/:id/confirm</code>. Confirm checks the stored object's size and type
+		against the declaration — a mismatch is refused and the object deleted — and only then writes
+		the <code>files</code> row, or the document. An upload belongs to its organisation and the
+		person who started it: anyone else's upload id is a 404, and so is a second confirm. A nightly
+		task deletes the objects of uploads nobody confirmed.
+	</p>
+	<p>
+		Where the <code>PUT</code> goes depends on one setting, and the client cannot tell which. With an
+		R2 API token's key pair set, the Worker presigns a URL on R2's S3 API (the binding itself cannot
+		presign), signing the type, the length and write-once, and the file goes straight to the bucket.
+		Without the key pair the URL is the Worker's own, which holds the same rules itself; deployed,
+		it takes at most 10 MB a file. Provisioning writes the bucket's CORS rule, and local
+		development needs no R2 credentials.
+	</p>
+	<div class="why">
+		<p>
+			<strong>Why direct uploads are opt-in.</strong> The <code>FILES</code> binding cannot presign, so
+			a direct URL is signed against R2's S3 API and needs an R2 API token. Without one, every upload
+			goes through the Worker's own URL, which holds the same rules, up to 10 MB a file deployed.
+		</p>
+	</div>
+	<div class="note">
+		<p>
+			A direct upload is a single <code>PUT</code>, so 5 GiB is the ceiling, with no multipart
+			upload and no resume. A presigned URL is not spent by the confirm: for its 10 minutes it can
+			write the key again once the confirmed object is gone. The nightly task deletes such an
+			object for the kit's own targets, and a plugin owns that cleanup for its own.
+		</p>
+	</div>
 
 	<h2>The files table is the only thing the browser can name</h2>
 	<p>
@@ -82,18 +126,18 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		row's id — never by a storage key.
 	</p>
 	<p>
-		Uploads write the object first and the row second; if the insert fails, the object is deleted,
-		so there are no orphans in the bucket. Downloads are tenant-scoped lookups — another tenant's
+		Writes go object first and row second; if the insert fails, the object is deleted. Downloads
+		are tenant-scoped lookups — another tenant's
 		file is a 404, not a 403 — and carry an ETag from R2 so a repeat request is a 304.
 	</p>
 
-	<h2>Upload limits per scope, and the download default</h2>
+	<h2>Upload targets, and the download default</h2>
 	<p>
-		Upload scopes are declared once in the shared package and mirrored in the database enum. Each
-		carries its own rules: an avatar must be one of a short list of image types, everything is
-		capped by size, and an empty file is rejected outright. The JSON body limit is skipped for
-		upload routes, which mount their own larger transport cap and then enforce the exact per-file
-		limit in the handler.
+		Each kind of upload is a target with its own rules: the kit's are <code>avatars</code>,
+		<code>uploads</code> and <code>documents</code>, and a plugin adds its own. An avatar must be
+		one of a short list of image types, every target is capped by size, and an empty file is
+		rejected outright. Apart from the Worker's own upload URL, no core route takes a file in its
+		request body.
 	</p>
 	<div class="why">
 		<p>

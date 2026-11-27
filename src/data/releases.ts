@@ -681,6 +681,15 @@ export const RELEASES: Release[] = [
 		migrations: true,
 		areas: ['api', 'cli', 'db', 'shared', 'ui', 'plugins', 'config', 'docs'],
 	},
+	{
+		version: '0.46.0',
+		date: '2026-11-27',
+		summary:
+			'Files now upload straight to R2 through a URL the app signs, once you give it an R2 API token, so a large file never passes through the Worker; without a token they go through the Worker, up to 10 MB a file. Every upload is checked for permission, type and size before a byte moves, checked again once it lands, and belongs to the organisation and the person who started it. Plugins get upload targets of their own, and detach.sh now works on a clone with a long history. Upload calls in the app and the CLI change shape: the porting note has the steps.',
+		breaking: true,
+		migrations: true,
+		areas: ['api', 'cli', 'db', 'shared', 'ui', 'plugins', 'config', 'docs'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
