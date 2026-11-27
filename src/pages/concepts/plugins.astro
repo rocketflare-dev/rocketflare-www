@@ -78,7 +78,7 @@ const installMessages = [
 		<thead><tr><th>The barrel</th><th>What it carries</th></tr></thead>
 		<tbody>
 			<tr><td>Shared contracts</td><td>the plugin's schemas, job types, agent and prompt keys, permission subjects and feature flags — read by the composers that build each of those registries</td></tr>
-			<tr><td>Server</td><td>its routes, job handlers, agents, agent tools, scheduled tasks, permission grants and post-sign-up hooks</td></tr>
+			<tr><td>Server</td><td>its routes, job handlers, agents, agent tools, scheduled tasks, permission grants, upload targets and post-sign-up hooks</td></tr>
 			<tr><td>Database schema</td><td>one line re-exporting its tables, so the migration tool and the isolation tests see them exactly as they see the kit's own</td></tr>
 			<tr><td>UI</td><td>its pages, navigation entries, settings tabs and query keys</td></tr>
 			<tr><td>CLI</td><td>its commands, added after the kit's own</td></tr>
@@ -106,6 +106,14 @@ const installMessages = [
 		job or a schedule; and knowledge ingested by its upstream id, so syncing the same item again
 		updates it instead of adding a copy. The <a href="/concepts/connectors/">connectors</a> plugin is
 		the first to use all four.
+	</p>
+	<p>
+		A plugin that takes files declares upload targets rather than an upload route. Each target names
+		the permission it needs, which the host checks before anything else, so no target is open to
+		every member by omission. Its id and its storage keys sit under the plugin's id, a key anywhere
+		else is refused, and the plugin never sees the bytes in a request — it is handed the stored
+		object at confirm. The older upload paths still work, deprecated, so an installed plugin keeps
+		working until it moves.
 	</p>
 
 	<h2>Four published entries, and an id that is a namespace</h2>

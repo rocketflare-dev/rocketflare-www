@@ -8,7 +8,7 @@ const middleware = [
 	{ label: 'request logger', note: 'a request id for everything below' },
 	{ label: 'config', note: 'loadConfig(env), validated once per isolate' },
 	{ label: 'security headers', note: 'applied after the handler; a 101 passes through untouched' },
-	{ label: 'body limit', note: '1 MB JSON; upload routes mount their own larger cap' },
+	{ label: 'body limit', note: '1 MB before parsing; no core route takes a file' },
 	{ label: 'CORS', note: 'before CSRF, so preflights are answered' },
 	{ label: 'CSRF', note: 'cookie-only, no database — cheap to reject' },
 	{ label: 'database', note: 'one client per request, closed in waitUntil' },
@@ -87,7 +87,7 @@ const middleware = [
 			<tr><td>request logger</td><td>next, so everything below has a request id to log against</td></tr>
 			<tr><td>config</td><td>everything below reads the parsed config rather than raw bindings</td></tr>
 			<tr><td>security headers</td><td>applied after the handler, and returns a 101 upgrade untouched</td></tr>
-			<tr><td>body limit</td><td>before anything reads a body; upload routes mount their own larger cap</td></tr>
+			<tr><td>body limit</td><td>before anything reads a body: 1 MB, and no core route takes a file. The exceptions are the Worker’s own upload URL (10 MB deployed) and a public mount’s own cap</td></tr>
 			<tr><td>CORS</td><td>before CSRF, so preflight requests get answered rather than rejected</td></tr>
 			<tr><td>CSRF</td><td>cookie-only and cheap — reject before spending a database connection</td></tr>
 			<tr><td>database</td><td>the first real cost: one client per request, closed in <code>waitUntil</code></td></tr>
