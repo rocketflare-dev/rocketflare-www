@@ -8,13 +8,19 @@
  * release, `minKit` is the oldest kit release its manifest accepts, and the
  * install command is the repository URL at a tag.
  *
- * Every field is transcribed from the plugin's own `rocketflare-plugin.json`
- * and README — update them together.
+ * For a plugin in a public repository, the version, the tag that installs it and
+ * `minKit` are not written here: `npm run sync:plugins` reads them from the
+ * repository's tags and the manifest at the latest one into
+ * `plugin-releases.ts`, with the plugin's own changelog entries. Each plugin
+ * has its own version and tag (`<id>-vX.Y.Z`); up to 3.14.0 they shared one.
+ * Every other field is transcribed from the plugin's README — update them together.
  *
  * A commercial plugin (`availability: 'partners'`) lives in a private repository that partners
  * are given access to. It has no repository, changelog or README fields at all, so nothing here
  * can link to that repository, sync its README or print a public install command for it.
  */
+import { PLUGIN_RELEASES, type PluginReleaseEntry } from './plugin-releases.ts'
+
 /**
  * What /plugins/ groups the open-source catalogue by: the capability a plugin gives an app, so a
  * reader looking for "connect our accounting" finds FreeAgent beside Connectors, not by release
@@ -76,12 +82,19 @@ export interface PublicPlugin extends PluginBase {
 	repoLabel: string
 	/**
 	 * Where the plugin sits inside its repository, when it is not the root of one. A repository may
-	 * hold several plugins released in lockstep, so the install command needs the directory as well
-	 * as the tag.
+	 * hold several plugins, each released under its own tag, so the install command needs the
+	 * directory as well as the tag.
 	 */
 	subdir?: string
 	/** The plugin's own changelog. */
 	changelogUrl: string
+	/**
+	 * The git tag that installs `version`: `<id>-vX.Y.Z`, or a plain `X.Y.Z` for a plugin whose
+	 * latest release is from before each plugin had its own tag. Absent means the tag is `version`.
+	 */
+	tag?: string
+	/** Its releases, newest first, from the repository's changelog (`npm run sync:plugins`). */
+	releases?: PluginReleaseEntry[]
 	/** Its README or docs, when that is a different page from the repo root. */
 	docsUrl?: string
 	/**
@@ -105,6 +118,8 @@ export interface PartnerPlugin extends PluginBase {
 	repoLabel?: never
 	subdir?: never
 	changelogUrl?: never
+	tag?: never
+	releases?: never
 	docsUrl?: never
 	readme?: never
 }
@@ -112,6 +127,14 @@ export interface PartnerPlugin extends PluginBase {
 export type Plugin = PublicPlugin | PartnerPlugin
 
 const PLUGINS_REPO = 'https://github.com/rocketflare-dev/rocketflare-plugins'
+
+/** A public plugin's version, tag, `minKit` and changelog, as `npm run sync:plugins` last read them. */
+function released(id: string) {
+	const r = PLUGIN_RELEASES[id]
+	if (!r) throw new Error(`plugins: no release synced for '${id}' — run \`npm run sync:plugins\``)
+	return { version: r.version, tag: r.tag, minKit: r.minKit, releases: r.releases }
+}
+
 const KIT_REPO = 'https://github.com/rocketflare-dev/rocketflare'
 
 export const PLUGINS: Plugin[] = [
@@ -123,8 +146,7 @@ export const PLUGINS: Plugin[] = [
 		repo: PLUGINS_REPO,
 		repoLabel: 'rocketflare-dev/rocketflare-plugins',
 		subdir: 'plugins/analytics',
-		minKit: '0.41.0',
-		version: '3.14.0',
+		...released('analytics'),
 		shipsAs: 'optional',
 		summary:
 			'Dashboards, cubes, fact tables and the drizzle-cube query API — everything that used to be part of the kit, now a repository of its own.',
@@ -152,8 +174,7 @@ export const PLUGINS: Plugin[] = [
 		repo: PLUGINS_REPO,
 		repoLabel: 'rocketflare-dev/rocketflare-plugins',
 		subdir: 'plugins/web-knowledge',
-		minKit: '0.41.0',
-		version: '3.14.0',
+		...released('web-knowledge'),
 		shipsAs: 'optional',
 		summary:
 			'Lets agents and chat search the public web and read pages, on each organisation’s own search key — and only for the organisations that turn it on.',
@@ -177,8 +198,7 @@ export const PLUGINS: Plugin[] = [
 		repo: PLUGINS_REPO,
 		repoLabel: 'rocketflare-dev/rocketflare-plugins',
 		subdir: 'plugins/connectors',
-		minKit: '0.29.0',
-		version: '3.14.0',
+		...released('connectors'),
 		shipsAs: 'optional',
 		summary:
 			'Connects an organisation’s own Microsoft 365 to your app: an admin grants consent once, and its directory and calendars sync in. It holds the rows, routes and schedules; a provider plugin (today, m365) does the talking.',
@@ -204,8 +224,7 @@ export const PLUGINS: Plugin[] = [
 		repo: PLUGINS_REPO,
 		repoLabel: 'rocketflare-dev/rocketflare-plugins',
 		subdir: 'plugins/m365',
-		minKit: '0.29.0',
-		version: '3.14.0',
+		...released('m365'),
 		shipsAs: 'optional',
 		summary:
 			'Microsoft 365 as a provider for the connectors plugin, which it requires — install connectors first. One multi-tenant Entra app for your whole deployment; each customer’s admin consents to it once.',
@@ -230,8 +249,7 @@ export const PLUGINS: Plugin[] = [
 		repo: PLUGINS_REPO,
 		repoLabel: 'rocketflare-dev/rocketflare-plugins',
 		subdir: 'plugins/issue-reports',
-		minKit: '0.29.0',
-		version: '3.14.0',
+		...released('issue-reports'),
 		shipsAs: 'optional',
 		summary:
 			'Ideas & issues: anyone on the team talks a bug or an idea through with an agent, which asks until it is clear and logs it on GitHub once they approve the draft.',
@@ -257,8 +275,7 @@ export const PLUGINS: Plugin[] = [
 		repo: PLUGINS_REPO,
 		repoLabel: 'rocketflare-dev/rocketflare-plugins',
 		subdir: 'plugins/freeagent',
-		minKit: '0.41.0',
-		version: '3.14.0',
+		...released('freeagent'),
 		shipsAs: 'optional',
 		summary:
 			'Mirrors each organisation’s FreeAgent company (UK accounting) into your app, for pages, agents, analytics and the plugins you build on top. An admin approves it once, over OAuth.',
@@ -285,8 +302,7 @@ export const PLUGINS: Plugin[] = [
 		repo: PLUGINS_REPO,
 		repoLabel: 'rocketflare-dev/rocketflare-plugins',
 		subdir: 'plugins/inbox',
-		minKit: '0.41.0',
-		version: '3.14.0',
+		...released('inbox'),
 		shipsAs: 'optional',
 		summary:
 			'Inbound email for your app: forward receipts, invoices and notices to an address on your domain, and they arrive parsed, with their attachments, ready for other plugins to act on.',
@@ -313,8 +329,7 @@ export const PLUGINS: Plugin[] = [
 		repo: PLUGINS_REPO,
 		repoLabel: 'rocketflare-dev/rocketflare-plugins',
 		subdir: 'plugins/guide',
-		minKit: '0.41.0',
-		version: '3.14.0',
+		...released('guide'),
 		shipsAs: 'optional',
 		summary:
 			'An in-app user guide about your app itself: your coding agent writes it from the code, a Claude Code hook says when a change may have made it stale, and members search it and ask it questions from any screen.',
@@ -340,8 +355,7 @@ export const PLUGINS: Plugin[] = [
 		repo: PLUGINS_REPO,
 		repoLabel: 'rocketflare-dev/rocketflare-plugins',
 		subdir: 'plugins/global-search',
-		minKit: '0.31.0',
-		version: '3.14.0',
+		...released('global-search'),
 		shipsAs: 'optional',
 		summary:
 			'One ⌘K palette to go anywhere, run a command or find anything a person may see in your app — people, agents, chats and documents — and any installed plugin can add its own results and commands.',
@@ -470,14 +484,14 @@ export const publicPluginById = (id: string): PublicPlugin => {
 }
 
 /**
- * The command that installs a plugin — the repository at its tag. A vendored
+ * The command that installs a plugin — the repository at its release tag. A vendored
  * plugin has none: it is already in the tree. Nor does a commercial one: its
  * repository is private, and its page sends the reader to /partners/ instead.
  */
 export const installCommand = (p: Plugin) =>
 	isPartnerOnly(p) || p.shipsAs === 'vendored'
 		? null
-		: `pnpm plugin add ${p.repo}.git@${p.version}${p.subdir ? ` --subdir ${p.subdir}` : ''}`
+		: `pnpm plugin add ${p.repo}.git@${p.tag ?? p.version}${p.subdir ? ` --subdir ${p.subdir}` : ''}`
 
 /** The plugin's page on this site. */
 export const pluginPath = (p: Plugin | string) => `/plugins/${typeof p === 'string' ? p : p.id}/`

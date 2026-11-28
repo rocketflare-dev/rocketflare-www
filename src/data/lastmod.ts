@@ -19,7 +19,7 @@ import { execFileSync } from 'node:child_process'
 const EXTRA_SOURCES: Record<string, string[]> = {
 	'/changelog/': ['src/data/releases.ts'],
 	'/concepts/': ['src/data/concepts.ts'],
-	'/plugins/': ['src/data/plugins.ts'],
+	'/plugins/': ['src/data/plugins.ts', 'src/data/plugin-releases.ts'],
 	'/compare/': ['src/data/comparisons.ts'],
 }
 
@@ -30,7 +30,7 @@ function candidateSources(pathname: string): string[] {
 	// A plugin's page is one dynamic route over the data file and its synced README.
 	const plugin = slug.match(/^plugins\/([a-z0-9-]+)$/)
 	if (plugin) {
-		return ['src/pages/plugins/[id].astro', 'src/data/plugins.ts', `src/content/plugins/${plugin[1]}.md`]
+		return ['src/pages/plugins/[id].astro', 'src/data/plugins.ts', 'src/data/plugin-releases.ts', `src/content/plugins/${plugin[1]}.md`]
 	}
 	// A security document is one dynamic route over the copy `sync:security` vendors.
 	const securityDoc = slug.match(/^security\/(threat-model|audit|policy)$/)
