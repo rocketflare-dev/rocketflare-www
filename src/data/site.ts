@@ -1,5 +1,7 @@
 /** Every external destination the site links to, in one place. */
 export const GITHUB_URL = 'https://github.com/rocketflare-dev/rocketflare'
+/** Rocketpod: the same kit on Node, Postgres and S3 (`/rocketpod/`). */
+export const ROCKETPOD_GITHUB_URL = 'https://github.com/rocketflare-dev/rocketpod'
 export const DRIZZLE_CUBE_URL = 'https://try.drizzle-cube.dev'
 
 const DOCS = `${GITHUB_URL}/blob/main`

@@ -1,0 +1,172 @@
+---
+/**
+ * Rocketpod: the same kit on Node, Postgres and S3, for teams that cannot run on Cloudflare.
+ * Deliberately low-key (footer only, not the nav): Rocketflare is the kit this site is about,
+ * and this page is for the reader who has already decided Cloudflare is not an option for them.
+ * Every claim here must hold for Rocketpod's README and docs/FORK.md.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro'
+import SectionHead from '../components/SectionHead.astro'
+import { pageByPath } from '../data/pages'
+import { ROCKETPOD_GITHUB_URL } from '../data/site'
+
+const page = pageByPath('/rocketpod/')
+if (!page) throw new Error('Page not in the registry: /rocketpod/')
+
+const FORK_URL = `${ROCKETPOD_GITHUB_URL}/blob/main/docs/FORK.md`
+const DEPLOY_URL = `${ROCKETPOD_GITHUB_URL}/blob/main/docs/DEPLOY.md`
+const RELEASES_URL = `${ROCKETPOD_GITHUB_URL}/releases`
+
+interface Row {
+	what: string
+	rocketflare: string
+	rocketpod: string
+}
+
+const rows: Row[] = [
+	{ what: 'Runs as', rocketflare: 'Cloudflare Workers', rocketpod: 'One Node server in a container' },
+	{ what: 'Database', rocketflare: 'Neon, or Postgres through Hyperdrive', rocketpod: 'Any Postgres 17 with pgvector' },
+	{ what: 'Jobs and cron', rocketflare: 'Queues and cron triggers', rocketpod: 'pg-boss, in Postgres' },
+	{ what: 'Durable agent runs', rocketflare: 'Workflows', rocketpod: 'OpenWorkflow, in Postgres' },
+	{ what: 'Realtime', rocketflare: 'Durable Objects', rocketpod: 'WebSockets with LISTEN/NOTIFY' },
+	{ what: 'Files', rocketflare: 'R2', rocketpod: 'Any S3-compatible store' },
+	{ what: 'Deploys with', rocketflare: 'wrangler', rocketpod: 'Docker Compose, Helm or AWS ECS' },
+]
+---
+<BaseLayout title={page.title} description={page.description} noindex={!page.ready}>
+	<header class="hero page-hero bg-sky">
+		<div class="wrap">
+			<span class="eyebrow">Can't use Cloudflare?</span>
+			<h1>Rocketpod: the same kit, in a container</h1>
+			<p class="lede">
+				Rocketpod is Rocketflare ported to Node, Postgres and an S3-compatible store. It is one
+				image you run on your own infrastructure, with the same product inside.
+			</p>
+		</div>
+	</header>
+
+	<section class="block">
+		<div class="wrap">
+			<SectionHead align="left" eyebrow="The same" title="Everything you build on stays the same" />
+			<div class="split">
+				<div class="main">
+					<p>
+						Tenancy, sign-in, roles and permissions, chat and agents over your documents, the CLI, the
+						in-app Guide and the codebase written for a coding agent are all in Rocketpod, and work
+						the same way.
+					</p>
+					<p>
+						Plugins install into both. <code>pnpm plugin add</code> translates a Rocketflare plugin
+						into Rocketpod's names as it copies it in, and a plugin reaches jobs, storage and realtime
+						through its context, so it never needs to know which runtime it is on.
+					</p>
+				</div>
+				<aside class="why">
+					<h3>When to pick it</h3>
+					<p>
+						When your company runs its own Kubernetes or AWS, or your data has to stay in your own
+						cloud account. If Cloudflare is an option, start with Rocketflare. It is the kit this
+						site documents, and it gets every change first.
+					</p>
+				</aside>
+			</div>
+		</div>
+	</section>
+
+	<section class="block bg-band">
+		<div class="wrap">
+			<SectionHead align="left" eyebrow="Different" title="What runs underneath" />
+			<table class="compare">
+				<thead>
+					<tr><th scope="col"></th><th scope="col">Rocketflare</th><th scope="col">Rocketpod</th></tr>
+				</thead>
+				<tbody>
+					{rows.map((r) => (
+						<tr><th scope="row">{r.what}</th><td>{r.rocketflare}</td><td>{r.rocketpod}</td></tr>
+					))}
+				</tbody>
+			</table>
+			<p class="note">
+				Rocketpod's <a href={DEPLOY_URL} target="_blank" rel="noopener">deploy guide</a> covers
+				Compose, the Helm chart and ECS.
+			</p>
+		</div>
+	</section>
+
+	<section class="block">
+		<div class="wrap">
+			<SectionHead align="left" eyebrow="Kept in step" title="It follows every Rocketflare release" />
+			<div class="split">
+				<div class="main">
+					<p>
+						Each Rocketflare release is ported into Rocketpod by hand, with its tests, and Rocketpod
+						takes the same version number. So a plugin that needs kit 0.46.0 means the same thing in
+						both.
+					</p>
+					<p>
+						What each change became on Node is recorded in
+						<a href={FORK_URL} target="_blank" rel="noopener">docs/FORK.md</a>, and Rocketpod's own
+						releases are on <a href={RELEASES_URL} target="_blank" rel="noopener">GitHub</a>.
+					</p>
+				</div>
+				<aside class="why">
+					<h3>Same licence</h3>
+					<p>
+						Rocketpod is MIT too, on the <a href="/license/">same terms</a> as Rocketflare.
+					</p>
+				</aside>
+			</div>
+			<div class="actions">
+				<a class="btn btn-primary" href={ROCKETPOD_GITHUB_URL} target="_blank" rel="noopener">Rocketpod on GitHub</a>
+			</div>
+		</div>
+	</section>
+</BaseLayout>
+
+<style>
+	.hero { border-bottom: 1px solid var(--border); }
+	.hero .lede { max-width: 70ch; }
+	.block { padding: 3.5rem 0; }
+	.block p { color: var(--text-muted); }
+	.block.bg-band p { color: var(--band-muted); }
+
+	.split {
+		display: grid;
+		grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+		gap: 2.5rem;
+		align-items: start;
+	}
+	.main p:first-child { margin-top: 0; }
+	.why {
+		padding: 1.4rem 1.6rem;
+		border: 1px solid var(--border);
+		border-radius: 18px;
+		background: var(--card);
+		box-shadow: var(--shadow-sm);
+	}
+	.why h3 { margin: 0 0 0.5rem; font-size: 1.05rem; color: var(--text-bright); }
+	.why p { color: var(--text-muted); margin: 0; }
+	.actions { display: flex; flex-wrap: wrap; gap: 0.9rem; margin-top: 1.6rem; }
+
+	.compare { width: 100%; border-collapse: collapse; margin-top: 1.2rem; }
+	.compare th, .compare td {
+		text-align: left;
+		padding: 0.8rem 1rem 0.8rem 0;
+		border-top: 1px solid color-mix(in srgb, var(--band-ink) 14%, transparent);
+		vertical-align: baseline;
+	}
+	.compare tbody tr:last-child th, .compare tbody tr:last-child td {
+		border-bottom: 1px solid color-mix(in srgb, var(--band-ink) 14%, transparent);
+	}
+	.compare thead th { color: var(--band-ink); font-weight: 800; border-top: none; }
+	.compare tbody th { color: var(--band-ink); font-weight: 600; }
+	.compare td { color: var(--band-muted); }
+	.note { margin-top: 1.2rem; }
+
+	@media (max-width: 900px) {
+		.split { grid-template-columns: minmax(0, 1fr); gap: 1.5rem; }
+	}
+	@media (max-width: 640px) {
+		.compare th, .compare td { padding-right: 0.6rem; font-size: 0.93rem; }
+	}
+</style>
