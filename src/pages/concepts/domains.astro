@@ -1,0 +1,103 @@
+---
+import ConceptLayout from '../../layouts/ConceptLayout.astro'
+---
+<ConceptLayout
+	slug="domains"
+	source={[
+		'docs/POSITIONING.md',
+		'apps/web/src/app.ts',
+		'apps/web/src/example-hr/',
+		'apps/web/src/example-sales/',
+		'apps/web/src/units/server.ts',
+		'packages/shared/src/units.ts',
+		'scripts/lib/units.mjs',
+		'apps/web/tests/config/units.test.ts',
+	]}
+>
+	<h2>One app, many domains</h2>
+	<p>
+		A business that runs one process on the kit soon wants a second: expenses after purchase orders,
+		leave requests after timesheets. From kit 0.47.0 the second process goes into the app it already
+		has, as another <em>domain</em>, not into a new copy. The people, the organisations, the roles,
+		sign-in, the knowledge base, the agents and the audit trail are already there, and an agent can
+		work across both processes in one run, because both sets of tools belong to the same person.
+	</p>
+	<p>
+		The rule for where code goes is one sentence. A domain holds this app's own concepts and logic:
+		its orders, its leave requests, the rules for approving them. A <a href="/concepts/plugins/">plugin</a>
+		is a reusable capability that works across domains and across apps: single sign-on, analytics, a
+		CMS, a connector to an outside system.
+	</p>
+
+	<h2>A unit is a plugin or a domain</h2>
+	<p>
+		Both are <em>units</em>. Each has an id that doubles as its namespace, the same slots (routes,
+		tables, jobs, events, tools, agents, prompts, pages, permissions) and the same naming rules, and
+		every registry in the app reads them through one list: the installed plugins first, then the
+		domains. The difference is how they arrive.
+	</p>
+	<table>
+		<thead><tr><th></th><th>Domain</th><th>Plugin</th></tr></thead>
+		<tbody>
+			<tr><td>Holds</td><td>this app's own process</td><td>a capability other apps want too</td></tr>
+			<tr><td>Lives</td><td>in place, under <code>apps/web/src/&lt;id&gt;/</code></td><td>in its own git repository, copied in</td></tr>
+			<tr><td>Wired by</td><td>one line in each of the app's own lists, written by hand</td><td><code>pnpm plugin add</code>, which writes the barrel lines</td></tr>
+			<tr><td>Manifest</td><td>none</td><td><code>plugin.json</code>, with its requirements</td></tr>
+			<tr><td>Kit upgrades</td><td>never touch it</td><td>never touch it; it has its own releases</td></tr>
+		</tbody>
+	</table>
+	<p>
+		A domain is declared with <code>defineDomain</code> and listed in <code>src/app.ts</code> and its
+		four twins, one each for the pages, the tables, the shared contracts and the command line. Those
+		lists belong to the app: a kit upgrade creates them empty in a copy that has none and never writes
+		to them again.
+	</p>
+	<div class="why">
+		<p>
+			<strong>Why not a plugin for everything.</strong> A plugin carries a manifest, a repository and
+			an install step, which is the right price for something several apps share. For a process only
+			this app has, that is ceremony with nothing to show for it. A domain keeps the same boundaries
+			and drops the packaging.
+		</p>
+	</div>
+
+	<h2>How two domains talk to each other</h2>
+	<p>
+		Each kind of coupling has one rule. When something happened, one domain emits an event and the
+		other handles it, with no import between them. When one domain needs a synchronous read or command
+		from another, it calls that domain's <code>public.ts</code>, which takes the caller's context so the
+		owner's rules apply, and only when its <code>dependsOn</code> names the other domain. When an agent
+		needs both, it is one run: its tools already hold every unit's tools for the person who started it.
+	</p>
+	<p>
+		The kit ships two example domains in a fresh copy. <code>example-hr</code> holds leave requests and
+		an approval event. <code>example-sales</code> holds leads, refuses to assign one while its owner is on
+		leave by asking <code>example-hr</code>, releases leads when leave is approved, and has an agent that
+		uses both domains' tools. They exist to be read and deleted, and an upgraded copy never receives them.
+	</p>
+
+	<h2>One boundary check over every unit</h2>
+	<p>
+		A test and <code>pnpm plugin check</code> run the same boundary check over plugins and domains
+		together. It fails a domain that reaches into another domain's internals, or into one its
+		<code>dependsOn</code> does not list; a cycle between domains; a plugin that imports a domain; a
+		table outside its unit's namespace; and two units that claim the same table, job type, event or
+		route. <code>pnpm plugin add</code> runs the id and table half before it copies anything, so a
+		plugin cannot land on top of a domain's names.
+	</p>
+	<div class="note">
+		<p>
+			A domain cannot add sign-in methods, single sign-on policies, public sites or a new
+			<code>/api</code> prefix: identity and public hosts stay plugin capabilities. And there are no
+			per-domain roles or budgets yet; a domain's permissions are the organisation's roles.
+		</p>
+	</div>
+
+	<h2>An app-owned plugin stays a plugin</h2>
+	<p>
+		A copy made before domains existed may hold its own processes as plugins in its own tree. They keep
+		working, and each is already a unit. Moving one into a domain is the owner's choice, and the kit's
+		concepts document has the recipe: copy the trees out, remove the plugin, declare the domain and list
+		it. It keeps the id and every table name, so there is no migration and no data to move.
+	</p>
+</ConceptLayout>

@@ -116,7 +116,8 @@ globs:
 	<p>
 		That gate runs lint, typecheck, test and build. It is the same command before every commit, as
 		the single CI job, and in a coding sandbox's ship gate, so nothing passes in one place and fails
-		in another. It starts its own test database.
+		in another. It starts its own test database, and each checkout gets a database of its own on
+		it, so two worktrees running the suite at once never touch each other's tables.
 	</p>
 	<p>
 		While you work, <code>pnpm gate --changed</code> runs the same four steps over only what your

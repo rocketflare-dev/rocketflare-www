@@ -146,8 +146,10 @@ import DiagramSteps from '../../components/DiagramSteps.astro'
 	</p>
 	<p>
 		A run whose workflow instance has vanished is reconciled the next time somebody reads it: the
-		read asks the workflow engine for the instance status and settles the row accordingly. There is
-		no sweeper cron, because the only rows anybody cares about are the ones somebody is looking at.
+		read asks the workflow engine for the instance status and settles the row accordingly. For the
+		runs nobody is looking at, an hourly sweep does the same for up to a hundred rows at a time and
+		sends any reminders that are due. Hourly rather than every few minutes, so an idle Neon database
+		can suspend between sweeps.
 	</p>
 
 	<h2>Realtime: a Durable Object per tenant, nudges not payloads</h2>

@@ -255,6 +255,12 @@ const installMessages = [
 		as plugins from the start and are added only when you want them. Chat, agents and knowledge remain core, and every copy has
 		them.
 	</p>
+	<p>
+		A plugin is for a capability several apps want. Your app's own processes, from kit 0.47.0, are
+		<a href="/concepts/domains/">app domains</a>: the same slots and namespaces, written in place and
+		listed by hand, with no manifest and no install step. Plugins and domains are both units, and one
+		boundary check covers them together.
+	</p>
 	<div class="note">
 		<p>
 			There is no third-party trust model — no sandbox, no review, no signature. "First-party only"
