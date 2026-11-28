@@ -24,10 +24,12 @@ export interface PluginRelease {
 
 export const PLUGIN_RELEASES: Record<string, PluginRelease> = {
 	'analytics': {
-		version: '3.15.0',
-		tag: 'analytics-v3.15.0',
-		minKit: '0.47.0',
+		version: '3.16.0',
+		tag: 'analytics-v3.16.0',
+		minKit: '0.48.0',
 		releases: [
+			{ version: '3.16.0', date: '2026-11-28', tag: 'analytics-v3.16.0', noChange: false,
+				html: '<p>Analytics stops for an organisation that turned it off (kit 0.48.0\'s kill switch), and <code>pnpm plugin check</code> no longer warns about it. The plugin needs kit 0.48.0 or later. <a href="https://github.com/rocketflare-dev/rocketflare-plugins/blob/analytics-v3.16.0/plugins/analytics/docs/upgrades/3.16.0.md" target="_blank" rel="noopener">Porting note</a>.</p>' },
 			{ version: '3.15.0', date: '2026-11-28', tag: 'analytics-v3.15.0', noChange: false,
 				html: '<p>Analytics\' cube tools answer <code>egress</code> and <code>readsContent</code>, so <code>pnpm plugin check</code> no longer warns about them, and the plugin needs kit 0.47.0 or later. <a href="https://github.com/rocketflare-dev/rocketflare-plugins/blob/analytics-v3.15.0/plugins/analytics/docs/upgrades/3.15.0.md" target="_blank" rel="noopener">Porting note</a>.</p>' },
 			{ version: '3.14.0', date: '2026-11-22', tag: '3.14.0', noChange: false,
@@ -77,10 +79,12 @@ export const PLUGIN_RELEASES: Record<string, PluginRelease> = {
 		],
 	},
 	'web-knowledge': {
-		version: '3.15.0',
-		tag: 'web-knowledge-v3.15.0',
-		minKit: '0.47.0',
+		version: '3.16.0',
+		tag: 'web-knowledge-v3.16.0',
+		minKit: '0.48.0',
 		releases: [
+			{ version: '3.16.0', date: '2026-11-28', tag: 'web-knowledge-v3.16.0', noChange: false,
+				html: '<p><code>pnpm plugin check</code> no longer warns that <code>webTools</code> is exported without <code>definePublic</code>. The plugin needs kit 0.48.0 or later. <a href="https://github.com/rocketflare-dev/rocketflare-plugins/blob/web-knowledge-v3.16.0/plugins/web-knowledge/docs/upgrades/3.16.0.md" target="_blank" rel="noopener">Porting note</a>.</p>' },
 			{ version: '3.15.0', date: '2026-11-28', tag: 'web-knowledge-v3.15.0', noChange: false,
 				html: '<p>Web knowledge\'s tools answer <code>egress</code> and <code>readsContent</code>, so <code>pnpm plugin check</code> no longer warns about them, and the plugin needs kit 0.47.0 or later. <a href="https://github.com/rocketflare-dev/rocketflare-plugins/blob/web-knowledge-v3.15.0/plugins/web-knowledge/docs/upgrades/3.15.0.md" target="_blank" rel="noopener">Porting note</a>.</p>' },
 			{ version: '3.14.0', date: '2026-11-22', tag: '3.14.0', noChange: false,
@@ -128,10 +132,12 @@ export const PLUGIN_RELEASES: Record<string, PluginRelease> = {
 		],
 	},
 	'connectors': {
-		version: '3.15.0',
-		tag: 'connectors-v3.15.0',
-		minKit: '0.29.0',
+		version: '3.16.0',
+		tag: 'connectors-v3.16.0',
+		minKit: '0.48.0',
 		releases: [
+			{ version: '3.16.0', date: '2026-11-28', tag: 'connectors-v3.16.0', noChange: false,
+				html: '<p>Connectors stops for an organisation that turned it off (kit 0.48.0\'s kill switch), and <code>pnpm plugin check</code> no longer warns about it. The plugin needs kit 0.48.0 or later (it declared 0.29.0 before). <a href="https://github.com/rocketflare-dev/rocketflare-plugins/blob/connectors-v3.16.0/plugins/connectors/docs/upgrades/3.16.0.md" target="_blank" rel="noopener">Porting note</a>.</p>' },
 			{ version: '3.15.0', date: '2026-11-28', tag: 'connectors-v3.15.0', noChange: false,
 				html: '<p>The sync cron runs hourly, at <code>17 * * * *</code>, instead of every 15 minutes (<code>*/15 * * * *</code>). <a href="https://github.com/rocketflare-dev/rocketflare-plugins/blob/connectors-v3.15.0/plugins/connectors/docs/upgrades/3.15.0.md" target="_blank" rel="noopener">Porting note</a>.</p>' },
 			{ version: '3.14.0', date: '2026-11-22', tag: '3.14.0', noChange: true,
@@ -249,10 +255,12 @@ export const PLUGIN_RELEASES: Record<string, PluginRelease> = {
 		],
 	},
 	'freeagent': {
-		version: '3.16.0',
-		tag: 'freeagent-v3.16.0',
-		minKit: '0.47.0',
+		version: '3.17.0',
+		tag: 'freeagent-v3.17.0',
+		minKit: '0.48.0',
 		releases: [
+			{ version: '3.17.0', date: '2026-11-28', tag: 'freeagent-v3.17.0', noChange: false,
+				html: '<p>FreeAgent stops for an organisation that turned it off (kit 0.48.0\'s kill switch), including when another plugin calls its service API, and <code>pnpm plugin check</code> no longer warns about it. The plugin needs kit 0.48.0 or later. <a href="https://github.com/rocketflare-dev/rocketflare-plugins/blob/freeagent-v3.17.0/plugins/freeagent/docs/upgrades/3.17.0.md" target="_blank" rel="noopener">Porting note</a>.</p>' },
 			{ version: '3.16.0', date: '2026-11-28', tag: 'freeagent-v3.16.0', noChange: false,
 				html: '<p>The sync cron runs hourly, at <code>18 * * * *</code>, instead of every 30 minutes (<code>*/30 * * * *</code>). <a href="https://github.com/rocketflare-dev/rocketflare-plugins/blob/freeagent-v3.16.0/plugins/freeagent/docs/upgrades/3.16.0.md" target="_blank" rel="noopener">Porting note</a>.</p>' },
 			{ version: '3.15.0', date: '2026-11-28', tag: 'freeagent-v3.15.0', noChange: false,
@@ -282,10 +290,12 @@ export const PLUGIN_RELEASES: Record<string, PluginRelease> = {
 		],
 	},
 	'inbox': {
-		version: '3.15.0',
-		tag: 'inbox-v3.15.0',
-		minKit: '0.47.0',
+		version: '3.16.0',
+		tag: 'inbox-v3.16.0',
+		minKit: '0.48.0',
 		releases: [
+			{ version: '3.16.0', date: '2026-11-28', tag: 'inbox-v3.16.0', noChange: false,
+				html: '<p>The two readers other plugins call stop for an organisation that turned inbox off (kit 0.48.0\'s kill switch), and <code>pnpm plugin check</code> no longer warns about them. The plugin needs kit 0.48.0 or later. <a href="https://github.com/rocketflare-dev/rocketflare-plugins/blob/inbox-v3.16.0/plugins/inbox/docs/upgrades/3.16.0.md" target="_blank" rel="noopener">Porting note</a>.</p>' },
 			{ version: '3.15.0', date: '2026-11-28', tag: 'inbox-v3.15.0', noChange: false,
 				html: '<p>Inbox\'s tools answer <code>egress</code> and <code>readsContent</code>, so <code>pnpm plugin check</code> no longer warns about them, and the plugin needs kit 0.47.0 or later. <a href="https://github.com/rocketflare-dev/rocketflare-plugins/blob/inbox-v3.15.0/plugins/inbox/docs/upgrades/3.15.0.md" target="_blank" rel="noopener">Porting note</a>.</p>' },
 			{ version: '3.14.0', date: '2026-11-22', tag: '3.14.0', noChange: false,
@@ -313,10 +323,12 @@ export const PLUGIN_RELEASES: Record<string, PluginRelease> = {
 		],
 	},
 	'guide': {
-		version: '3.15.0',
-		tag: 'guide-v3.15.0',
-		minKit: '0.47.0',
+		version: '3.16.0',
+		tag: 'guide-v3.16.0',
+		minKit: '0.48.0',
 		releases: [
+			{ version: '3.16.0', date: '2026-11-28', tag: 'guide-v3.16.0', noChange: false,
+				html: '<p>The daily index task says it spans every organisation, so kit 0.48.0\'s config test no longer warns about it. The plugin needs kit 0.48.0 or later. <a href="https://github.com/rocketflare-dev/rocketflare-plugins/blob/guide-v3.16.0/plugins/guide/docs/upgrades/3.16.0.md" target="_blank" rel="noopener">Porting note</a>.</p>' },
 			{ version: '3.15.0', date: '2026-11-28', tag: 'guide-v3.15.0', noChange: false,
 				html: '<p>Guide\'s <code>search_guide</code> tool answers <code>egress</code> and <code>readsContent</code>, so <code>pnpm plugin check</code> no longer warns about it, and the plugin needs kit 0.47.0 or later. <a href="https://github.com/rocketflare-dev/rocketflare-plugins/blob/guide-v3.15.0/plugins/guide/docs/upgrades/3.15.0.md" target="_blank" rel="noopener">Porting note</a>.</p>' },
 			{ version: '3.14.0', date: '2026-11-22', tag: '3.14.0', noChange: false,
