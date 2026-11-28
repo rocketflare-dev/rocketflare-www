@@ -222,6 +222,16 @@ export const CONCEPTS: Concept[] = [
 		anchor: '17-connectors',
 		group: 'product',
 	},
+	{
+		slug: 'domains',
+		num: '18',
+		title: 'App domains',
+		blurb: 'A second process goes into the app you already have, as a domain beside its plugins: the same slots and namespaces, one line per list, and one boundary check over both.',
+		tone: 'blue',
+		icon: 'layers',
+		anchor: '20-app-domains',
+		group: 'foundation',
+	},
 ]
 
 export const conceptBySlug = (slug: string) => CONCEPTS.find((c) => c.slug === slug)

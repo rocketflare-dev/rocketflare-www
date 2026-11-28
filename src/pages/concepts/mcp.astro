@@ -131,6 +131,15 @@ import Terminal from '../../components/Terminal.astro'
 		appear under the plugin's name in Settings → MCP. The <a href="/concepts/analytics/">analytics
 		plugin</a> offers its cube queries this way, to MCP clients and agent runs but not to chat.
 	</p>
+	<p>
+		From kit 0.47.0 a tool also answers one governance question: can it send your data outside your
+		organisation, by email, a webhook, a web request or by publishing a page? That is its
+		<code>egress</code> field, answered from what the handler itself does; calling the app's own
+		models is not egress. A second field, <code>readsContent</code>, says whether it hands organisation
+		text to a model. Every kit tool answers both. The gate and <code>pnpm plugin check</code> warn for
+		any tool, in the app, a plugin or a domain, that leaves <code>egress</code> unanswered; a later
+		release makes the answer required.
+	</p>
 
 	<h2>Adding a tool with a coding agent</h2>
 	<p>

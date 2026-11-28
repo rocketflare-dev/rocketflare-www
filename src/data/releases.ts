@@ -699,6 +699,15 @@ export const RELEASES: Release[] = [
 		migrations: false,
 		areas: ['api', 'cli', 'db', 'shared', 'ui', 'plugins', 'config', 'docs', 'scripts'],
 	},
+	{
+		version: '0.47.0',
+		date: '2026-11-28',
+		summary:
+			'A second process goes into the app you already have, as an app domain beside its plugins, under one boundary check. Tools now say whether they can send data outside your organisation, plugins can release on their own version tags, every checkout tests on a database of its own, and the agent-run sweep runs hourly so an idle database can sleep.',
+		breaking: false,
+		migrations: true,
+		areas: ['api', 'ui', 'cli', 'db', 'plugin', 'tooling', 'docs', 'config', 'scripts', 'plugins'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */

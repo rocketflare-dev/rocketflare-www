@@ -240,8 +240,8 @@ const embeddingTiers = [
 		nudge over the websocket tells any open viewer to re-read. Cancellation is cooperative — a
 		request marks the row and the run checks between turns — and reads reconcile, asking the workflow
 		engine about any run that still claims to be active and settling it if the engine has never
-		heard of it. There is no sweeper cron, because reconcile-on-read covers the same ground at the
-		moment somebody actually cares.
+		heard of it. An hourly sweep settles the runs nobody reads, so a lost run is closed within the
+		hour even if no one opens it.
 	</p>
 
 	<h2>Agents at volume: batches, fan-out, budgets and policies</h2>
