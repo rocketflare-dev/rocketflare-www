@@ -128,10 +128,12 @@ export const PLUGIN_RELEASES: Record<string, PluginRelease> = {
 		],
 	},
 	'connectors': {
-		version: '3.14.0',
-		tag: '3.14.0',
+		version: '3.15.0',
+		tag: 'connectors-v3.15.0',
 		minKit: '0.29.0',
 		releases: [
+			{ version: '3.15.0', date: '2026-11-28', tag: 'connectors-v3.15.0', noChange: false,
+				html: '<p>The sync cron runs hourly, at <code>17 * * * *</code>, instead of every 15 minutes (<code>*/15 * * * *</code>). <a href="https://github.com/rocketflare-dev/rocketflare-plugins/blob/connectors-v3.15.0/plugins/connectors/docs/upgrades/3.15.0.md" target="_blank" rel="noopener">Porting note</a>.</p>' },
 			{ version: '3.14.0', date: '2026-11-22', tag: '3.14.0', noChange: true,
 				html: '<p>No change to connectors: this release carries the analytics, freeagent, guide, inbox and web-knowledge changes, and every plugin in this repository ships at one version. <a href="https://github.com/rocketflare-dev/rocketflare-plugins/blob/3.14.0/plugins/connectors/docs/upgrades/3.14.0.md" target="_blank" rel="noopener">Porting note</a>.</p>' },
 			{ version: '3.13.3', date: '2026-11-22', tag: '3.13.3', noChange: false,
@@ -247,10 +249,12 @@ export const PLUGIN_RELEASES: Record<string, PluginRelease> = {
 		],
 	},
 	'freeagent': {
-		version: '3.15.0',
-		tag: 'freeagent-v3.15.0',
+		version: '3.16.0',
+		tag: 'freeagent-v3.16.0',
 		minKit: '0.47.0',
 		releases: [
+			{ version: '3.16.0', date: '2026-11-28', tag: 'freeagent-v3.16.0', noChange: false,
+				html: '<p>The sync cron runs hourly, at <code>18 * * * *</code>, instead of every 30 minutes (<code>*/30 * * * *</code>). <a href="https://github.com/rocketflare-dev/rocketflare-plugins/blob/freeagent-v3.16.0/plugins/freeagent/docs/upgrades/3.16.0.md" target="_blank" rel="noopener">Porting note</a>.</p>' },
 			{ version: '3.15.0', date: '2026-11-28', tag: 'freeagent-v3.15.0', noChange: false,
 				html: '<p>FreeAgent\'s tools answer <code>egress</code> and <code>readsContent</code>, so <code>pnpm plugin check</code> no longer warns about them, and the plugin needs kit 0.47.0 or later. <a href="https://github.com/rocketflare-dev/rocketflare-plugins/blob/freeagent-v3.15.0/plugins/freeagent/docs/upgrades/3.15.0.md" target="_blank" rel="noopener">Porting note</a>.</p>' },
 			{ version: '3.14.0', date: '2026-11-22', tag: '3.14.0', noChange: false,

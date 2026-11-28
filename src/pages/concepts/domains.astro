@@ -12,6 +12,10 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		'packages/shared/src/units.ts',
 		'scripts/lib/units.mjs',
 		'apps/web/tests/config/units.test.ts',
+		'apps/web/src/permissions/domains.ts',
+		'apps/web/src/api/services/domain-switch.ts',
+		'apps/web/src/api/services/budgets.ts',
+		'apps/web/src/ui/pages/settings/DomainAccess.tsx',
 	]}
 >
 	<h2>One app, many domains</h2>
@@ -66,7 +70,10 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		Each kind of coupling has one rule. When something happened, one domain emits an event and the
 		other handles it, with no import between them. When one domain needs a synchronous read or command
 		from another, it calls that domain's <code>public.ts</code>, which takes the caller's context so the
-		owner's rules apply, and only when its <code>dependsOn</code> names the other domain. When an agent
+		owner's rules apply, and only when its <code>dependsOn</code> names the other domain. From kit 0.48.0
+		<code>dependsOn</code> may name an installed plugin too, so a domain that reads from one says so, and
+		each function in <code>public.ts</code> is wrapped in <code>definePublic</code>, which refuses the
+		call while the owner is switched off for that organisation. When an agent
 		needs both, it is one run: its tools already hold every unit's tools for the person who started it.
 	</p>
 	<p>
@@ -85,13 +92,69 @@ import ConceptLayout from '../../layouts/ConceptLayout.astro'
 		route. <code>pnpm plugin add</code> runs the id and table half before it copies anything, so a
 		plugin cannot land on top of a domain's names.
 	</p>
+	<p>
+		It also fails a domain's public function that is not wrapped in <code>definePublic</code>, and a
+		domain's schedule that fires more than once an hour or loops over organisations by hand instead of
+		using <code>perTenantTask</code>, which the kit runs once per organisation and skips where the
+		domain is off. It warns when a domain imports a plugin its <code>dependsOn</code> does not list. A
+		plugin gets the same three as warnings for now, so nothing already published breaks.
+	</p>
 	<div class="note">
 		<p>
 			A domain cannot add sign-in methods, single sign-on policies, public sites or a new
-			<code>/api</code> prefix: identity and public hosts stay plugin capabilities. And there are no
-			per-domain roles or budgets yet; a domain's permissions are the organisation's roles.
+			<code>/api</code> prefix: identity and public hosts stay plugin capabilities.
 		</p>
 	</div>
+
+	<h2>Roles inside a domain</h2>
+	<p>
+		By default a domain's permissions are the organisation's roles. From kit 0.48.0 an admin can also
+		give a group a role inside one domain or plugin: <code>member</code> or <code>admin</code>. A grant
+		raises the group's members for that unit's own subjects and nothing else. The finance team can run
+		expenses without becoming organisation admins, and no grant ever reaches members, billing or
+		another unit. In code, <code>ctx.isUnitAdmin</code> answers for the unit and <code>ctx.isAdmin</code>
+		still answers for the organisation, so each check says which it means.
+	</p>
+	<p>
+		Every agent run and chat thread records the unit that owns it, so a domain's admins see that
+		domain's runs, approve its agents' requests and get its notifications, beside the organisation's
+		admins. With no grants, everyone sees exactly what they saw before.
+	</p>
+
+	<h2>Who can open it, and turning it off</h2>
+	<p>
+		Each unit has an access mode per organisation. <code>tenant</code>, the default, opens it to
+		everyone in the organisation. <code>groups</code> opens it only to the groups that hold a grant in
+		it, and to the organisation's admins. A unit someone cannot open is gone for them: its pages, nav,
+		cards and settings tabs are hidden, its routes answer 404, and chat, agents and MCP get none of its
+		tools or knowledge. A domain can declare <code>groups</code> as its default in code.
+	</p>
+	<p>
+		The kill switch turns a unit off for one organisation, admins included. The kit enforces it, not
+		each author: queued runs are cancelled at their next step, its jobs and event handlers are skipped,
+		and its public functions, scheduled tasks and public routes refuse. That is what
+		<code>definePublic</code> and <code>perTenantTask</code> are for.
+	</p>
+
+	<h2>Budgets per domain</h2>
+	<p>
+		Spend and concurrency are checked as a chain: the run, then its agent, then its domain, then the
+		organisation. A domain declares a daily cost ceiling and a cap on active runs in code, an agent can
+		do the same, and an organisation's admin may lower either but never raise it above what the code
+		says. Every metered AI call records its unit, so a domain's spend today is one number. The kit's
+		own chat gets daily caps per organisation and per person. Leave them unset and nothing is capped
+		that was not before.
+	</p>
+
+	<h2>One screen for all of it</h2>
+	<p>
+		Settings → Domains opens on a diagram of how every domain and plugin reads from the others, drawn
+		from their <code>dependsOn</code>, with any unit that is switched off dimmed. Each unit then has
+		its own view: the groups granted a role in it, its access mode, its on/off switch, its budget
+		override, and what it depends on and what depends on it. Turning off a plugin that a domain reads
+		from asks first and names the domain. With nothing set, the screen says everyone keeps their
+		organisation role.
+	</p>
 
 	<h2>An app-owned plugin stays a plugin</h2>
 	<p>

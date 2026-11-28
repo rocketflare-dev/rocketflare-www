@@ -205,7 +205,7 @@ export const PLUGINS: Plugin[] = [
 		adds: [
 			'<strong>A connection per organisation</strong> — Settings → Connections: pick a provider, send the organisation’s admin through consent, and watch the sync. Disconnecting deletes everything that was synced.',
 			'<strong>The directory and calendars</strong> — people, groups and memberships, plus the calendars of people who are members of your app, matched to them by email. Members see only their own events; admins see everyone’s.',
-			'<strong>Delta sync on a schedule</strong> — every 15 minutes, each resource resumes from where the provider’s own change feed left off, with a claim row so two runs never sync the same thing at once.',
+			'<strong>Delta sync on a schedule</strong> — hourly, each resource resumes from where the provider’s own change feed left off, with a claim row so two runs never sync the same thing at once.',
 			'<strong>Seven tables</strong> — installations, connections, sync cursors, users, groups, memberships and events, each with the same row-level-security policy as everything else. Secrets are encrypted at rest and never sent back.',
 			'<strong>Commands</strong> — <code>rocketflare connectors status</code> for counts and sync progress, and <code>rocketflare connectors sync</code> to run one now.',
 			'<strong>An agent skill</strong> — <code>connectors</code> registers the Entra app for you with the Azure CLI, stores the secret without printing it, walks a customer’s admin through consent, and turns an <code>AADSTS</code> error into the fix.',
@@ -281,7 +281,7 @@ export const PLUGINS: Plugin[] = [
 			'Mirrors each organisation’s FreeAgent company (UK accounting) into your app, for pages, agents, analytics and the plugins you build on top. An admin approves it once, over OAuth.',
 		adds: [
 			'<strong>A connection per organisation</strong> — Settings → FreeAgent: one company each, approved once over OAuth, with its tokens stored sealed. A refused refresh token marks the connection as needing to be reconnected.',
-			'<strong>Incremental sync</strong> — every 30 minutes, after connecting and on Sync now: bank accounts, transactions, explanations, categories, contacts, bills and invoices. The first sync reaches back about 400 days.',
+			'<strong>Incremental sync</strong> — hourly, after connecting and on Sync now: bank accounts, transactions, explanations, categories, contacts, bills and invoices. The first sync reaches back about 400 days.',
 			'<strong>A FreeAgent page</strong> — unexplained transactions and invoices, with an overdue filter. Every member can see it; owners and admins connect, disconnect and sync.',
 			'<strong>Agent tools</strong> — five that read the mirror, and two that write: <code>freeagent_explain_transaction</code> and <code>freeagent_create_bill</code>, offered only to admins and waiting for a person to approve each call.',
 			'<strong>A service API and an extension</strong> — other plugins explain transactions, attach receipts and create bills through exported functions, and hear about every sync through <code>freeagent:sync-listeners</code>.',
