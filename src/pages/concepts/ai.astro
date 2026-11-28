@@ -256,6 +256,9 @@ const embeddingTiers = [
 		the call returns — so a cancelled or failed run still accounts for every turn it paid for, and a
 		run page can say what that run cost. A budget per run, per agent and per organisation per day is
 		checked before each call, and a run that reaches one stops with a reason a person can act on.
+		From kit 0.48.0 the check is a chain, run then agent then <a href="/concepts/domains/">domain</a>
+		then organisation, an admin can lower an agent's or a domain's ceiling but never raise it, and the
+		kit's chat can be capped per organisation and per person per day.
 	</p>
 	<p>
 		An agent can also declare a policy for its tool loop: how many turns, tool calls and seconds of

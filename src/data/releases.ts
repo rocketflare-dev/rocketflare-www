@@ -708,6 +708,15 @@ export const RELEASES: Release[] = [
 		migrations: true,
 		areas: ['api', 'ui', 'cli', 'db', 'plugin', 'tooling', 'docs', 'config', 'scripts', 'plugins'],
 	},
+	{
+		version: '0.48.0',
+		date: '2026-11-28',
+		summary:
+			'Each domain and plugin can now have its own admins, be limited to chosen groups or switched off for one organisation, and carry its own spending caps, all from a new Settings, Domains screen. Until an admin sets any of it, nothing changes.',
+		breaking: false,
+		migrations: true,
+		areas: ['api', 'config', 'docs', 'ui', 'db', 'shared', 'cli', 'plugin', 'scripts', 'plugins'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */

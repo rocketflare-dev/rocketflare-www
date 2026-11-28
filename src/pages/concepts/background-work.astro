@@ -55,6 +55,22 @@ import DiagramSteps from '../../components/DiagramSteps.astro'
 		</p>
 	</div>
 
+	<h2>Schedules: hourly at most, once per organisation</h2>
+	<p>
+		Every cron trigger that touches Postgres wakes a Neon compute that would otherwise be asleep, so
+		from kit 0.48.0 schedules are hourly at most by default. A domain's schedule that fires more often
+		fails a test, and a plugin's is a warning from <code>pnpm plugin check</code>. Pick one fixed minute
+		in the hour, such as <code>17 * * * *</code>, and offer a "sync now" button for anyone who cannot wait.
+	</p>
+	<p>
+		A task that does the same thing for each organisation is written with <code>perTenantTask</code>:
+		the kit loops over the organisations and skips any where that domain or plugin is switched off.
+		A task that has to cover every organisation at once, a cleanup say, is marked
+		<code>allTenants</code> and says why. When a plugin upgrade or removal stops declaring a schedule,
+		<code>pnpm plugin upgrade</code> and <code>remove</code> take it out of both wrangler files, so an
+		old schedule never keeps firing beside the new one.
+	</p>
+
 	<h2>One queue, typed job envelopes, and a version seam</h2>
 	<p>
 		There is a single jobs queue. Every message is a discriminated union validated by a zod schema

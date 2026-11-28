@@ -116,6 +116,15 @@ const installMessages = [
 		working until it moves.
 	</p>
 
+	<p>
+		A plugin's schedules are hourly at most by default, because each trigger that reads the database
+		wakes it; <code>pnpm plugin check</code> warns about anything more frequent. A schedule that works
+		per organisation is a <code>perTenantTask</code>, which the kit skips for an organisation that has
+		switched the plugin off, and a function other units call is wrapped in <code>definePublic</code>,
+		which refuses while the plugin is off. Both are warnings for plugins today, so nothing published
+		breaks; they are how a plugin honours the <a href="/concepts/domains/">kill switch</a>.
+	</p>
+
 	<h2>Four published entries, and an id that is a namespace</h2>
 	<p>
 		A plugin has exactly four entry files — one for the server half, one for the browser half, one
