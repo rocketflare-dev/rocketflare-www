@@ -1,7 +1,8 @@
 ---
 /**
  * One page per plugin: the facts from src/data/plugins.ts (version, minKit, what it needs, the
- * install commands, its skills) and, below them, the plugin's own README — synced into
+ * install commands, its skills), its own releases (synced into src/data/plugin-releases.ts) and,
+ * below them, the plugin's own README — synced into
  * src/content/plugins/<id>.md by `npm run sync:plugins`, so the prose is written once, in the
  * plugin's repository, and kept in step from there.
  *
@@ -52,6 +53,10 @@ const shipsAs = partnerOnly
 			: 'Add it when you need it'
 const title = `${p.label} plugin — Rocketflare`
 const showcase = isPartnerOnly(p) ? showcaseFor(p.id) : undefined
+/** The newest few releases are listed; the rest fold away under them. */
+const RECENT = 5
+const releases = isPartnerOnly(p) ? [] : (p.releases ?? [])
+const tagUrl = (tag: string) => (isPartnerOnly(p) ? '' : `${p.repo}/tree/${tag}`)
 const shot = isPartnerOnly(p) ? undefined : shotFor(p.id)
 ---
 <BaseLayout title={title} description={p.summary}>
@@ -203,6 +208,33 @@ const shot = isPartnerOnly(p) ? undefined : shotFor(p.id)
 					<ul class="adds">{p.adds.map((a) => <li set:html={a} />)}</ul>
 				</section>
 
+				{releases.length > 0 && (
+					<section aria-labelledby="releases-title">
+						<h2 id="releases-title">Releases</h2>
+						<ol class="releases">
+							{releases.slice(0, RECENT).map((r) => (
+								<li class:list={[{ 'no-change': r.noChange }]}>
+									<p class="release-head"><a href={tagUrl(r.tag)} target="_blank" rel="noopener"><code>{r.version}</code></a> <span>{r.date}</span></p>
+									<div class="release-body" set:html={r.html} />
+								</li>
+							))}
+						</ol>
+						{releases.length > RECENT && (
+							<details class="older">
+								<summary>{releases.length - RECENT} older releases</summary>
+								<ol class="releases">
+									{releases.slice(RECENT).map((r) => (
+										<li class:list={[{ 'no-change': r.noChange }]}>
+											<p class="release-head"><a href={tagUrl(r.tag)} target="_blank" rel="noopener"><code>{r.version}</code></a> <span>{r.date}</span></p>
+											<div class="release-body" set:html={r.html} />
+										</li>
+									))}
+								</ol>
+							</details>
+						)}
+					</section>
+				)}
+
 				{readme && (
 					<article class="readme" aria-labelledby="readme-title">
 						<h2 id="readme-title" class="readme-head">From the README</h2>
@@ -280,6 +312,17 @@ const shot = isPartnerOnly(p) ? undefined : shotFor(p.id)
 	.partner-note .partner-links { display: flex; flex-wrap: wrap; gap: 0.7rem; margin: 1rem 0 0; }
 	.adds { margin: 0; padding-left: 1.1rem; display: grid; gap: 0.65rem; }
 	.adds li { line-height: 1.55; }
+
+	.releases { list-style: none; margin: 0; padding: 0; display: grid; gap: 1rem; }
+	.release-head { margin: 0 0 0.2rem; display: flex; gap: 0.6rem; align-items: baseline; }
+	.release-head span { color: var(--text-muted); font-size: 0.85rem; }
+	.release-body :global(p) { margin: 0 0 0.4rem; line-height: 1.55; font-size: 0.95rem; }
+	.release-body :global(a) { text-decoration: underline; text-underline-offset: 0.18em; }
+	.release-body :global(code) { overflow-wrap: anywhere; }
+	.no-change .release-body { color: var(--text-muted); }
+	.older { margin-top: 1rem; }
+	.older summary { cursor: pointer; color: var(--text-muted); font-size: 0.92rem; }
+	.older .releases { margin-top: 1rem; }
 
 	.readme { border-top: 1px solid var(--border); padding-top: 2.2rem; }
 	.readme-source { font-size: 0.88rem; color: var(--text-muted); margin: -0.3rem 0 1.6rem; }

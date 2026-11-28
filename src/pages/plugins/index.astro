@@ -63,7 +63,7 @@ const commercial = COMMERCIAL_PLUGINS.map((p) => ({ p, text: searchText(p), show
 						title="zsh — your app"
 						lines={[
 							{ cmd: 'pnpm plugin add \\' },
-							{ out: `    ${example.repo}.git@${example.version} \\` },
+							{ out: `    ${example.repo}.git@${example.tag ?? example.version} \\` },
 							{ out: `    --subdir ${example.subdir} --apply` },
 						]}
 						copy={`${exampleCmd} --apply`}
