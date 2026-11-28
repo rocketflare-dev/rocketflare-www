@@ -326,6 +326,18 @@ export const PAGES: SitePage[] = [
 		inNav: false,
 	},
 	{
+		path: '/rocketpod/',
+		title: 'Rocketpod — the same kit on Node, Postgres and S3',
+		nav: 'Rocketpod',
+		description:
+			'Can’t run on Cloudflare? Rocketpod is Rocketflare ported to one Node container over Postgres and an S3-compatible store, deployed with Compose, Helm or AWS ECS. The same product and plugins, kept in step with every release.',
+		audience: 'engineer',
+		// Footer only, after License terms (12): it is for the reader who has ruled Cloudflare out.
+		order: 12.5,
+		ready: true,
+		inNav: false,
+	},
+	{
 		path: '/partners/',
 		title: 'Partners — the companies that can build Rocketflare apps for you',
 		nav: 'Partners',
