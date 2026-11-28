@@ -690,6 +690,15 @@ export const RELEASES: Release[] = [
 		migrations: true,
 		areas: ['api', 'cli', 'db', 'shared', 'ui', 'plugins', 'config', 'docs'],
 	},
+	{
+		version: '0.46.1',
+		date: '2026-11-28',
+		summary:
+			'The tagline, sign-in art, logo and favicon are now settings, and the page title and description come from the app name and tagline. Upgrades get safer for copies that have drifted: an older copy is told to step through 0.44.1 first, the bundled example plugin catches up, the kit’s own links stay pointed at the kit, a customised look is never half restyled, and what the upgrade writes is formatted. Adopting the default look keeps your own CSS rules, plugin screens that post forms work again, and plugin upgrades, the dev database and the agent-docs check stop removing kit lines, moving ports you chose and flagging placeholder links.',
+		breaking: false,
+		migrations: false,
+		areas: ['api', 'cli', 'db', 'shared', 'ui', 'plugins', 'config', 'docs', 'scripts'],
+	},
 ]
 
 /** Newest first — the order the changelog reads in. */
